@@ -1,8 +1,11 @@
 {
   "name": "web-capture",
-  "version": "1.0.0",
-  "description": "Microservice to render web pages as HTML, Markdown, or PNG",
+  "version": "1.1.0",
+  "description": "CLI and microservice to render web pages as HTML, Markdown, or PNG",
   "main": "src/index.js",
+  "bin": {
+    "web-capture": "./bin/web-capture.js"
+  },
   "scripts": {
     "start": "docker compose up -d",
     "dev": "nodemon src/index.js",

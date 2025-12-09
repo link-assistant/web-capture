@@ -2,7 +2,37 @@
 
 <img width="1824" alt="Screenshot 2025-05-12 at 3 49 32 AM" src="https://github.com/user-attachments/assets/cbf63dec-7dcd-40e7-9d5d-eddc49fe6169" />
 
-A microservice to fetch URLs and render them as:
+A CLI and microservice to fetch URLs and render them as:
+
+- **HTML**: Rendered page content
+- **Markdown**: Converted from HTML
+- **PNG screenshot**: Full page capture
+
+## Quick Start
+
+### CLI Usage
+
+```bash
+# Install globally
+npm install -g web-capture
+
+# Capture a URL as HTML (output to stdout)
+web-capture https://example.com
+
+# Capture as Markdown and save to file
+web-capture https://example.com --format markdown --output page.md
+
+# Take a screenshot
+web-capture https://example.com --format png --output screenshot.png
+
+# Start as API server
+web-capture --serve
+
+# Start server on custom port
+web-capture --serve --port 8080
+```
+
+### API Endpoints (Server Mode)
 
 - **HTML**: GET /html?url=<URL>
 - **Markdown**: GET /markdown?url=<URL>
@@ -14,6 +44,51 @@ A microservice to fetch URLs and render them as:
 npm install
 # or
 yarn install
+```
+
+## CLI Reference
+
+### Server Mode
+
+Start the API server:
+
+```bash
+web-capture --serve [--port <port>]
+```
+
+| Option | Short | Description | Default |
+|--------|-------|-------------|---------|
+| `--serve` | `-s` | Start as HTTP API server | - |
+| `--port` | `-p` | Port to listen on | 3000 (or PORT env) |
+
+### Capture Mode
+
+Capture a URL directly:
+
+```bash
+web-capture <url> [options]
+```
+
+| Option | Short | Description | Default |
+|--------|-------|-------------|---------|
+| `--format` | `-f` | Output format: `html`, `markdown`/`md`, `image`/`png` | `html` |
+| `--output` | `-o` | Output file path | stdout (text) or auto-generated (images) |
+| `--engine` | `-e` | Browser engine: `puppeteer`, `playwright` | `puppeteer` (or BROWSER_ENGINE env) |
+
+### Examples
+
+```bash
+# Capture HTML to stdout
+web-capture https://example.com
+
+# Capture Markdown to file
+web-capture https://example.com -f markdown -o page.md
+
+# Take screenshot with Playwright engine
+web-capture https://example.com -f png -e playwright -o screenshot.png
+
+# Pipe HTML to another command
+web-capture https://example.com | grep "title"
 ```
 
 ## Available Commands
