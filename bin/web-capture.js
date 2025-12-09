@@ -5,116 +5,69 @@
 // 2. Capture mode: web-capture <url> [options]
 
 import { fileURLToPath } from 'url';
-import { dirname, resolve, basename } from 'path';
+import { dirname, resolve } from 'path';
 import fs from 'fs';
 import { URL } from 'url';
+import { makeConfig } from 'lino-arguments';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-// Parse command line arguments
-function parseArgs(argv) {
-  const args = {
-    serve: false,
-    port: parseInt(process.env.PORT, 10) || 3000,
-    url: null,
-    format: 'html',
-    output: null,
-    engine: process.env.BROWSER_ENGINE || 'puppeteer',
-    help: false,
-    version: false
-  };
-
-  const positionalArgs = [];
-
-  for (let i = 2; i < argv.length; i++) {
-    const arg = argv[i];
-
-    if (arg === '--serve' || arg === '-s') {
-      args.serve = true;
-    } else if (arg === '--port' || arg === '-p') {
-      args.port = parseInt(argv[++i], 10) || 3000;
-    } else if (arg === '--format' || arg === '-f') {
-      args.format = argv[++i] || 'html';
-    } else if (arg === '--output' || arg === '-o') {
-      args.output = argv[++i];
-    } else if (arg === '--engine' || arg === '-e') {
-      args.engine = argv[++i] || 'puppeteer';
-    } else if (arg === '--help' || arg === '-h') {
-      args.help = true;
-    } else if (arg === '--version' || arg === '-v') {
-      args.version = true;
-    } else if (!arg.startsWith('-')) {
-      positionalArgs.push(arg);
-    }
+// Create configuration using lino-arguments pattern
+const config = makeConfig({
+  yargs: ({ yargs, getenv }) => {
+    return yargs
+      .usage('web-capture - Capture web pages as HTML, Markdown, or PNG\n\nUsage:\n  web-capture --serve [--port <port>]       Start as API server\n  web-capture <url> [options]               Capture a URL to file/stdout')
+      .option('serve', {
+        alias: 's',
+        type: 'boolean',
+        description: 'Start as HTTP API server',
+        default: false
+      })
+      .option('port', {
+        alias: 'p',
+        type: 'number',
+        description: 'Port to listen on (default: 3000, or PORT env)',
+        default: getenv('PORT', 3000)
+      })
+      .option('format', {
+        alias: 'f',
+        type: 'string',
+        description: 'Output format: html, markdown, md, image, png',
+        default: 'html'
+      })
+      .option('output', {
+        alias: 'o',
+        type: 'string',
+        description: 'Output file path (default: stdout for text, auto-generated for images)'
+      })
+      .option('engine', {
+        alias: 'e',
+        type: 'string',
+        description: 'Browser engine: puppeteer, playwright',
+        default: getenv('BROWSER_ENGINE', 'puppeteer')
+      })
+      .option('configuration', {
+        type: 'string',
+        description: 'Path to .lenv configuration file'
+      })
+      .help('help')
+      .alias('help', 'h')
+      .version()
+      .alias('version', 'v')
+      .example('web-capture --serve', 'Start API server on port 3000')
+      .example('web-capture --serve --port 8080', 'Start API server on custom port')
+      .example('web-capture https://example.com', 'Capture URL as HTML to stdout')
+      .example('web-capture https://example.com --format markdown --output page.md', 'Capture URL as Markdown to file')
+      .example('web-capture https://example.com --format png --engine playwright -o screenshot.png', 'Capture screenshot using Playwright')
+      .epilogue('API Endpoints (in server mode):\n  GET /html?url=<URL>&engine=<ENGINE>       Get rendered HTML\n  GET /markdown?url=<URL>                   Get Markdown conversion\n  GET /image?url=<URL>&engine=<ENGINE>      Get PNG screenshot\n  GET /fetch?url=<URL>                      Proxy fetch\n  GET /stream?url=<URL>                     Streaming proxy')
+      .strict();
+  },
+  lenv: {
+    enabled: true,
+    path: '.lenv'
   }
-
-  if (positionalArgs.length > 0) {
-    args.url = positionalArgs[0];
-  }
-
-  return args;
-}
-
-function showHelp() {
-  console.log(`
-web-capture - Capture web pages as HTML, Markdown, or PNG
-
-Usage:
-  web-capture --serve [--port <port>]       Start as API server
-  web-capture <url> [options]               Capture a URL to file/stdout
-
-Server Mode:
-  --serve, -s                 Start as HTTP API server
-  --port, -p <port>           Port to listen on (default: 3000, or PORT env)
-
-Capture Mode:
-  <url>                       URL to capture
-  --format, -f <format>       Output format: html, markdown, md, image, png
-                              (default: html)
-  --output, -o <file>         Output file path (default: stdout for text,
-                              auto-generated filename for images)
-  --engine, -e <engine>       Browser engine: puppeteer, playwright
-                              (default: puppeteer, or BROWSER_ENGINE env)
-
-Other Options:
-  --help, -h                  Show this help message
-  --version, -v               Show version number
-
-Examples:
-  # Start API server on port 3000
-  web-capture --serve
-
-  # Start API server on custom port
-  web-capture --serve --port 8080
-
-  # Capture URL as HTML to stdout
-  web-capture https://example.com
-
-  # Capture URL as Markdown to file
-  web-capture https://example.com --format markdown --output page.md
-
-  # Capture screenshot using Playwright
-  web-capture https://example.com --format png --engine playwright -o screenshot.png
-
-API Endpoints (in server mode):
-  GET /html?url=<URL>&engine=<ENGINE>       Get rendered HTML
-  GET /markdown?url=<URL>                   Get Markdown conversion
-  GET /image?url=<URL>&engine=<ENGINE>      Get PNG screenshot
-  GET /fetch?url=<URL>                      Proxy fetch
-  GET /stream?url=<URL>                     Streaming proxy
-`);
-}
-
-async function showVersion() {
-  try {
-    const packagePath = resolve(__dirname, '..', 'package.json');
-    const packageJson = JSON.parse(fs.readFileSync(packagePath, 'utf-8'));
-    console.log(`web-capture v${packageJson.version}`);
-  } catch (err) {
-    console.log('web-capture v1.0.0');
-  }
-}
+});
 
 async function startServer(port) {
   // Import the Express app
@@ -276,31 +229,23 @@ async function captureUrl(url, options) {
 }
 
 async function main() {
-  const args = parseArgs(process.argv);
+  // Get positional arguments (non-option arguments)
+  const url = config._ && config._.length > 0 ? config._[0] : null;
 
-  if (args.help) {
-    showHelp();
-    process.exit(0);
-  }
-
-  if (args.version) {
-    await showVersion();
-    process.exit(0);
-  }
-
-  if (args.serve) {
+  if (config.serve) {
     // Server mode
-    await startServer(args.port);
-  } else if (args.url) {
+    await startServer(config.port);
+  } else if (url) {
     // Capture mode
-    await captureUrl(args.url, {
-      format: args.format,
-      output: args.output,
-      engine: args.engine
+    await captureUrl(url, {
+      format: config.format,
+      output: config.output,
+      engine: config.engine
     });
   } else {
-    // No arguments - show help
-    showHelp();
+    // No arguments - show error
+    console.error('Error: Missing URL or --serve flag');
+    console.error('Run with --help for usage information');
     process.exit(1);
   }
 }
