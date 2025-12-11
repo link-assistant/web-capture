@@ -42,4 +42,4 @@ COPY . .
 
 EXPOSE 3000
 
-ENTRYPOINT ["node", "src/index.js"]
+ENTRYPOINT ["node", "bin/web-capture.js", "--serve"]

@@ -11,7 +11,7 @@ beforeAll(async () => {
   const port = await getPort();
   baseUrl = `http://localhost:${port}`;
 
-  serverProcess = spawn('node', [path.resolve('src/index.js')], {
+  serverProcess = spawn('node', [path.resolve('bin/web-capture.js'), '--serve'], {
     env: { ...process.env, PORT: port },
     stdio: ['ignore', 'pipe', 'pipe']
   });

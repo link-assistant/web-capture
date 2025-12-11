@@ -8,7 +8,7 @@
   },
   "scripts": {
     "start": "docker compose up -d",
-    "dev": "nodemon src/index.js",
+    "dev": "nodemon bin/web-capture.js -- --serve",
     "test": "node --experimental-vm-modules ./node_modules/.bin/jest",
     "test:watch": "node --experimental-vm-modules ./node_modules/.bin/jest --watch",
     "test:e2e:process": "node --experimental-vm-modules ./node_modules/.bin/jest tests/e2e.process.test.js",
