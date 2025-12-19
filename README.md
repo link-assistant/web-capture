@@ -56,10 +56,10 @@ Start the API server:
 web-capture --serve [--port <port>]
 ```
 
-| Option | Short | Description | Default |
-|--------|-------|-------------|---------|
-| `--serve` | `-s` | Start as HTTP API server | - |
-| `--port` | `-p` | Port to listen on | 3000 (or PORT env) |
+| Option    | Short | Description              | Default            |
+| --------- | ----- | ------------------------ | ------------------ |
+| `--serve` | `-s`  | Start as HTTP API server | -                  |
+| `--port`  | `-p`  | Port to listen on        | 3000 (or PORT env) |
 
 ### Capture Mode
 
@@ -69,11 +69,11 @@ Capture a URL directly:
 web-capture <url> [options]
 ```
 
-| Option | Short | Description | Default |
-|--------|-------|-------------|---------|
-| `--format` | `-f` | Output format: `html`, `markdown`/`md`, `image`/`png` | `html` |
-| `--output` | `-o` | Output file path | stdout (text) or auto-generated (images) |
-| `--engine` | `-e` | Browser engine: `puppeteer`, `playwright` | `puppeteer` (or BROWSER_ENGINE env) |
+| Option     | Short | Description                                           | Default                                  |
+| ---------- | ----- | ----------------------------------------------------- | ---------------------------------------- |
+| `--format` | `-f`  | Output format: `html`, `markdown`/`md`, `image`/`png` | `html`                                   |
+| `--output` | `-o`  | Output file path                                      | stdout (text) or auto-generated (images) |
+| `--engine` | `-e`  | Browser engine: `puppeteer`, `playwright`             | `puppeteer` (or BROWSER_ENGINE env)      |
 
 ### Examples
 
@@ -94,10 +94,12 @@ web-capture https://example.com | grep "title"
 ## Available Commands
 
 ### Development
+
 - `yarn dev` - Start the development server with hot reloading using nodemon
 - `yarn start` - Start the service using Docker Compose
 
 ### Testing
+
 - `yarn test` - Run all unit tests
 - `yarn test:watch` - Run tests in watch mode
 - `yarn test:e2e` - Run end-to-end tests
@@ -105,9 +107,11 @@ web-capture https://example.com | grep "title"
 - `yarn test:all` - Run all tests including build and e2e tests
 
 ### Building
+
 - `yarn build` - Build and start the Docker container
 
 ### Examples
+
 - `yarn examples:python` - Run Python example scripts
 - `yarn examples:javascript` - Run JavaScript example scripts
 - `yarn examples` - Run all examples (requires build)
@@ -115,12 +119,14 @@ web-capture https://example.com | grep "title"
 ## Usage
 
 ### Local Development
+
 ```bash
 yarn dev
 curl http://localhost:3000/html?url=https://example.com
 ```
 
 ### Docker
+
 ```bash
 # Build and run using Docker Compose
 yarn start
@@ -133,16 +139,20 @@ docker run -p 3000:3000 web-capture
 ## API Endpoints
 
 ### HTML Endpoint
+
 ```bash
 GET /html?url=<URL>&engine=<ENGINE>
 ```
+
 Returns the raw HTML content of the specified URL.
 
 **Parameters:**
+
 - `url` (required): The URL to fetch
 - `engine` (optional): Browser engine to use (`puppeteer` or `playwright`). Default: `puppeteer`
 
 **Examples:**
+
 ```bash
 # Using default Puppeteer engine
 curl http://localhost:3000/html?url=https://example.com
@@ -152,22 +162,28 @@ curl http://localhost:3000/html?url=https://example.com&engine=playwright
 ```
 
 ### Markdown Endpoint
+
 ```bash
 GET /markdown?url=<URL>
 ```
+
 Converts the HTML content of the specified URL to Markdown format.
 
 ### Image Endpoint
+
 ```bash
 GET /image?url=<URL>&engine=<ENGINE>
 ```
+
 Returns a PNG screenshot of the specified URL.
 
 **Parameters:**
+
 - `url` (required): The URL to capture
 - `engine` (optional): Browser engine to use (`puppeteer` or `playwright`). Default: `puppeteer`
 
 **Examples:**
+
 ```bash
 # Using default Puppeteer engine
 curl http://localhost:3000/image?url=https://example.com > screenshot.png
@@ -228,17 +244,20 @@ The service supports both **Puppeteer** and **Playwright** browser engines:
 - **Playwright**: Alternative engine with similar capabilities
 
 You can choose the engine using:
+
 - CLI argument: `--engine playwright`
 - Environment variable: `BROWSER_ENGINE=playwright`
 - Configuration file: `BROWSER_ENGINE: playwright` in `.lenv`
 
 **Supported engine values:**
+
 - `puppeteer` or `pptr` - Use Puppeteer
 - `playwright` or `pw` - Use Playwright
 
 ## Development
 
 The service is built with:
+
 - Express.js for the web server
 - Puppeteer and Playwright for headless browser automation and screenshots
 - Turndown for HTML to Markdown conversion

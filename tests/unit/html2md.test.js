@@ -581,16 +581,30 @@ describe('convertHtmlToMarkdown', () => {
 
     const md = convertHtmlToMarkdown(html);
     // Should contain a Markdown table header
-    expect(md).toMatch(/\|\s*Attribute\s*\|\s*Type\s*\|\s*Required\s*\|\s*Description\s*\|/);
+    expect(md).toMatch(
+      /\|\s*Attribute\s*\|\s*Type\s*\|\s*Required\s*\|\s*Description\s*\|/
+    );
     // Should contain the separator row
     expect(md).toMatch(/\|\s*-+\s*\|\s*-+\s*\|\s*-+\s*\|\s*-+\s*\|/);
     // Should contain all data rows
     // Accept any number of backslashes before underscores (Turndown may escape as \\_)
-    expect(md).toMatch(/\|\s*amount\s*\|\s*decimal\s*\|\s*yes\s*\|\s*order amount\s*\|/);
-    expect(md).toMatch(/\|\s*currency(?:\\*)_id\s*\|\s*string\s*\|\s*yes\s*\|\s*order currency id\s*\|/);
-    expect(md).toMatch(/\|\s*network\s*\|\s*string\s*\|\s*yes\s*\|\s*currency network\s*\|/);
-    expect(md).toMatch(/\|\s*external(?:\\*)_order(?:\\*)_id\s*\|\s*string\s*\|\s*no\s*\|\s*additional external invoice id\s*\|/);
-    expect(md).toMatch(/\|\s*email\s*\|\s*string\s*\|\s*no\s*\|\s*end users email\s*\|/);
-    expect(md).toMatch(/\|\s*description\s*\|\s*string\s*\|\s*no\s*\|\s*order description\s*\|/);
+    expect(md).toMatch(
+      /\|\s*amount\s*\|\s*decimal\s*\|\s*yes\s*\|\s*order amount\s*\|/
+    );
+    expect(md).toMatch(
+      /\|\s*currency(?:\\*)_id\s*\|\s*string\s*\|\s*yes\s*\|\s*order currency id\s*\|/
+    );
+    expect(md).toMatch(
+      /\|\s*network\s*\|\s*string\s*\|\s*yes\s*\|\s*currency network\s*\|/
+    );
+    expect(md).toMatch(
+      /\|\s*external(?:\\*)_order(?:\\*)_id\s*\|\s*string\s*\|\s*no\s*\|\s*additional external invoice id\s*\|/
+    );
+    expect(md).toMatch(
+      /\|\s*email\s*\|\s*string\s*\|\s*no\s*\|\s*end users email\s*\|/
+    );
+    expect(md).toMatch(
+      /\|\s*description\s*\|\s*string\s*\|\s*no\s*\|\s*order description\s*\|/
+    );
   });
 });

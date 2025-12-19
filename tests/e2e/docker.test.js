@@ -7,13 +7,13 @@ const WAIT_FOR_READY = 10000; // ms
 const PORT = 3000; // Use the same port as in docker-compose.yml
 const baseUrl = `http://localhost:${PORT}`;
 
-let timings = {};
+const timings = {};
 
 async function isServiceRunning() {
   try {
     const res = await fetch(`${baseUrl}/html?url=https://example.com`);
     return res.status === 200;
-  } catch (e) {
+  } catch {
     return false;
   }
 }
@@ -30,7 +30,9 @@ beforeAll(async () => {
       const { stdout, stderr } = await execAsync('docker-compose up -d');
       timings.dockerStartup = Date.now() - dockerStart;
       console.log('Docker compose output:', stdout);
-      if (stderr) console.error('Docker compose errors:', stderr);
+      if (stderr) {
+        console.error('Docker compose errors:', stderr);
+      }
 
       // Wait for the service to be ready
       const readyStart = Date.now();
@@ -64,13 +66,16 @@ beforeAll(async () => {
       throw error;
     }
     timings.beforeAll = Date.now() - timings.start;
-    console.log('Timing: Docker startup:', timings.dockerStartup + 'ms');
-    console.log('Timing: Service readiness:', timings.serviceReady + 'ms');
-    console.log('Timing: beforeAll total:', timings.beforeAll + 'ms');
+    console.log('Timing: Docker startup:', `${timings.dockerStartup}ms`);
+    console.log('Timing: Service readiness:', `${timings.serviceReady}ms`);
+    console.log('Timing: beforeAll total:', `${timings.beforeAll}ms`);
   } else {
     console.log('Docker service is already running. Skipping startup.');
     timings.beforeAll = Date.now() - timings.start;
-    console.log('Timing: beforeAll (already running):', timings.beforeAll + 'ms');
+    console.log(
+      'Timing: beforeAll (already running):',
+      `${timings.beforeAll}ms`
+    );
   }
 }, 30000); // Reduced timeout for beforeAll
 
@@ -83,18 +88,20 @@ describe('E2E (Docker): Web Capture Microservice', () => {
     const text = await res.text();
     expect(text).toMatch(/<html/i);
     timings.html = Date.now() - htmlStart;
-    console.log('Timing: /html endpoint:', timings.html + 'ms');
+    console.log('Timing: /html endpoint:', `${timings.html}ms`);
   }, 20000);
 
   it('should return Markdown from /markdown endpoint', async () => {
     const mdStart = Date.now();
     const url = 'https://example.com';
-    const res = await fetch(`${baseUrl}/markdown?url=${encodeURIComponent(url)}`);
+    const res = await fetch(
+      `${baseUrl}/markdown?url=${encodeURIComponent(url)}`
+    );
     expect(res.status).toBe(200);
     const text = await res.text();
     expect(text).toMatch(/example/i);
     timings.markdown = Date.now() - mdStart;
-    console.log('Timing: /markdown endpoint:', timings.markdown + 'ms');
+    console.log('Timing: /markdown endpoint:', `${timings.markdown}ms`);
   }, 20000);
 
   it('should return PNG from /image endpoint', async () => {
@@ -105,11 +112,13 @@ describe('E2E (Docker): Web Capture Microservice', () => {
     expect(res.headers.get('content-type')).toMatch(/^image\/png/);
     const buf = Buffer.from(await res.arrayBuffer());
     // PNG signature check
-    const pngSignature = Buffer.from([0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A]);
+    const pngSignature = Buffer.from([
+      0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a,
+    ]);
     expect(buf.slice(0, 8)).toEqual(pngSignature);
     expect(buf.length).toBeGreaterThan(100); // Should be a non-trivial PNG
     timings.png = Date.now() - pngStart;
-    console.log('Timing: /image endpoint:', timings.png + 'ms');
+    console.log('Timing: /image endpoint:', `${timings.png}ms`);
   }, 60000);
 
   it('should stream content from /stream endpoint', async () => {

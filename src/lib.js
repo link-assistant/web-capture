@@ -1,3 +1,4 @@
+/* eslint-disable no-useless-escape */
 // Common logic for the web-capture microservice
 import fetch from 'node-fetch';
 import * as cheerio from 'cheerio';
@@ -7,7 +8,9 @@ import { URL } from 'url';
 import turndownPluginGfm from 'turndown-plugin-gfm';
 
 export async function fetchHtml(url) {
-  if (!url) throw new Error('Missing URL parameter');
+  if (!url) {
+    throw new Error('Missing URL parameter');
+  }
   const response = await fetch(url);
   return response.text();
 }
@@ -24,9 +27,9 @@ export function convertHtmlToMarkdown(html, baseUrl) {
   $('style, script, noscript').remove();
 
   // Remove inline event handlers (attributes starting with 'on')
-  $('*').each(function() {
+  $('*').each(function () {
     const attribs = this.attribs || {};
-    Object.keys(attribs).forEach(attr => {
+    Object.keys(attribs).forEach((attr) => {
       if (attr.toLowerCase().startsWith('on')) {
         $(this).removeAttr(attr);
       }
@@ -39,27 +42,35 @@ export function convertHtmlToMarkdown(html, baseUrl) {
   $('[style]').removeAttr('style');
 
   // Remove empty headings (h1-h2) and headings with only whitespace
-  $('h1, h2, h3, h4, h5, h6').each(function() {
+  $('h1, h2, h3, h4, h5, h6').each(function () {
     if (!$(this).text().trim()) {
       $(this).remove();
     }
   });
 
   // Remove <a> tags with no direct text content (including only whitespace or only child elements)
-  $('a').each(function() {
+  $('a').each(function () {
     // Get all text nodes directly under this <a>
-    const directText = $(this).contents().filter(function() {
-      return this.type === 'text';
-    }).text();
+    const directText = $(this)
+      .contents()
+      .filter(function () {
+        return this.type === 'text';
+      })
+      .text();
     // If no direct text and all children are empty or whitespace, remove the <a>
     if (!directText.trim()) {
       // Also check if all children are empty or whitespace
       let allChildrenEmpty = true;
-      $(this).children().each(function() {
-        if ($(this).text().trim() || (this.tagName === 'img' && $(this).attr('alt'))) {
-          allChildrenEmpty = false;
-        }
-      });
+      $(this)
+        .children()
+        .each(function () {
+          if (
+            $(this).text().trim() ||
+            (this.tagName === 'img' && $(this).attr('alt'))
+          ) {
+            allChildrenEmpty = false;
+          }
+        });
       if (allChildrenEmpty) {
         $(this).remove();
       }
@@ -67,29 +78,33 @@ export function convertHtmlToMarkdown(html, baseUrl) {
   });
 
   // Remove <a> tags with only <img> as child and no alt text
-  $('a').each(function() {
+  $('a').each(function () {
     const children = $(this).children();
-    if (children.length === 1 && children[0].tagName === 'img' && !$(children[0]).attr('alt')) {
+    if (
+      children.length === 1 &&
+      children[0].tagName === 'img' &&
+      !$(children[0]).attr('alt')
+    ) {
       $(this).remove();
     }
   });
 
   // Remove any leftover empty <a> tags
-  $('a').each(function() {
+  $('a').each(function () {
     if (!$(this).text().trim()) {
       $(this).remove();
     }
   });
 
   // Remove any leftover empty elements (optional, for robustness)
-  $('[data-remove-empty]').each(function() {
+  $('[data-remove-empty]').each(function () {
     if (!$(this).text().trim()) {
       $(this).remove();
     }
   });
 
   // Preprocess ARIA role-based tables to semantic tables with <thead> and <tbody>
-  $('[role="table"]').each(function() {
+  $('[role="table"]').each(function () {
     const $table = $(this);
     const $newTable = $('<table></table>');
     // Add caption if present
@@ -105,25 +120,31 @@ export function convertHtmlToMarkdown(html, baseUrl) {
       // First rowgroup is header
       const $thead = $('<thead></thead>');
       const $tbody = $('<tbody></tbody>');
-      rowgroups.each(function(i) {
-        $(this).find('> [role="row"]').each(function() {
-          const $row = $(this);
-          const $tr = $('<tr></tr>');
-          $row.children('[role="columnheader"]').each(function() {
-            $tr.append($('<th></th>').text($(this).text()));
+      rowgroups.each(function (i) {
+        $(this)
+          .find('> [role="row"]')
+          .each(function () {
+            const $row = $(this);
+            const $tr = $('<tr></tr>');
+            $row.children('[role="columnheader"]').each(function () {
+              $tr.append($('<th></th>').text($(this).text()));
+            });
+            $row.children('[role="cell"]').each(function () {
+              $tr.append($('<td></td>').text($(this).text()));
+            });
+            if (i === 0 && $tr.children('th').length) {
+              $thead.append($tr);
+            } else {
+              $tbody.append($tr);
+            }
           });
-          $row.children('[role="cell"]').each(function() {
-            $tr.append($('<td></td>').text($(this).text()));
-          });
-          if (i === 0 && $tr.children('th').length) {
-            $thead.append($tr);
-          } else {
-            $tbody.append($tr);
-          }
-        });
       });
-      if ($thead.children().length) $newTable.append($thead);
-      if ($tbody.children().length) $newTable.append($tbody);
+      if ($thead.children().length) {
+        $newTable.append($thead);
+      }
+      if ($tbody.children().length) {
+        $newTable.append($tbody);
+      }
     }
     $table.replaceWith($newTable);
   });
@@ -138,7 +159,7 @@ export function convertHtmlToMarkdown(html, baseUrl) {
     linkStyle: 'inlined',
     linkReferenceStyle: 'full',
     hr: '---',
-    style: false
+    style: false,
   });
   turndown.use(turndownPluginGfm.gfm);
   return turndown.turndown($.html());
@@ -147,15 +168,20 @@ export function convertHtmlToMarkdown(html, baseUrl) {
 // Convert relative URLs to absolute URLs in HTML content
 export function convertRelativeUrls(html, baseUrl) {
   const base = new URL(baseUrl);
-  
+
   // Function to convert a single URL
   const toAbsolute = (url) => {
-    if (!url || url.startsWith('data:') || url.startsWith('blob:') || url.startsWith('javascript:')) {
+    if (
+      !url ||
+      url.startsWith('data:') ||
+      url.startsWith('blob:') ||
+      url.startsWith('javascript:')
+    ) {
       return url;
     }
     try {
       return new URL(url, base).href;
-    } catch (e) {
+    } catch {
       return url;
     }
   };
@@ -173,14 +199,17 @@ export function convertRelativeUrls(html, baseUrl) {
     { tag: 'track', attr: 'src' },
     { tag: 'embed', attr: 'src' },
     { tag: 'object', attr: 'data' },
-    { tag: 'iframe', attr: 'src' }
+    { tag: 'iframe', attr: 'src' },
   ];
 
   let result = html;
-  
+
   // Process each attribute type
   for (const { tag, attr } of attributes) {
-    const regex = new RegExp(`<${tag}[^>]*${attr}=["']([^"']+)["'][^>]*>`, 'gi');
+    const regex = new RegExp(
+      `<${tag}[^>]*${attr}=["']([^"']+)["'][^>]*>`,
+      'gi'
+    );
     result = result.replace(regex, (match, url) => {
       const absoluteUrl = toAbsolute(url);
       return match.replace(url, absoluteUrl);
@@ -211,13 +240,31 @@ export function convertRelativeUrls(html, baseUrl) {
       el.src = absolutifyUrl(el.getAttribute('src'));
     }
     if (el.hasAttribute('style')) {
-      el.setAttribute('style', el.getAttribute('style').replace(/url\(['"]?([^'")]+)['"]?\)/g, function(m, url) { return 'url(\'' + absolutifyUrl(url) + '\')'; }));
+      // The escapes in the regex are intentional for matching CSS url() syntax
+      // eslint-disable-next-line no-useless-escape
+      const urlPattern = /url\(["']?([^'")]+)["']?\)/g;
+      el.setAttribute(
+        'style',
+        el.getAttribute('style').replace(urlPattern, (m, capturedUrl) => {
+          const absoluteUrl = absolutifyUrl(capturedUrl);
+          return "url('" + absoluteUrl + "')";
+        })
+      );
     }
   }
   function fixAllUrls(root) {
     root.querySelectorAll('*').forEach(fixElementUrls);
-    root.querySelectorAll('style').forEach(function(styleTag) {
-      styleTag.textContent = styleTag.textContent.replace(/url\(['"]?([^'")]+)['"]?\)/g, function(m, url) { return 'url(\'' + absolutifyUrl(url) + '\')'; });
+    // The escapes in the regex are intentional for matching CSS url() syntax
+    // eslint-disable-next-line no-useless-escape
+    const urlPattern = /url\(["']?([^'")]+)["']?\)/g;
+    root.querySelectorAll('style').forEach(function (styleTag) {
+      styleTag.textContent = styleTag.textContent.replace(
+        urlPattern,
+        (m, capturedUrl) => {
+          const absoluteUrl = absolutifyUrl(capturedUrl);
+          return "url('" + absoluteUrl + "')";
+        }
+      );
     });
   }
   fixAllUrls(document);
@@ -234,7 +281,7 @@ export function convertRelativeUrls(html, baseUrl) {
   observer.observe(document.body, { childList: true, subtree: true });
 })();</script>
 `;
-    result = result.replace(/<\/head>/i, runtimeHook + '</head>');
+    result = result.replace(/<\/head>/i, `${runtimeHook}</head>`);
   }
 
   return result;
@@ -249,10 +296,7 @@ export function convertToUtf8(html) {
   // If it's already UTF-8, just ensure the meta tag is present
   if (currentCharset === 'utf-8' || currentCharset === 'utf8') {
     if (!charsetMatch) {
-      return html.replace(
-        /<head[^>]*>/i,
-        '$&<meta charset="utf-8">'
-      );
+      return html.replace(/<head[^>]*>/i, '$&<meta charset="utf-8">');
     }
     return html;
   }
@@ -263,7 +307,7 @@ export function convertToUtf8(html) {
     const buffer = iconv.encode(html, currentCharset);
     // Decode the buffer to UTF-8
     const utf8Html = iconv.decode(buffer, 'utf-8');
-    
+
     // Replace the charset meta tag with UTF-8
     return utf8Html.replace(
       /<meta[^>]+charset=["']?[^"'>\s]+["']?/i,
@@ -272,10 +316,7 @@ export function convertToUtf8(html) {
   } catch (error) {
     console.error('Error converting charset:', error);
     // If conversion fails, return original HTML with UTF-8 meta tag
-    return html.replace(
-      /<head[^>]*>/i,
-      '$&<meta charset="utf-8">'
-    );
+    return html.replace(/<head[^>]*>/i, '$&<meta charset="utf-8">');
   }
 }
 
@@ -283,10 +324,7 @@ export function convertToUtf8(html) {
 export function ensureUtf8(html) {
   // If no charset meta tag is present, inject one
   if (!/<meta[^>]+charset/i.test(html)) {
-    html = html.replace(
-      /<head[^>]*>/i,
-      '$&<meta charset="utf-8">'
-    );
+    html = html.replace(/<head[^>]*>/i, '$&<meta charset="utf-8">');
   }
   return html;
 }

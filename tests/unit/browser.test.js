@@ -115,7 +115,15 @@ describe('Browser Abstraction Layer', () => {
       const playwrightPage = await playwrightBrowser.newPage();
 
       // Check that both have the same methods
-      const methods = ['setExtraHTTPHeaders', 'setUserAgent', 'setViewport', 'goto', 'content', 'screenshot', 'close'];
+      const methods = [
+        'setExtraHTTPHeaders',
+        'setUserAgent',
+        'setViewport',
+        'goto',
+        'content',
+        'screenshot',
+        'close',
+      ];
       for (const method of methods) {
         expect(puppeteerPage[method]).toBeDefined();
         expect(playwrightPage[method]).toBeDefined();

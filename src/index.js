@@ -16,7 +16,8 @@ app.get('/stream', streamHandler);
 app.get('/fetch', fetchHandler);
 
 // Start the server if this is the main module
-const isMainModule = process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1];
+const isMainModule =
+  process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1];
 let server;
 if (isMainModule) {
   console.log('Process PID:', process.pid);

@@ -4,69 +4,80 @@
 // 1. Server mode: web-capture --serve [--port 3000]
 // 2. Capture mode: web-capture <url> [options]
 
-import { fileURLToPath } from 'url';
-import { dirname, resolve } from 'path';
 import fs from 'fs';
-import { URL } from 'url';
+import { URL } from 'node:url';
 import { makeConfig } from 'lino-arguments';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
 
 // Create configuration using lino-arguments pattern
 const config = makeConfig({
-  yargs: ({ yargs, getenv }) => {
-    return yargs
-      .usage('web-capture - Capture web pages as HTML, Markdown, or PNG\n\nUsage:\n  web-capture --serve [--port <port>]       Start as API server\n  web-capture <url> [options]               Capture a URL to file/stdout')
+  yargs: ({ yargs, getenv }) =>
+    yargs
+      .usage(
+        'web-capture - Capture web pages as HTML, Markdown, or PNG\n\nUsage:\n  web-capture --serve [--port <port>]       Start as API server\n  web-capture <url> [options]               Capture a URL to file/stdout'
+      )
       .option('serve', {
         alias: 's',
         type: 'boolean',
         description: 'Start as HTTP API server',
-        default: false
+        default: false,
       })
       .option('port', {
         alias: 'p',
         type: 'number',
         description: 'Port to listen on (default: 3000, or PORT env)',
-        default: getenv('PORT', 3000)
+        default: getenv('PORT', 3000),
       })
       .option('format', {
         alias: 'f',
         type: 'string',
         description: 'Output format: html, markdown, md, image, png',
-        default: 'html'
+        default: 'html',
       })
       .option('output', {
         alias: 'o',
         type: 'string',
-        description: 'Output file path (default: stdout for text, auto-generated for images)'
+        description:
+          'Output file path (default: stdout for text, auto-generated for images)',
       })
       .option('engine', {
         alias: 'e',
         type: 'string',
         description: 'Browser engine: puppeteer, playwright',
-        default: getenv('BROWSER_ENGINE', 'puppeteer')
+        default: getenv('BROWSER_ENGINE', 'puppeteer'),
       })
       .option('configuration', {
         type: 'string',
-        description: 'Path to .lenv configuration file'
+        description: 'Path to .lenv configuration file',
       })
       .help('help')
       .alias('help', 'h')
       .version()
       .alias('version', 'v')
       .example('web-capture --serve', 'Start API server on port 3000')
-      .example('web-capture --serve --port 8080', 'Start API server on custom port')
-      .example('web-capture https://example.com', 'Capture URL as HTML to stdout')
-      .example('web-capture https://example.com --format markdown --output page.md', 'Capture URL as Markdown to file')
-      .example('web-capture https://example.com --format png --engine playwright -o screenshot.png', 'Capture screenshot using Playwright')
-      .epilogue('API Endpoints (in server mode):\n  GET /html?url=<URL>&engine=<ENGINE>       Get rendered HTML\n  GET /markdown?url=<URL>                   Get Markdown conversion\n  GET /image?url=<URL>&engine=<ENGINE>      Get PNG screenshot\n  GET /fetch?url=<URL>                      Proxy fetch\n  GET /stream?url=<URL>                     Streaming proxy')
-      .strict();
-  },
+      .example(
+        'web-capture --serve --port 8080',
+        'Start API server on custom port'
+      )
+      .example(
+        'web-capture https://example.com',
+        'Capture URL as HTML to stdout'
+      )
+      .example(
+        'web-capture https://example.com --format markdown --output page.md',
+        'Capture URL as Markdown to file'
+      )
+      .example(
+        'web-capture https://example.com --format png --engine playwright -o screenshot.png',
+        'Capture screenshot using Playwright'
+      )
+      .epilogue(
+        'API Endpoints (in server mode):\n  GET /html?url=<URL>&engine=<ENGINE>       Get rendered HTML\n  GET /markdown?url=<URL>                   Get Markdown conversion\n  GET /image?url=<URL>&engine=<ENGINE>      Get PNG screenshot\n  GET /fetch?url=<URL>                      Proxy fetch\n  GET /stream?url=<URL>                     Streaming proxy'
+      )
+      .strict(),
   lenv: {
     enabled: true,
-    path: '.lenv'
-  }
+    path: '.lenv',
+  },
 });
 
 async function startServer(port) {
@@ -121,13 +132,18 @@ async function captureUrl(url, options) {
   // Validate URL
   try {
     new URL(absoluteUrl);
-  } catch (err) {
+  } catch {
     console.error(`Error: Invalid URL "${url}"`);
     process.exit(1);
   }
 
   // Import required modules
-  const { fetchHtml, convertHtmlToMarkdown, convertToUtf8, convertRelativeUrls } = await import('../src/lib.js');
+  const {
+    fetchHtml,
+    convertHtmlToMarkdown,
+    convertToUtf8,
+    convertRelativeUrls,
+  } = await import('../src/lib.js');
   const { createBrowser } = await import('../src/browser.js');
 
   const normalizedFormat = format.toLowerCase();
@@ -144,23 +160,29 @@ async function captureUrl(url, options) {
       } else {
         process.stdout.write(markdown);
       }
-    } else if (normalizedFormat === 'image' || normalizedFormat === 'png' || normalizedFormat === 'screenshot') {
+    } else if (
+      normalizedFormat === 'image' ||
+      normalizedFormat === 'png' ||
+      normalizedFormat === 'screenshot'
+    ) {
       // Image/screenshot format
       const browser = await createBrowser(engine);
       try {
         const page = await browser.newPage();
         await page.setExtraHTTPHeaders({
           'Accept-Language': 'en-US,en;q=0.9',
-          'Accept-Charset': 'utf-8'
+          'Accept-Charset': 'utf-8',
         });
-        await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
+        await page.setUserAgent(
+          'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+        );
         await page.setViewport({ width: 1280, height: 800 });
         await page.goto(absoluteUrl, {
           waitUntil: 'networkidle0',
-          timeout: 30000
+          timeout: 30000,
         });
         // Wait for 5 seconds after page load
-        await new Promise(resolve => setTimeout(resolve, 5000));
+        await new Promise((resolve) => setTimeout(resolve, 5000));
 
         const buffer = await page.screenshot({ type: 'png' });
 
@@ -180,7 +202,10 @@ async function captureUrl(url, options) {
     } else {
       // HTML format (default)
       const html = await fetchHtml(absoluteUrl);
-      const hasJavaScript = /<script[^>]*>[\s\S]*?<\/script>|<script[^>]*\/>|javascript:/i.test(html);
+      const hasJavaScript =
+        /<script[^>]*>[\s\S]*?<\/script>|<script[^>]*\/>|javascript:/i.test(
+          html
+        );
       const isHtml = /<html[^>]*>[\s\S]*?<\/html>/i.test(html);
 
       let resultHtml;
@@ -192,16 +217,18 @@ async function captureUrl(url, options) {
           const page = await browser.newPage();
           await page.setExtraHTTPHeaders({
             'Accept-Language': 'en-US,en;q=0.9',
-            'Accept-Charset': 'utf-8'
+            'Accept-Charset': 'utf-8',
           });
-          await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
+          await page.setUserAgent(
+            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+          );
           await page.setViewport({ width: 1280, height: 800 });
           await page.goto(absoluteUrl, {
             waitUntil: 'networkidle0',
-            timeout: 30000
+            timeout: 30000,
           });
           // Wait for 5 seconds after page load
-          await new Promise(resolve => setTimeout(resolve, 5000));
+          await new Promise((resolve) => setTimeout(resolve, 5000));
 
           const renderedHtml = await page.content();
           const utf8Html = convertToUtf8(renderedHtml);
@@ -240,7 +267,7 @@ async function main() {
     await captureUrl(url, {
       format: config.format,
       output: config.output,
-      engine: config.engine
+      engine: config.engine,
     });
   } else {
     // No arguments - show error
@@ -250,7 +277,7 @@ async function main() {
   }
 }
 
-main().catch(err => {
+main().catch((err) => {
   console.error('Fatal error:', err.message);
   process.exit(1);
 });

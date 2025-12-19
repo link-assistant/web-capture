@@ -1,5 +1,4 @@
 // Unit tests for CLI argument parsing and functionality
-import { jest } from '@jest/globals';
 import { spawn } from 'child_process';
 import { fileURLToPath } from 'url';
 import { dirname, resolve } from 'path';
@@ -13,16 +12,20 @@ function runCli(args, options = {}) {
   return new Promise((resolve, reject) => {
     const proc = spawn('node', [cliPath, ...args], {
       cwd: options.cwd || dirname(cliPath),
-      env: { ...process.env, ...options.env }
+      env: { ...process.env, ...options.env },
     });
 
     let stdout = '';
     let stderr = '';
 
-    proc.stdout.on('data', data => { stdout += data.toString(); });
-    proc.stderr.on('data', data => { stderr += data.toString(); });
+    proc.stdout.on('data', (data) => {
+      stdout += data.toString();
+    });
+    proc.stderr.on('data', (data) => {
+      stderr += data.toString();
+    });
 
-    proc.on('close', code => {
+    proc.on('close', (code) => {
       resolve({ code, stdout, stderr });
     });
 

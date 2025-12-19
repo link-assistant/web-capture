@@ -11,10 +11,14 @@ beforeAll(async () => {
   const port = await getPort();
   baseUrl = `http://localhost:${port}`;
 
-  serverProcess = spawn('node', [path.resolve('bin/web-capture.js'), '--serve'], {
-    env: { ...process.env, PORT: port },
-    stdio: ['ignore', 'pipe', 'pipe']
-  });
+  serverProcess = spawn(
+    'node',
+    [path.resolve('bin/web-capture.js'), '--serve'],
+    {
+      env: { ...process.env, PORT: port },
+      stdio: ['ignore', 'pipe', 'pipe'],
+    }
+  );
 
   // Wait for the server to be ready (simple delay or poll)
   await new Promise((resolve, reject) => {
@@ -22,7 +26,10 @@ beforeAll(async () => {
       reject(new Error('Server did not start in time'));
     }, WAIT_FOR_READY);
     serverProcess.stdout.on('data', (data) => {
-      if (data.toString().includes('listening') || data.toString().includes('Server running')) {
+      if (
+        data.toString().includes('listening') ||
+        data.toString().includes('Server running')
+      ) {
         clearTimeout(timeout);
         resolve();
       }
@@ -49,7 +56,9 @@ describe('E2E: Web Capture Microservice', () => {
 
   it('should return Markdown from /markdown endpoint', async () => {
     const url = 'https://example.com';
-    const res = await fetch(`${baseUrl}/markdown?url=${encodeURIComponent(url)}`);
+    const res = await fetch(
+      `${baseUrl}/markdown?url=${encodeURIComponent(url)}`
+    );
     expect(res.status).toBe(200);
     const text = await res.text();
     expect(text).toMatch(/example/i);
@@ -62,7 +71,9 @@ describe('E2E: Web Capture Microservice', () => {
     expect(res.headers.get('content-type')).toMatch(/^image\/png/);
     const buf = Buffer.from(await res.arrayBuffer());
     // PNG signature check
-    const pngSignature = Buffer.from([0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A]);
+    const pngSignature = Buffer.from([
+      0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a,
+    ]);
     expect(buf.slice(0, 8)).toEqual(pngSignature);
     expect(buf.length).toBeGreaterThan(100); // Should be a non-trivial PNG
   }, 60000);

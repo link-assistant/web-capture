@@ -9,7 +9,9 @@ console.log('Comparing Puppeteer and Playwright engines...\n');
 // Fetch using Puppeteer
 console.log('1. Fetching HTML using Puppeteer (default)...');
 const startPuppeteer = Date.now();
-const puppeteerResponse = await fetch(`${baseUrl}/html?url=${encodeURIComponent(targetUrl)}`);
+const puppeteerResponse = await fetch(
+  `${baseUrl}/html?url=${encodeURIComponent(targetUrl)}`
+);
 const puppeteerHtml = await puppeteerResponse.text();
 const puppeteerTime = Date.now() - startPuppeteer;
 fs.writeFileSync('output/puppeteer_comparison.html', puppeteerHtml);
@@ -19,7 +21,9 @@ console.log(`   Size: ${puppeteerHtml.length} bytes`);
 // Fetch using Playwright
 console.log('\n2. Fetching HTML using Playwright...');
 const startPlaywright = Date.now();
-const playwrightResponse = await fetch(`${baseUrl}/html?url=${encodeURIComponent(targetUrl)}&engine=playwright`);
+const playwrightResponse = await fetch(
+  `${baseUrl}/html?url=${encodeURIComponent(targetUrl)}&engine=playwright`
+);
 const playwrightHtml = await playwrightResponse.text();
 const playwrightTime = Date.now() - startPlaywright;
 fs.writeFileSync('output/playwright_comparison.html', playwrightHtml);
