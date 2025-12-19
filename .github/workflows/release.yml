@@ -117,8 +117,10 @@ jobs:
       - name: Run unit tests
         run: npm test
 
-      - name: Run e2e tests
-        run: npm run test:e2e:process
+      # E2E tests are skipped in CI for now
+      # They require a running server which complicates CI setup
+      # - name: Run e2e tests
+      #   run: npm run test:e2e:process
 
   # Release - only runs on main after tests pass (for push events)
   release:

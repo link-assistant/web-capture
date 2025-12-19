@@ -1,5 +1,5 @@
 ---
-"web-capture": patch
+'web-capture': patch
 ---
 
 Add comprehensive CI/CD pipeline based on js-ai-driven-development-pipeline-template
