@@ -11,9 +11,8 @@ export default {
   testMatch: [
     '**/tests/unit/**/*.test.js',
     '**/tests/mock/**/*.test.js',
-    // E2E tests excluded from CI (they require running servers)
-    // '**/tests/e2e/**/*.test.js',
-    // '**/tests/integration/**/*.test.js',
+    '**/tests/e2e/**/*.test.js',
+    '**/tests/integration/**/*.test.js',
   ],
   setupFiles: ['./tests/jest.setup.mjs'],
 };

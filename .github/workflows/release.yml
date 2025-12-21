@@ -114,13 +114,17 @@ jobs:
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
 
-      - name: Run unit tests
-        run: npm test
+      - name: Install Puppeteer browsers
+        run: npx puppeteer browsers install chrome
 
-      # E2E tests are skipped in CI for now
-      # They require a running server which complicates CI setup
-      # - name: Run e2e tests
-      #   run: npm run test:e2e:process
+      - name: Run unit, integration, and e2e process tests
+        run: npm test -- --testPathIgnorePatterns="docker.test.js"
+
+      - name: Build Docker image for e2e tests
+        run: docker compose build
+
+      - name: Run e2e Docker tests
+        run: npm test -- tests/e2e/docker.test.js
 
   # Release - only runs on main after tests pass (for push events)
   release:
