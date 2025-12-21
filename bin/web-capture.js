@@ -25,7 +25,9 @@ const config = makeConfig({
         alias: 'p',
         type: 'number',
         description: 'Port to listen on (default: 3000, or PORT env)',
-        default: getenv('PORT', 3000),
+        // Don't use getenv here - let yargs read from process.env.PORT directly
+        // which will be set by the test or by lino-arguments from .lenv
+        default: 3000,
       })
       .option('format', {
         alias: 'f',

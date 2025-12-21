@@ -146,7 +146,8 @@ function createPlaywrightPageAdapter(page) {
       await page.setExtraHTTPHeaders(headers);
     },
     async setUserAgent(userAgent) {
-      await page.setUserAgent(userAgent);
+      // Playwright doesn't have page.setUserAgent, use extraHTTPHeaders instead
+      await page.setExtraHTTPHeaders({ 'User-Agent': userAgent });
     },
     async setViewport(viewport) {
       // Playwright uses setViewportSize instead of setViewport

@@ -13,9 +13,9 @@ beforeAll(async () => {
 
   serverProcess = spawn(
     'node',
-    [path.resolve('bin/web-capture.js'), '--serve'],
+    [path.resolve('bin/web-capture.js'), '--serve', '--port', port.toString()],
     {
-      env: { ...process.env, PORT: port },
+      env: process.env,
       stdio: ['ignore', 'pipe', 'pipe'],
     }
   );
@@ -25,15 +25,33 @@ beforeAll(async () => {
     const timeout = setTimeout(() => {
       reject(new Error('Server did not start in time'));
     }, WAIT_FOR_READY);
+
+    let serverStarted = false;
     serverProcess.stdout.on('data', (data) => {
       if (
         data.toString().includes('listening') ||
         data.toString().includes('Server running')
       ) {
+        serverStarted = true;
         clearTimeout(timeout);
         resolve();
       }
     });
+
+    serverProcess.on('error', (error) => {
+      clearTimeout(timeout);
+      reject(error);
+    });
+
+    serverProcess.on('exit', (code, signal) => {
+      if (!serverStarted) {
+        clearTimeout(timeout);
+        reject(
+          new Error(`Server process exited with code ${code}, signal ${signal}`)
+        );
+      }
+    });
+
     // Fallback: resolve after WAIT_FOR_READY
     setTimeout(resolve, WAIT_FOR_READY);
   });
