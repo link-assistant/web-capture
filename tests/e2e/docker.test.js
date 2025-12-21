@@ -26,8 +26,8 @@ beforeAll(async () => {
     console.log('Service not running, starting Docker container...');
     try {
       const dockerStart = Date.now();
-      // Start the Docker container using docker-compose
-      const { stdout, stderr } = await execAsync('docker-compose up -d');
+      // Start the Docker container using docker compose (v2 command)
+      const { stdout, stderr } = await execAsync('docker compose up -d');
       timings.dockerStartup = Date.now() - dockerStart;
       console.log('Docker compose output:', stdout);
       if (stderr) {
