@@ -47,7 +47,11 @@ export async function createBrowser(engine = 'puppeteer', options = {}) {
  */
 async function createPuppeteerBrowser(options = {}) {
   const defaultOptions = {
-    args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
+    args: [
+      '--no-sandbox',
+      '--disable-setuid-sandbox',
+      '--disable-dev-shm-usage',
+    ],
   };
 
   const browser = await puppeteer.launch({ ...defaultOptions, ...options });
@@ -61,7 +65,7 @@ async function createPuppeteerBrowser(options = {}) {
       await browser.close();
     },
     type: 'puppeteer',
-    _browser: browser
+    _browser: browser,
   };
 }
 
@@ -72,11 +76,18 @@ async function createPuppeteerBrowser(options = {}) {
  */
 async function createPlaywrightBrowser(options = {}) {
   const defaultOptions = {
-    args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
+    args: [
+      '--no-sandbox',
+      '--disable-setuid-sandbox',
+      '--disable-dev-shm-usage',
+    ],
   };
 
   // Playwright uses chromium by default
-  const browser = await playwright.chromium.launch({ ...defaultOptions, ...options });
+  const browser = await playwright.chromium.launch({
+    ...defaultOptions,
+    ...options,
+  });
 
   return {
     async newPage() {
@@ -87,7 +98,7 @@ async function createPlaywrightBrowser(options = {}) {
       await browser.close();
     },
     type: 'playwright',
-    _browser: browser
+    _browser: browser,
   };
 }
 
@@ -120,7 +131,7 @@ function createPuppeteerPageAdapter(page) {
       await page.close();
     },
     _page: page,
-    _type: 'puppeteer'
+    _type: 'puppeteer',
   };
 }
 
@@ -135,7 +146,8 @@ function createPlaywrightPageAdapter(page) {
       await page.setExtraHTTPHeaders(headers);
     },
     async setUserAgent(userAgent) {
-      await page.setUserAgent(userAgent);
+      // Playwright doesn't have page.setUserAgent, use extraHTTPHeaders instead
+      await page.setExtraHTTPHeaders({ 'User-Agent': userAgent });
     },
     async setViewport(viewport) {
       // Playwright uses setViewportSize instead of setViewport
@@ -159,7 +171,7 @@ function createPlaywrightPageAdapter(page) {
       await page.close();
     },
     _page: page,
-    _type: 'playwright'
+    _type: 'playwright',
   };
 }
 

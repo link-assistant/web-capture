@@ -6,12 +6,12 @@ This report analyzes open-source projects similar to "web-capture," a microservi
 
 ## Microservices for Web Capture
 
-| **Project**            | **License** | **GitHub Link**                                             |
-|------------------------|-------------|-------------------------------------------------------------|
-| **screeenly**          | MIT         | [stefanzweifel/screeenly](https://github.com/stefanzweifel/screeenly) |
-| **capture-website-api**| ISC         | [robvanderleek/capture-website-api](https://github.com/robvanderleek/capture-website-api) |
-| **captino**            | MIT         | [pistatium/captino](https://github.com/pistatium/captino)   |
-| **gowitness**          | MIT         | [gowitness/gowitness](https://github.com/gowitness/gowitness) |
+| **Project**             | **License** | **GitHub Link**                                                                           |
+| ----------------------- | ----------- | ----------------------------------------------------------------------------------------- |
+| **screeenly**           | MIT         | [stefanzweifel/screeenly](https://github.com/stefanzweifel/screeenly)                     |
+| **capture-website-api** | ISC         | [robvanderleek/capture-website-api](https://github.com/robvanderleek/capture-website-api) |
+| **captino**             | MIT         | [pistatium/captino](https://github.com/pistatium/captino)                                 |
+| **gowitness**           | MIT         | [gowitness/gowitness](https://github.com/gowitness/gowitness)                             |
 
 ### Features of Microservices
 
@@ -40,9 +40,9 @@ This report analyzes open-source projects similar to "web-capture," a microservi
 
 ## Libraries for Web Capture
 
-| **Project**                | **License** | **GitHub Link**                                             |
-|----------------------------|-------------|-------------------------------------------------------------|
-| **webpage-capture**        | MIT         | [b4dnewz/webpage-capture](https://github.com/b4dnewz/webpage-capture) |
+| **Project**                | **License** | **GitHub Link**                                                                                                   |
+| -------------------------- | ----------- | ----------------------------------------------------------------------------------------------------------------- |
+| **webpage-capture**        | MIT         | [b4dnewz/webpage-capture](https://github.com/b4dnewz/webpage-capture)                                             |
 | **html-screen-capture-js** | MIT         | [html-screen-capture-js/html-screen-capture-js](https://github.com/html-screen-capture-js/html-screen-capture-js) |
 
 ### Features of Libraries

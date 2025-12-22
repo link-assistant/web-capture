@@ -16,7 +16,10 @@ describe('Browser Engine Integration Tests', () => {
 
     it('can navigate to a page and get content', async () => {
       const page = await browser.newPage();
-      await page.goto('https://example.com', { waitUntil: 'networkidle0', timeout: 30000 });
+      await page.goto('https://example.com', {
+        waitUntil: 'networkidle0',
+        timeout: 30000,
+      });
       const content = await page.content();
       expect(content).toContain('Example Domain');
     }, 60000);
@@ -24,7 +27,10 @@ describe('Browser Engine Integration Tests', () => {
     it('can take a screenshot', async () => {
       const page = await browser.newPage();
       await page.setViewport({ width: 1280, height: 800 });
-      await page.goto('https://example.com', { waitUntil: 'networkidle0', timeout: 30000 });
+      await page.goto('https://example.com', {
+        waitUntil: 'networkidle0',
+        timeout: 30000,
+      });
       const screenshot = await page.screenshot({ type: 'png' });
       expect(screenshot).toBeInstanceOf(Buffer);
       expect(screenshot.length).toBeGreaterThan(100);
@@ -34,7 +40,10 @@ describe('Browser Engine Integration Tests', () => {
       const page = await browser.newPage();
       await page.setExtraHTTPHeaders({ 'Accept-Language': 'en-US' });
       await page.setUserAgent('Test User Agent');
-      await page.goto('https://example.com', { waitUntil: 'networkidle0', timeout: 30000 });
+      await page.goto('https://example.com', {
+        waitUntil: 'networkidle0',
+        timeout: 30000,
+      });
       const content = await page.content();
       expect(content).toBeTruthy();
     }, 60000);
@@ -55,7 +64,10 @@ describe('Browser Engine Integration Tests', () => {
 
     it('can navigate to a page and get content', async () => {
       const page = await browser.newPage();
-      await page.goto('https://example.com', { waitUntil: 'networkidle0', timeout: 30000 });
+      await page.goto('https://example.com', {
+        waitUntil: 'networkidle0',
+        timeout: 30000,
+      });
       const content = await page.content();
       expect(content).toContain('Example Domain');
     }, 60000);
@@ -63,7 +75,10 @@ describe('Browser Engine Integration Tests', () => {
     it('can take a screenshot', async () => {
       const page = await browser.newPage();
       await page.setViewport({ width: 1280, height: 800 });
-      await page.goto('https://example.com', { waitUntil: 'networkidle0', timeout: 30000 });
+      await page.goto('https://example.com', {
+        waitUntil: 'networkidle0',
+        timeout: 30000,
+      });
       const screenshot = await page.screenshot({ type: 'png' });
       expect(screenshot).toBeInstanceOf(Buffer);
       expect(screenshot.length).toBeGreaterThan(100);
@@ -73,7 +88,10 @@ describe('Browser Engine Integration Tests', () => {
       const page = await browser.newPage();
       await page.setExtraHTTPHeaders({ 'Accept-Language': 'en-US' });
       await page.setUserAgent('Test User Agent');
-      await page.goto('https://example.com', { waitUntil: 'networkidle0', timeout: 30000 });
+      await page.goto('https://example.com', {
+        waitUntil: 'networkidle0',
+        timeout: 30000,
+      });
       const content = await page.content();
       expect(content).toBeTruthy();
     }, 60000);
@@ -87,8 +105,14 @@ describe('Browser Engine Integration Tests', () => {
       const puppeteerPage = await puppeteerBrowser.newPage();
       const playwrightPage = await playwrightBrowser.newPage();
 
-      await puppeteerPage.goto('https://example.com', { waitUntil: 'networkidle0', timeout: 30000 });
-      await playwrightPage.goto('https://example.com', { waitUntil: 'networkidle0', timeout: 30000 });
+      await puppeteerPage.goto('https://example.com', {
+        waitUntil: 'networkidle0',
+        timeout: 30000,
+      });
+      await playwrightPage.goto('https://example.com', {
+        waitUntil: 'networkidle0',
+        timeout: 30000,
+      });
 
       const puppeteerContent = await puppeteerPage.content();
       const playwrightContent = await playwrightPage.content();

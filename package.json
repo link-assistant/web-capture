@@ -1,11 +1,14 @@
 {
   "name": "web-capture",
-  "version": "1.0.0",
-  "description": "Microservice to render web pages as HTML, Markdown, or PNG",
+  "version": "1.1.0",
+  "description": "CLI and microservice to render web pages as HTML, Markdown, or PNG",
   "main": "src/index.js",
+  "bin": {
+    "web-capture": "./bin/web-capture.js"
+  },
   "scripts": {
     "start": "docker compose up -d",
-    "dev": "nodemon src/index.js",
+    "dev": "nodemon bin/web-capture.js -- --serve",
     "test": "node --experimental-vm-modules ./node_modules/.bin/jest",
     "test:watch": "node --experimental-vm-modules ./node_modules/.bin/jest --watch",
     "test:e2e:process": "node --experimental-vm-modules ./node_modules/.bin/jest tests/e2e.process.test.js",
@@ -15,11 +18,23 @@
     "build": "docker compose down && docker compose build && yarn start",
     "examples:python": "python3 examples/python/html_download.py && python3 examples/python/markdown_download.py && python3 examples/python/image_download.py",
     "examples:javascript": "node examples/js/html_download.js && node examples/js/markdown_download.js && node examples/js/image_download.js",
-    "examples": "yarn build && yarn examples:javascript && yarn examples:python"
+    "examples": "yarn build && yarn examples:javascript && yarn examples:python",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "check:duplication": "jscpd .",
+    "check": "npm run lint && npm run format:check && npm run check:duplication",
+    "prepare": "husky || true",
+    "changeset": "changeset",
+    "changeset:version": "node scripts/changeset-version.mjs",
+    "changeset:publish": "changeset publish",
+    "changeset:status": "changeset status --since=origin/main"
   },
   "dependencies": {
     "cheerio": "^1.0.0",
     "express": "^4.18.2",
+    "lino-arguments": "^0.2.1",
     "node-fetch": "^2.7.0",
     "playwright": "^1.49.0",
     "puppeteer": "^24.8.2",
@@ -28,10 +43,18 @@
   "devDependencies": {
     "@babel/core": "^7.24.0",
     "@babel/preset-env": "^7.24.0",
+    "@changesets/cli": "^2.29.7",
     "babel-jest": "^29.7.0",
+    "eslint": "^9.38.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-prettier": "^5.5.4",
     "get-port": "^7.1.0",
+    "husky": "^9.1.7",
     "jest": "^29.7.0",
+    "jscpd": "^4.0.5",
+    "lint-staged": "^16.2.6",
     "nock": "^13.5.4",
+    "prettier": "^3.6.2",
     "supertest": "^6.3.4",
     "turndown-plugin-gfm": "^1.0.2"
   },
@@ -45,5 +68,16 @@
   "license": "UNLICENSED",
   "engines": {
     "node": ">=22.0.0 <23.0.0"
+  },
+  "lint-staged": {
+    "*.{js,mjs,cjs}": [
+      "eslint --fix --max-warnings 0",
+      "prettier --write",
+      "prettier --check"
+    ],
+    "*.md": [
+      "prettier --write",
+      "prettier --check"
+    ]
   }
 }

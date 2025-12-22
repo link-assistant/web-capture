@@ -4,4 +4,4 @@ import { jest } from '@jest/globals';
 jest.setTimeout(10000);
 
 // Suppress console.error during tests
-global.console.error = jest.fn(); 
+global.console.error = jest.fn();

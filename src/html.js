@@ -3,7 +3,9 @@ import { createBrowser, getBrowserEngine } from './browser.js';
 
 export async function htmlHandler(req, res) {
   const url = req.query.url;
-  if (!url) return res.status(400).send('Missing `url` parameter');
+  if (!url) {
+    return res.status(400).send('Missing `url` parameter');
+  }
   try {
     // Ensure URL is absolute
     const absoluteUrl = url.startsWith('http') ? url : `https://${url}`;
@@ -12,7 +14,8 @@ export async function htmlHandler(req, res) {
     const html = await fetchHtml(absoluteUrl);
 
     // Check if it's valid HTML and contains JavaScript
-    const hasJavaScript = /<script[^>]*>[\s\S]*?<\/script>|<script[^>]*\/>|javascript:/i.test(html);
+    const hasJavaScript =
+      /<script[^>]*>[\s\S]*?<\/script>|<script[^>]*\/>|javascript:/i.test(html);
     const isHtml = /<html[^>]*>[\s\S]*?<\/html>/i.test(html);
 
     if (!isHtml || hasJavaScript) {
@@ -25,18 +28,20 @@ export async function htmlHandler(req, res) {
         // Set proper encoding headers
         await page.setExtraHTTPHeaders({
           'Accept-Language': 'en-US,en;q=0.9',
-          'Accept-Charset': 'utf-8'
+          'Accept-Charset': 'utf-8',
         });
 
-        await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
+        await page.setUserAgent(
+          'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+        );
         await page.setViewport({ width: 1280, height: 800 });
         // Navigate to the page
         await page.goto(absoluteUrl, {
           waitUntil: 'networkidle0',
-          timeout: 30000
+          timeout: 30000,
         });
         // Wait for 5 seconds after page load
-        await new Promise(resolve => setTimeout(resolve, 5000));
+        await new Promise((resolve) => setTimeout(resolve, 5000));
         // Get the rendered HTML, convert to UTF-8, and make URLs absolute (and inject runtime JS hook)
         const renderedHtml = await page.content();
         const utf8Html = convertToUtf8(renderedHtml);
@@ -56,4 +61,4 @@ export async function htmlHandler(req, res) {
     console.error('HTML fetch error:', err);
     res.status(500).send('Error fetching HTML');
   }
-} 
+}
