@@ -263,6 +263,56 @@ The service is built with:
 - Turndown for HTML to Markdown conversion
 - Jest for testing
 
+## Related Resources
+
+### NPM Packages & Libraries
+
+#### Web Capture & Screenshot Tools
+
+- [capture-website](https://www.npmjs.com/package/capture-website) - Capture website screenshots with a simple API
+- [pageres](https://www.npmjs.com/package/pageres) - Capture screenshots of websites in various resolutions
+- [puppeteer](https://www.npmjs.com/package/puppeteer) - Headless Chrome Node.js API for browser automation and screenshots
+- [playwright](https://www.npmjs.com/package/playwright) - Cross-browser automation library
+
+#### HTML to Markdown Conversion
+
+- [turndown](https://github.com/mixmark-io/turndown) - HTML to Markdown converter written in JavaScript
+- [html-to-markdown](https://github.com/JohannesKaufmann/html-to-markdown) - Go library to convert HTML to Markdown with support for entire websites
+- [markdowner](https://github.com/supermemoryai/markdowner) - Advanced HTML to Markdown conversion tool
+- [pandoc](https://pandoc.org/) - Universal document converter supporting HTML to Markdown
+
+#### Web Scraping
+
+- [scrape-it](https://www.npmjs.com/package/scrape-it) - Node.js scraper with a clean API
+
+### Screenshot API Services
+
+#### Commercial Services
+
+- [ScreenshotOne](https://screenshotone.com/) - Developer-focused screenshot API with advanced features
+- [ScrapFly](https://scrapfly.io/blog/posts/what-is-the-best-screenshot-api) - Screenshot API with antibot protection and rotating proxies
+- [ScreenshotAPI.net](https://www.screenshotapi.net/) - High-quality screenshot API with retina support
+- [ApiFlash](https://apiflash.com/) - Chrome-based screenshot API with S3 integration
+- [Scrapingdog](https://www.scrapingdog.com/) - Cost-effective screenshot and scraping solution
+- [URLBox](https://urlbox.io/) - Website screenshot API
+
+#### Free/Open Services
+
+- [site-shot.com](https://www.site-shot.com) - Free website screenshot service
+- [pikwy.com](https://pikwy.com) - Website thumbnail and screenshot generator
+- [screenshotmachine.com](https://www.screenshotmachine.com) - Website screenshot service
+- [screenshot.guru](https://screenshot.guru) - Simple screenshot service
+
+### HTML to Markdown Services
+
+- [urltomarkdown.com](https://urltomarkdown.com) - Convert URLs to Markdown format
+- [CaptureKit](https://www.capturekit.dev/blog/how-to-convert-html-to-markdown) - API for HTML to Markdown conversion
+
+### Alternative Tools
+
+- [MarkItDown](https://www.infoworld.com/article/3963991/markitdown-microsofts-open-source-tool-for-markdown-conversion.html) - Microsoft's open-source tool for converting various file formats to Markdown
+- [html-to-markdown (Python)](https://pypi.org/project/html-to-markdown/) - Rust-powered Python library for HTML to Markdown conversion
+
 ## License
 
 UNLICENSED
