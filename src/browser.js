@@ -1,6 +1,28 @@
-// Browser abstraction layer to support both Puppeteer and Playwright
+// Browser abstraction layer using browser-commander utilities
+// Note: browser-commander's launchBrowser currently doesn't support custom args
+// for headless server environments (--no-sandbox, etc). We use browser-commander's
+// utilities (CHROME_ARGS) and maintain browser launch code here until this
+// feature is added to browser-commander.
+// See: https://github.com/link-foundation/browser-commander/issues/11
+
+import { CHROME_ARGS } from 'browser-commander';
 import puppeteer from 'puppeteer';
 import playwright from 'playwright';
+
+/**
+ * Additional Chrome args needed for headless server environments
+ * These are not included in browser-commander's CHROME_ARGS yet
+ */
+const SERVER_CHROME_ARGS = [
+  '--no-sandbox',
+  '--disable-setuid-sandbox',
+  '--disable-dev-shm-usage',
+];
+
+/**
+ * Combined Chrome args: browser-commander defaults + server-specific args
+ */
+const ALL_CHROME_ARGS = [...CHROME_ARGS, ...SERVER_CHROME_ARGS];
 
 /**
  * Unified browser interface that works with both Puppeteer and Playwright
@@ -34,9 +56,9 @@ export async function createBrowser(engine = 'puppeteer', options = {}) {
   const normalizedEngine = engine.toLowerCase();
 
   if (normalizedEngine === 'playwright') {
-    return createPlaywrightBrowser(options);
+    return await createPlaywrightBrowser(options);
   } else {
-    return createPuppeteerBrowser(options);
+    return await createPuppeteerBrowser(options);
   }
 }
 
@@ -47,11 +69,7 @@ export async function createBrowser(engine = 'puppeteer', options = {}) {
  */
 async function createPuppeteerBrowser(options = {}) {
   const defaultOptions = {
-    args: [
-      '--no-sandbox',
-      '--disable-setuid-sandbox',
-      '--disable-dev-shm-usage',
-    ],
+    args: ALL_CHROME_ARGS,
   };
 
   const browser = await puppeteer.launch({ ...defaultOptions, ...options });
@@ -76,11 +94,7 @@ async function createPuppeteerBrowser(options = {}) {
  */
 async function createPlaywrightBrowser(options = {}) {
   const defaultOptions = {
-    args: [
-      '--no-sandbox',
-      '--disable-setuid-sandbox',
-      '--disable-dev-shm-usage',
-    ],
+    args: ALL_CHROME_ARGS,
   };
 
   // Playwright uses chromium by default
@@ -177,6 +191,7 @@ function createPlaywrightPageAdapter(page) {
 
 /**
  * Get the browser engine from query parameters or environment variable
+ * Uses browser-commander's detectEngine when available, with fallback logic
  * @param {Object} req - Express request object
  * @returns {string} - 'puppeteer' or 'playwright'
  */
