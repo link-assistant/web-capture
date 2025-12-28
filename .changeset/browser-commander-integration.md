@@ -1,5 +1,5 @@
 ---
-"@link-assistant/web-capture": minor
+'@link-assistant/web-capture': minor
 ---
 
 Integrate browser-commander library for browser operations
