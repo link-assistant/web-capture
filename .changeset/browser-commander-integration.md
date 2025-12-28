@@ -2,8 +2,9 @@
 '@link-assistant/web-capture': minor
 ---
 
-Integrate browser-commander library for browser operations
+Fully integrate browser-commander library for all browser operations
 
-- Add browser-commander as a dependency
-- Use CHROME_ARGS from browser-commander for consistent Chrome launch arguments
-- Combine with server-specific args for headless environments
+- Use browser-commander's launchBrowser for both Puppeteer and Playwright
+- Pass server-specific args (--no-sandbox, etc.) via the args option
+- Configure headless mode and unique userDataDir for server environments
+- Update browser-commander dependency from ^0.3.0 to ^0.4.0
