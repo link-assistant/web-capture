@@ -1,28 +1,19 @@
-// Browser abstraction layer using browser-commander utilities
-// Note: browser-commander's launchBrowser currently doesn't support custom args
-// for headless server environments (--no-sandbox, etc). We use browser-commander's
-// utilities (CHROME_ARGS) and maintain browser launch code here until this
-// feature is added to browser-commander.
-// See: https://github.com/link-foundation/browser-commander/issues/11
+// Browser abstraction layer using browser-commander for all browser operations
+// See: https://github.com/link-foundation/browser-commander
 
-import { CHROME_ARGS } from 'browser-commander';
-import puppeteer from 'puppeteer';
-import playwright from 'playwright';
+import { launchBrowser } from 'browser-commander';
+import os from 'os';
+import path from 'path';
 
 /**
  * Additional Chrome args needed for headless server environments
- * These are not included in browser-commander's CHROME_ARGS yet
+ * These are appended to browser-commander's default CHROME_ARGS
  */
 const SERVER_CHROME_ARGS = [
   '--no-sandbox',
   '--disable-setuid-sandbox',
   '--disable-dev-shm-usage',
 ];
-
-/**
- * Combined Chrome args: browser-commander defaults + server-specific args
- */
-const ALL_CHROME_ARGS = [...CHROME_ARGS, ...SERVER_CHROME_ARGS];
 
 /**
  * Unified browser interface that works with both Puppeteer and Playwright
@@ -48,70 +39,52 @@ const ALL_CHROME_ARGS = [...CHROME_ARGS, ...SERVER_CHROME_ARGS];
 
 /**
  * Create a browser instance using the specified engine
+ * Uses browser-commander's launchBrowser for both Puppeteer and Playwright
  * @param {string} engine - 'puppeteer' or 'playwright' (defaults to puppeteer)
  * @param {Object} options - Browser launch options
  * @returns {Promise<BrowserAdapter>}
  */
 export async function createBrowser(engine = 'puppeteer', options = {}) {
   const normalizedEngine = engine.toLowerCase();
+  const engineType =
+    normalizedEngine === 'playwright' || normalizedEngine === 'pw'
+      ? 'playwright'
+      : 'puppeteer';
 
-  if (normalizedEngine === 'playwright') {
-    return await createPlaywrightBrowser(options);
-  } else {
-    return await createPuppeteerBrowser(options);
-  }
-}
+  // Generate unique userDataDir for this session to avoid conflicts
+  const userDataDir = path.join(
+    os.tmpdir(),
+    `web-capture-${engineType}-${Date.now()}`
+  );
 
-/**
- * Create a Puppeteer browser instance
- * @param {Object} options - Puppeteer launch options
- * @returns {Promise<BrowserAdapter>}
- */
-async function createPuppeteerBrowser(options = {}) {
-  const defaultOptions = {
-    args: ALL_CHROME_ARGS,
-  };
-
-  const browser = await puppeteer.launch({ ...defaultOptions, ...options });
-
-  return {
-    async newPage() {
-      const page = await browser.newPage();
-      return createPuppeteerPageAdapter(page);
-    },
-    async close() {
-      await browser.close();
-    },
-    type: 'puppeteer',
-    _browser: browser,
-  };
-}
-
-/**
- * Create a Playwright browser instance
- * @param {Object} options - Playwright launch options
- * @returns {Promise<BrowserAdapter>}
- */
-async function createPlaywrightBrowser(options = {}) {
-  const defaultOptions = {
-    args: ALL_CHROME_ARGS,
-  };
-
-  // Playwright uses chromium by default
-  const browser = await playwright.chromium.launch({
-    ...defaultOptions,
+  // Use browser-commander's launchBrowser with server-specific args
+  // Default to headless for server environments
+  const { browser, page } = await launchBrowser({
+    engine: engineType,
+    args: SERVER_CHROME_ARGS,
+    headless: true,
+    userDataDir,
+    slowMo: 0, // Disable slowMo for server operations
     ...options,
   });
 
+  // Close the initial page since we'll create new ones via newPage()
+  await page.close();
+
+  const pageAdapter =
+    engineType === 'playwright'
+      ? createPlaywrightPageAdapter
+      : createPuppeteerPageAdapter;
+
   return {
     async newPage() {
-      const page = await browser.newPage();
-      return createPlaywrightPageAdapter(page);
+      const newPage = await browser.newPage();
+      return pageAdapter(newPage);
     },
     async close() {
       await browser.close();
     },
-    type: 'playwright',
+    type: engineType,
     _browser: browser,
   };
 }
@@ -191,7 +164,6 @@ function createPlaywrightPageAdapter(page) {
 
 /**
  * Get the browser engine from query parameters or environment variable
- * Uses browser-commander's detectEngine when available, with fallback logic
  * @param {Object} req - Express request object
  * @returns {string} - 'puppeteer' or 'playwright'
  */
