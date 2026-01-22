@@ -120,7 +120,7 @@ mod tests {
     fn test_convert_html_to_markdown_basic() {
         let html = r"<html><body><h1>Hello World</h1><p>This is a test.</p></body></html>";
         let result = convert_html_to_markdown(html, None).unwrap();
-        eprintln!("Result: {:?}", result);
+        eprintln!("Result: {result:?}");
         // html2md may format headers differently (with or without space after #)
         assert!(
             result.contains("Hello World"),
