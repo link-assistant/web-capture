@@ -122,8 +122,14 @@ mod tests {
         let result = convert_html_to_markdown(html, None).unwrap();
         eprintln!("Result: {:?}", result);
         // html2md may format headers differently (with or without space after #)
-        assert!(result.contains("Hello World"), "Should contain 'Hello World'");
-        assert!(result.contains("This is a test."), "Should contain 'This is a test.'");
+        assert!(
+            result.contains("Hello World"),
+            "Should contain 'Hello World'"
+        );
+        assert!(
+            result.contains("This is a test."),
+            "Should contain 'This is a test.'"
+        );
     }
 
     #[test]
