@@ -1,21 +1,54 @@
 # web-capture
 
-<img width="1824" alt="Screenshot 2025-05-12 at 3 49 32 AM" src="https://github.com/user-attachments/assets/cbf63dec-7dcd-40e7-9d5d-eddc49fe6169" />
-
 A CLI and microservice to fetch URLs and render them as:
 
 - **HTML**: Rendered page content
 - **Markdown**: Converted from HTML
 - **PNG screenshot**: Full page capture
 
+## Language Implementations
+
+This repository contains two implementations with compatible APIs:
+
+| Implementation | Directory | Package | Status |
+|---------------|-----------|---------|--------|
+| **JavaScript/Node.js** | [`./js`](./js) | [@link-assistant/web-capture](https://www.npmjs.com/package/@link-assistant/web-capture) | Production |
+| **Rust** | [`./rust`](./rust) | [web-capture](https://crates.io/crates/web-capture) | Production |
+
+Both implementations provide the same CLI interface and HTTP API endpoints, allowing you to choose based on your deployment preferences.
+
 ## Quick Start
 
-### CLI Usage
+### JavaScript
 
 ```bash
-# Install globally
-npm install -g web-capture
+cd js
+npm install
+npm run dev
+```
 
+### Rust
+
+```bash
+cd rust
+cargo run -- --serve
+```
+
+## API Endpoints
+
+Both implementations expose the same API:
+
+| Endpoint | Description |
+|----------|-------------|
+| `GET /html?url=<URL>` | Get rendered HTML content |
+| `GET /markdown?url=<URL>` | Get Markdown conversion |
+| `GET /image?url=<URL>` | Get PNG screenshot |
+| `GET /fetch?url=<URL>` | Proxy fetch content |
+| `GET /stream?url=<URL>` | Stream content |
+
+## CLI Usage
+
+```bash
 # Capture a URL as HTML (output to stdout)
 web-capture https://example.com
 
@@ -32,287 +65,120 @@ web-capture --serve
 web-capture --serve --port 8080
 ```
 
-### API Endpoints (Server Mode)
+## CLI Options
 
-- **HTML**: GET /html?url=<URL>
-- **Markdown**: GET /markdown?url=<URL>
-- **PNG screenshot**: GET /image?url=<URL>
+| Option | Short | Description | Default |
+|--------|-------|-------------|---------|
+| `--serve` | `-s` | Start as HTTP API server | - |
+| `--port` | `-p` | Port to listen on | 3000 |
+| `--format` | `-f` | Output format: `html`, `markdown`/`md`, `image`/`png` | `html` |
+| `--output` | `-o` | Output file path | stdout (text) or auto-generated (images) |
+| `--engine` | `-e` | Browser engine (JS only): `puppeteer`, `playwright` | `puppeteer` |
 
-## Installation
+## Docker
 
-```bash
-npm install
-# or
-yarn install
-```
-
-## CLI Reference
-
-### Server Mode
-
-Start the API server:
+### JavaScript
 
 ```bash
-web-capture --serve [--port <port>]
+cd js
+docker build -t web-capture-js .
+docker run -p 3000:3000 web-capture-js
 ```
 
-| Option    | Short | Description              | Default            |
-| --------- | ----- | ------------------------ | ------------------ |
-| `--serve` | `-s`  | Start as HTTP API server | -                  |
-| `--port`  | `-p`  | Port to listen on        | 3000 (or PORT env) |
-
-### Capture Mode
-
-Capture a URL directly:
+### Rust
 
 ```bash
-web-capture <url> [options]
+cd rust
+docker build -t web-capture-rust .
+docker run -p 3000:3000 web-capture-rust
 ```
 
-| Option     | Short | Description                                           | Default                                  |
-| ---------- | ----- | ----------------------------------------------------- | ---------------------------------------- |
-| `--format` | `-f`  | Output format: `html`, `markdown`/`md`, `image`/`png` | `html`                                   |
-| `--output` | `-o`  | Output file path                                      | stdout (text) or auto-generated (images) |
-| `--engine` | `-e`  | Browser engine: `puppeteer`, `playwright`             | `puppeteer` (or BROWSER_ENGINE env)      |
+## Project Structure
 
-### Examples
-
-```bash
-# Capture HTML to stdout
-web-capture https://example.com
-
-# Capture Markdown to file
-web-capture https://example.com -f markdown -o page.md
-
-# Take screenshot with Playwright engine
-web-capture https://example.com -f png -e playwright -o screenshot.png
-
-# Pipe HTML to another command
-web-capture https://example.com | grep "title"
 ```
-
-## Available Commands
-
-### Development
-
-- `yarn dev` - Start the development server with hot reloading using nodemon
-- `yarn start` - Start the service using Docker Compose
-
-### Testing
-
-- `yarn test` - Run all unit tests
-- `yarn test:watch` - Run tests in watch mode
-- `yarn test:e2e` - Run end-to-end tests
-- `yarn test:e2e:docker` - Run end-to-end tests against Docker container
-- `yarn test:all` - Run all tests including build and e2e tests
-
-### Building
-
-- `yarn build` - Build and start the Docker container
-
-### Examples
-
-- `yarn examples:python` - Run Python example scripts
-- `yarn examples:javascript` - Run JavaScript example scripts
-- `yarn examples` - Run all examples (requires build)
-
-## Usage
-
-### Local Development
-
-```bash
-yarn dev
-curl http://localhost:3000/html?url=https://example.com
+web-capture/
+├── js/                          # JavaScript/Node.js implementation
+│   ├── src/                     # Source code
+│   ├── bin/                     # CLI entry point
+│   ├── tests/                   # Test files
+│   ├── examples/                # Usage examples
+│   ├── scripts/                 # Build/release scripts
+│   ├── package.json             # npm package manifest
+│   ├── Dockerfile               # Docker build file
+│   └── README.md                # JavaScript-specific docs
+│
+├── rust/                        # Rust implementation
+│   ├── src/                     # Source code
+│   │   ├── lib.rs               # Library exports
+│   │   ├── main.rs              # CLI/server entry point
+│   │   ├── browser.rs           # Browser automation
+│   │   ├── html.rs              # HTML processing
+│   │   └── markdown.rs          # Markdown conversion
+│   ├── tests/                   # Test files
+│   ├── examples/                # Usage examples
+│   ├── Cargo.toml               # Cargo package manifest
+│   ├── Dockerfile               # Docker build file
+│   └── README.md                # Rust-specific docs
+│
+├── .github/workflows/
+│   ├── js.yml                   # JavaScript CI/CD
+│   └── rust.yml                 # Rust CI/CD
+│
+└── README.md                    # This file
 ```
-
-### Docker
-
-```bash
-# Build and run using Docker Compose
-yarn start
-
-# Or manually
-docker build -t web-capture .
-docker run -p 3000:3000 web-capture
-```
-
-## API Endpoints
-
-### HTML Endpoint
-
-```bash
-GET /html?url=<URL>&engine=<ENGINE>
-```
-
-Returns the raw HTML content of the specified URL.
-
-**Parameters:**
-
-- `url` (required): The URL to fetch
-- `engine` (optional): Browser engine to use (`puppeteer` or `playwright`). Default: `puppeteer`
-
-**Examples:**
-
-```bash
-# Using default Puppeteer engine
-curl http://localhost:3000/html?url=https://example.com
-
-# Using Playwright engine
-curl http://localhost:3000/html?url=https://example.com&engine=playwright
-```
-
-### Markdown Endpoint
-
-```bash
-GET /markdown?url=<URL>
-```
-
-Converts the HTML content of the specified URL to Markdown format.
-
-### Image Endpoint
-
-```bash
-GET /image?url=<URL>&engine=<ENGINE>
-```
-
-Returns a PNG screenshot of the specified URL.
-
-**Parameters:**
-
-- `url` (required): The URL to capture
-- `engine` (optional): Browser engine to use (`puppeteer` or `playwright`). Default: `puppeteer`
-
-**Examples:**
-
-```bash
-# Using default Puppeteer engine
-curl http://localhost:3000/image?url=https://example.com > screenshot.png
-
-# Using Playwright engine
-curl http://localhost:3000/image?url=https://example.com&engine=playwright > screenshot.png
-```
-
-## Configuration
-
-web-capture uses [lino-arguments](https://github.com/link-foundation/lino-arguments) for unified configuration management. Configuration values are resolved with the following priority (highest to lowest):
-
-1. **CLI arguments**: `--port 8080`
-2. **Environment variables**: `PORT=8080`
-3. **Custom configuration file**: `--configuration path/to/custom.lenv`
-4. **Default .lenv file**: `.lenv` in the project root
-5. **Built-in defaults**
-
-### Configuration File (.lenv)
-
-Create a `.lenv` file in your project root using Links Notation format:
-
-```lenv
-# Server configuration
-PORT: 3000
-
-# Browser engine (puppeteer or playwright)
-BROWSER_ENGINE: puppeteer
-```
-
-### Using Custom Configuration Files
-
-Specify a custom configuration file path:
-
-```bash
-web-capture --serve --configuration /path/to/custom.lenv
-```
-
-### Environment Variables
-
-All configuration options support environment variables:
-
-```bash
-# Set port via environment variable
-export PORT=8080
-web-capture --serve
-
-# Set browser engine
-export BROWSER_ENGINE=playwright
-web-capture https://example.com --format png
-```
-
-## Browser Engine Support
-
-The service supports both **Puppeteer** and **Playwright** browser engines:
-
-- **Puppeteer**: Default engine, mature and well-tested
-- **Playwright**: Alternative engine with similar capabilities
-
-You can choose the engine using:
-
-- CLI argument: `--engine playwright`
-- Environment variable: `BROWSER_ENGINE=playwright`
-- Configuration file: `BROWSER_ENGINE: playwright` in `.lenv`
-
-**Supported engine values:**
-
-- `puppeteer` or `pptr` - Use Puppeteer
-- `playwright` or `pw` - Use Playwright
 
 ## Development
 
-The service is built with:
+### JavaScript
 
-- Express.js for the web server
-- Puppeteer and Playwright for headless browser automation and screenshots
-- Turndown for HTML to Markdown conversion
-- Jest for testing
+```bash
+cd js
+npm install
+npm run dev          # Start dev server
+npm test             # Run tests
+npm run lint         # Run linter
+```
 
-## Related Resources
+### Rust
 
-### NPM Packages & Libraries
+```bash
+cd rust
+cargo build          # Build
+cargo test           # Run tests
+cargo clippy         # Run linter
+cargo fmt            # Format code
+```
 
-#### Web Capture & Screenshot Tools
+## Features
 
-- [capture-website](https://www.npmjs.com/package/capture-website) - Capture website screenshots with a simple API
-- [pageres](https://www.npmjs.com/package/pageres) - Capture screenshots of websites in various resolutions
-- [puppeteer](https://www.npmjs.com/package/puppeteer) - Headless Chrome Node.js API for browser automation and screenshots
-- [playwright](https://www.npmjs.com/package/playwright) - Cross-browser automation library
+- **HTML Rendering**: Fetch and render HTML with JavaScript support via headless browsers
+- **Markdown Conversion**: Clean HTML-to-Markdown conversion with proper formatting
+- **Screenshots**: Capture PNG screenshots of web pages
+- **URL Normalization**: Convert relative URLs to absolute
+- **Encoding Detection**: Automatic charset detection and UTF-8 conversion
+- **Proxy Support**: Fetch and stream content through the service
 
-#### HTML to Markdown Conversion
+## Browser Engines
 
-- [turndown](https://github.com/mixmark-io/turndown) - HTML to Markdown converter written in JavaScript
-- [html-to-markdown](https://github.com/JohannesKaufmann/html-to-markdown) - Go library to convert HTML to Markdown with support for entire websites
-- [markdowner](https://github.com/supermemoryai/markdowner) - Advanced HTML to Markdown conversion tool
-- [pandoc](https://pandoc.org/) - Universal document converter supporting HTML to Markdown
+### JavaScript Version
 
-#### Web Scraping
+The JavaScript implementation supports two browser engines:
 
-- [scrape-it](https://www.npmjs.com/package/scrape-it) - Node.js scraper with a clean API
+- **Puppeteer** (default): Mature, well-tested Chrome automation
+- **Playwright**: Cross-browser automation with similar capabilities
 
-### Screenshot API Services
+### Rust Version
 
-#### Commercial Services
+The Rust implementation uses:
 
-- [ScreenshotOne](https://screenshotone.com/) - Developer-focused screenshot API with advanced features
-- [ScrapFly](https://scrapfly.io/blog/posts/what-is-the-best-screenshot-api) - Screenshot API with antibot protection and rotating proxies
-- [ScreenshotAPI.net](https://www.screenshotapi.net/) - High-quality screenshot API with retina support
-- [ApiFlash](https://apiflash.com/) - Chrome-based screenshot API with S3 integration
-- [Scrapingdog](https://www.scrapingdog.com/) - Cost-effective screenshot and scraping solution
-- [URLBox](https://urlbox.io/) - Website screenshot API
-
-#### Free/Open Services
-
-- [site-shot.com](https://www.site-shot.com) - Free website screenshot service
-- [pikwy.com](https://pikwy.com) - Website thumbnail and screenshot generator
-- [screenshotmachine.com](https://www.screenshotmachine.com) - Website screenshot service
-- [screenshot.guru](https://screenshot.guru) - Simple screenshot service
-
-### HTML to Markdown Services
-
-- [urltomarkdown.com](https://urltomarkdown.com) - Convert URLs to Markdown format
-- [CaptureKit](https://www.capturekit.dev/blog/how-to-convert-html-to-markdown) - API for HTML to Markdown conversion
-
-### Alternative Tools
-
-- [MarkItDown](https://www.infoworld.com/article/3963991/markitdown-microsofts-open-source-tool-for-markdown-conversion.html) - Microsoft's open-source tool for converting various file formats to Markdown
-- [html-to-markdown (Python)](https://pypi.org/project/html-to-markdown/) - Rust-powered Python library for HTML to Markdown conversion
+- **browser-commander**: A Rust crate for browser automation using chromiumoxide
 
 ## License
 
-UNLICENSED
+UNLICENSED (JavaScript) / Unlicense (Rust)
+
+## Related Projects
+
+- [browser-commander](https://github.com/link-foundation/browser-commander) - Browser automation library used in Rust implementation
+- [turndown](https://github.com/mixmark-io/turndown) - HTML to Markdown converter used in JS implementation
+- [html2md](https://github.com/nickyc975/html2md-rs) - HTML to Markdown converter used in Rust implementation
