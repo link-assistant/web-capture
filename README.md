@@ -102,7 +102,6 @@ web-capture/
 │   ├── bin/                     # CLI entry point
 │   ├── tests/                   # Test files
 │   ├── examples/                # Usage examples
-│   ├── scripts/                 # Build/release scripts
 │   ├── package.json             # npm package manifest
 │   ├── Dockerfile               # Docker build file
 │   └── README.md                # JavaScript-specific docs
@@ -119,6 +118,10 @@ web-capture/
 │   ├── Cargo.toml               # Cargo package manifest
 │   ├── Dockerfile               # Docker build file
 │   └── README.md                # Rust-specific docs
+│
+├── scripts/                     # Shared build/release scripts
+│   ├── *.mjs                    # JavaScript-specific scripts
+│   └── rust-*.mjs               # Rust-specific scripts
 │
 ├── .github/workflows/
 │   ├── js.yml                   # JavaScript CI/CD

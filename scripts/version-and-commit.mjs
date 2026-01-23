@@ -189,9 +189,9 @@ async function main() {
       // Run instant version bump script
       // Rely on command-stream's auto-quoting for proper argument handling
       if (description) {
-        await $`node scripts/instant-version-bump.mjs --bump-type ${bumpType} --description ${description}`;
+        await $`node ../scripts/instant-version-bump.mjs --bump-type ${bumpType} --description ${description}`;
       } else {
-        await $`node scripts/instant-version-bump.mjs --bump-type ${bumpType}`;
+        await $`node ../scripts/instant-version-bump.mjs --bump-type ${bumpType}`;
       }
     } else {
       console.log('Running changeset version...');

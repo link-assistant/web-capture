@@ -6,11 +6,13 @@ on:
       - main
     paths:
       - 'rust/**'
+      - 'scripts/rust-*.mjs'
       - '.github/workflows/rust.yml'
   pull_request:
     types: [opened, synchronize, reopened]
     paths:
       - 'rust/**'
+      - 'scripts/rust-*.mjs'
       - '.github/workflows/rust.yml'
   workflow_dispatch:
     inputs:
@@ -133,6 +135,11 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.x'
+
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@stable
 
@@ -147,38 +154,20 @@ jobs:
 
       - name: Check if version changed
         id: version_check
-        run: |
-          # Get current version from Cargo.toml
-          CURRENT_VERSION=$(grep -m1 '^version' Cargo.toml | sed 's/.*"\(.*\)".*/\1/')
-          echo "Current version: $CURRENT_VERSION"
-
-          # Check if tag exists
-          if git rev-parse "rust-v$CURRENT_VERSION" >/dev/null 2>&1; then
-            echo "Tag rust-v$CURRENT_VERSION already exists"
-            echo "should_release=false" >> $GITHUB_OUTPUT
-          else
-            echo "Tag rust-v$CURRENT_VERSION does not exist, will release"
-            echo "should_release=true" >> $GITHUB_OUTPUT
-            echo "version=$CURRENT_VERSION" >> $GITHUB_OUTPUT
-          fi
+        run: node ../scripts/rust-version-check.mjs
 
       - name: Publish to crates.io
         if: steps.version_check.outputs.should_release == 'true'
+        id: publish
         env:
           CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
-        run: |
-          cargo publish --allow-dirty || echo "Publish failed or already published"
+        run: node ../scripts/rust-publish-crate.mjs
 
       - name: Create GitHub Release
         if: steps.version_check.outputs.should_release == 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          VERSION="${{ steps.version_check.outputs.version }}"
-          gh release create "rust-v$VERSION" \
-            --title "Rust v$VERSION" \
-            --notes "Rust web-capture version $VERSION" \
-            --target ${{ github.sha }}
+        run: node ../scripts/rust-create-github-release.mjs --release-version "${{ steps.version_check.outputs.version }}" --repository "${{ github.repository }}" --commit-sha "${{ github.sha }}"
 
   # Manual Instant Release
   instant-release:
@@ -192,6 +181,11 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.x'
+
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@stable
 
@@ -204,52 +198,19 @@ jobs:
             rust/target
           key: ${{ runner.os }}-cargo-${{ hashFiles('rust/Cargo.lock') }}
 
-      - name: Configure Git
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-
-      - name: Bump version
-        id: bump
-        run: |
-          # Get current version
-          CURRENT=$(grep -m1 '^version' Cargo.toml | sed 's/.*"\(.*\)".*/\1/')
-          IFS='.' read -r MAJOR MINOR PATCH <<< "$CURRENT"
-
-          # Bump based on type
-          case "${{ github.event.inputs.bump_type }}" in
-            major) MAJOR=$((MAJOR + 1)); MINOR=0; PATCH=0 ;;
-            minor) MINOR=$((MINOR + 1)); PATCH=0 ;;
-            patch) PATCH=$((PATCH + 1)) ;;
-          esac
-
-          NEW_VERSION="$MAJOR.$MINOR.$PATCH"
-          echo "New version: $NEW_VERSION"
-
-          # Update Cargo.toml
-          sed -i "s/^version = \"$CURRENT\"/version = \"$NEW_VERSION\"/" Cargo.toml
-
-          echo "version=$NEW_VERSION" >> $GITHUB_OUTPUT
-
-      - name: Commit version bump
-        run: |
-          git add Cargo.toml
-          git commit -m "chore(rust): bump version to ${{ steps.bump.outputs.version }}"
-          git push
+      - name: Version and commit
+        id: version
+        run: node ../scripts/rust-version-and-commit.mjs --bump-type "${{ github.event.inputs.bump_type }}" --description "${{ github.event.inputs.description }}"
 
       - name: Publish to crates.io
+        if: steps.version.outputs.version_committed == 'true'
+        id: publish
         env:
           CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
-        run: |
-          cargo publish --allow-dirty || echo "Publish failed or already published"
+        run: node ../scripts/rust-publish-crate.mjs
 
       - name: Create GitHub Release
+        if: steps.version.outputs.version_committed == 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          VERSION="${{ steps.bump.outputs.version }}"
-          DESCRIPTION="${{ github.event.inputs.description || 'Manual release' }}"
-          gh release create "rust-v$VERSION" \
-            --title "Rust v$VERSION" \
-            --notes "$DESCRIPTION" \
-            --target ${{ github.sha }}
+        run: node ../scripts/rust-create-github-release.mjs --release-version "${{ steps.version.outputs.version }}" --repository "${{ github.repository }}" --description "${{ github.event.inputs.description }}" --commit-sha "${{ github.sha }}"
