@@ -33,7 +33,7 @@ describe('Habr Article Download Tests', () => {
   // Use article 0.0.2 as the primary test article (English, most recent)
   const primaryArticle = HABR_ARTICLES['0.0.2'];
 
-  describe('Markdown Download (fetch only)', () => {
+  describeIfLive('Markdown Download (fetch only)', () => {
     it('downloads article 0.0.2 as markdown', async () => {
       const html = await fetchHtml(primaryArticle.url);
       expect(html.length).toBeGreaterThan(1000);
