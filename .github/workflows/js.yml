@@ -132,6 +132,12 @@ jobs:
       - name: Run unit, integration, and e2e process tests
         run: npm test -- --testPathIgnorePatterns="docker.test.js"
 
+      - name: Run Habr article live integration tests
+        env:
+          HABR_INTEGRATION: 'true'
+        run: npm test -- --testPathPattern="habr-article" --testTimeout=120000
+        continue-on-error: true
+
       - name: Build Docker image for e2e tests
         run: docker compose build
 
