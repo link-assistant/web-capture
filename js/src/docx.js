@@ -55,24 +55,18 @@ export async function docxHandler(req, res) {
       const tagName = (el.tagName || '').toLowerCase();
       const text = $(el).text().trim();
 
-      if (!text && tagName !== 'img' && tagName !== 'figure') continue;
+      if (!text && tagName !== 'img' && tagName !== 'figure') {
+        continue;
+      }
 
       if (tagName === 'h1') {
-        children.push(
-          new Paragraph({ text, heading: HeadingLevel.HEADING_1 })
-        );
+        children.push(new Paragraph({ text, heading: HeadingLevel.HEADING_1 }));
       } else if (tagName === 'h2') {
-        children.push(
-          new Paragraph({ text, heading: HeadingLevel.HEADING_2 })
-        );
+        children.push(new Paragraph({ text, heading: HeadingLevel.HEADING_2 }));
       } else if (tagName === 'h3') {
-        children.push(
-          new Paragraph({ text, heading: HeadingLevel.HEADING_3 })
-        );
+        children.push(new Paragraph({ text, heading: HeadingLevel.HEADING_3 }));
       } else if (tagName === 'h4' || tagName === 'h5' || tagName === 'h6') {
-        children.push(
-          new Paragraph({ text, heading: HeadingLevel.HEADING_4 })
-        );
+        children.push(new Paragraph({ text, heading: HeadingLevel.HEADING_4 }));
       } else if (tagName === 'figure' || tagName === 'img') {
         const img = tagName === 'img' ? $(el) : $(el).find('img').first();
         const src = img.attr('src');
@@ -178,7 +172,11 @@ export async function docxHandler(req, res) {
 
 function guessImageType(url) {
   const pathname = new URL(url).pathname.toLowerCase();
-  if (pathname.endsWith('.jpg') || pathname.endsWith('.jpeg')) return 'jpg';
-  if (pathname.endsWith('.gif')) return 'gif';
+  if (pathname.endsWith('.jpg') || pathname.endsWith('.jpeg')) {
+    return 'jpg';
+  }
+  if (pathname.endsWith('.gif')) {
+    return 'gif';
+  }
   return 'png';
 }

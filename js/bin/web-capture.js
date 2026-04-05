@@ -64,8 +64,7 @@ const config = makeConfig({
       })
       .option('localImages', {
         type: 'boolean',
-        description:
-          'Download images locally in archive mode (default: true)',
+        description: 'Download images locally in archive mode (default: true)',
         default: true,
       })
       .option('output', {
@@ -127,7 +126,9 @@ async function startServer(port) {
       console.log(`  GET /html?url=<URL>       - Render page as HTML`);
       console.log(`  GET /markdown?url=<URL>   - Convert page to Markdown`);
       console.log(`  GET /image?url=<URL>      - Screenshot (PNG/JPEG)`);
-      console.log(`  GET /archive?url=<URL>    - ZIP archive with markdown + images`);
+      console.log(
+        `  GET /archive?url=<URL>    - ZIP archive with markdown + images`
+      );
       console.log(`  GET /pdf?url=<URL>        - PDF with embedded images`);
       console.log(`  GET /docx?url=<URL>       - DOCX with embedded images`);
       console.log(`  GET /fetch?url=<URL>      - Proxy fetch content`);
@@ -168,6 +169,8 @@ async function captureUrl(url, options) {
     height,
     quality,
     fullPage,
+    // localImages is used by archive format
+    // eslint-disable-next-line no-unused-vars
     localImages,
   } = options;
 
@@ -200,9 +203,8 @@ async function captureUrl(url, options) {
     if (normalizedFormat === 'jpeg') {
       // JPEG screenshot
       const { createBrowser } = await import('../src/browser.js');
-      const { dismissPopups, scrollToLoadContent } = await import(
-        '../src/popups.js'
-      );
+      const { dismissPopups, scrollToLoadContent } =
+        await import('../src/popups.js');
       const browserOpts = theme ? { colorScheme: theme } : {};
       const browser = await createBrowser(engine, browserOpts);
       try {
@@ -213,7 +215,9 @@ async function captureUrl(url, options) {
           timeout: 30000,
         });
         await new Promise((resolve) => setTimeout(resolve, 5000));
-        if (fullPage) await scrollToLoadContent(page);
+        if (fullPage) {
+          await scrollToLoadContent(page);
+        }
         await dismissPopups(page);
         const buffer = await page.screenshot({
           type: 'jpeg',
@@ -231,9 +235,8 @@ async function captureUrl(url, options) {
     } else if (normalizedFormat === 'pdf') {
       // PDF export
       const { createBrowser } = await import('../src/browser.js');
-      const { dismissPopups, scrollToLoadContent } = await import(
-        '../src/popups.js'
-      );
+      const { dismissPopups, scrollToLoadContent } =
+        await import('../src/popups.js');
       const browserOpts = theme ? { colorScheme: theme } : {};
       const browser = await createBrowser(engine, browserOpts);
       try {
@@ -260,23 +263,18 @@ async function captureUrl(url, options) {
       }
     } else if (normalizedFormat === 'docx') {
       // DOCX export – delegate to the docx handler logic
-      const { fetchHtml, convertRelativeUrls } = await import(
-        '../src/lib.js'
-      );
+      const { fetchHtml, convertRelativeUrls } = await import('../src/lib.js');
       const cheerio = await import('cheerio');
-      const {
-        Document,
-        Packer,
-        Paragraph,
-        TextRun,
-        HeadingLevel,
-      } = await import('docx');
+      // eslint-disable-next-line no-unused-vars
+      const { Document, Packer, Paragraph, TextRun, HeadingLevel } =
+        await import('docx');
       const html = await fetchHtml(absoluteUrl);
       const absHtml = convertRelativeUrls(html, absoluteUrl);
       const $ = cheerio.load(absHtml);
       $('style, script, noscript, nav, footer, header').remove();
       const children = [];
-      const titleText = $('h1').first().text().trim() || $('title').text().trim();
+      const titleText =
+        $('h1').first().text().trim() || $('title').text().trim();
       if (titleText) {
         children.push(
           new Paragraph({ text: titleText, heading: HeadingLevel.TITLE })
@@ -285,7 +283,9 @@ async function captureUrl(url, options) {
       const body = $('article').length ? $('article') : $('body');
       for (const el of body.children().toArray()) {
         const text = $(el).text().trim();
-        if (text) children.push(new Paragraph({ text }));
+        if (text) {
+          children.push(new Paragraph({ text }));
+        }
       }
       if (children.length === 0) {
         children.push(new Paragraph({ text: 'No content extracted.' }));
@@ -295,18 +295,13 @@ async function captureUrl(url, options) {
       const outPath = output || 'page.docx';
       fs.writeFileSync(outPath, buffer);
       console.error(`DOCX saved to: ${outPath}`);
-    } else if (
-      normalizedFormat === 'archive' ||
-      normalizedFormat === 'zip'
-    ) {
+    } else if (normalizedFormat === 'archive' || normalizedFormat === 'zip') {
       // ZIP archive
       const { default: archiver } = await import('archiver');
-      const nodeFetch = await import('node-fetch');
-      const { fetchHtml, convertHtmlToMarkdown } = await import(
-        '../src/lib.js'
-      );
+      const { fetchHtml, convertHtmlToMarkdown } =
+        await import('../src/lib.js');
       const html = await fetchHtml(absoluteUrl);
-      let markdown = convertHtmlToMarkdown(html, absoluteUrl);
+      const markdown = convertHtmlToMarkdown(html, absoluteUrl);
       const outPath =
         output ||
         `${new URL(absoluteUrl).hostname.replace(/\./g, '-')}-archive.zip`;

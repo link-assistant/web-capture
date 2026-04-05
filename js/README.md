@@ -104,10 +104,10 @@ GET /html?url=<URL>&engine=<ENGINE>
 
 Returns the raw HTML content of the specified URL.
 
-| Parameter | Required | Description                         | Default     |
-| --------- | -------- | ----------------------------------- | ----------- |
-| `url`     | Yes      | URL to fetch                        | -           |
-| `engine`  | No       | Browser engine: puppeteer/playwright | puppeteer   |
+| Parameter | Required | Description                          | Default   |
+| --------- | -------- | ------------------------------------ | --------- |
+| `url`     | Yes      | URL to fetch                         | -         |
+| `engine`  | No       | Browser engine: puppeteer/playwright | puppeteer |
 
 ### Markdown Endpoint
 
@@ -117,8 +117,8 @@ GET /markdown?url=<URL>
 
 Converts the HTML content of the specified URL to Markdown format.
 
-| Parameter | Required | Description | Default |
-| --------- | -------- | ----------- | ------- |
+| Parameter | Required | Description  | Default |
+| --------- | -------- | ------------ | ------- |
 | `url`     | Yes      | URL to fetch | -       |
 
 ### Image Endpoint
@@ -129,17 +129,17 @@ GET /image?url=<URL>&format=png&theme=dark&width=1920&height=1080&fullPage=true
 
 Returns a screenshot of the specified URL.
 
-| Parameter       | Required | Description                                | Default     |
-| --------------- | -------- | ------------------------------------------ | ----------- |
-| `url`           | Yes      | URL to capture                             | -           |
-| `engine`        | No       | Browser engine: puppeteer/playwright       | puppeteer   |
-| `format`        | No       | Image format: `png` (lossless) or `jpeg`   | png         |
-| `quality`       | No       | JPEG quality 0-100 (ignored for PNG)       | 80          |
-| `width`         | No       | Viewport width in pixels                   | 1280        |
-| `height`        | No       | Viewport height in pixels                  | 800         |
-| `fullPage`      | No       | Capture full scrollable page               | false       |
-| `theme`         | No       | Color scheme: `light`, `dark`              | browser default |
-| `dismissPopups` | No       | Auto-close cookie/consent popups           | true        |
+| Parameter       | Required | Description                              | Default         |
+| --------------- | -------- | ---------------------------------------- | --------------- |
+| `url`           | Yes      | URL to capture                           | -               |
+| `engine`        | No       | Browser engine: puppeteer/playwright     | puppeteer       |
+| `format`        | No       | Image format: `png` (lossless) or `jpeg` | png             |
+| `quality`       | No       | JPEG quality 0-100 (ignored for PNG)     | 80              |
+| `width`         | No       | Viewport width in pixels                 | 1280            |
+| `height`        | No       | Viewport height in pixels                | 800             |
+| `fullPage`      | No       | Capture full scrollable page             | false           |
+| `theme`         | No       | Color scheme: `light`, `dark`            | browser default |
+| `dismissPopups` | No       | Auto-close cookie/consent popups         | true            |
 
 ### Archive Endpoint
 
@@ -149,10 +149,10 @@ GET /archive?url=<URL>&localImages=true
 
 Returns a ZIP archive containing `article.md` and optionally an `images/` directory.
 
-| Parameter     | Required | Description                              | Default   |
-| ------------- | -------- | ---------------------------------------- | --------- |
-| `url`         | Yes      | URL to archive                           | -         |
-| `localImages` | No       | Download images locally into the archive | true      |
+| Parameter     | Required | Description                              | Default |
+| ------------- | -------- | ---------------------------------------- | ------- |
+| `url`         | Yes      | URL to archive                           | -       |
+| `localImages` | No       | Download images locally into the archive | true    |
 
 ### PDF Endpoint
 
@@ -162,14 +162,14 @@ GET /pdf?url=<URL>&theme=light
 
 Returns a PDF document rendered by the browser engine (all images embedded).
 
-| Parameter       | Required | Description                          | Default        |
-| --------------- | -------- | ------------------------------------ | -------------- |
-| `url`           | Yes      | URL to convert                       | -              |
-| `engine`        | No       | Browser engine                       | puppeteer      |
-| `width`         | No       | Viewport width in pixels             | 1280           |
-| `height`        | No       | Viewport height in pixels            | 800            |
-| `theme`         | No       | Color scheme: `light`, `dark`        | browser default|
-| `dismissPopups` | No       | Auto-close popups before export      | true           |
+| Parameter       | Required | Description                     | Default         |
+| --------------- | -------- | ------------------------------- | --------------- |
+| `url`           | Yes      | URL to convert                  | -               |
+| `engine`        | No       | Browser engine                  | puppeteer       |
+| `width`         | No       | Viewport width in pixels        | 1280            |
+| `height`        | No       | Viewport height in pixels       | 800             |
+| `theme`         | No       | Color scheme: `light`, `dark`   | browser default |
+| `dismissPopups` | No       | Auto-close popups before export | true            |
 
 ### DOCX Endpoint
 
@@ -211,29 +211,29 @@ web-capture --serve [--port <port>]
 web-capture <url> [options]
 ```
 
-| Option          | Short | Description                                                   | Default                                  |
-| --------------- | ----- | ------------------------------------------------------------- | ---------------------------------------- |
-| `--format`      | `-f`  | Output format (see below)                                     | `html`                                   |
-| `--output`      | `-o`  | Output file path                                              | stdout (text) or auto-generated (images) |
-| `--engine`      | `-e`  | Browser engine: `puppeteer`, `playwright`                     | `puppeteer` (or BROWSER_ENGINE env)      |
-| `--theme`       | `-t`  | Color scheme: `light`, `dark`, `no-preference`                | browser default                          |
-| `--width`       |       | Viewport width in pixels                                      | 1280                                     |
-| `--height`      |       | Viewport height in pixels                                     | 800                                      |
-| `--quality`     |       | JPEG quality 0-100                                            | 80                                       |
-| `--fullPage`    |       | Capture full scrollable page                                  | false                                    |
-| `--localImages` |       | Download images locally in archive mode                       | true                                     |
+| Option          | Short | Description                                    | Default                                  |
+| --------------- | ----- | ---------------------------------------------- | ---------------------------------------- |
+| `--format`      | `-f`  | Output format (see below)                      | `html`                                   |
+| `--output`      | `-o`  | Output file path                               | stdout (text) or auto-generated (images) |
+| `--engine`      | `-e`  | Browser engine: `puppeteer`, `playwright`      | `puppeteer` (or BROWSER_ENGINE env)      |
+| `--theme`       | `-t`  | Color scheme: `light`, `dark`, `no-preference` | browser default                          |
+| `--width`       |       | Viewport width in pixels                       | 1280                                     |
+| `--height`      |       | Viewport height in pixels                      | 800                                      |
+| `--quality`     |       | JPEG quality 0-100                             | 80                                       |
+| `--fullPage`    |       | Capture full scrollable page                   | false                                    |
+| `--localImages` |       | Download images locally in archive mode        | true                                     |
 
 **Supported formats:**
 
-| Format                    | Description                                |
-| ------------------------- | ------------------------------------------ |
-| `html`                    | Rendered HTML (default)                    |
-| `markdown` / `md`        | Markdown conversion                        |
-| `image` / `png`          | PNG screenshot (lossless)                  |
-| `jpeg`                    | JPEG screenshot (configurable quality)     |
-| `pdf`                     | PDF with embedded images                   |
-| `docx`                    | Word document with embedded images         |
-| `archive` / `zip`        | ZIP archive with markdown + local images   |
+| Format            | Description                              |
+| ----------------- | ---------------------------------------- |
+| `html`            | Rendered HTML (default)                  |
+| `markdown` / `md` | Markdown conversion                      |
+| `image` / `png`   | PNG screenshot (lossless)                |
+| `jpeg`            | JPEG screenshot (configurable quality)   |
+| `pdf`             | PDF with embedded images                 |
+| `docx`            | Word document with embedded images       |
+| `archive` / `zip` | ZIP archive with markdown + local images |
 
 ## Configuration
 
@@ -322,19 +322,27 @@ npm run test:all            # Run all tests including build
 You can also use web-capture as a Node.js library:
 
 ```javascript
-import { fetchHtml, convertHtmlToMarkdown } from '@link-assistant/web-capture/src/lib.js';
+import {
+  fetchHtml,
+  convertHtmlToMarkdown,
+} from '@link-assistant/web-capture/src/lib.js';
 import { createBrowser } from '@link-assistant/web-capture/src/browser.js';
 import { dismissPopups } from '@link-assistant/web-capture/src/popups.js';
 
 // Fetch and convert to markdown
 const html = await fetchHtml('https://habr.com/en/articles/895896/');
-const markdown = convertHtmlToMarkdown(html, 'https://habr.com/en/articles/895896/');
+const markdown = convertHtmlToMarkdown(
+  html,
+  'https://habr.com/en/articles/895896/'
+);
 
 // Take a themed screenshot
 const browser = await createBrowser('playwright', { colorScheme: 'dark' });
 const page = await browser.newPage();
 await page.setViewport({ width: 1920, height: 1080 });
-await page.goto('https://habr.com/en/articles/895896/', { waitUntil: 'networkidle0' });
+await page.goto('https://habr.com/en/articles/895896/', {
+  waitUntil: 'networkidle0',
+});
 await dismissPopups(page);
 const buffer = await page.screenshot({ type: 'png', fullPage: true });
 await browser.close();

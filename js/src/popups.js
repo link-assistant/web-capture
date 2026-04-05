@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 /**
  * Popup/modal/cookie banner detection and auto-close utilities.
  *

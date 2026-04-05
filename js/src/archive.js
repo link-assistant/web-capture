@@ -107,9 +107,17 @@ export async function archiveHandler(req, res) {
 
 function guessImageExtension(url) {
   const pathname = new URL(url).pathname.toLowerCase();
-  if (pathname.endsWith('.jpg') || pathname.endsWith('.jpeg')) return 'jpg';
-  if (pathname.endsWith('.gif')) return 'gif';
-  if (pathname.endsWith('.webp')) return 'webp';
-  if (pathname.endsWith('.svg')) return 'svg';
+  if (pathname.endsWith('.jpg') || pathname.endsWith('.jpeg')) {
+    return 'jpg';
+  }
+  if (pathname.endsWith('.gif')) {
+    return 'gif';
+  }
+  if (pathname.endsWith('.webp')) {
+    return 'webp';
+  }
+  if (pathname.endsWith('.svg')) {
+    return 'svg';
+  }
   return 'png';
 }

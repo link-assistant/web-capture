@@ -28,7 +28,7 @@ describe('Habr Article Download Tests', () => {
   describe('Markdown Download', () => {
     it.each(['puppeteer', 'playwright'])(
       'downloads article 0.0.2 as markdown using %s',
-      async (engine) => {
+      async () => {
         const html = await fetchHtml(primaryArticle.url);
         expect(html.length).toBeGreaterThan(1000);
 
