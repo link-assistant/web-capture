@@ -12,6 +12,7 @@ import { docxHandler } from './docx.js';
 const app = express();
 const port = process.env.PORT || 3000;
 
+app.get('/health', (req, res) => res.json({ status: 'ok' }));
 app.get('/html', htmlHandler);
 app.get('/markdown', markdownHandler);
 app.get('/image', imageHandler);
