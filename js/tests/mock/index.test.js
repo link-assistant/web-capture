@@ -148,22 +148,16 @@ describe('Web Capture Microservice', () => {
       0x82, // IEND chunk
     ]);
 
-    it(
-      'should return PNG image when URL is provided',
-      async () => {
-        const response = await request(app)
-          .get('/image')
-          .query({ url: testUrl });
+    it('should return PNG image when URL is provided', async () => {
+      const response = await request(app).get('/image').query({ url: testUrl });
 
-        expect(response.status).toBe(200);
-        expect(response.type).toBe('image/png');
-        const pngSignature = Buffer.from([
-          0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a,
-        ]);
-        expect(response.body.slice(0, 8)).toEqual(pngSignature);
-      },
-      60000
-    );
+      expect(response.status).toBe(200);
+      expect(response.type).toBe('image/png');
+      const pngSignature = Buffer.from([
+        0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a,
+      ]);
+      expect(response.body.slice(0, 8)).toEqual(pngSignature);
+    }, 60000);
 
     it('should return 400 when URL is missing', async () => {
       const response = await request(app).get('/image');
