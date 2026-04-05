@@ -172,6 +172,10 @@ describe('Web Capture Microservice', () => {
   describe('GET /stream', () => {
     it('should stream content from the given URL', async () => {
       const testUrl = 'https://example.com';
+      const testHtml = '<html><body><h1>Streamed Page</h1></body></html>';
+      nock(testUrl).get('/').reply(200, testHtml, {
+        'content-type': 'text/html',
+      });
       const response = await request(app).get(`/stream?url=${testUrl}`);
       expect(response.status).toBe(200);
       expect(response.text).toMatch(/<html/i);
