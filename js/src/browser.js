@@ -42,6 +42,7 @@ const SERVER_CHROME_ARGS = [
  * Uses browser-commander's launchBrowser for both Puppeteer and Playwright
  * @param {string} engine - 'puppeteer' or 'playwright' (defaults to puppeteer)
  * @param {Object} options - Browser launch options
+ * @param {string} [options.colorScheme] - Color scheme: 'light', 'dark', or 'no-preference'
  * @returns {Promise<BrowserAdapter>}
  */
 export async function createBrowser(engine = 'puppeteer', options = {}) {
@@ -50,6 +51,8 @@ export async function createBrowser(engine = 'puppeteer', options = {}) {
     normalizedEngine === 'playwright' || normalizedEngine === 'pw'
       ? 'playwright'
       : 'puppeteer';
+
+  const { colorScheme, ...launchOpts } = options;
 
   // Generate unique userDataDir for this session to avoid conflicts
   const userDataDir = path.join(
@@ -65,7 +68,7 @@ export async function createBrowser(engine = 'puppeteer', options = {}) {
     headless: true,
     userDataDir,
     slowMo: 0, // Disable slowMo for server operations
-    ...options,
+    ...launchOpts,
   });
 
   // Close the initial page since we'll create new ones via newPage()
@@ -78,8 +81,29 @@ export async function createBrowser(engine = 'puppeteer', options = {}) {
 
   return {
     async newPage() {
-      const newPage = await browser.newPage();
-      return pageAdapter(newPage);
+      let newPage;
+      if (engineType === 'playwright' && colorScheme) {
+        // For Playwright, set colorScheme at context level for reliability
+        const context = await browser.newContext({ colorScheme });
+        newPage = await context.newPage();
+      } else {
+        newPage = await browser.newPage();
+      }
+      const adapted = pageAdapter(newPage);
+
+      // For Puppeteer, emulate color scheme via CDP
+      if (engineType === 'puppeteer' && colorScheme) {
+        try {
+          const client = await newPage.createCDPSession();
+          await client.send('Emulation.setEmulatedMedia', {
+            features: [{ name: 'prefers-color-scheme', value: colorScheme }],
+          });
+        } catch {
+          /* CDP not available in all environments */
+        }
+      }
+
+      return adapted;
     },
     async close() {
       await browser.close();
