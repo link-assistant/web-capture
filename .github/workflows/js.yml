@@ -108,6 +108,7 @@ jobs:
   test:
     name: JS - Test (Node.js on ${{ matrix.os }})
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
     needs: [changeset-check]
     if: always() && (github.event_name == 'push' || needs.changeset-check.result == 'success')
     strategy:
@@ -138,13 +139,16 @@ jobs:
         env:
           HABR_INTEGRATION: 'true'
         run: npm test -- --testPathPattern="habr-article" --testTimeout=120000
+        timeout-minutes: 10
         continue-on-error: true
 
       - name: Build Docker image for e2e tests
         run: docker compose build
+        timeout-minutes: 10
 
       - name: Run e2e Docker tests
         run: npm test -- tests/e2e/docker.test.js
+        timeout-minutes: 5
 
   # Release - only runs on main after tests pass (for push events)
   release:
