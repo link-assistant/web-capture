@@ -139,8 +139,7 @@ jobs:
         env:
           HABR_INTEGRATION: 'true'
         run: npm test -- --testPathPattern="habr-article" --testTimeout=120000
-        timeout-minutes: 10
-        continue-on-error: true
+        timeout-minutes: 15
 
       - name: Build Docker image for e2e tests
         run: docker compose build

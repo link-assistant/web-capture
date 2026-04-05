@@ -67,6 +67,12 @@ const config = makeConfig({
         description: 'Download images locally in archive mode (default: true)',
         default: true,
       })
+      .option('documentFormat', {
+        type: 'string',
+        description:
+          'Document format in archive mode: markdown (default) or html',
+        default: 'markdown',
+      })
       .option('output', {
         alias: 'o',
         type: 'string',
@@ -105,7 +111,7 @@ const config = makeConfig({
         'Capture screenshot using Playwright'
       )
       .epilogue(
-        'API Endpoints (in server mode):\n  GET /html?url=<URL>&engine=<ENGINE>           Get rendered HTML\n  GET /markdown?url=<URL>                       Get Markdown conversion\n  GET /image?url=<URL>&format=png|jpeg&theme=light|dark  Screenshot\n  GET /archive?url=<URL>&localImages=true       ZIP with markdown + images\n  GET /pdf?url=<URL>&theme=light|dark           PDF with embedded images\n  GET /docx?url=<URL>                           DOCX with embedded images\n  GET /fetch?url=<URL>                          Proxy fetch\n  GET /stream?url=<URL>                         Streaming proxy'
+        'API Endpoints (in server mode):\n  GET /html?url=<URL>&engine=<ENGINE>           Get rendered HTML\n  GET /markdown?url=<URL>                       Get Markdown conversion\n  GET /image?url=<URL>&format=png|jpeg&theme=light|dark  Screenshot\n  GET /archive?url=<URL>&localImages=true&documentFormat=markdown|html  ZIP archive\n  GET /pdf?url=<URL>&theme=light|dark           PDF with embedded images\n  GET /docx?url=<URL>                           DOCX with embedded images\n  GET /fetch?url=<URL>                          Proxy fetch\n  GET /stream?url=<URL>                         Streaming proxy'
       )
       .strict(),
   lenv: {
@@ -298,10 +304,21 @@ async function captureUrl(url, options) {
     } else if (normalizedFormat === 'archive' || normalizedFormat === 'zip') {
       // ZIP archive
       const { default: archiver } = await import('archiver');
-      const { fetchHtml, convertHtmlToMarkdown } =
+      const { fetchHtml, convertHtmlToMarkdown, convertRelativeUrls } =
         await import('../src/lib.js');
-      const html = await fetchHtml(absoluteUrl);
-      const markdown = convertHtmlToMarkdown(html, absoluteUrl);
+      const { retry } = await import('../src/retry.js');
+      const cheerio = await import('cheerio');
+      const nodeFetch = await import('node-fetch');
+
+      const html = await retry(() => fetchHtml(absoluteUrl), {
+        retries: 3,
+        baseDelay: 1000,
+        onRetry: (err, attempt) => {
+          console.error(`Retry ${attempt} fetching page: ${err.message}`);
+        },
+      });
+
+      const docFormat = options.documentFormat === 'html' ? 'html' : 'markdown';
       const outPath =
         output ||
         `${new URL(absoluteUrl).hostname.replace(/\./g, '-')}-archive.zip`;
@@ -310,7 +327,82 @@ async function captureUrl(url, options) {
         ? archiver.default('zip', { zlib: { level: 9 } })
         : archiver('zip', { zlib: { level: 9 } });
       archive.pipe(outStream);
-      archive.append(markdown, { name: 'article.md' });
+
+      // Collect images
+      const $ = cheerio.load(html);
+      const images = [];
+      $('img').each(function () {
+        const src = $(this).attr('src');
+        if (src && !src.startsWith('data:') && !src.startsWith('blob:')) {
+          try {
+            images.push(new URL(src, absoluteUrl).href);
+          } catch {
+            /* skip */
+          }
+        }
+      });
+      const uniqueImages = [...new Set(images)];
+
+      // Build image map for local downloads
+      const imageMap = new Map();
+      if (options.localImages && uniqueImages.length > 0) {
+        let idx = 1;
+        for (const imgUrl of uniqueImages) {
+          const ext = imgUrl.match(/\.(jpe?g|gif|webp|svg|png)/i)?.[1] || 'png';
+          imageMap.set(imgUrl, `images/image-${idx}.${ext}`);
+          idx++;
+        }
+      }
+
+      if (docFormat === 'html') {
+        const outputHtml = convertRelativeUrls(html, absoluteUrl);
+        const $out = cheerio.load(outputHtml);
+        $out('script, noscript').remove();
+        if (imageMap.size > 0) {
+          $out('img').each(function () {
+            const src = $out(this).attr('src');
+            if (src) {
+              try {
+                const resolved = new URL(src, absoluteUrl).href;
+                if (imageMap.has(resolved)) {
+                  $out(this).attr('src', imageMap.get(resolved));
+                }
+              } catch {
+                /* skip */
+              }
+            }
+          });
+        }
+        archive.append($out.html(), { name: 'article.html' });
+      } else {
+        let markdown = convertHtmlToMarkdown(html, absoluteUrl);
+        if (imageMap.size > 0) {
+          for (const [remoteUrl, localPath] of imageMap) {
+            markdown = markdown.split(remoteUrl).join(localPath);
+          }
+        }
+        archive.append(markdown, { name: 'article.md' });
+      }
+
+      // Download images
+      if (imageMap.size > 0) {
+        for (const [imgUrl, localPath] of imageMap) {
+          try {
+            const fetchFn = nodeFetch.default || nodeFetch;
+            const resp = await retry(() => fetchFn(imgUrl), {
+              retries: 2,
+              baseDelay: 500,
+            });
+            if (resp.ok) {
+              const buffer = await resp.buffer();
+              archive.append(buffer, { name: localPath });
+            }
+          } catch {
+            /* skip failed image downloads */
+          }
+        }
+      }
+
       await archive.finalize();
       await new Promise((resolve) => outStream.on('close', resolve));
       console.error(`Archive saved to: ${outPath}`);
@@ -439,6 +531,7 @@ async function main() {
       quality: config.quality,
       fullPage: config.fullPage,
       localImages: config.localImages,
+      documentFormat: config.documentFormat,
     });
   } else {
     // No arguments - show error

@@ -73,8 +73,11 @@ The service is tested against real Habr.com articles. Here are examples for each
 # Markdown (default: remote image links)
 web-capture https://habr.com/en/articles/895896/ -f markdown -o article.md
 
-# ZIP archive with local images
+# ZIP archive with local images (markdown format, default)
 web-capture https://habr.com/en/articles/895896/ -f archive -o article.zip
+
+# ZIP archive with local images (HTML format with CSS)
+web-capture https://habr.com/en/articles/895896/ -f archive --documentFormat html -o article-html.zip
 
 # Light theme full-page PNG
 web-capture https://habr.com/en/articles/895896/ -f png --theme light --fullPage -o light.png
@@ -144,15 +147,30 @@ Returns a screenshot of the specified URL.
 ### Archive Endpoint
 
 ```
-GET /archive?url=<URL>&localImages=true
+GET /archive?url=<URL>&localImages=true&documentFormat=markdown
 ```
 
-Returns a ZIP archive containing `article.md` and optionally an `images/` directory.
+Returns a ZIP archive containing either `article.md` or `article.html` and asset directories (`images/`, `css/`).
 
-| Parameter     | Required | Description                              | Default |
-| ------------- | -------- | ---------------------------------------- | ------- |
-| `url`         | Yes      | URL to archive                           | -       |
-| `localImages` | No       | Download images locally into the archive | true    |
+| Parameter        | Required | Description                              | Default    |
+| ---------------- | -------- | ---------------------------------------- | ---------- |
+| `url`            | Yes      | URL to archive                           | -          |
+| `localImages`    | No       | Download images locally into the archive | true       |
+| `documentFormat` | No       | Document format: `markdown` or `html`    | `markdown` |
+
+**Archive structure** (with `localImages=true`):
+
+```
+archive.zip
+├── article.md        # or article.html when documentFormat=html
+├── images/
+│   ├── image-1.png
+│   ├── image-2.jpg
+│   └── ...
+└── css/              # only when documentFormat=html
+    ├── style-1.css
+    └── ...
+```
 
 ### PDF Endpoint
 
@@ -211,17 +229,18 @@ web-capture --serve [--port <port>]
 web-capture <url> [options]
 ```
 
-| Option          | Short | Description                                    | Default                                  |
-| --------------- | ----- | ---------------------------------------------- | ---------------------------------------- |
-| `--format`      | `-f`  | Output format (see below)                      | `html`                                   |
-| `--output`      | `-o`  | Output file path                               | stdout (text) or auto-generated (images) |
-| `--engine`      | `-e`  | Browser engine: `puppeteer`, `playwright`      | `puppeteer` (or BROWSER_ENGINE env)      |
-| `--theme`       | `-t`  | Color scheme: `light`, `dark`, `no-preference` | browser default                          |
-| `--width`       |       | Viewport width in pixels                       | 1280                                     |
-| `--height`      |       | Viewport height in pixels                      | 800                                      |
-| `--quality`     |       | JPEG quality 0-100                             | 80                                       |
-| `--fullPage`    |       | Capture full scrollable page                   | false                                    |
-| `--localImages` |       | Download images locally in archive mode        | true                                     |
+| Option             | Short | Description                                    | Default                                  |
+| ------------------ | ----- | ---------------------------------------------- | ---------------------------------------- |
+| `--format`         | `-f`  | Output format (see below)                      | `html`                                   |
+| `--output`         | `-o`  | Output file path                               | stdout (text) or auto-generated (images) |
+| `--engine`         | `-e`  | Browser engine: `puppeteer`, `playwright`      | `puppeteer` (or BROWSER_ENGINE env)      |
+| `--theme`          | `-t`  | Color scheme: `light`, `dark`, `no-preference` | browser default                          |
+| `--width`          |       | Viewport width in pixels                       | 1280                                     |
+| `--height`         |       | Viewport height in pixels                      | 800                                      |
+| `--quality`        |       | JPEG quality 0-100                             | 80                                       |
+| `--fullPage`       |       | Capture full scrollable page                   | false                                    |
+| `--localImages`    |       | Download images locally in archive mode        | true                                     |
+| `--documentFormat` |       | Document format in archive: `markdown`, `html` | `markdown`                               |
 
 **Supported formats:**
 
