@@ -37,12 +37,14 @@ const describeIfLive = SKIP_LIVE ? describe.skip : describe;
 jest.setTimeout(120000);
 
 // Helper: navigate to URL with retry and exponential backoff
+// Uses 'domcontentloaded' instead of 'networkidle0' because Habr pages have
+// persistent ad/tracking network activity that prevents networkidle0 from firing.
 async function navigateWithRetry(page, url) {
   await retry(
     async () => {
       await page.goto(url, {
-        waitUntil: 'networkidle0',
-        timeout: 30000,
+        waitUntil: 'domcontentloaded',
+        timeout: 60000,
       });
     },
     {
@@ -55,8 +57,8 @@ async function navigateWithRetry(page, url) {
       },
     }
   );
-  // Wait for dynamic content
-  await new Promise((r) => setTimeout(r, 2000));
+  // Wait for page content and images to load after DOM is ready
+  await new Promise((r) => setTimeout(r, 5000));
 }
 
 describe('Habr Article Download Tests', () => {

@@ -81,25 +81,26 @@ export async function createBrowser(engine = 'puppeteer', options = {}) {
 
   return {
     async newPage() {
-      let newPage;
-      if (engineType === 'playwright' && colorScheme) {
-        // For Playwright, set colorScheme at context level for reliability
-        const context = await browser.newContext({ colorScheme });
-        newPage = await context.newPage();
-      } else {
-        newPage = await browser.newPage();
-      }
+      const newPage = await browser.newPage();
       const adapted = pageAdapter(newPage);
 
-      // For Puppeteer, emulate color scheme via CDP
-      if (engineType === 'puppeteer' && colorScheme) {
-        try {
-          const client = await newPage.createCDPSession();
-          await client.send('Emulation.setEmulatedMedia', {
-            features: [{ name: 'prefers-color-scheme', value: colorScheme }],
-          });
-        } catch {
-          /* CDP not available in all environments */
+      // Emulate color scheme
+      if (colorScheme) {
+        if (engineType === 'puppeteer') {
+          try {
+            const client = await newPage.createCDPSession();
+            await client.send('Emulation.setEmulatedMedia', {
+              features: [{ name: 'prefers-color-scheme', value: colorScheme }],
+            });
+          } catch {
+            /* CDP not available in all environments */
+          }
+        } else if (engineType === 'playwright') {
+          try {
+            await newPage.emulateMedia({ colorScheme });
+          } catch {
+            /* emulateMedia not available in all environments */
+          }
         }
       }
 
