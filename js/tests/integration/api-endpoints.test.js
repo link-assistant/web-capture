@@ -5,6 +5,7 @@
  * Uses the Express app directly via supertest.
  */
 
+import { jest } from '@jest/globals';
 import request from 'supertest';
 import { app } from '../../src/index.js';
 

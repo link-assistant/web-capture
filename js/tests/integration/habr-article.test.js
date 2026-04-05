@@ -13,6 +13,7 @@
  * - Engine comparison
  */
 
+import { jest } from '@jest/globals';
 import { createBrowser } from '../../src/browser.js';
 import { fetchHtml, convertHtmlToMarkdown } from '../../src/lib.js';
 import { dismissPopups, scrollToLoadContent } from '../../src/popups.js';
