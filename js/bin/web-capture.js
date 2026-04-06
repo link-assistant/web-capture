@@ -255,7 +255,7 @@ async function captureUrl(url, options) {
         await new Promise((resolve) => setTimeout(resolve, 5000));
         await scrollToLoadContent(page);
         await dismissPopups(page);
-        const rawPage = page._page || page;
+        const rawPage = page.rawPage || page;
         const pdfBuffer = await rawPage.pdf({
           format: 'A4',
           printBackground: true,

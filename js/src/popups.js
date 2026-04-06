@@ -18,7 +18,7 @@
  */
 export async function dismissPopups(page) {
   // Get the underlying page object if wrapped in an adapter
-  const rawPage = page._page || page;
+  const rawPage = page.rawPage || page;
 
   // Handle Playwright dialog events (browser-level alerts/confirms)
   if (typeof rawPage.on === 'function') {
@@ -143,7 +143,7 @@ export async function dismissPopups(page) {
  * @param {number} options.passDelay - Delay between passes in ms (default: 1000)
  */
 export async function scrollToLoadContent(page, options = {}) {
-  const rawPage = page._page || page;
+  const rawPage = page.rawPage || page;
   const { passes = 2, stepDelay = 100, passDelay = 1000 } = options;
 
   for (let pass = 0; pass < passes; pass++) {

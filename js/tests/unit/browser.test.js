@@ -80,7 +80,7 @@ describe('Browser Abstraction Layer', () => {
       expect(page.goto).toBeDefined();
       expect(page.content).toBeDefined();
       expect(page.screenshot).toBeDefined();
-      expect(page._type).toBe('puppeteer');
+      expect(page.type).toBe('puppeteer');
       await browser.close();
     });
   });
@@ -101,7 +101,7 @@ describe('Browser Abstraction Layer', () => {
       expect(page.goto).toBeDefined();
       expect(page.content).toBeDefined();
       expect(page.screenshot).toBeDefined();
-      expect(page._type).toBe('playwright');
+      expect(page.type).toBe('playwright');
       await browser.close();
     });
   });

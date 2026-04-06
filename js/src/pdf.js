@@ -55,7 +55,7 @@ export async function pdfHandler(req, res) {
       }
 
       // Generate PDF - works with both Puppeteer and Playwright
-      const rawPage = page._page || page;
+      const rawPage = page.rawPage || page;
       const pdfBuffer = await rawPage.pdf({
         format: 'A4',
         printBackground: true,
