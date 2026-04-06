@@ -40,7 +40,9 @@ on:
         required: false
         type: string
 
-concurrency: ${{ github.workflow }}-${{ github.ref }}
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 defaults:
   run:
@@ -106,6 +108,7 @@ jobs:
   test:
     name: JS - Test (Node.js on ${{ matrix.os }})
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
     needs: [changeset-check]
     if: always() && (github.event_name == 'push' || needs.changeset-check.result == 'success')
     strategy:
@@ -132,11 +135,19 @@ jobs:
       - name: Run unit, integration, and e2e process tests
         run: npm test -- --testPathIgnorePatterns="docker.test.js"
 
+      - name: Run Habr article live integration tests
+        env:
+          HABR_INTEGRATION: 'true'
+        run: npm test -- --testPathPattern="habr-article" --testTimeout=120000
+        timeout-minutes: 15
+
       - name: Build Docker image for e2e tests
         run: docker compose build
+        timeout-minutes: 10
 
       - name: Run e2e Docker tests
         run: npm test -- tests/e2e/docker.test.js
+        timeout-minutes: 5
 
   # Release - only runs on main after tests pass (for push events)
   release:

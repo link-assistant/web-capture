@@ -5,15 +5,22 @@ import { markdownHandler } from './markdown.js';
 import { imageHandler } from './image.js';
 import { streamHandler } from './stream.js';
 import { fetchHandler } from './fetch.js';
+import { archiveHandler } from './archive.js';
+import { pdfHandler } from './pdf.js';
+import { docxHandler } from './docx.js';
 
 const app = express();
 const port = process.env.PORT || 3000;
 
+app.get('/health', (req, res) => res.json({ status: 'ok' }));
 app.get('/html', htmlHandler);
 app.get('/markdown', markdownHandler);
 app.get('/image', imageHandler);
 app.get('/stream', streamHandler);
 app.get('/fetch', fetchHandler);
+app.get('/archive', archiveHandler);
+app.get('/pdf', pdfHandler);
+app.get('/docx', docxHandler);
 
 // Start the server if this is the main module
 const isMainModule =

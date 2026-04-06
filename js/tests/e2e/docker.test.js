@@ -1,4 +1,6 @@
 import fetch from 'node-fetch';
+import http from 'http';
+import getPort from 'get-port';
 import { exec } from 'child_process';
 import { promisify } from 'util';
 
@@ -8,10 +10,18 @@ const PORT = 3000; // Use the same port as in docker-compose.yml
 const baseUrl = `http://localhost:${PORT}`;
 
 const timings = {};
+let mockServer;
+let mockUrl;
+
+const MOCK_HTML = `<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="utf-8"><title>Example Domain</title></head>
+<body><h1>Example Domain</h1><p>This domain is for use in illustrative examples.</p></body>
+</html>`;
 
 async function isServiceRunning() {
   try {
-    const res = await fetch(`${baseUrl}/html?url=https://example.com`);
+    const res = await fetch(`${baseUrl}/health`);
     return res.status === 200;
   } catch {
     return false;
@@ -20,6 +30,20 @@ async function isServiceRunning() {
 
 beforeAll(async () => {
   timings.start = Date.now();
+
+  // Start a local mock server to avoid depending on external network
+  const mockPort = await getPort();
+  mockServer = http.createServer((req, res) => {
+    res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+    res.end(MOCK_HTML);
+  });
+  await new Promise((resolve) =>
+    mockServer.listen(mockPort, '0.0.0.0', resolve)
+  );
+  // Use host.docker.internal or the host IP to make it reachable from Docker
+  // On Linux (CI), Docker containers can reach the host via 172.17.0.1
+  mockUrl = `http://172.17.0.1:${mockPort}`;
+
   console.log('Checking if Docker service is already running...');
   const alreadyRunning = await isServiceRunning();
   if (!alreadyRunning) {
@@ -44,7 +68,7 @@ beforeAll(async () => {
         const checkReady = async () => {
           try {
             console.log(`Checking if service is ready at ${baseUrl}...`);
-            const res = await fetch(`${baseUrl}/html?url=https://example.com`);
+            const res = await fetch(`${baseUrl}/health`);
             if (res.status === 200) {
               console.log('Service is ready!');
               clearTimeout(timeout);
@@ -79,11 +103,24 @@ beforeAll(async () => {
   }
 }, 30000); // Reduced timeout for beforeAll
 
+afterAll(async () => {
+  if (mockServer) {
+    mockServer.close();
+  }
+  // Stop Docker containers
+  try {
+    await execAsync('docker compose down');
+  } catch {
+    // Ignore errors during cleanup
+  }
+});
+
 describe('E2E (Docker): Web Capture Microservice', () => {
   it('should return HTML from /html endpoint', async () => {
     const htmlStart = Date.now();
-    const url = 'https://example.com';
-    const res = await fetch(`${baseUrl}/html?url=${encodeURIComponent(url)}`);
+    const res = await fetch(
+      `${baseUrl}/html?url=${encodeURIComponent(mockUrl)}`
+    );
     expect(res.status).toBe(200);
     const text = await res.text();
     expect(text).toMatch(/<html/i);
@@ -93,9 +130,8 @@ describe('E2E (Docker): Web Capture Microservice', () => {
 
   it('should return Markdown from /markdown endpoint', async () => {
     const mdStart = Date.now();
-    const url = 'https://example.com';
     const res = await fetch(
-      `${baseUrl}/markdown?url=${encodeURIComponent(url)}`
+      `${baseUrl}/markdown?url=${encodeURIComponent(mockUrl)}`
     );
     expect(res.status).toBe(200);
     const text = await res.text();
@@ -106,8 +142,9 @@ describe('E2E (Docker): Web Capture Microservice', () => {
 
   it('should return PNG from /image endpoint', async () => {
     const pngStart = Date.now();
-    const url = 'https://example.com';
-    const res = await fetch(`${baseUrl}/image?url=${encodeURIComponent(url)}`);
+    const res = await fetch(
+      `${baseUrl}/image?url=${encodeURIComponent(mockUrl)}`
+    );
     expect(res.status).toBe(200);
     expect(res.headers.get('content-type')).toMatch(/^image\/png/);
     const buf = Buffer.from(await res.arrayBuffer());
@@ -123,8 +160,9 @@ describe('E2E (Docker): Web Capture Microservice', () => {
 
   it('should stream content from /stream endpoint', async () => {
     const startTime = Date.now();
-    const url = 'https://example.com';
-    const res = await fetch(`${baseUrl}/stream?url=${encodeURIComponent(url)}`);
+    const res = await fetch(
+      `${baseUrl}/stream?url=${encodeURIComponent(mockUrl)}`
+    );
     expect(res.status).toBe(200);
     // Get the response as text
     const text = await res.text();
@@ -136,8 +174,9 @@ describe('E2E (Docker): Web Capture Microservice', () => {
 
   it('should return content from /fetch endpoint', async () => {
     const startTime = Date.now();
-    const url = 'https://example.com';
-    const res = await fetch(`${baseUrl}/fetch?url=${encodeURIComponent(url)}`);
+    const res = await fetch(
+      `${baseUrl}/fetch?url=${encodeURIComponent(mockUrl)}`
+    );
     expect(res.status).toBe(200);
     const text = await res.text();
     expect(text).toMatch(/<html/i);

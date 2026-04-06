@@ -33,8 +33,15 @@ const SERVER_CHROME_ARGS = [
  * @property {Function} content - Get page HTML content
  * @property {Function} screenshot - Take screenshot
  * @property {Function} close - Close the page
- * @property {Object} _page - Original page object
- * @property {string} _type - Browser type
+ * @property {Object} rawPage - Underlying raw Playwright/Puppeteer page for extensibility.
+ *   Use this to access APIs not yet exposed by browser-commander (see issues below).
+ *   Pending browser-commander support:
+ *   - PDF generation: https://github.com/link-foundation/browser-commander/issues/35
+ *   - Color scheme emulation: https://github.com/link-foundation/browser-commander/issues/36
+ *   - Keyboard interaction: https://github.com/link-foundation/browser-commander/issues/37
+ *   - Dialog event handling: https://github.com/link-foundation/browser-commander/issues/38
+ *   - Official extensibility docs: https://github.com/link-foundation/browser-commander/issues/39
+ * @property {string} type - Browser type ('puppeteer' or 'playwright')
  */
 
 /**
@@ -42,6 +49,7 @@ const SERVER_CHROME_ARGS = [
  * Uses browser-commander's launchBrowser for both Puppeteer and Playwright
  * @param {string} engine - 'puppeteer' or 'playwright' (defaults to puppeteer)
  * @param {Object} options - Browser launch options
+ * @param {string} [options.colorScheme] - Color scheme: 'light', 'dark', or 'no-preference'
  * @returns {Promise<BrowserAdapter>}
  */
 export async function createBrowser(engine = 'puppeteer', options = {}) {
@@ -50,6 +58,8 @@ export async function createBrowser(engine = 'puppeteer', options = {}) {
     normalizedEngine === 'playwright' || normalizedEngine === 'pw'
       ? 'playwright'
       : 'puppeteer';
+
+  const { colorScheme, ...launchOpts } = options;
 
   // Generate unique userDataDir for this session to avoid conflicts
   const userDataDir = path.join(
@@ -65,7 +75,7 @@ export async function createBrowser(engine = 'puppeteer', options = {}) {
     headless: true,
     userDataDir,
     slowMo: 0, // Disable slowMo for server operations
-    ...options,
+    ...launchOpts,
   });
 
   // Close the initial page since we'll create new ones via newPage()
@@ -79,13 +89,35 @@ export async function createBrowser(engine = 'puppeteer', options = {}) {
   return {
     async newPage() {
       const newPage = await browser.newPage();
-      return pageAdapter(newPage);
+      const adapted = pageAdapter(newPage);
+
+      // Emulate color scheme
+      if (colorScheme) {
+        if (engineType === 'puppeteer') {
+          try {
+            const client = await newPage.createCDPSession();
+            await client.send('Emulation.setEmulatedMedia', {
+              features: [{ name: 'prefers-color-scheme', value: colorScheme }],
+            });
+          } catch {
+            /* CDP not available in all environments */
+          }
+        } else if (engineType === 'playwright') {
+          try {
+            await newPage.emulateMedia({ colorScheme });
+          } catch {
+            /* emulateMedia not available in all environments */
+          }
+        }
+      }
+
+      return adapted;
     },
     async close() {
       await browser.close();
     },
     type: engineType,
-    _browser: browser,
+    rawBrowser: browser,
   };
 }
 
@@ -117,8 +149,10 @@ function createPuppeteerPageAdapter(page) {
     async close() {
       await page.close();
     },
-    _page: page,
-    _type: 'puppeteer',
+    // rawPage: underlying Playwright/Puppeteer page for APIs not yet in browser-commander
+    // See: https://github.com/link-foundation/browser-commander/issues/39
+    rawPage: page,
+    type: 'puppeteer',
   };
 }
 
@@ -157,8 +191,10 @@ function createPlaywrightPageAdapter(page) {
     async close() {
       await page.close();
     },
-    _page: page,
-    _type: 'playwright',
+    // rawPage: underlying Playwright/Puppeteer page for APIs not yet in browser-commander
+    // See: https://github.com/link-foundation/browser-commander/issues/39
+    rawPage: page,
+    type: 'playwright',
   };
 }
 

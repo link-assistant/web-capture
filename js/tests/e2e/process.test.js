@@ -1,4 +1,5 @@
 import { spawn } from 'child_process';
+import http from 'http';
 import fetch from 'node-fetch';
 import getPort from 'get-port';
 import path from 'path';
@@ -6,8 +7,25 @@ import path from 'path';
 const WAIT_FOR_READY = 5000; // ms
 let serverProcess;
 let baseUrl;
+let mockServer;
+let mockUrl;
+
+const MOCK_HTML = `<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="utf-8"><title>Example Domain</title></head>
+<body><h1>Example Domain</h1><p>This domain is for use in illustrative examples.</p></body>
+</html>`;
 
 beforeAll(async () => {
+  // Start a local mock server to avoid depending on external network
+  const mockPort = await getPort();
+  mockServer = http.createServer((req, res) => {
+    res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+    res.end(MOCK_HTML);
+  });
+  await new Promise((resolve) => mockServer.listen(mockPort, resolve));
+  mockUrl = `http://localhost:${mockPort}`;
+
   const port = await getPort();
   baseUrl = `http://localhost:${port}`;
 
@@ -61,21 +79,24 @@ afterAll(() => {
   if (serverProcess) {
     serverProcess.kill();
   }
+  if (mockServer) {
+    mockServer.close();
+  }
 });
 
 describe('E2E: Web Capture Microservice', () => {
   it('should return HTML from /html endpoint', async () => {
-    const url = 'https://example.com';
-    const res = await fetch(`${baseUrl}/html?url=${encodeURIComponent(url)}`);
+    const res = await fetch(
+      `${baseUrl}/html?url=${encodeURIComponent(mockUrl)}`
+    );
     expect(res.status).toBe(200);
     const text = await res.text();
     expect(text).toMatch(/<html/i);
   });
 
   it('should return Markdown from /markdown endpoint', async () => {
-    const url = 'https://example.com';
     const res = await fetch(
-      `${baseUrl}/markdown?url=${encodeURIComponent(url)}`
+      `${baseUrl}/markdown?url=${encodeURIComponent(mockUrl)}`
     );
     expect(res.status).toBe(200);
     const text = await res.text();
@@ -83,8 +104,9 @@ describe('E2E: Web Capture Microservice', () => {
   });
 
   it('should return PNG from /image endpoint', async () => {
-    const url = 'https://example.com';
-    const res = await fetch(`${baseUrl}/image?url=${encodeURIComponent(url)}`);
+    const res = await fetch(
+      `${baseUrl}/image?url=${encodeURIComponent(mockUrl)}`
+    );
     expect(res.status).toBe(200);
     expect(res.headers.get('content-type')).toMatch(/^image\/png/);
     const buf = Buffer.from(await res.arrayBuffer());
@@ -97,8 +119,9 @@ describe('E2E: Web Capture Microservice', () => {
   }, 60000);
 
   it('should stream content from /stream endpoint', async () => {
-    const url = 'https://example.com';
-    const res = await fetch(`${baseUrl}/stream?url=${encodeURIComponent(url)}`);
+    const res = await fetch(
+      `${baseUrl}/stream?url=${encodeURIComponent(mockUrl)}`
+    );
     expect(res.status).toBe(200);
     // Get the response as text
     const text = await res.text();
@@ -107,8 +130,9 @@ describe('E2E: Web Capture Microservice', () => {
   }, 20000);
 
   it('should return content from /fetch endpoint', async () => {
-    const url = 'https://example.com';
-    const res = await fetch(`${baseUrl}/fetch?url=${encodeURIComponent(url)}`);
+    const res = await fetch(
+      `${baseUrl}/fetch?url=${encodeURIComponent(mockUrl)}`
+    );
     expect(res.status).toBe(200);
     const text = await res.text();
     expect(text).toMatch(/<html/i);

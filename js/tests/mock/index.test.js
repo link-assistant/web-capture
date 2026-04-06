@@ -157,9 +157,7 @@ describe('Web Capture Microservice', () => {
         0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a,
       ]);
       expect(response.body.slice(0, 8)).toEqual(pngSignature);
-      // Skipping strict buffer match: Puppeteer output is not deterministic
-      // expect(response.body.equals(mockBuffer)).toBe(true);
-    });
+    }, 60000);
 
     it('should return 400 when URL is missing', async () => {
       const response = await request(app).get('/image');
@@ -172,6 +170,10 @@ describe('Web Capture Microservice', () => {
   describe('GET /stream', () => {
     it('should stream content from the given URL', async () => {
       const testUrl = 'https://example.com';
+      const testHtml = '<html><body><h1>Streamed Page</h1></body></html>';
+      nock(testUrl).get('/').reply(200, testHtml, {
+        'content-type': 'text/html',
+      });
       const response = await request(app).get(`/stream?url=${testUrl}`);
       expect(response.status).toBe(200);
       expect(response.text).toMatch(/<html/i);

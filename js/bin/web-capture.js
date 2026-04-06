@@ -32,8 +32,46 @@ const config = makeConfig({
       .option('format', {
         alias: 'f',
         type: 'string',
-        description: 'Output format: html, markdown, md, image, png',
+        description:
+          'Output format: html, markdown, md, image, png, jpeg, pdf, docx, archive',
         default: 'html',
+      })
+      .option('theme', {
+        alias: 't',
+        type: 'string',
+        description:
+          'Color scheme for screenshots/PDF: light, dark, no-preference',
+      })
+      .option('width', {
+        type: 'number',
+        description: 'Viewport width in pixels (default: 1280)',
+        default: 1280,
+      })
+      .option('height', {
+        type: 'number',
+        description: 'Viewport height in pixels (default: 800)',
+        default: 800,
+      })
+      .option('quality', {
+        type: 'number',
+        description: 'JPEG quality 0-100 (default: 80, only for jpeg format)',
+        default: 80,
+      })
+      .option('fullPage', {
+        type: 'boolean',
+        description: 'Capture full scrollable page (default: false)',
+        default: false,
+      })
+      .option('localImages', {
+        type: 'boolean',
+        description: 'Download images locally in archive mode (default: true)',
+        default: true,
+      })
+      .option('documentFormat', {
+        type: 'string',
+        description:
+          'Document format in archive mode: markdown (default) or html',
+        default: 'markdown',
       })
       .option('output', {
         alias: 'o',
@@ -73,7 +111,7 @@ const config = makeConfig({
         'Capture screenshot using Playwright'
       )
       .epilogue(
-        'API Endpoints (in server mode):\n  GET /html?url=<URL>&engine=<ENGINE>       Get rendered HTML\n  GET /markdown?url=<URL>                   Get Markdown conversion\n  GET /image?url=<URL>&engine=<ENGINE>      Get PNG screenshot\n  GET /fetch?url=<URL>                      Proxy fetch\n  GET /stream?url=<URL>                     Streaming proxy'
+        'API Endpoints (in server mode):\n  GET /html?url=<URL>&engine=<ENGINE>           Get rendered HTML\n  GET /markdown?url=<URL>                       Get Markdown conversion\n  GET /image?url=<URL>&format=png|jpeg&theme=light|dark  Screenshot\n  GET /archive?url=<URL>&localImages=true&documentFormat=markdown|html  ZIP archive\n  GET /pdf?url=<URL>&theme=light|dark           PDF with embedded images\n  GET /docx?url=<URL>                           DOCX with embedded images\n  GET /fetch?url=<URL>                          Proxy fetch\n  GET /stream?url=<URL>                         Streaming proxy'
       )
       .strict(),
   lenv: {
@@ -93,7 +131,12 @@ async function startServer(port) {
       console.log('Available endpoints:');
       console.log(`  GET /html?url=<URL>       - Render page as HTML`);
       console.log(`  GET /markdown?url=<URL>   - Convert page to Markdown`);
-      console.log(`  GET /image?url=<URL>      - Screenshot page as PNG`);
+      console.log(`  GET /image?url=<URL>      - Screenshot (PNG/JPEG)`);
+      console.log(
+        `  GET /archive?url=<URL>    - ZIP archive with markdown + images`
+      );
+      console.log(`  GET /pdf?url=<URL>        - PDF with embedded images`);
+      console.log(`  GET /docx?url=<URL>       - DOCX with embedded images`);
       console.log(`  GET /fetch?url=<URL>      - Proxy fetch content`);
       console.log(`  GET /stream?url=<URL>     - Stream content`);
       console.log('');
@@ -123,7 +166,19 @@ async function startServer(port) {
 }
 
 async function captureUrl(url, options) {
-  const { format, output, engine } = options;
+  const {
+    format,
+    output,
+    engine,
+    theme,
+    width,
+    height,
+    quality,
+    fullPage,
+    // localImages is used by archive format
+    // eslint-disable-next-line no-unused-vars
+    localImages,
+  } = options;
 
   // Ensure URL is absolute
   let absoluteUrl = url;
@@ -151,7 +206,207 @@ async function captureUrl(url, options) {
   const normalizedFormat = format.toLowerCase();
 
   try {
-    if (normalizedFormat === 'markdown' || normalizedFormat === 'md') {
+    if (normalizedFormat === 'jpeg') {
+      // JPEG screenshot
+      const { createBrowser } = await import('../src/browser.js');
+      const { dismissPopups, scrollToLoadContent } =
+        await import('../src/popups.js');
+      const browserOpts = theme ? { colorScheme: theme } : {};
+      const browser = await createBrowser(engine, browserOpts);
+      try {
+        const page = await browser.newPage();
+        await page.setViewport({ width, height });
+        await page.goto(absoluteUrl, {
+          waitUntil: 'networkidle0',
+          timeout: 30000,
+        });
+        await new Promise((resolve) => setTimeout(resolve, 5000));
+        if (fullPage) {
+          await scrollToLoadContent(page);
+        }
+        await dismissPopups(page);
+        const buffer = await page.screenshot({
+          type: 'jpeg',
+          quality,
+          fullPage,
+        });
+        const outPath =
+          output ||
+          `${new URL(absoluteUrl).hostname.replace(/\./g, '_')}_${Date.now()}.jpg`;
+        fs.writeFileSync(outPath, buffer);
+        console.error(`JPEG screenshot saved to: ${outPath}`);
+      } finally {
+        await browser.close();
+      }
+    } else if (normalizedFormat === 'pdf') {
+      // PDF export
+      const { createBrowser } = await import('../src/browser.js');
+      const { dismissPopups, scrollToLoadContent } =
+        await import('../src/popups.js');
+      const browserOpts = theme ? { colorScheme: theme } : {};
+      const browser = await createBrowser(engine, browserOpts);
+      try {
+        const page = await browser.newPage();
+        await page.setViewport({ width, height });
+        await page.goto(absoluteUrl, {
+          waitUntil: 'networkidle0',
+          timeout: 30000,
+        });
+        await new Promise((resolve) => setTimeout(resolve, 5000));
+        await scrollToLoadContent(page);
+        await dismissPopups(page);
+        const rawPage = page.rawPage || page;
+        const pdfBuffer = await rawPage.pdf({
+          format: 'A4',
+          printBackground: true,
+          margin: { top: '1cm', right: '1cm', bottom: '1cm', left: '1cm' },
+        });
+        const outPath = output || 'page.pdf';
+        fs.writeFileSync(outPath, pdfBuffer);
+        console.error(`PDF saved to: ${outPath}`);
+      } finally {
+        await browser.close();
+      }
+    } else if (normalizedFormat === 'docx') {
+      // DOCX export – delegate to the docx handler logic
+      const { fetchHtml, convertRelativeUrls } = await import('../src/lib.js');
+      const cheerio = await import('cheerio');
+      // eslint-disable-next-line no-unused-vars
+      const { Document, Packer, Paragraph, TextRun, HeadingLevel } =
+        await import('docx');
+      const html = await fetchHtml(absoluteUrl);
+      const absHtml = convertRelativeUrls(html, absoluteUrl);
+      const $ = cheerio.load(absHtml);
+      $('style, script, noscript, nav, footer, header').remove();
+      const children = [];
+      const titleText =
+        $('h1').first().text().trim() || $('title').text().trim();
+      if (titleText) {
+        children.push(
+          new Paragraph({ text: titleText, heading: HeadingLevel.TITLE })
+        );
+      }
+      const body = $('article').length ? $('article') : $('body');
+      for (const el of body.children().toArray()) {
+        const text = $(el).text().trim();
+        if (text) {
+          children.push(new Paragraph({ text }));
+        }
+      }
+      if (children.length === 0) {
+        children.push(new Paragraph({ text: 'No content extracted.' }));
+      }
+      const doc = new Document({ sections: [{ children }] });
+      const buffer = await Packer.toBuffer(doc);
+      const outPath = output || 'page.docx';
+      fs.writeFileSync(outPath, buffer);
+      console.error(`DOCX saved to: ${outPath}`);
+    } else if (normalizedFormat === 'archive' || normalizedFormat === 'zip') {
+      // ZIP archive
+      const { default: archiver } = await import('archiver');
+      const { fetchHtml, convertHtmlToMarkdown, convertRelativeUrls } =
+        await import('../src/lib.js');
+      const { retry } = await import('../src/retry.js');
+      const cheerio = await import('cheerio');
+      const nodeFetch = await import('node-fetch');
+
+      const html = await retry(() => fetchHtml(absoluteUrl), {
+        retries: 3,
+        baseDelay: 1000,
+        onRetry: (err, attempt) => {
+          console.error(`Retry ${attempt} fetching page: ${err.message}`);
+        },
+      });
+
+      const docFormat = options.documentFormat === 'html' ? 'html' : 'markdown';
+      const outPath =
+        output ||
+        `${new URL(absoluteUrl).hostname.replace(/\./g, '-')}-archive.zip`;
+      const outStream = fs.createWriteStream(outPath);
+      const archive = archiver.default
+        ? archiver.default('zip', { zlib: { level: 9 } })
+        : archiver('zip', { zlib: { level: 9 } });
+      archive.pipe(outStream);
+
+      // Collect images
+      const $ = cheerio.load(html);
+      const images = [];
+      $('img').each(function () {
+        const src = $(this).attr('src');
+        if (src && !src.startsWith('data:') && !src.startsWith('blob:')) {
+          try {
+            images.push(new URL(src, absoluteUrl).href);
+          } catch {
+            /* skip */
+          }
+        }
+      });
+      const uniqueImages = [...new Set(images)];
+
+      // Build image map for local downloads
+      const imageMap = new Map();
+      if (options.localImages && uniqueImages.length > 0) {
+        let idx = 1;
+        for (const imgUrl of uniqueImages) {
+          const ext = imgUrl.match(/\.(jpe?g|gif|webp|svg|png)/i)?.[1] || 'png';
+          imageMap.set(imgUrl, `images/image-${idx}.${ext}`);
+          idx++;
+        }
+      }
+
+      if (docFormat === 'html') {
+        const outputHtml = convertRelativeUrls(html, absoluteUrl);
+        const $out = cheerio.load(outputHtml);
+        $out('script, noscript').remove();
+        if (imageMap.size > 0) {
+          $out('img').each(function () {
+            const src = $out(this).attr('src');
+            if (src) {
+              try {
+                const resolved = new URL(src, absoluteUrl).href;
+                if (imageMap.has(resolved)) {
+                  $out(this).attr('src', imageMap.get(resolved));
+                }
+              } catch {
+                /* skip */
+              }
+            }
+          });
+        }
+        archive.append($out.html(), { name: 'article.html' });
+      } else {
+        let markdown = convertHtmlToMarkdown(html, absoluteUrl);
+        if (imageMap.size > 0) {
+          for (const [remoteUrl, localPath] of imageMap) {
+            markdown = markdown.split(remoteUrl).join(localPath);
+          }
+        }
+        archive.append(markdown, { name: 'article.md' });
+      }
+
+      // Download images
+      if (imageMap.size > 0) {
+        for (const [imgUrl, localPath] of imageMap) {
+          try {
+            const fetchFn = nodeFetch.default || nodeFetch;
+            const resp = await retry(() => fetchFn(imgUrl), {
+              retries: 2,
+              baseDelay: 500,
+            });
+            if (resp.ok) {
+              const buffer = await resp.buffer();
+              archive.append(buffer, { name: localPath });
+            }
+          } catch {
+            /* skip failed image downloads */
+          }
+        }
+      }
+
+      await archive.finalize();
+      await new Promise((resolve) => outStream.on('close', resolve));
+      console.error(`Archive saved to: ${outPath}`);
+    } else if (normalizedFormat === 'markdown' || normalizedFormat === 'md') {
       // Markdown format
       const html = await fetchHtml(absoluteUrl);
       const markdown = convertHtmlToMarkdown(html, absoluteUrl);
@@ -270,6 +525,13 @@ async function main() {
       format: config.format,
       output: config.output,
       engine: config.engine,
+      theme: config.theme,
+      width: config.width,
+      height: config.height,
+      quality: config.quality,
+      fullPage: config.fullPage,
+      localImages: config.localImages,
+      documentFormat: config.documentFormat,
     });
   } else {
     // No arguments - show error
