@@ -11,28 +11,29 @@
  */
 
 /**
- * Close any popup overlays/modals on a Playwright or Puppeteer page.
+ * Close any popup overlays/modals on a page adapter (from browser.js).
  * Should be called after page content has loaded and before taking screenshots.
  *
- * @param {Object} page - A PageAdapter (from browser.js) or raw Playwright/Puppeteer page
+ * Uses browser-commander APIs:
+ * - page.onDialog()   – dismiss browser-level alert/confirm dialogs (v0.7.0+)
+ * - page.keyboard     – press Escape to dismiss remaining popups (v0.7.0+)
+ * - page.evaluate()   – run JS in the browser context to click close buttons
+ *
+ * @param {Object} page - A PageAdapter from browser.js
  */
 export async function dismissPopups(page) {
-  // Get the underlying page object if wrapped in an adapter
-  const rawPage = page.rawPage || page;
-
-  // Handle Playwright dialog events (browser-level alerts/confirms)
-  if (typeof rawPage.on === 'function') {
-    rawPage.on('dialog', async (dialog) => {
-      try {
-        await dialog.dismiss();
-      } catch {
-        /* ignore */
-      }
-    });
-  }
+  // Handle browser-level dialog events (alert, confirm, prompt) using
+  // browser-commander's dialog API (v0.7.0+)
+  page.onDialog(async (dialog) => {
+    try {
+      await dialog.dismiss();
+    } catch {
+      /* ignore */
+    }
+  });
 
   // Try to click the Google Funding Choices "Consent" button first
-  const fcConsentClicked = await rawPage.evaluate(() => {
+  const fcConsentClicked = await page.evaluate(() => {
     const consentBtn = document.querySelector('.fc-cta-consent');
     if (consentBtn) {
       try {
@@ -46,11 +47,11 @@ export async function dismissPopups(page) {
   });
 
   if (fcConsentClicked) {
-    await sleep(rawPage, 1000);
+    await sleep(page, 1000);
   }
 
   // Click all known close/dismiss buttons and remove overlay elements
-  await rawPage.evaluate(() => {
+  await page.evaluate(() => {
     const closeSelectors = [
       // Google Funding Choices (FC) consent dialog
       '.fc-cta-consent',
@@ -119,14 +120,12 @@ export async function dismissPopups(page) {
     }
   });
 
-  await sleep(rawPage, 500);
+  await sleep(page, 500);
 
-  // Press Escape to dismiss remaining popups
+  // Press Escape to dismiss remaining popups using browser-commander's keyboard API (v0.7.0+)
   try {
-    if (rawPage.keyboard) {
-      await rawPage.keyboard.press('Escape');
-      await sleep(rawPage, 300);
-    }
+    await page.keyboard.press('Escape');
+    await sleep(page, 300);
   } catch {
     /* ignore */
   }
@@ -136,18 +135,17 @@ export async function dismissPopups(page) {
  * Scroll through the page to trigger lazy-loaded content.
  * Makes multiple passes for media-heavy pages.
  *
- * @param {Object} page - Page object (raw or adapter)
+ * @param {Object} page - PageAdapter from browser.js
  * @param {Object} options
  * @param {number} options.passes - Number of scroll passes (default: 2)
  * @param {number} options.stepDelay - Delay between scroll steps in ms (default: 100)
  * @param {number} options.passDelay - Delay between passes in ms (default: 1000)
  */
 export async function scrollToLoadContent(page, options = {}) {
-  const rawPage = page.rawPage || page;
   const { passes = 2, stepDelay = 100, passDelay = 1000 } = options;
 
   for (let pass = 0; pass < passes; pass++) {
-    await rawPage.evaluate(
+    await page.evaluate(
       async ({ delay }) => {
         const scrollHeight = document.documentElement.scrollHeight;
         const viewportHeight = window.innerHeight;
@@ -160,18 +158,14 @@ export async function scrollToLoadContent(page, options = {}) {
       },
       { delay: stepDelay }
     );
-    await sleep(rawPage, passDelay);
+    await sleep(page, passDelay);
   }
 
   // Extra wait for images to finish loading
-  await sleep(rawPage, 2000);
+  await sleep(page, 2000);
 }
 
-/** Portable sleep that works with both Playwright and Puppeteer pages */
-async function sleep(page, ms) {
-  if (typeof page.waitForTimeout === 'function') {
-    await page.waitForTimeout(ms);
-  } else {
-    await new Promise((resolve) => setTimeout(resolve, ms));
-  }
+/** Portable sleep using standard Promise-based timeout */
+async function sleep(_page, ms) {
+  await new Promise((resolve) => setTimeout(resolve, ms));
 }

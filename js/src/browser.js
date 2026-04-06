@@ -1,7 +1,11 @@
 // Browser abstraction layer using browser-commander for all browser operations
 // See: https://github.com/link-foundation/browser-commander
 
-import { launchBrowser } from 'browser-commander';
+import {
+  launchBrowser,
+  makeBrowserCommander,
+  emulateMedia,
+} from 'browser-commander';
 import os from 'os';
 import path from 'path';
 
@@ -16,15 +20,18 @@ const SERVER_CHROME_ARGS = [
 ];
 
 /**
- * Unified browser interface that works with both Puppeteer and Playwright
- * @typedef {Object} BrowserAdapter
- * @property {Function} newPage - Create a new page
- * @property {Function} close - Close the browser
- * @property {string} type - Browser type ('puppeteer' or 'playwright')
- */
-
-/**
- * Unified page interface
+ * Unified page interface wrapping browser-commander's makeBrowserCommander.
+ *
+ * Exposes:
+ * - setExtraHTTPHeaders / setUserAgent / setViewport / goto / content / screenshot / close
+ *   (via the underlying raw page for cross-engine compatibility)
+ * - commander.pdf()           – PDF generation (browser-commander v0.8.0)
+ * - commander.emulateMedia()  – Color scheme emulation (browser-commander v0.7.0)
+ * - commander.keyboard        – Keyboard interaction (browser-commander v0.7.0)
+ * - commander.onDialog()      – Dialog event handling (browser-commander v0.7.0)
+ * - commander.evaluate()      – Page evaluation (browser-commander)
+ * All other browser-commander APIs are available on the returned commander object.
+ *
  * @typedef {Object} PageAdapter
  * @property {Function} setExtraHTTPHeaders - Set HTTP headers
  * @property {Function} setUserAgent - Set user agent
@@ -33,24 +40,22 @@ const SERVER_CHROME_ARGS = [
  * @property {Function} content - Get page HTML content
  * @property {Function} screenshot - Take screenshot
  * @property {Function} close - Close the page
- * @property {Object} rawPage - Underlying raw Playwright/Puppeteer page for extensibility.
- *   Use this to access APIs not yet exposed by browser-commander (see issues below).
- *   Pending browser-commander support:
- *   - PDF generation: https://github.com/link-foundation/browser-commander/issues/35
- *   - Color scheme emulation: https://github.com/link-foundation/browser-commander/issues/36
- *   - Keyboard interaction: https://github.com/link-foundation/browser-commander/issues/37
- *   - Dialog event handling: https://github.com/link-foundation/browser-commander/issues/38
- *   - Official extensibility docs: https://github.com/link-foundation/browser-commander/issues/39
+ * @property {Function} pdf - Generate PDF (browser-commander v0.8.0)
+ * @property {Function} emulateMedia - Color scheme emulation (browser-commander v0.7.0)
+ * @property {Object} keyboard - Keyboard interaction (browser-commander v0.7.0)
+ * @property {Function} onDialog - Dialog event handling (browser-commander v0.7.0)
+ * @property {Function} evaluate - Page evaluation
  * @property {string} type - Browser type ('puppeteer' or 'playwright')
  */
 
 /**
- * Create a browser instance using the specified engine
- * Uses browser-commander's launchBrowser for both Puppeteer and Playwright
+ * Create a browser instance using the specified engine.
+ * Uses browser-commander's launchBrowser + makeBrowserCommander facade.
+ *
  * @param {string} engine - 'puppeteer' or 'playwright' (defaults to puppeteer)
  * @param {Object} options - Browser launch options
  * @param {string} [options.colorScheme] - Color scheme: 'light', 'dark', or 'no-preference'
- * @returns {Promise<BrowserAdapter>}
+ * @returns {Promise<Object>} - Browser handle with newPage() and close()
  */
 export async function createBrowser(engine = 'puppeteer', options = {}) {
   const normalizedEngine = engine.toLowerCase();
@@ -68,50 +73,42 @@ export async function createBrowser(engine = 'puppeteer', options = {}) {
   );
 
   // Use browser-commander's launchBrowser with server-specific args
-  // Default to headless for server environments
-  const { browser, page } = await launchBrowser({
+  const { browser, page: initialPage } = await launchBrowser({
     engine: engineType,
     args: SERVER_CHROME_ARGS,
     headless: true,
     userDataDir,
-    slowMo: 0, // Disable slowMo for server operations
+    slowMo: 0,
     ...launchOpts,
   });
 
   // Close the initial page since we'll create new ones via newPage()
-  await page.close();
-
-  const pageAdapter =
-    engineType === 'playwright'
-      ? createPlaywrightPageAdapter
-      : createPuppeteerPageAdapter;
+  await initialPage.close();
 
   return {
     async newPage() {
-      const newPage = await browser.newPage();
-      const adapted = pageAdapter(newPage);
+      const rawPage = await browser.newPage();
 
-      // Emulate color scheme
+      // Apply color scheme emulation using browser-commander's unified API (v0.7.0+)
       if (colorScheme) {
-        if (engineType === 'puppeteer') {
-          try {
-            const client = await newPage.createCDPSession();
-            await client.send('Emulation.setEmulatedMedia', {
-              features: [{ name: 'prefers-color-scheme', value: colorScheme }],
-            });
-          } catch {
-            /* CDP not available in all environments */
-          }
-        } else if (engineType === 'playwright') {
-          try {
-            await newPage.emulateMedia({ colorScheme });
-          } catch {
-            /* emulateMedia not available in all environments */
-          }
+        try {
+          await emulateMedia({
+            page: rawPage,
+            engine: engineType,
+            colorScheme,
+          });
+        } catch {
+          /* emulateMedia not available in all environments */
         }
       }
 
-      return adapted;
+      // Wrap with the full browser-commander facade for unified API access
+      const commander = makeBrowserCommander({ page: rawPage });
+
+      // Build a unified page adapter that exposes both:
+      // 1. The familiar cross-engine adapter interface (setExtraHTTPHeaders, goto, etc.)
+      // 2. All browser-commander v0.7.0+ APIs (pdf, emulateMedia, keyboard, onDialog, evaluate)
+      return createPageAdapter(rawPage, commander, engineType);
     },
     async close() {
       await browser.close();
@@ -122,79 +119,98 @@ export async function createBrowser(engine = 'puppeteer', options = {}) {
 }
 
 /**
- * Create a page adapter for Puppeteer
- * @param {Object} page - Puppeteer page object
+ * Create a unified page adapter from a raw page and its browser-commander facade.
+ * Provides a stable cross-engine interface plus all new browser-commander APIs.
+ *
+ * @param {Object} rawPage - Raw Playwright or Puppeteer page
+ * @param {Object} commander - browser-commander facade from makeBrowserCommander
+ * @param {string} engineType - 'puppeteer' or 'playwright'
  * @returns {PageAdapter}
  */
-function createPuppeteerPageAdapter(page) {
+function createPageAdapter(rawPage, commander, engineType) {
   return {
-    async setExtraHTTPHeaders(headers) {
-      await page.setExtraHTTPHeaders(headers);
-    },
-    async setUserAgent(userAgent) {
-      await page.setUserAgent(userAgent);
-    },
-    async setViewport(viewport) {
-      await page.setViewport(viewport);
-    },
-    async goto(url, options = {}) {
-      await page.goto(url, options);
-    },
-    async content() {
-      return await page.content();
-    },
-    async screenshot(options = {}) {
-      return await page.screenshot(options);
-    },
-    async close() {
-      await page.close();
-    },
-    // rawPage: underlying Playwright/Puppeteer page for APIs not yet in browser-commander
-    // See: https://github.com/link-foundation/browser-commander/issues/39
-    rawPage: page,
-    type: 'puppeteer',
-  };
-}
+    // --- Cross-engine adapter methods (stable interface) ---
 
-/**
- * Create a page adapter for Playwright
- * @param {Object} page - Playwright page object
- * @returns {PageAdapter}
- */
-function createPlaywrightPageAdapter(page) {
-  return {
     async setExtraHTTPHeaders(headers) {
-      await page.setExtraHTTPHeaders(headers);
+      await rawPage.setExtraHTTPHeaders(headers);
     },
     async setUserAgent(userAgent) {
-      // Playwright doesn't have page.setUserAgent, use extraHTTPHeaders instead
-      await page.setExtraHTTPHeaders({ 'User-Agent': userAgent });
+      if (engineType === 'playwright') {
+        // Playwright doesn't have page.setUserAgent, use extraHTTPHeaders instead
+        await rawPage.setExtraHTTPHeaders({ 'User-Agent': userAgent });
+      } else {
+        await rawPage.setUserAgent(userAgent);
+      }
     },
     async setViewport(viewport) {
-      // Playwright uses setViewportSize instead of setViewport
-      await page.setViewportSize(viewport);
+      if (engineType === 'playwright') {
+        // Playwright uses setViewportSize instead of setViewport
+        await rawPage.setViewportSize(viewport);
+      } else {
+        await rawPage.setViewport(viewport);
+      }
     },
     async goto(url, options = {}) {
-      // Convert Puppeteer waitUntil options to Playwright equivalents
-      const playwrightOptions = { ...options };
-      if (playwrightOptions.waitUntil === 'networkidle0') {
-        playwrightOptions.waitUntil = 'networkidle';
+      if (engineType === 'playwright') {
+        // Convert Puppeteer waitUntil options to Playwright equivalents
+        const playwrightOptions = { ...options };
+        if (playwrightOptions.waitUntil === 'networkidle0') {
+          playwrightOptions.waitUntil = 'networkidle';
+        }
+        await rawPage.goto(url, playwrightOptions);
+      } else {
+        await rawPage.goto(url, options);
       }
-      await page.goto(url, playwrightOptions);
     },
     async content() {
-      return await page.content();
+      return await rawPage.content();
     },
     async screenshot(options = {}) {
-      return await page.screenshot(options);
+      return await rawPage.screenshot(options);
     },
     async close() {
-      await page.close();
+      await commander.destroy();
+      await rawPage.close();
     },
-    // rawPage: underlying Playwright/Puppeteer page for APIs not yet in browser-commander
-    // See: https://github.com/link-foundation/browser-commander/issues/39
-    rawPage: page,
-    type: 'playwright',
+
+    // --- browser-commander v0.8.0+: PDF generation ---
+    // Usage: await page.pdf({ pdfOptions: { format: 'A4', printBackground: true } })
+    async pdf(opts = {}) {
+      return await commander.pdf(opts);
+    },
+
+    // --- browser-commander v0.7.0+: Color scheme emulation ---
+    // Usage: await page.emulateMedia({ colorScheme: 'dark' })
+    async emulateMedia(opts = {}) {
+      return await commander.emulateMedia(opts);
+    },
+
+    // --- browser-commander v0.7.0+: Keyboard interaction ---
+    // Usage: await page.keyboard.press('Escape')
+    get keyboard() {
+      return commander.keyboard;
+    },
+
+    // --- browser-commander v0.7.0+: Dialog event handling ---
+    // Usage: page.onDialog(async (dialog) => { await dialog.dismiss(); })
+    onDialog(handler) {
+      return commander.onDialog(handler);
+    },
+    offDialog(handler) {
+      return commander.offDialog(handler);
+    },
+    clearDialogHandlers() {
+      return commander.clearDialogHandlers();
+    },
+
+    // --- browser-commander: Page evaluation ---
+    // Usage: await page.evaluate(() => window.scrollTo(0, 0))
+    async evaluate(fn, ...args) {
+      return await commander.evaluate({ fn, args });
+    },
+
+    // Engine type identifier
+    type: engineType,
   };
 }
 
