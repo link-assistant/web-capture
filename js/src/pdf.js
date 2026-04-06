@@ -54,12 +54,13 @@ export async function pdfHandler(req, res) {
         await dismissPopups(page);
       }
 
-      // Generate PDF - works with both Puppeteer and Playwright
-      const rawPage = page.rawPage || page;
-      const pdfBuffer = await rawPage.pdf({
-        format: 'A4',
-        printBackground: true,
-        margin: { top: '1cm', right: '1cm', bottom: '1cm', left: '1cm' },
+      // Generate PDF using browser-commander's unified pdf() API (v0.8.0+)
+      const pdfBuffer = await page.pdf({
+        pdfOptions: {
+          format: 'A4',
+          printBackground: true,
+          margin: { top: '1cm', right: '1cm', bottom: '1cm', left: '1cm' },
+        },
       });
 
       res.set('Content-Type', 'application/pdf');

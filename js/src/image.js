@@ -66,10 +66,9 @@ export async function imageHandler(req, res) {
 
       if (shouldDismissPopups) {
         await dismissPopups(page);
-        // Scroll back to top after dismissing popups
-        const rawPage = page.rawPage || page;
+        // Scroll back to top after dismissing popups using browser-commander's evaluate API
         // eslint-disable-next-line no-undef
-        await rawPage.evaluate(() => window.scrollTo(0, 0));
+        await page.evaluate(() => window.scrollTo(0, 0));
         await new Promise((resolve) => setTimeout(resolve, 500));
       }
 

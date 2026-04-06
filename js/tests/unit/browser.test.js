@@ -132,5 +132,41 @@ describe('Browser Abstraction Layer', () => {
       await puppeteerBrowser.close();
       await playwrightBrowser.close();
     });
+
+    it('both adapters expose browser-commander v0.7.0+ APIs', async () => {
+      const puppeteerBrowser = await createBrowser('puppeteer');
+      const playwrightBrowser = await createBrowser('playwright');
+
+      const puppeteerPage = await puppeteerBrowser.newPage();
+      const playwrightPage = await playwrightBrowser.newPage();
+
+      // browser-commander v0.7.0: keyboard interaction
+      expect(puppeteerPage.keyboard).toBeDefined();
+      expect(puppeteerPage.keyboard.press).toBeDefined();
+      expect(puppeteerPage.keyboard.type).toBeDefined();
+      expect(playwrightPage.keyboard).toBeDefined();
+      expect(playwrightPage.keyboard.press).toBeDefined();
+
+      // browser-commander v0.7.0: dialog handling
+      expect(puppeteerPage.onDialog).toBeDefined();
+      expect(puppeteerPage.offDialog).toBeDefined();
+      expect(puppeteerPage.clearDialogHandlers).toBeDefined();
+      expect(playwrightPage.onDialog).toBeDefined();
+
+      // browser-commander v0.7.0: media emulation
+      expect(puppeteerPage.emulateMedia).toBeDefined();
+      expect(playwrightPage.emulateMedia).toBeDefined();
+
+      // browser-commander v0.8.0: PDF generation
+      expect(puppeteerPage.pdf).toBeDefined();
+      expect(playwrightPage.pdf).toBeDefined();
+
+      // browser-commander: evaluate
+      expect(puppeteerPage.evaluate).toBeDefined();
+      expect(playwrightPage.evaluate).toBeDefined();
+
+      await puppeteerBrowser.close();
+      await playwrightBrowser.close();
+    });
   });
 });
