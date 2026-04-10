@@ -164,7 +164,7 @@ jobs:
         run: node ../scripts/rust-publish-crate.mjs
 
       - name: Create GitHub Release
-        if: steps.version_check.outputs.should_release == 'true'
+        if: steps.publish.outputs.published == 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: node ../scripts/rust-create-github-release.mjs --release-version "${{ steps.version_check.outputs.version }}" --repository "${{ github.repository }}" --commit-sha "${{ github.sha }}"
