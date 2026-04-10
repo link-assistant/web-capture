@@ -8,6 +8,9 @@ import { fetchHandler } from './fetch.js';
 import { archiveHandler } from './archive.js';
 import { pdfHandler } from './pdf.js';
 import { docxHandler } from './docx.js';
+import { animationHandler } from './animation.js';
+import { figuresHandler } from './figures.js';
+import { themedImageHandler } from './themed-image.js';
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -21,6 +24,9 @@ app.get('/fetch', fetchHandler);
 app.get('/archive', archiveHandler);
 app.get('/pdf', pdfHandler);
 app.get('/docx', docxHandler);
+app.get('/animation', animationHandler);
+app.get('/figures', figuresHandler);
+app.get('/themed-image', themedImageHandler);
 
 // Start the server if this is the main module
 const isMainModule =

@@ -6,6 +6,9 @@ import TurndownService from 'turndown';
 import iconv from 'iconv-lite';
 import { URL } from 'url';
 import turndownPluginGfm from 'turndown-plugin-gfm';
+import { isFormulaImage, isMathElement, extractFormula } from './latex.js';
+import { extractMetadata } from './metadata.js';
+import { postProcessMarkdown } from './postprocess.js';
 
 export async function fetchHtml(url) {
   if (!url) {
@@ -285,6 +288,225 @@ export function convertRelativeUrls(html, baseUrl) {
   }
 
   return result;
+}
+
+/**
+ * Enhanced HTML to Markdown conversion with LaTeX formula extraction,
+ * metadata extraction, code language detection, and post-processing.
+ *
+ * This is the enhanced version of convertHtmlToMarkdown that handles:
+ * - LaTeX formulas from img.formula (Habr), KaTeX, MathJax
+ * - Article metadata (author, date, views, hubs, tags)
+ * - Code language detection with content-based correction
+ * - Blockquote math grouping with \displaystyle
+ * - Unicode normalization, quote straightening, dash normalization
+ * - LaTeX spacing fixes for GitHub rendering
+ *
+ * @param {string} html - HTML content
+ * @param {string} [baseUrl] - Base URL for resolving relative URLs
+ * @param {Object} [options] - Enhanced options
+ * @param {boolean} [options.extractLatex=true] - Extract LaTeX formulas
+ * @param {boolean} [options.extractMetadata=true] - Extract article metadata
+ * @param {boolean} [options.postProcess=true] - Apply post-processing pipeline
+ * @param {boolean} [options.detectCodeLanguage=true] - Detect/correct code languages
+ * @returns {Object} Result with { markdown, metadata }
+ */
+export function convertHtmlToMarkdownEnhanced(html, baseUrl, options = {}) {
+  const {
+    extractLatex = true,
+    extractMetadata: shouldExtractMetadata = true,
+    postProcess = true,
+    detectCodeLanguage = true,
+  } = options;
+
+  // Ensure all URLs are absolute before Markdown conversion
+  if (baseUrl) {
+    html = convertRelativeUrls(html, baseUrl);
+  }
+
+  const $ = cheerio.load(html);
+
+  // Extract metadata before cleaning
+  let metadata = null;
+  if (shouldExtractMetadata) {
+    metadata = extractMetadata($);
+  }
+
+  // Remove unwanted elements
+  $('style, script, noscript').remove();
+  $('*').each(function () {
+    const attribs = this.attribs || {};
+    Object.keys(attribs).forEach((attr) => {
+      if (attr.toLowerCase().startsWith('on')) {
+        $(this).removeAttr(attr);
+      }
+    });
+  });
+  $('a[href^="javascript:"]').remove();
+  $('[style]').removeAttr('style');
+
+  // Remove empty headings
+  $('h1, h2, h3, h4, h5, h6').each(function () {
+    if (!$(this).text().trim()) {
+      $(this).remove();
+    }
+  });
+
+  // Remove empty links (same logic as convertHtmlToMarkdown)
+  $('a').each(function () {
+    const directText = $(this)
+      .contents()
+      .filter(function () {
+        return this.type === 'text';
+      })
+      .text();
+    if (!directText.trim()) {
+      let allChildrenEmpty = true;
+      $(this)
+        .children()
+        .each(function () {
+          if (
+            $(this).text().trim() ||
+            (this.tagName === 'img' && $(this).attr('alt'))
+          ) {
+            allChildrenEmpty = false;
+          }
+        });
+      if (allChildrenEmpty) {
+        $(this).remove();
+      }
+    }
+  });
+  $('a').each(function () {
+    const children = $(this).children();
+    if (
+      children.length === 1 &&
+      children[0].tagName === 'img' &&
+      !$(children[0]).attr('alt')
+    ) {
+      $(this).remove();
+    }
+  });
+  $('a').each(function () {
+    if (!$(this).text().trim()) {
+      $(this).remove();
+    }
+  });
+
+  // Handle LaTeX formulas before Turndown conversion
+  if (extractLatex) {
+    // Replace Habr formula images with LaTeX text
+    $('img.formula, img[source]').each(function () {
+      if (isFormulaImage($, this)) {
+        const latex = extractFormula($, this);
+        if (latex) {
+          $(this).replaceWith(`$${latex}$`);
+        }
+      }
+    });
+
+    // Replace KaTeX/MathJax elements
+    $('.katex, .math, mjx-container, .MathJax').each(function () {
+      if (isMathElement($, this)) {
+        const latex = extractFormula($, this);
+        if (latex) {
+          $(this).replaceWith(`$${latex}$`);
+        }
+      }
+    });
+  }
+
+  // Handle code language detection/correction
+  if (detectCodeLanguage) {
+    $('pre code').each(function () {
+      const codeText = $(this).text().trim();
+      const language =
+        $(this)
+          .attr('class')
+          ?.match(/language-(\w+)/)?.[1] ||
+        $(this)
+          .attr('class')
+          ?.match(/^(\w+)$/)?.[1] ||
+        '';
+
+      // Content-based language correction
+      if (
+        language === 'matlab' &&
+        /\b(Require\s+Import|Definition|Fixpoint|Lemma|Theorem|Proof|Qed|Notation|Inductive)\b/.test(
+          codeText
+        )
+      ) {
+        $(this).removeClass(`language-${language}`).addClass('language-coq');
+      }
+    });
+  }
+
+  // Preprocess ARIA tables (same as original)
+  $('[role="table"]').each(function () {
+    const $table = $(this);
+    const $newTable = $('<table></table>');
+    const label = $table.attr('aria-label');
+    const descId = $table.attr('aria-describedby');
+    if (label) {
+      $newTable.append(`<caption>${label}</caption>`);
+    } else if (descId && $(`#${descId}`).length) {
+      $newTable.append(`<caption>${$(`#${descId}`).text()}</caption>`);
+    }
+    const rowgroups = $table.find('> [role="rowgroup"]');
+    if (rowgroups.length > 0) {
+      const $thead = $('<thead></thead>');
+      const $tbody = $('<tbody></tbody>');
+      rowgroups.each(function (i) {
+        $(this)
+          .find('> [role="row"]')
+          .each(function () {
+            const $row = $(this);
+            const $tr = $('<tr></tr>');
+            $row.children('[role="columnheader"]').each(function () {
+              $tr.append($('<th></th>').text($(this).text()));
+            });
+            $row.children('[role="cell"]').each(function () {
+              $tr.append($('<td></td>').text($(this).text()));
+            });
+            if (i === 0 && $tr.children('th').length) {
+              $thead.append($tr);
+            } else {
+              $tbody.append($tr);
+            }
+          });
+      });
+      if ($thead.children().length) {
+        $newTable.append($thead);
+      }
+      if ($tbody.children().length) {
+        $newTable.append($tbody);
+      }
+    }
+    $table.replaceWith($newTable);
+  });
+
+  // Convert to Markdown using Turndown
+  const turndown = new TurndownService({
+    headingStyle: 'atx',
+    codeBlockStyle: 'fenced',
+    emDelimiter: '*',
+    bulletListMarker: '-',
+    strongDelimiter: '**',
+    linkStyle: 'inlined',
+    linkReferenceStyle: 'full',
+    hr: '---',
+    style: false,
+  });
+  turndown.use(turndownPluginGfm.gfm);
+
+  let markdown = turndown.turndown($.html());
+
+  // Apply post-processing
+  if (postProcess) {
+    markdown = postProcessMarkdown(markdown);
+  }
+
+  return { markdown, metadata };
 }
 
 // Convert HTML content to UTF-8 if it's not already
