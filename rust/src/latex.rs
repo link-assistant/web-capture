@@ -191,15 +191,13 @@ mod tests {
     fn test_extract_katex_formula_data_tex() {
         let html = Html::parse_fragment(r#"<span class="katex" data-tex="\pi r^2"></span>"#);
         let el = select_first(&html, ".katex").unwrap();
-        assert_eq!(
-            extract_katex_formula(&el),
-            Some(r"\pi r^2".to_string())
-        );
+        assert_eq!(extract_katex_formula(&el), Some(r"\pi r^2".to_string()));
     }
 
     #[test]
     fn test_extract_mathjax_formula_data_tex() {
-        let html = Html::parse_fragment(r#"<mjx-container data-tex="\sum_{i=0}^n"></mjx-container>"#);
+        let html =
+            Html::parse_fragment(r#"<mjx-container data-tex="\sum_{i=0}^n"></mjx-container>"#);
         let el = select_first(&html, "mjx-container").unwrap();
         assert_eq!(
             extract_mathjax_formula(&el),

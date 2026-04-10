@@ -78,7 +78,11 @@ fn select_text(document: &Html, selector_str: &str) -> Option<String> {
     let sel = Selector::parse(selector_str).ok()?;
     let el = document.select(&sel).next()?;
     let text: String = el.text().collect::<String>().trim().to_string();
-    if text.is_empty() { None } else { Some(text) }
+    if text.is_empty() {
+        None
+    } else {
+        Some(text)
+    }
 }
 
 /// Helper to select first element and get an attribute value.
@@ -263,10 +267,10 @@ pub fn format_metadata_block(metadata: &ArticleMetadata) -> Vec<String> {
             .author_full_name
             .as_ref()
             .map_or_else(|| author.clone(), |full| format!("{full} ({author})"));
-        let author_link = metadata
-            .author_url
-            .as_ref()
-            .map_or_else(|| author_name.clone(), |url| format!("[{author_name}]({url})"));
+        let author_link = metadata.author_url.as_ref().map_or_else(
+            || author_name.clone(),
+            |url| format!("[{author_name}]({url})"),
+        );
         lines.push(format!("**Author:** {author_link}"));
     }
 
@@ -397,10 +401,10 @@ pub fn format_footer_block(metadata: &ArticleMetadata) -> Vec<String> {
             .author_full_name
             .as_ref()
             .map_or_else(|| author.clone(), |full| format!("{full} ({author})"));
-        let author_link = metadata
-            .author_url
-            .as_ref()
-            .map_or_else(|| author_name.clone(), |url| format!("[{author_name}]({url})"));
+        let author_link = metadata.author_url.as_ref().map_or_else(
+            || author_name.clone(),
+            |url| format!("[{author_name}]({url})"),
+        );
         let mut author_line = format!("**Author:** {author_link}");
         if let Some(ref karma) = metadata.author_karma {
             author_line.push_str(&format!(" | Karma: {karma}"));
@@ -473,7 +477,9 @@ mod tests {
             ..Default::default()
         };
         let lines = format_footer_block(&meta);
-        assert!(lines.iter().any(|l| l.contains("rust") && l.contains("web")));
+        assert!(lines
+            .iter()
+            .any(|l| l.contains("rust") && l.contains("web")));
     }
 
     #[test]

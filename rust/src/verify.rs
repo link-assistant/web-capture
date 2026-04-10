@@ -131,9 +131,7 @@ pub fn normalize_text(text: &str) -> String {
 
     // Handle \\mathbb{n}_0 case-insensitively
     if let Ok(re) = Regex::new(r"(?i)\\mathbb\{n\}_0") {
-        result = re
-            .replace_all(&result, "\u{2115}\u{2080}")
-            .to_string();
+        result = re.replace_all(&result, "\u{2115}\u{2080}").to_string();
     }
 
     result.to_lowercase()
@@ -219,8 +217,7 @@ pub fn verify_markdown_content(
         };
 
         let substring_match = normalized.len() > 20
-            && normalized_markdown
-                .contains(&normalized[..normalized.len().min(50)]);
+            && normalized_markdown.contains(&normalized[..normalized.len().min(50)]);
 
         if match_rate >= 0.6 || substring_match {
             passed_checks += 1;
@@ -265,9 +262,7 @@ pub fn verify_markdown_content(
             matching_lines as f64 / lines.len() as f64
         };
 
-        if match_rate >= 0.6
-            || normalized_markdown_for_code.contains(&normalized_code_full)
-        {
+        if match_rate >= 0.6 || normalized_markdown_for_code.contains(&normalized_code_full) {
             passed_checks += 1;
         } else {
             let truncated = if code.len() > 100 {
@@ -295,8 +290,7 @@ pub fn verify_markdown_content(
         };
 
         let substring_match = normalized.len() > 15
-            && normalized_markdown
-                .contains(&normalized[..normalized.len().min(40)]);
+            && normalized_markdown.contains(&normalized[..normalized.len().min(40)]);
 
         if match_rate >= 0.6 || substring_match {
             passed_checks += 1;
@@ -313,10 +307,7 @@ pub fn verify_markdown_content(
     // Check blockquote formulas
     for formula in &web_content.blockquote_formulas {
         total_checks += 1;
-        let normalized_formula = formula
-            .split_whitespace()
-            .collect::<Vec<_>>()
-            .join(" ");
+        let normalized_formula = formula.split_whitespace().collect::<Vec<_>>().join(" ");
 
         // Extract key parts
         let cleaned = normalized_formula
@@ -342,16 +333,13 @@ pub fn verify_markdown_content(
                     .iter()
                     .filter(|part| line.to_lowercase().contains(&part.to_lowercase()))
                     .count();
-                if !key_parts.is_empty()
-                    && matching_parts >= key_parts.len().min(2)
-                {
+                if !key_parts.is_empty() && matching_parts >= key_parts.len().min(2) {
                     found = true;
                     break;
                 }
                 if line.contains(&normalized_formula)
                     || line.contains(formula.as_str())
-                    || (formula.len() < 20
-                        && line.contains(&formula.replace(' ', "")))
+                    || (formula.len() < 20 && line.contains(&formula.replace(' ', "")))
                 {
                     found = true;
                     break;
@@ -496,11 +484,7 @@ mod tests {
     #[test]
     fn test_verify_empty_content() {
         let content = WebContent::default();
-        let result = verify_markdown_content(
-            &content,
-            "Some markdown",
-            &VerifyOptions::default(),
-        );
+        let result = verify_markdown_content(&content, "Some markdown", &VerifyOptions::default());
         assert!(result.success);
         assert_eq!(result.total_checks, 0);
     }

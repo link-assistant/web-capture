@@ -114,10 +114,7 @@ pub fn generate_local_filename(url: &str, index: usize) -> String {
 ///
 /// Note: In the Rust implementation, actual downloading requires `reqwest`.
 /// The `dry_run` mode works without network access.
-pub async fn localize_images(
-    markdown_text: &str,
-    options: &LocalizeOptions,
-) -> LocalizeResult {
+pub async fn localize_images(markdown_text: &str, options: &LocalizeOptions) -> LocalizeResult {
     let all_images = extract_image_references(markdown_text);
 
     // Filter to only external images not already localized
@@ -291,10 +288,7 @@ mod tests {
 
     #[test]
     fn test_get_extension_from_url_no_extension() {
-        assert_eq!(
-            get_extension_from_url("https://example.com/image"),
-            ".png"
-        );
+        assert_eq!(get_extension_from_url("https://example.com/image"), ".png");
     }
 
     #[test]

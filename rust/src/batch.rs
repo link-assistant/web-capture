@@ -86,20 +86,17 @@ pub fn load_config(config_path: &str) -> Result<BatchConfig, String> {
 ///
 /// Returns an error if the version is not found.
 pub fn get_article(config: &BatchConfig, version: &str) -> Result<ArticleConfig, String> {
-    let article = config
-        .articles
-        .get(version)
-        .ok_or_else(|| {
-            let available: Vec<&String> = config.articles.keys().collect();
-            format!(
-                "Unknown article version: {version}. Available: {}",
-                available
-                    .iter()
-                    .map(|s| s.as_str())
-                    .collect::<Vec<_>>()
-                    .join(", ")
-            )
-        })?;
+    let article = config.articles.get(version).ok_or_else(|| {
+        let available: Vec<&String> = config.articles.keys().collect();
+        format!(
+            "Unknown article version: {version}. Available: {}",
+            available
+                .iter()
+                .map(|s| s.as_str())
+                .collect::<Vec<_>>()
+                .join(", ")
+        )
+    })?;
 
     // Merge defaults
     if let Some(ref defaults) = config.defaults {
@@ -159,10 +156,7 @@ pub fn create_config_from_urls(urls: &[String], defaults: Option<ArticleConfig>)
         );
     }
 
-    BatchConfig {
-        articles,
-        defaults,
-    }
+    BatchConfig { articles, defaults }
 }
 
 /// Validate a batch configuration.
@@ -182,10 +176,7 @@ pub fn validate_config(config: &BatchConfig) -> ValidationResult {
         if article.url.is_empty() {
             errors.push(format!("Article \"{id}\" missing required \"url\" field"));
         } else if Url::parse(&article.url).is_err() {
-            errors.push(format!(
-                "Article \"{id}\" has invalid URL: {}",
-                article.url
-            ));
+            errors.push(format!("Article \"{id}\" has invalid URL: {}", article.url));
         }
     }
 
@@ -204,7 +195,10 @@ fn merge_config(defaults: &ArticleConfig, article: &ArticleConfig) -> ArticleCon
             article.url.clone()
         },
         title: article.title.clone().or_else(|| defaults.title.clone()),
-        language: article.language.clone().or_else(|| defaults.language.clone()),
+        language: article
+            .language
+            .clone()
+            .or_else(|| defaults.language.clone()),
         archive_path: article
             .archive_path
             .clone()

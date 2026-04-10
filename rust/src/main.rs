@@ -431,7 +431,12 @@ async fn themed_image_handler(Query(params): Query<UrlQuery>) -> Response {
 
 /// Capture a URL and save/output the result
 #[allow(clippy::too_many_lines)]
-async fn capture_url(url: &str, format: &str, output: Option<&PathBuf>, args: &Args) -> anyhow::Result<()> {
+async fn capture_url(
+    url: &str,
+    format: &str,
+    output: Option<&PathBuf>,
+    args: &Args,
+) -> anyhow::Result<()> {
     let absolute_url = normalize_url(url).map_err(|e| anyhow::anyhow!(e))?;
 
     match format.to_lowercase().as_str() {
@@ -445,7 +450,8 @@ async fn capture_url(url: &str, format: &str, output: Option<&PathBuf>, args: &A
                     post_process: args.post_process,
                     detect_code_language: args.detect_code_language,
                 };
-                let result = convert_html_to_markdown_enhanced(&html, Some(&absolute_url), &options)?;
+                let result =
+                    convert_html_to_markdown_enhanced(&html, Some(&absolute_url), &options)?;
                 result.markdown
             } else {
                 convert_html_to_markdown(&html, Some(&absolute_url))?

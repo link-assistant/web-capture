@@ -55,9 +55,7 @@ pub fn post_process_markdown(markdown: &str, options: &PostProcessOptions) -> St
     // Fix double spaces (but not in code blocks)
     if let Ok(re) = Regex::new(r"([^\n`]) +") {
         result = re
-            .replace_all(&result, |caps: &regex::Captures| {
-                format!("{} ", &caps[1])
-            })
+            .replace_all(&result, |caps: &regex::Captures| format!("{} ", &caps[1]))
             .to_string();
     }
 
