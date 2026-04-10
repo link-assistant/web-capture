@@ -4288,10 +4288,10 @@ links-notation@^0.11.2:
   resolved "https://registry.npmjs.org/links-notation/-/links-notation-0.11.2.tgz"
   integrity sha512-VPyELWBXpaCCiNPVeZhMbG7RuvOQR51nhqELK+s/rbSzKYhSs+tyiSOdQ7z8I7Kh3PLABF3bZETtWSFwx3vFfg==
 
-lino-arguments@^0.2.1:
-  version "0.2.1"
-  resolved "https://registry.npmjs.org/lino-arguments/-/lino-arguments-0.2.1.tgz"
-  integrity sha512-rLgQDWKHeMKw/R5btvXxb4OQlLSnKhog/AGJ12LJWXSN9KNZa1MO4xWOJ/VllmZv/vPziOIDLAvfxdWH25h9BA==
+lino-arguments@^0.2.5:
+  version "0.2.5"
+  resolved "https://registry.npmjs.org/lino-arguments/-/lino-arguments-0.2.5.tgz"
+  integrity sha512-NyFNcE9EwuXmQ6DVnVA8GFoL5Dtm0gv9j99Tg8n8Z3HR0gkxuIprchItD8UGKiLsskxlcgk7LIbIao2V0vWeiQ==
   dependencies:
     getenv "^2.0.0"
     links-notation "^0.11.2"
