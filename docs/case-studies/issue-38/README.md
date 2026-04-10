@@ -49,6 +49,13 @@ npm error - /opt/hostedtoolcache/node/22.22.2/x64/lib/node_modules/npm/node_modu
 
 **Impact:** The setup-npm.mjs script is meant to update npm to >=11.5.1 for OIDC trusted publishing support. When it fails, the publish step may lack proper OIDC authentication.
 
+**External references:**
+- [actions/runner-images#13883](https://github.com/actions/runner-images/issues/13883) - npm in Node.js 22.22.2 toolcache has broken module tree (missing `promise-retry`)
+- [nodejs/node#62430](https://github.com/nodejs/node/issues/62430) - npm i -g npm@latest -> Cannot find module 'promise-retry'
+- [npm/cli#9151](https://github.com/npm/cli/issues/9151) - latest npm fails to install in latest node 22
+
+**Status:** The `promise-retry` dependency was replaced with `@gar/promise-retry` in npm 11.11.0. The issue affects Node.js 22.22.2 on GitHub Actions runner images with `ubuntu-24.04` starting from image version `20260329.72.1`. A workaround is to use `corepack enable && corepack prepare npm@latest --activate` or to gracefully handle the failure.
+
 ### Root Cause 3: Cascading Publish Failure (CONSEQUENCE)
 
 Because Root Cause 1 prevents the changeset version step from running, no version bump commit is made. The `version-and-commit.mjs` script reports "No changes to commit", the `version_committed` output is never set to `true`, and the subsequent publish step is skipped.
