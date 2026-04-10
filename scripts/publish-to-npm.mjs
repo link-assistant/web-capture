@@ -96,11 +96,28 @@ async function main() {
       );
     }
 
-    // Publish to npm using OIDC trusted publishing with retry logic
+    // Publish to npm using direct npm publish with retry logic
+    // Note: We use `npm publish` directly instead of `changeset publish` because
+    // `changeset publish` does not properly support OIDC trusted publishing for
+    // scoped packages and does not propagate publish failures (exits 0 on error).
     for (let i = 1; i <= MAX_RETRIES; i++) {
       console.log(`Publish attempt ${i} of ${MAX_RETRIES}...`);
       try {
-        await $`npm run changeset:publish`;
+        await $`npm publish --provenance --access public`;
+
+        // Verify the version was actually published
+        console.log('Verifying publish...');
+        await sleep(3000); // Wait for npm registry to propagate
+        const verifyResult =
+          await $`npm view "${PACKAGE_NAME}@${currentVersion}" version`.run({
+            capture: true,
+          });
+        if (verifyResult.code !== 0) {
+          throw new Error(
+            `Publish verification failed: version ${currentVersion} not found on npm after publish`
+          );
+        }
+
         setOutput('published', 'true');
         setOutput('published_version', currentVersion);
         console.log(
