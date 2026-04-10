@@ -6,6 +6,7 @@ import TurndownService from 'turndown';
 import iconv from 'iconv-lite';
 import { URL } from 'url';
 import turndownPluginGfm from 'turndown-plugin-gfm';
+import he from 'he';
 import { isFormulaImage, isMathElement, extractFormula } from './latex.js';
 import { extractMetadata } from './metadata.js';
 import { postProcessMarkdown } from './postprocess.js';
@@ -165,7 +166,8 @@ export function convertHtmlToMarkdown(html, baseUrl) {
     style: false,
   });
   turndown.use(turndownPluginGfm.gfm);
-  return turndown.turndown($.html());
+  // Decode HTML entities to unicode after markdown conversion
+  return he.decode(turndown.turndown($.html()));
 }
 
 // Convert relative URLs to absolute URLs in HTML content
@@ -499,7 +501,8 @@ export function convertHtmlToMarkdownEnhanced(html, baseUrl, options = {}) {
   });
   turndown.use(turndownPluginGfm.gfm);
 
-  let markdown = turndown.turndown($.html());
+  // Decode HTML entities to unicode after markdown conversion
+  let markdown = he.decode(turndown.turndown($.html()));
 
   // Apply post-processing
   if (postProcess) {

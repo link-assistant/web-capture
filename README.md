@@ -1,5 +1,11 @@
 # web-capture
 
+**JavaScript:** [![npm version](https://img.shields.io/npm/v/@link-assistant/web-capture?label=npm&color=blue)](https://www.npmjs.com/package/@link-assistant/web-capture) [![npm downloads](https://img.shields.io/npm/dm/@link-assistant/web-capture?label=downloads&color=blue)](https://www.npmjs.com/package/@link-assistant/web-capture) [![CI - JavaScript](https://img.shields.io/github/actions/workflow/status/link-assistant/web-capture/js.yml?branch=main&label=JS%20CI)](https://github.com/link-assistant/web-capture/actions/workflows/js.yml)
+
+**Rust:** [![crates.io version](https://img.shields.io/crates/v/web-capture?label=crates.io&color=orange)](https://crates.io/crates/web-capture) [![crates.io downloads](https://img.shields.io/crates/d/web-capture?label=downloads&color=orange)](https://crates.io/crates/web-capture) [![docs.rs](https://img.shields.io/docsrs/web-capture?label=docs.rs)](https://docs.rs/web-capture) [![CI - Rust](https://img.shields.io/github/actions/workflow/status/link-assistant/web-capture/rust.yml?branch=main&label=Rust%20CI)](https://github.com/link-assistant/web-capture/actions/workflows/rust.yml)
+
+**Release:** [![GitHub Release](https://img.shields.io/github/v/release/link-assistant/web-capture?label=GitHub%20Release)](https://github.com/link-assistant/web-capture/releases) [![License: Unlicense](https://img.shields.io/badge/license-Unlicense-green)](https://unlicense.org)
+
 A CLI and microservice to fetch URLs and render them as:
 
 - **HTML**: Rendered page content
