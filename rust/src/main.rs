@@ -480,29 +480,27 @@ async fn gdocs_handler(
     match format {
         "archive" | "zip" => {
             match web_capture::gdocs::fetch_google_doc_as_archive(&params.url, api_token).await {
-                Ok(archive) => {
-                    match web_capture::gdocs::create_archive_zip(&archive) {
-                        Ok(zip_data) => {
-                            let filename = format!("gdoc-{}.zip", archive.document_id);
-                            (
-                                StatusCode::OK,
-                                [
-                                    ("Content-Type", "application/zip".to_string()),
-                                    (
-                                        "Content-Disposition",
-                                        format!("attachment; filename=\"{filename}\""),
-                                    ),
-                                ],
-                                zip_data,
-                            )
-                                .into_response()
-                        }
-                        Err(e) => {
-                            error!("Google Docs archive error: {}", e);
-                            (StatusCode::INTERNAL_SERVER_ERROR, e.to_string()).into_response()
-                        }
+                Ok(archive) => match web_capture::gdocs::create_archive_zip(&archive) {
+                    Ok(zip_data) => {
+                        let filename = format!("gdoc-{}.zip", archive.document_id);
+                        (
+                            StatusCode::OK,
+                            [
+                                ("Content-Type", "application/zip".to_string()),
+                                (
+                                    "Content-Disposition",
+                                    format!("attachment; filename=\"{filename}\""),
+                                ),
+                            ],
+                            zip_data,
+                        )
+                            .into_response()
                     }
-                }
+                    Err(e) => {
+                        error!("Google Docs archive error: {}", e);
+                        (StatusCode::INTERNAL_SERVER_ERROR, e.to_string()).into_response()
+                    }
+                },
                 Err(e) => {
                     error!("Google Docs capture error: {}", e);
                     (StatusCode::INTERNAL_SERVER_ERROR, e.to_string()).into_response()

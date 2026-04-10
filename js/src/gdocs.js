@@ -172,7 +172,8 @@ export function extractBase64Images(html) {
   const updatedHtml = html.replace(
     /(<img\s[^>]*src=")data:image\/(png|jpeg|jpg|gif|webp|svg\+xml);base64,([^"]+)(")/gi,
     (match, prefix, mimeExt, base64Data, suffix) => {
-      const ext = mimeExt === 'jpeg' ? 'jpg' : mimeExt === 'svg+xml' ? 'svg' : mimeExt;
+      const ext =
+        mimeExt === 'jpeg' ? 'jpg' : mimeExt === 'svg+xml' ? 'svg' : mimeExt;
       const filename = `image-${String(idx).padStart(2, '0')}.${ext}`;
       const mimeType = `image/${mimeExt}`;
       images.push({
@@ -259,23 +260,7 @@ export async function gdocsHandler(req, res) {
 
   try {
     if (format === 'archive' || format === 'zip') {
-      const archiveResult = await fetchGoogleDocAsArchive(url, { apiToken });
-
-      res.set('Content-Type', 'application/zip');
-      res.set(
-        'Content-Disposition',
-        `attachment; filename="gdoc-${archiveResult.documentId}.zip"`
-      );
-
-      const archive = archiver('zip', { zlib: { level: 9 } });
-      archive.pipe(res);
-      archive.append(archiveResult.markdown, { name: 'article.md' });
-      archive.append(archiveResult.html, { name: 'article.html' });
-      for (const img of archiveResult.images) {
-        archive.append(img.data, { name: `images/${img.filename}` });
-      }
-      await archive.finalize();
-      return;
+      return await sendGDocsArchive(res, url, apiToken);
     }
 
     if (format === 'markdown' || format === 'md') {
@@ -283,37 +268,54 @@ export async function gdocsHandler(req, res) {
       return res.type('text/markdown').send(result.markdown);
     }
 
-    // For other formats, fetch the raw export
-    const exportFormat =
-      format === 'markdown' || format === 'md' ? 'html' : format;
-    const result = await fetchGoogleDoc(url, {
-      format: exportFormat,
-      apiToken,
-    });
-
-    if (format === 'html') {
-      return res.type('text/html').send(result.content);
-    } else if (format === 'txt') {
-      return res.type('text/plain').send(result.content);
-    } else if (format === 'pdf') {
-      return res
-        .type('application/pdf')
-        .set('Content-Disposition', 'inline; filename="document.pdf"')
-        .send(result.content);
-    } else if (format === 'docx') {
-      return res
-        .type(
-          'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
-        )
-        .set('Content-Disposition', 'inline; filename="document.docx"')
-        .send(result.content);
-    }
-
-    return res.type('text/html').send(result.content);
+    return await sendGDocsExport(res, url, format, apiToken);
   } catch (err) {
     console.error('Google Docs capture error:', err.message);
     return res.status(500).send(`Error capturing Google Doc: ${err.message}`);
   }
+}
+
+async function sendGDocsArchive(res, url, apiToken) {
+  const archiveResult = await fetchGoogleDocAsArchive(url, { apiToken });
+
+  res.set('Content-Type', 'application/zip');
+  res.set(
+    'Content-Disposition',
+    `attachment; filename="gdoc-${archiveResult.documentId}.zip"`
+  );
+
+  const archive = archiver('zip', { zlib: { level: 9 } });
+  archive.pipe(res);
+  archive.append(archiveResult.markdown, { name: 'article.md' });
+  archive.append(archiveResult.html, { name: 'article.html' });
+  for (const img of archiveResult.images) {
+    archive.append(img.data, { name: `images/${img.filename}` });
+  }
+  await archive.finalize();
+}
+
+const FORMAT_CONTENT_TYPES = {
+  html: 'text/html',
+  txt: 'text/plain',
+  pdf: 'application/pdf',
+  docx: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+};
+
+const FORMAT_DISPOSITIONS = {
+  pdf: 'inline; filename="document.pdf"',
+  docx: 'inline; filename="document.docx"',
+};
+
+async function sendGDocsExport(res, url, format, apiToken) {
+  const result = await fetchGoogleDoc(url, { format, apiToken });
+  const contentType = FORMAT_CONTENT_TYPES[format] || 'text/html';
+  const disposition = FORMAT_DISPOSITIONS[format];
+
+  res.type(contentType);
+  if (disposition) {
+    res.set('Content-Disposition', disposition);
+  }
+  return res.send(result.content);
 }
 
 /**
