@@ -33,9 +33,18 @@
 //! }
 //! ```
 
+pub mod animation;
+pub mod batch;
 pub mod browser;
+pub mod figures;
 pub mod html;
+pub mod latex;
+pub mod localize_images;
 pub mod markdown;
+pub mod metadata;
+pub mod postprocess;
+pub mod themed_image;
+pub mod verify;
 
 use thiserror::Error;
 
@@ -180,6 +189,100 @@ pub fn convert_relative_urls(html: &str, base_url: &str) -> String {
 #[must_use]
 pub fn convert_to_utf8(html: &str) -> String {
     html::convert_to_utf8(html)
+}
+
+/// Options for enhanced HTML-to-Markdown conversion.
+#[allow(clippy::struct_excessive_bools)]
+#[derive(Debug, Clone)]
+pub struct EnhancedOptions {
+    /// Extract LaTeX formulas from img.formula, `KaTeX`, `MathJax` elements.
+    pub extract_latex: bool,
+    /// Extract article metadata (author, date, hubs, tags).
+    pub extract_metadata: bool,
+    /// Apply post-processing (unicode normalization, LaTeX spacing, etc.).
+    pub post_process: bool,
+    /// Detect and correct code block languages.
+    pub detect_code_language: bool,
+}
+
+impl Default for EnhancedOptions {
+    fn default() -> Self {
+        Self {
+            extract_latex: true,
+            extract_metadata: true,
+            post_process: true,
+            detect_code_language: true,
+        }
+    }
+}
+
+/// Result of enhanced HTML-to-Markdown conversion.
+#[derive(Debug, Clone)]
+pub struct EnhancedMarkdownResult {
+    pub markdown: String,
+    pub metadata: Option<metadata::ArticleMetadata>,
+}
+
+/// Convert HTML to Markdown with enhanced options.
+///
+/// Supports LaTeX formula extraction, metadata extraction, and
+/// post-processing pipeline matching the JavaScript implementation.
+///
+/// # Arguments
+///
+/// * `html` - The HTML content to convert
+/// * `base_url` - Optional base URL for resolving relative URLs
+/// * `options` - Enhanced conversion options
+///
+/// # Returns
+///
+/// Enhanced result with markdown text and optional metadata
+///
+/// # Errors
+///
+/// Returns an error if base conversion fails
+pub fn convert_html_to_markdown_enhanced(
+    html: &str,
+    base_url: Option<&str>,
+    options: &EnhancedOptions,
+) -> Result<EnhancedMarkdownResult> {
+    // Start with basic markdown conversion
+    let mut md = markdown::convert_html_to_markdown(html, base_url)?;
+
+    // Extract metadata if requested
+    let extracted_metadata = if options.extract_metadata {
+        let meta = metadata::extract_metadata(html);
+        // Prepend metadata block
+        let header_lines = metadata::format_metadata_block(&meta);
+        if !header_lines.is_empty() {
+            let header = header_lines.join("\n");
+            // Insert after the first heading
+            if let Some(pos) = md.find("\n\n") {
+                md = format!("{}\n\n{}\n{}", &md[..pos], header, &md[pos + 2..]);
+            } else {
+                md = format!("{header}\n\n{md}");
+            }
+        }
+        // Append footer block
+        let footer_lines = metadata::format_footer_block(&meta);
+        if !footer_lines.is_empty() {
+            md.push_str("\n\n");
+            md.push_str(&footer_lines.join("\n"));
+        }
+        Some(meta)
+    } else {
+        None
+    };
+
+    // Apply post-processing if requested
+    if options.post_process {
+        md = postprocess::post_process_markdown(&md, &postprocess::PostProcessOptions::default());
+    }
+
+    Ok(EnhancedMarkdownResult {
+        markdown: md,
+        metadata: extracted_metadata,
+    })
 }
 
 // Re-export commonly used types

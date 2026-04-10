@@ -89,6 +89,61 @@ const config = makeConfig({
         type: 'string',
         description: 'Path to .lenv configuration file',
       })
+      .option('enhanced', {
+        type: 'boolean',
+        description:
+          'Use enhanced markdown conversion with LaTeX extraction, metadata, and post-processing (default: false)',
+        default: false,
+      })
+      .option('extractLatex', {
+        type: 'boolean',
+        description:
+          'Extract LaTeX formulas from img.formula, KaTeX, MathJax (default: true when --enhanced)',
+        default: true,
+      })
+      .option('extractMetadata', {
+        type: 'boolean',
+        description:
+          'Extract article metadata (author, date, hubs, tags) (default: true when --enhanced)',
+        default: true,
+      })
+      .option('postProcess', {
+        type: 'boolean',
+        description:
+          'Apply post-processing (unicode normalization, LaTeX spacing) (default: true when --enhanced)',
+        default: true,
+      })
+      .option('detectCodeLanguage', {
+        type: 'boolean',
+        description:
+          'Detect and correct code block languages (default: true when --enhanced)',
+        default: true,
+      })
+      .option('dualTheme', {
+        type: 'boolean',
+        description:
+          'Capture both light and dark theme screenshots (default: false)',
+        default: false,
+      })
+      .option('configFile', {
+        type: 'string',
+        description: 'Path to batch configuration file (JSON or MJS)',
+      })
+      .option('all', {
+        type: 'boolean',
+        description: 'Process all articles in batch configuration',
+        default: false,
+      })
+      .option('dryRun', {
+        type: 'boolean',
+        description: 'Show what would be done without making changes',
+        default: false,
+      })
+      .option('verbose', {
+        type: 'boolean',
+        description: 'Show detailed output',
+        default: false,
+      })
       .help('help')
       .alias('help', 'h')
       .version()
@@ -409,7 +464,20 @@ async function captureUrl(url, options) {
     } else if (normalizedFormat === 'markdown' || normalizedFormat === 'md') {
       // Markdown format
       const html = await fetchHtml(absoluteUrl);
-      const markdown = convertHtmlToMarkdown(html, absoluteUrl);
+      let markdown;
+
+      if (options.enhanced) {
+        const { convertHtmlToMarkdownEnhanced } = await import('../src/lib.js');
+        const result = convertHtmlToMarkdownEnhanced(html, absoluteUrl, {
+          extractLatex: options.extractLatex,
+          extractMetadata: options.extractMetadata,
+          postProcess: options.postProcess,
+          detectCodeLanguage: options.detectCodeLanguage,
+        });
+        markdown = result.markdown;
+      } else {
+        markdown = convertHtmlToMarkdown(html, absoluteUrl);
+      }
 
       if (output) {
         fs.writeFileSync(output, markdown, 'utf-8');
@@ -532,6 +600,12 @@ async function main() {
       fullPage: config.fullPage,
       localImages: config.localImages,
       documentFormat: config.documentFormat,
+      enhanced: config.enhanced,
+      extractLatex: config.extractLatex,
+      extractMetadata: config.extractMetadata,
+      postProcess: config.postProcess,
+      detectCodeLanguage: config.detectCodeLanguage,
+      dualTheme: config.dualTheme,
     });
   } else {
     // No arguments - show error
