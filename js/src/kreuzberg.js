@@ -15,19 +15,22 @@ let _initPromise = null;
 let _convert = null;
 
 async function ensureLoaded() {
-  if (_convert) return _convert;
-  if (_initPromise) return _initPromise;
-  _initPromise = (async () => {
-    try {
-      const mod = await import('@kreuzberg/html-to-markdown-node');
+  if (_convert) {
+    return _convert;
+  }
+  if (_initPromise) {
+    return _initPromise;
+  }
+  _initPromise = import('@kreuzberg/html-to-markdown-node')
+    .then((mod) => {
       _convert = mod.convert;
       return _convert;
-    } catch {
+    })
+    .catch(() => {
       _convert = null;
       return null;
-    }
-  })();
-  return _initPromise;
+    });
+  return await _initPromise;
 }
 
 /**
