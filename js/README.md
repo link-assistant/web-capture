@@ -1,5 +1,11 @@
 # web-capture (JavaScript/Node.js)
 
+[![npm version](https://img.shields.io/npm/v/@link-assistant/web-capture?label=npm&color=blue)](https://www.npmjs.com/package/@link-assistant/web-capture)
+[![npm downloads](https://img.shields.io/npm/dm/@link-assistant/web-capture?label=downloads&color=blue)](https://www.npmjs.com/package/@link-assistant/web-capture)
+[![GitHub Release](https://img.shields.io/github/v/release/link-assistant/web-capture?label=GitHub%20Release)](https://github.com/link-assistant/web-capture/releases)
+[![CI - JavaScript](https://img.shields.io/github/actions/workflow/status/link-assistant/web-capture/js.yml?branch=main&label=CI)](https://github.com/link-assistant/web-capture/actions/workflows/js.yml)
+[![License: Unlicense](https://img.shields.io/badge/license-Unlicense-green)](https://unlicense.org)
+
 A CLI and microservice to fetch URLs and render them as:
 
 - **HTML**: Rendered page content
