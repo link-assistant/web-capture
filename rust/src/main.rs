@@ -34,8 +34,8 @@ use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 use url::Url;
 
 use web_capture::{
-    capture_screenshot, convert_html_to_markdown, convert_relative_urls, convert_to_utf8,
-    fetch_html, html, render_html,
+    capture_screenshot, convert_html_to_markdown, convert_html_to_markdown_enhanced,
+    convert_relative_urls, convert_to_utf8, fetch_html, html, render_html, EnhancedOptions,
 };
 
 /// CLI arguments
@@ -65,6 +65,46 @@ struct Args {
     /// Output file path (default: stdout for text, auto-generated for images)
     #[arg(short, long)]
     output: Option<PathBuf>,
+
+    /// Use enhanced markdown conversion with LaTeX extraction, metadata, and post-processing
+    #[arg(long, default_value_t = false)]
+    enhanced: bool,
+
+    /// Extract LaTeX formulas from img.formula, `KaTeX`, `MathJax` (default: true when --enhanced)
+    #[arg(long, default_value_t = true)]
+    extract_latex: bool,
+
+    /// Extract article metadata (author, date, hubs, tags) (default: true when --enhanced)
+    #[arg(long, default_value_t = true)]
+    extract_metadata: bool,
+
+    /// Apply post-processing (unicode normalization, LaTeX spacing) (default: true when --enhanced)
+    #[arg(long, default_value_t = true)]
+    post_process: bool,
+
+    /// Detect and correct code block languages (default: true when --enhanced)
+    #[arg(long, default_value_t = true)]
+    detect_code_language: bool,
+
+    /// Capture both light and dark theme screenshots
+    #[arg(long, default_value_t = false)]
+    dual_theme: bool,
+
+    /// Path to batch configuration file (JSON)
+    #[arg(long)]
+    config_file: Option<PathBuf>,
+
+    /// Process all articles in batch configuration
+    #[arg(long, default_value_t = false)]
+    all: bool,
+
+    /// Show what would be done without making changes
+    #[arg(long, default_value_t = false)]
+    dry_run: bool,
+
+    /// Show detailed output
+    #[arg(long, default_value_t = false)]
+    verbose: bool,
 }
 
 /// Query parameters for API endpoints
@@ -89,9 +129,9 @@ async fn main() -> anyhow::Result<()> {
     if args.serve {
         // Server mode
         start_server(args.port).await?;
-    } else if let Some(url) = args.url {
+    } else if let Some(ref url) = args.url {
         // Capture mode
-        capture_url(&url, &args.format, args.output.as_ref()).await?;
+        capture_url(url, &args.format, args.output.as_ref(), &args).await?;
     } else {
         eprintln!("Error: Missing URL or --serve flag");
         eprintln!("Run with --help for usage information");
@@ -109,6 +149,9 @@ async fn start_server(port: u16) -> anyhow::Result<()> {
         .route("/image", get(image_handler))
         .route("/fetch", get(fetch_handler))
         .route("/stream", get(stream_handler))
+        .route("/animation", get(animation_handler))
+        .route("/figures", get(figures_handler))
+        .route("/themed-image", get(themed_image_handler))
         .layer(TraceLayer::new_for_http());
 
     let addr = SocketAddr::from(([0, 0, 0, 0], port));
@@ -120,6 +163,9 @@ async fn start_server(port: u16) -> anyhow::Result<()> {
     info!("  GET /image?url=<URL>      - Screenshot page as PNG");
     info!("  GET /fetch?url=<URL>      - Proxy fetch content");
     info!("  GET /stream?url=<URL>     - Stream content");
+    info!("  GET /animation?url=<URL>  - Capture animation frames");
+    info!("  GET /figures?url=<URL>    - Extract figure images");
+    info!("  GET /themed-image?url=<URL> - Dual-theme screenshots");
     info!("");
     info!("Press Ctrl+C to stop the server");
 
@@ -296,14 +342,114 @@ async fn stream_handler(query: Query<UrlQuery>) -> Response {
     fetch_handler(query).await
 }
 
+/// Animation endpoint handler
+async fn animation_handler(Query(params): Query<UrlQuery>) -> Response {
+    let url = match normalize_url(&params.url) {
+        Ok(url) => url,
+        Err(e) => return (StatusCode::BAD_REQUEST, e).into_response(),
+    };
+
+    let options = web_capture::animation::AnimationOptions::default();
+    match web_capture::animation::capture_animation_frames(&url, &options).await {
+        Ok(result) => {
+            let json = serde_json::json!({
+                "frameCount": result.frames.len(),
+                "loopDetected": result.loop_detected,
+                "loopFrame": result.loop_frame,
+                "duration": result.duration,
+                "totalFrames": result.total_frames,
+            });
+            axum::Json(json).into_response()
+        }
+        Err(e) => {
+            error!("Animation capture error: {}", e);
+            (StatusCode::INTERNAL_SERVER_ERROR, e.to_string()).into_response()
+        }
+    }
+}
+
+/// Figures extraction endpoint handler
+async fn figures_handler(Query(params): Query<UrlQuery>) -> Response {
+    let url = match normalize_url(&params.url) {
+        Ok(url) => url,
+        Err(e) => return (StatusCode::BAD_REQUEST, e).into_response(),
+    };
+
+    // Fetch the HTML and extract figures
+    let html_content = match fetch_html(&url).await {
+        Ok(html) => html,
+        Err(e) => {
+            error!("Failed to fetch HTML for figures: {}", e);
+            return (StatusCode::INTERNAL_SERVER_ERROR, "Error fetching HTML").into_response();
+        }
+    };
+
+    let figures = web_capture::figures::extract_figures(&html_content, &url);
+    let downloaded = web_capture::figures::download_figures(&figures).await;
+
+    let json = serde_json::json!({
+        "url": url,
+        "totalFound": figures.len(),
+        "totalDownloaded": downloaded.iter().filter(|d| d.buffer.is_some()).count(),
+        "figures": downloaded.iter().map(|f| serde_json::json!({
+            "figureNum": f.figure_num,
+            "filename": f.filename,
+            "caption": f.caption,
+            "originalUrl": f.original_url,
+            "downloaded": f.buffer.is_some(),
+            "error": f.error,
+        })).collect::<Vec<_>>(),
+    });
+    axum::Json(json).into_response()
+}
+
+/// Dual-themed screenshot endpoint handler
+async fn themed_image_handler(Query(params): Query<UrlQuery>) -> Response {
+    let url = match normalize_url(&params.url) {
+        Ok(url) => url,
+        Err(e) => return (StatusCode::BAD_REQUEST, e).into_response(),
+    };
+
+    let options = web_capture::themed_image::ThemedImageOptions::default();
+    match web_capture::themed_image::capture_dual_theme_screenshots(&url, &options).await {
+        Ok(result) => {
+            let json = serde_json::json!({
+                "url": result.url,
+                "width": result.width,
+                "height": result.height,
+                "lightSize": result.light_size,
+                "darkSize": result.dark_size,
+            });
+            axum::Json(json).into_response()
+        }
+        Err(e) => {
+            error!("Themed image capture error: {}", e);
+            (StatusCode::INTERNAL_SERVER_ERROR, e.to_string()).into_response()
+        }
+    }
+}
+
 /// Capture a URL and save/output the result
-async fn capture_url(url: &str, format: &str, output: Option<&PathBuf>) -> anyhow::Result<()> {
+#[allow(clippy::too_many_lines)]
+async fn capture_url(url: &str, format: &str, output: Option<&PathBuf>, args: &Args) -> anyhow::Result<()> {
     let absolute_url = normalize_url(url).map_err(|e| anyhow::anyhow!(e))?;
 
     match format.to_lowercase().as_str() {
         "markdown" | "md" => {
             let html = fetch_html(&absolute_url).await?;
-            let markdown = convert_html_to_markdown(&html, Some(&absolute_url))?;
+
+            let markdown = if args.enhanced {
+                let options = EnhancedOptions {
+                    extract_latex: args.extract_latex,
+                    extract_metadata: args.extract_metadata,
+                    post_process: args.post_process,
+                    detect_code_language: args.detect_code_language,
+                };
+                let result = convert_html_to_markdown_enhanced(&html, Some(&absolute_url), &options)?;
+                result.markdown
+            } else {
+                convert_html_to_markdown(&html, Some(&absolute_url))?
+            };
 
             if let Some(path) = output {
                 fs::write(path, &markdown).await?;
