@@ -1,5 +1,11 @@
 # @link-assistant/web-capture
 
+## 1.4.0
+
+### Minor Changes
+
+- f464988: Add Google Docs document to Markdown capture support with API token authentication
+
 ## 1.3.0
 
 ### Minor Changes
