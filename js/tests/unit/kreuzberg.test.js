@@ -1,4 +1,7 @@
-import { convertWithKreuzberg, isKreuzbergAvailable } from '../../src/kreuzberg.js';
+import {
+  convertWithKreuzberg,
+  isKreuzbergAvailable,
+} from '../../src/kreuzberg.js';
 
 let available;
 
