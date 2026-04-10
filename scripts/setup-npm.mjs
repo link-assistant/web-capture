@@ -24,8 +24,22 @@ try {
   const currentVersion = currentResult.stdout.trim();
   console.log(`Current npm version: ${currentVersion}`);
 
-  // Update npm to latest
-  await $`npm install -g npm@latest`;
+  // Update npm for OIDC trusted publishing (requires >= 11.5.1)
+  // Pin to npm@11 to avoid breaking changes from future major versions
+  // Use a fresh install approach to avoid corrupting the running npm instance
+  try {
+    await $`npm install -g npm@11`;
+  } catch (updateError) {
+    // npm global self-update can fail on some Node.js versions due to
+    // module resolution issues (e.g., 'promise-retry' not found).
+    // This is a known issue with in-place npm upgrades on GitHub Actions runners.
+    // See: https://github.com/npm/cli/issues/4028
+    console.warn(`Warning: npm update failed: ${updateError.message}`);
+    console.warn('Continuing with current npm version...');
+    console.warn(
+      'If OIDC publishing fails, the npm version may need to be >= 11.5.1'
+    );
+  }
 
   // Get updated npm version
   const updatedResult = await $`npm --version`.run({ capture: true });
