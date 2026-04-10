@@ -9,7 +9,7 @@ documentation = "https://docs.rs/web-capture"
 readme = "README.md"
 keywords = ["web", "capture", "screenshot", "markdown", "html"]
 categories = ["command-line-utilities", "web-programming"]
-rust-version = "1.75"
+rust-version = "1.85"
 
 [lib]
 path = "src/lib.rs"
@@ -39,6 +39,7 @@ scraper = "0.21"
 
 # HTML to Markdown conversion
 html2md = "0.2"
+html-to-markdown-rs = { version = "3.1.0", features = ["metadata"] }
 
 # Command line argument parsing
 clap = { version = "4.5", features = ["derive", "env"] }
