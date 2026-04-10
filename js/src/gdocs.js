@@ -6,6 +6,7 @@
 
 import fetch from 'node-fetch';
 import he from 'he';
+import archiver from 'archiver';
 import { convertHtmlToMarkdown } from './lib.js';
 
 const GDOCS_URL_PATTERN = /docs\.google\.com\/document\/d\/([a-zA-Z0-9_-]+)/;
@@ -156,6 +157,73 @@ export async function fetchGoogleDocAsMarkdown(url, options = {}) {
 }
 
 /**
+ * Extract base64 data URI images from HTML content.
+ *
+ * Google Docs HTML exports embed images as base64 data URIs.
+ * This function extracts them and replaces with local file paths.
+ *
+ * @param {string} html - HTML content with data URI images
+ * @returns {{html: string, images: Array<{filename: string, data: Buffer, mimeType: string}>}}
+ */
+export function extractBase64Images(html) {
+  const images = [];
+  let idx = 1;
+
+  const updatedHtml = html.replace(
+    /(<img\s[^>]*src=")data:image\/(png|jpeg|jpg|gif|webp|svg\+xml);base64,([^"]+)(")/gi,
+    (match, prefix, mimeExt, base64Data, suffix) => {
+      const ext = mimeExt === 'jpeg' ? 'jpg' : mimeExt === 'svg+xml' ? 'svg' : mimeExt;
+      const filename = `image-${String(idx).padStart(2, '0')}.${ext}`;
+      const mimeType = `image/${mimeExt}`;
+      images.push({
+        filename,
+        data: Buffer.from(base64Data, 'base64'),
+        mimeType,
+      });
+      idx++;
+      return `${prefix}images/${filename}${suffix}`;
+    }
+  );
+
+  return { html: updatedHtml, images };
+}
+
+/**
+ * Fetch a Google Docs document as a ZIP archive with images.
+ *
+ * Fetches the document as HTML, extracts embedded base64 images,
+ * and bundles everything into a ZIP archive containing:
+ * - article.md (Markdown version)
+ * - article.html (HTML version with local image paths)
+ * - images/ (extracted images)
+ *
+ * @param {string} url - Google Docs URL
+ * @param {Object} [options] - Options
+ * @param {string} [options.apiToken] - API token for private documents
+ * @returns {Promise<{documentId: string, exportUrl: string, createArchive: function}>}
+ */
+export async function fetchGoogleDocAsArchive(url, options = {}) {
+  const { apiToken } = options;
+
+  // Fetch HTML with embedded base64 images
+  const result = await fetchGoogleDoc(url, { format: 'html', apiToken });
+
+  // Extract base64 images from HTML
+  const { html: localHtml, images } = extractBase64Images(result.content);
+
+  // Convert the localized HTML to Markdown
+  const markdown = convertHtmlToMarkdown(localHtml, result.exportUrl);
+
+  return {
+    documentId: result.documentId,
+    exportUrl: result.exportUrl,
+    html: localHtml,
+    markdown,
+    images,
+  };
+}
+
+/**
  * Express handler for the /gdocs API endpoint.
  *
  * Query parameters:
@@ -190,6 +258,26 @@ export async function gdocsHandler(req, res) {
   const format = (req.query.format || 'markdown').toLowerCase();
 
   try {
+    if (format === 'archive' || format === 'zip') {
+      const archiveResult = await fetchGoogleDocAsArchive(url, { apiToken });
+
+      res.set('Content-Type', 'application/zip');
+      res.set(
+        'Content-Disposition',
+        `attachment; filename="gdoc-${archiveResult.documentId}.zip"`
+      );
+
+      const archive = archiver('zip', { zlib: { level: 9 } });
+      archive.pipe(res);
+      archive.append(archiveResult.markdown, { name: 'article.md' });
+      archive.append(archiveResult.html, { name: 'article.html' });
+      for (const img of archiveResult.images) {
+        archive.append(img.data, { name: `images/${img.filename}` });
+      }
+      await archive.finalize();
+      return;
+    }
+
     if (format === 'markdown' || format === 'md') {
       const result = await fetchGoogleDocAsMarkdown(url, { apiToken });
       return res.type('text/markdown').send(result.markdown);

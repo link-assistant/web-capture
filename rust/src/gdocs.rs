@@ -28,8 +28,11 @@
 //! }
 //! ```
 
+use base64::Engine;
 use regex::Regex;
+use std::io::Write;
 use std::sync::OnceLock;
+use tracing::debug;
 
 use crate::WebCaptureError;
 
@@ -196,4 +199,169 @@ pub fn extract_bearer_token(auth_header: &str) -> Option<&str> {
         .or_else(|| trimmed.strip_prefix("bearer "))
         .map(str::trim)
         .filter(|t| !t.is_empty())
+}
+
+/// An image extracted from base64 data URIs in HTML.
+#[derive(Debug, Clone)]
+pub struct ExtractedImage {
+    /// Local filename (e.g., "image-01.png")
+    pub filename: String,
+    /// Raw image bytes
+    pub data: Vec<u8>,
+    /// MIME type (e.g., "image/png")
+    pub mime_type: String,
+}
+
+/// Result of fetching a Google Doc as an archive.
+#[derive(Debug, Clone)]
+pub struct GDocsArchiveResult {
+    /// HTML content with local image paths
+    pub html: String,
+    /// Markdown content with local image paths
+    pub markdown: String,
+    /// Extracted images
+    pub images: Vec<ExtractedImage>,
+    /// Document ID
+    pub document_id: String,
+    /// Export URL used
+    pub export_url: String,
+}
+
+fn base64_image_pattern() -> &'static Regex {
+    static PATTERN: OnceLock<Regex> = OnceLock::new();
+    PATTERN.get_or_init(|| {
+        Regex::new(
+            r#"(<img\s[^>]*src=")data:image/(png|jpeg|jpg|gif|webp|svg\+xml);base64,([^"]+)(")"#,
+        )
+        .unwrap()
+    })
+}
+
+/// Extract base64 data URI images from HTML content.
+///
+/// Google Docs HTML exports embed images as base64 data URIs.
+/// This function extracts them and replaces with local file paths.
+///
+/// # Arguments
+///
+/// * `html` - HTML content with embedded base64 images
+///
+/// # Returns
+///
+/// Tuple of (updated HTML with local paths, extracted images)
+#[must_use]
+pub fn extract_base64_images(html: &str) -> (String, Vec<ExtractedImage>) {
+    let mut images = Vec::new();
+    let mut idx = 1u32;
+
+    let updated_html = base64_image_pattern()
+        .replace_all(html, |caps: &regex::Captures<'_>| {
+            let prefix = &caps[1];
+            let mime_ext = &caps[2];
+            let base64_data = &caps[3];
+            let suffix = &caps[4];
+
+            let ext = match mime_ext {
+                "jpeg" => "jpg",
+                "svg+xml" => "svg",
+                other => other,
+            };
+
+            let filename = format!("image-{idx:02}.{ext}");
+            let mime_type = format!("image/{mime_ext}");
+
+            if let Ok(data) = base64::engine::general_purpose::STANDARD.decode(base64_data) {
+                debug!("Extracted image: {} ({} bytes)", filename, data.len());
+                images.push(ExtractedImage {
+                    filename: filename.clone(),
+                    data,
+                    mime_type,
+                });
+            }
+
+            idx += 1;
+            format!("{prefix}images/{filename}{suffix}")
+        })
+        .into_owned();
+
+    (updated_html, images)
+}
+
+/// Fetch a Google Docs document as a ZIP archive.
+///
+/// Fetches the document as HTML, extracts embedded base64 images,
+/// converts to Markdown, and returns all components ready for archiving.
+///
+/// The archive contains:
+/// - `article.md` — Markdown version
+/// - `article.html` — HTML version with local image paths
+/// - `images/` — extracted images
+///
+/// # Arguments
+///
+/// * `url` - Google Docs URL
+/// * `api_token` - Optional API token for private documents
+///
+/// # Errors
+///
+/// Returns an error if the fetch or conversion fails.
+pub async fn fetch_google_doc_as_archive(
+    url: &str,
+    api_token: Option<&str>,
+) -> crate::Result<GDocsArchiveResult> {
+    let result = fetch_google_doc(url, "html", api_token).await?;
+
+    let (local_html, images) = extract_base64_images(&result.content);
+
+    let markdown =
+        crate::markdown::convert_html_to_markdown(&local_html, Some(&result.export_url))?;
+
+    debug!(
+        "Archive prepared: {} images extracted, {} bytes HTML, {} bytes Markdown",
+        images.len(),
+        local_html.len(),
+        markdown.len()
+    );
+
+    Ok(GDocsArchiveResult {
+        html: local_html,
+        markdown,
+        images,
+        document_id: result.document_id,
+        export_url: result.export_url,
+    })
+}
+
+/// Create a ZIP archive from a `GDocsArchiveResult`.
+///
+/// # Errors
+///
+/// Returns an error if ZIP creation fails.
+pub fn create_archive_zip(archive: &GDocsArchiveResult) -> crate::Result<Vec<u8>> {
+    let mut buf = std::io::Cursor::new(Vec::new());
+
+    {
+        let mut zip = zip::ZipWriter::new(&mut buf);
+        let options = zip::write::SimpleFileOptions::default()
+            .compression_method(zip::CompressionMethod::Deflated);
+
+        zip.start_file("article.md", options)
+            .map_err(|e| WebCaptureError::IoError(std::io::Error::other(e)))?;
+        zip.write_all(archive.markdown.as_bytes())?;
+
+        zip.start_file("article.html", options)
+            .map_err(|e| WebCaptureError::IoError(std::io::Error::other(e)))?;
+        zip.write_all(archive.html.as_bytes())?;
+
+        for img in &archive.images {
+            zip.start_file(format!("images/{}", img.filename), options)
+                .map_err(|e| WebCaptureError::IoError(std::io::Error::other(e)))?;
+            zip.write_all(&img.data)?;
+        }
+
+        zip.finish()
+            .map_err(|e| WebCaptureError::IoError(std::io::Error::other(e)))?;
+    }
+
+    Ok(buf.into_inner())
 }

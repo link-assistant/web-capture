@@ -3,6 +3,7 @@ import {
   isGoogleDocsUrl,
   extractDocumentId,
   buildExportUrl,
+  extractBase64Images,
   GDOCS_EXPORT_FORMATS,
 } from '../../src/gdocs.js';
 
@@ -151,6 +152,52 @@ describe('gdocs', () => {
         epub: 'epub',
         zip: 'zip',
       });
+    });
+  });
+
+  describe('extractBase64Images', () => {
+    it('extracts a single PNG data URI image', () => {
+      const html = '<img src="data:image/png;base64,iVBORw0KGgo=" alt="test">';
+      const { html: updated, images } = extractBase64Images(html);
+
+      expect(images).toHaveLength(1);
+      expect(images[0].filename).toBe('image-01.png');
+      expect(images[0].mimeType).toBe('image/png');
+      expect(images[0].data).toBeInstanceOf(Buffer);
+      expect(updated).toContain('src="images/image-01.png"');
+      expect(updated).not.toContain('data:image');
+    });
+
+    it('extracts multiple images with correct numbering and extensions', () => {
+      const html =
+        '<img src="data:image/png;base64,AAAA" alt="a"><img src="data:image/jpeg;base64,BBBB" alt="b">';
+      const { html: updated, images } = extractBase64Images(html);
+
+      expect(images).toHaveLength(2);
+      expect(images[0].filename).toBe('image-01.png');
+      expect(images[1].filename).toBe('image-02.jpg');
+      expect(images[1].mimeType).toBe('image/jpeg');
+      expect(updated).toContain('images/image-01.png');
+      expect(updated).toContain('images/image-02.jpg');
+    });
+
+    it('returns empty array when no data URI images', () => {
+      const html = '<p>No images here</p>';
+      const { html: updated, images } = extractBase64Images(html);
+
+      expect(images).toHaveLength(0);
+      expect(updated).toBe(html);
+    });
+
+    it('preserves non-data-URI images', () => {
+      const html =
+        '<img src="https://example.com/photo.png" alt="remote"><img src="data:image/gif;base64,R0lG" alt="local">';
+      const { html: updated, images } = extractBase64Images(html);
+
+      expect(images).toHaveLength(1);
+      expect(images[0].filename).toBe('image-01.gif');
+      expect(updated).toContain('https://example.com/photo.png');
+      expect(updated).toContain('images/image-01.gif');
     });
   });
 });
