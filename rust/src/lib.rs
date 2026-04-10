@@ -37,6 +37,7 @@ pub mod animation;
 pub mod batch;
 pub mod browser;
 pub mod figures;
+pub mod gdocs;
 pub mod html;
 pub mod latex;
 pub mod localize_images;
