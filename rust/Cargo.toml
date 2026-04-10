@@ -67,6 +67,9 @@ base64 = "0.22"
 # Regex for URL conversion
 regex = "1.11"
 
+# HTML entity decoding
+html-escape = "0.2"
+
 [dev-dependencies]
 tokio-test = "0.4"
 

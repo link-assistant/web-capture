@@ -110,10 +110,14 @@ pub async fn fetch_google_doc(
 
     let export_url = build_export_url(&document_id, format);
 
-    let mut request = reqwest::Client::new().get(&export_url).header(
-        "User-Agent",
-        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-    );
+    let mut request = reqwest::Client::new()
+        .get(&export_url)
+        .header(
+            "User-Agent",
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+        )
+        .header("Accept-Charset", "utf-8")
+        .header("Accept-Language", "en-US,en;q=0.9");
 
     if let Some(token) = api_token {
         request = request.header("Authorization", format!("Bearer {token}"));
@@ -133,9 +137,15 @@ pub async fn fetch_google_doc(
         )));
     }
 
-    let content = response.text().await.map_err(|e| {
+    let raw_content = response.text().await.map_err(|e| {
         WebCaptureError::FetchError(format!("Failed to read Google Doc response: {e}"))
     })?;
+
+    // Decode HTML entities to unicode for text-based formats
+    let content = match format {
+        "html" | "txt" | "md" => crate::html::decode_html_entities(&raw_content),
+        _ => raw_content,
+    };
 
     Ok(GDocsResult {
         content,

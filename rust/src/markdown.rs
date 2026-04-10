@@ -39,8 +39,11 @@ pub fn convert_html_to_markdown(html: &str, base_url: Option<&str>) -> Result<St
     // Convert to Markdown using html2md
     let markdown = html2md::parse_html(&cleaned_html);
 
+    // Decode HTML entities to unicode characters
+    let decoded_markdown = crate::html::decode_html_entities(&markdown);
+
     // Clean up the markdown output
-    let cleaned_markdown = clean_markdown(&markdown);
+    let cleaned_markdown = clean_markdown(&decoded_markdown);
 
     info!(
         "Successfully converted to Markdown ({} bytes)",

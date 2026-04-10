@@ -5,6 +5,7 @@
 // Browser-based capture navigates to the export URL using Puppeteer or Playwright.
 
 import fetch from 'node-fetch';
+import he from 'he';
 import { convertHtmlToMarkdown } from './lib.js';
 
 const GDOCS_URL_PATTERN = /docs\.google\.com\/document\/d\/([a-zA-Z0-9_-]+)/;
@@ -89,6 +90,8 @@ export async function fetchGoogleDoc(url, options = {}) {
   const headers = {
     'User-Agent':
       'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+    'Accept-Charset': 'utf-8',
+    'Accept-Language': 'en-US,en;q=0.9',
   };
 
   if (apiToken) {
@@ -107,7 +110,13 @@ export async function fetchGoogleDoc(url, options = {}) {
     );
   }
 
-  const content = await response.text();
+  const rawContent = await response.text();
+
+  // Decode HTML entities to unicode for text-based formats
+  const content =
+    format === 'html' || format === 'txt' || format === 'md'
+      ? he.decode(rawContent)
+      : rawContent;
 
   return {
     content,

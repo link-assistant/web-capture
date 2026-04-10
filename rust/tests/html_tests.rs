@@ -1,5 +1,6 @@
 use web_capture::html::{
-    convert_relative_urls, convert_to_utf8, has_javascript, is_html, normalize_url,
+    convert_relative_urls, convert_to_utf8, decode_html_entities, has_javascript, is_html,
+    normalize_url,
 };
 
 #[test]
@@ -84,4 +85,25 @@ fn test_normalize_url_relative() {
 #[test]
 fn test_normalize_url_empty() {
     assert!(normalize_url("").is_err());
+}
+
+#[test]
+fn test_decode_html_entities_basic() {
+    assert_eq!(decode_html_entities("&amp;"), "&");
+    assert_eq!(decode_html_entities("&lt;div&gt;"), "<div>");
+    assert_eq!(decode_html_entities("&#39;hello&#39;"), "'hello'");
+    assert_eq!(decode_html_entities("&quot;test&quot;"), "\"test\"");
+}
+
+#[test]
+fn test_decode_html_entities_unicode() {
+    assert_eq!(decode_html_entities("&#x2014;"), "\u{2014}"); // em-dash
+    assert_eq!(decode_html_entities("&mdash;"), "\u{2014}");
+    assert_eq!(decode_html_entities("&nbsp;"), "\u{00A0}");
+}
+
+#[test]
+fn test_decode_html_entities_no_entities() {
+    assert_eq!(decode_html_entities("plain text"), "plain text");
+    assert_eq!(decode_html_entities(""), "");
 }

@@ -216,6 +216,23 @@ pub fn is_html(html: &str) -> bool {
         .unwrap_or(false)
 }
 
+/// Decode HTML entities to unicode characters.
+///
+/// Converts HTML entities like `&amp;`, `&lt;`, `&#39;`, `&#x27;` etc.
+/// to their actual unicode character equivalents.
+///
+/// # Arguments
+///
+/// * `html` - The HTML content containing entities to decode
+///
+/// # Returns
+///
+/// The content with all HTML entities decoded to unicode
+#[must_use]
+pub fn decode_html_entities(html: &str) -> String {
+    html_escape::decode_html_entities(html).into_owned()
+}
+
 /// Normalize URL to ensure it's absolute.
 ///
 /// Prepends `https://` if no scheme is present and validates the URL.
