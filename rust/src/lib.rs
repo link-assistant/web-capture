@@ -192,9 +192,10 @@ pub fn convert_to_utf8(html: &str) -> String {
 }
 
 /// Options for enhanced HTML-to-Markdown conversion.
+#[allow(clippy::struct_excessive_bools)]
 #[derive(Debug, Clone)]
 pub struct EnhancedOptions {
-    /// Extract LaTeX formulas from img.formula, KaTeX, MathJax elements.
+    /// Extract LaTeX formulas from img.formula, `KaTeX`, `MathJax` elements.
     pub extract_latex: bool,
     /// Extract article metadata (author, date, hubs, tags).
     pub extract_metadata: bool,

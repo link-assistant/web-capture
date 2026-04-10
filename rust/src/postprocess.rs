@@ -4,7 +4,7 @@
 //! - Unicode normalization (non-breaking spaces, curly quotes, dashes)
 //! - LaTeX formula spacing fixes for GitHub rendering
 //! - Bold formatting cleanup
-//! - Percent sign fix for GitHub KaTeX
+//! - Percent sign fix for GitHub `KaTeX`
 //!
 //! Based on reference implementation from:
 //! <https://github.com/link-foundation/meta-theory/blob/main/scripts/download-article.mjs>
@@ -12,6 +12,7 @@
 use regex::Regex;
 
 /// Options for post-processing.
+#[allow(clippy::struct_excessive_bools)]
 #[derive(Debug, Clone)]
 pub struct PostProcessOptions {
     pub normalize_unicode: bool,
@@ -207,9 +208,9 @@ fn is_post_formula_char(c: char) -> bool {
         || c == '\u{0401}'
 }
 
-/// Fix percent sign in inline formulas for GitHub KaTeX rendering.
+/// Fix percent sign in inline formulas for GitHub `KaTeX` rendering.
 ///
-/// GitHub's KaTeX treats `%` as a LaTeX comment character.
+/// GitHub's `KaTeX` treats `%` as a LaTeX comment character.
 /// Workaround: use `\\%` which GitHub's preprocessor converts to `\%`.
 #[must_use]
 pub fn apply_percent_sign_fix(text: &str) -> String {
@@ -239,7 +240,7 @@ pub fn apply_bold_formatting_fixes(text: &str) -> String {
     // Fix bold marker spacing: trim content inside **...**
     result = result
         .lines()
-        .map(|line| fix_bold_line(line))
+        .map(fix_bold_line)
         .collect::<Vec<_>>()
         .join("\n");
 
@@ -248,19 +249,17 @@ pub fn apply_bold_formatting_fixes(text: &str) -> String {
 
 /// Fix bold formatting on a single line.
 fn fix_bold_line(line: &str) -> String {
-    let bold_re = match Regex::new(r"\*\*(.+?)\*\*") {
-        Ok(re) => re,
-        Err(_) => return line.to_string(),
+    enum Part {
+        Text(String),
+        Bold(String),
+    }
+
+    let Ok(bold_re) = Regex::new(r"\*\*(.+?)\*\*") else {
+        return line.to_string();
     };
 
     if !bold_re.is_match(line) {
         return line.to_string();
-    }
-
-    // Parse line into text/bold segments
-    enum Part {
-        Text(String),
-        Bold(String),
     }
     let mut parts: Vec<Part> = Vec::new();
     let mut last_end = 0;
@@ -298,7 +297,9 @@ fn fix_bold_line(line: &str) -> String {
                         rebuilt.push(' ');
                     }
                 }
-                rebuilt.push_str(&format!("**{content}**"));
+                rebuilt.push_str("**");
+                rebuilt.push_str(&content);
+                rebuilt.push_str("**");
                 // Check if next part starts with word character
                 if idx + 1 < parts_len {
                     // Peek is hard here, but the JS just checks next part content

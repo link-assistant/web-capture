@@ -2,8 +2,8 @@
 //!
 //! Extracts LaTeX formulas from HTML content, handling multiple sources:
 //! - Habr: `img.formula` elements with `source` attribute
-//! - KaTeX: `.katex` elements with `annotation[encoding="application/x-tex"]`
-//! - MathJax: `mjx-container` elements with `data-tex`/`data-latex` attributes
+//! - `KaTeX`: `.katex` elements with `annotation[encoding="application/x-tex"]`
+//! - `MathJax`: `mjx-container` elements with `data-tex`/`data-latex` attributes
 //!
 //! Based on reference implementation from:
 //! <https://github.com/link-foundation/meta-theory/blob/main/scripts/download-article.mjs>
@@ -23,7 +23,7 @@ pub fn is_formula_image(element: &ElementRef) -> bool {
     classes.contains("formula") || value.attr("source").is_some()
 }
 
-/// Check if an element is a math element (KaTeX, MathJax, or generic math class).
+/// Check if an element is a math element (`KaTeX`, `MathJax`, or generic math class).
 #[must_use]
 pub fn is_math_element(element: &ElementRef) -> bool {
     let value = element.value();
@@ -57,9 +57,9 @@ pub fn extract_habr_formula(element: &ElementRef) -> Option<String> {
     None
 }
 
-/// Extract LaTeX from KaTeX elements.
+/// Extract LaTeX from `KaTeX` elements.
 ///
-/// KaTeX stores the TeX source in `annotation[encoding="application/x-tex"]`.
+/// `KaTeX` stores the TeX source in `annotation[encoding="application/x-tex"]`.
 #[must_use]
 pub fn extract_katex_formula(element: &ElementRef) -> Option<String> {
     // Look for annotation element
@@ -83,9 +83,9 @@ pub fn extract_katex_formula(element: &ElementRef) -> Option<String> {
     None
 }
 
-/// Extract LaTeX from MathJax elements.
+/// Extract LaTeX from `MathJax` elements.
 ///
-/// MathJax stores TeX in `data-tex` attribute or annotation elements.
+/// `MathJax` stores TeX in `data-tex` attribute or annotation elements.
 #[must_use]
 pub fn extract_mathjax_formula(element: &ElementRef) -> Option<String> {
     let value = element.value();

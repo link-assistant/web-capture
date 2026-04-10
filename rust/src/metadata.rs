@@ -96,6 +96,7 @@ fn select_attr(document: &Html, selector_str: &str, attr: &str) -> Option<String
 ///
 /// Works without a browser by parsing the HTML directly with scraper.
 #[must_use]
+#[allow(clippy::too_many_lines)]
 pub fn extract_metadata(html: &str) -> ArticleMetadata {
     let document = Html::parse_document(html);
     let mut meta = ArticleMetadata::default();
@@ -142,14 +143,14 @@ pub fn extract_metadata(html: &str) -> ArticleMetadata {
         let mut hub_urls = Vec::new();
         for el in document.select(&sel) {
             // Try to get name from first span child
-            let name = if let Ok(span_sel) = Selector::parse("span:first-child") {
-                el.select(&span_sel)
-                    .next()
-                    .map(|span| span.text().collect::<String>().trim().to_string())
-                    .filter(|s| !s.is_empty())
-            } else {
-                None
-            };
+            let name = Selector::parse("span:first-child")
+                .ok()
+                .and_then(|span_sel| {
+                    el.select(&span_sel)
+                        .next()
+                        .map(|span| span.text().collect::<String>().trim().to_string())
+                        .filter(|s| !s.is_empty())
+                });
             let name = name.unwrap_or_else(|| {
                 el.text()
                     .collect::<String>()
@@ -297,7 +298,9 @@ pub fn format_metadata_block(metadata: &ArticleMetadata) -> Vec<String> {
         let mut date_line = format!("**Published:** {date}");
         if let Some(ref modified) = metadata.date_modified {
             if modified != date {
-                date_line.push_str(&format!(" (updated {modified})"));
+                date_line.push_str(" (updated ");
+                date_line.push_str(modified);
+                date_line.push(')');
             }
         }
         lines.push(date_line);
@@ -405,11 +408,12 @@ pub fn format_footer_block(metadata: &ArticleMetadata) -> Vec<String> {
             || author_name.clone(),
             |url| format!("[{author_name}]({url})"),
         );
-        let mut author_line = format!("**Author:** {author_link}");
+        let mut author_entry = format!("**Author:** {author_link}");
         if let Some(ref karma) = metadata.author_karma {
-            author_line.push_str(&format!(" | Karma: {karma}"));
+            author_entry.push_str(" | Karma: ");
+            author_entry.push_str(karma);
         }
-        lines.push(author_line);
+        lines.push(author_entry);
         lines.push(String::new());
     }
 

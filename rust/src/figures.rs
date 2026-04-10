@@ -45,9 +45,8 @@ pub fn extract_figures(html: &str, base_url: &str) -> Vec<Figure> {
     let mut figures = Vec::new();
     let mut sequential_index: u32 = 0;
 
-    let figure_sel = match Selector::parse("figure") {
-        Ok(sel) => sel,
-        Err(_) => return figures,
+    let Ok(figure_sel) = Selector::parse("figure") else {
+        return figures;
     };
     let img_sel = Selector::parse("img").unwrap();
     let caption_sel = Selector::parse("figcaption").unwrap();
@@ -207,9 +206,9 @@ mod tests {
 
     #[test]
     fn test_extract_figures_no_img() {
-        let html = r#"<html><body>
+        let html = r"<html><body>
             <figure><figcaption>Empty figure</figcaption></figure>
-        </body></html>"#;
+        </body></html>";
         let figures = extract_figures(html, "https://example.com");
         assert!(figures.is_empty());
     }

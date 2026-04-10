@@ -54,21 +54,11 @@ pub struct MissingContent {
 }
 
 /// Verification options.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Default)]
 pub struct VerifyOptions {
     pub verbose: bool,
     pub expected_figures: Option<u32>,
     pub has_local_images: bool,
-}
-
-impl Default for VerifyOptions {
-    fn default() -> Self {
-        Self {
-            verbose: false,
-            expected_figures: None,
-            has_local_images: false,
-        }
-    }
 }
 
 /// Result of content verification.
@@ -94,40 +84,37 @@ pub fn normalize_text(text: &str) -> String {
     if let Ok(re) = Regex::new(r"\s+") {
         result = re.replace_all(&result, " ").to_string();
     }
-    // Normalize unicode spaces
-    result = result
-        .replace('\u{00A0}', " ")
-        .replace('\u{2018}', "'")
-        .replace('\u{2019}', "'")
-        .replace('\u{201C}', "\"")
-        .replace('\u{201D}', "\"")
-        .replace('\u{00D7}', "x")
-        .replace('\u{2192}', "->")
-        .replace('\u{21A6}', "->")
-        .replace('\u{2212}', "-");
+    // Normalize unicode spaces and symbols
+    result = result.replace('\u{00A0}', " ");
+    result = result.replace('\u{2018}', "'");
+    result = result.replace('\u{2019}', "'");
+    result = result.replace('\u{201C}', "\"");
+    result = result.replace('\u{201D}', "\"");
+    result = result.replace('\u{00D7}', "x");
+    result = result.replace('\u{2192}', "->");
+    result = result.replace('\u{21A6}', "->");
+    result = result.replace('\u{2212}', "-");
 
     // Remove LaTeX delimiters
-    result = result.replace("$$", "").replace('$', "");
+    result = result.replace("$$", "");
+    result = result.replace('$', "");
 
     // Normalize LaTeX commands
-    if let Ok(re) = Regex::new(r"\\times") {
-        result = re.replace_all(&result, "x").to_string();
-    }
-    if let Ok(re) = Regex::new(r"\\to") {
-        result = re.replace_all(&result, "->").to_string();
-    }
+    result = result.replace("\\times", "x");
+    result = result.replace("\\to", "->");
     if let Ok(re) = Regex::new(r"\\displaystyle\s*") {
         result = re.replace_all(&result, "").to_string();
     }
     if let Ok(re) = Regex::new(r"\\text\{([^}]*)\}") {
         result = re.replace_all(&result, "$1").to_string();
     }
-    result = result.replace("\\\\%", "%").replace("\\%", "%");
-    result = result
-        .replace("\\subseteq", "\u{2286}")
-        .replace("\\in", "\u{2208}")
-        .replace("\\emptyset", "\u{2205}");
-    result = result.replace("^2", "\u{00B2}").replace("^n", "\u{207F}");
+    result = result.replace("\\\\%", "%");
+    result = result.replace("\\%", "%");
+    result = result.replace("\\subseteq", "\u{2286}");
+    result = result.replace("\\in", "\u{2208}");
+    result = result.replace("\\emptyset", "\u{2205}");
+    result = result.replace("^2", "\u{00B2}");
+    result = result.replace("^n", "\u{207F}");
 
     // Handle \\mathbb{n}_0 case-insensitively
     if let Ok(re) = Regex::new(r"(?i)\\mathbb\{n\}_0") {
@@ -145,21 +132,19 @@ pub fn normalize_code(text: &str) -> String {
     if let Ok(re) = Regex::new(r"\s+") {
         result = re.replace_all(&result, " ").to_string();
     }
-    result = result
-        .replace('\u{00A0}', " ")
-        .replace('\u{00D7}', "x")
-        .replace("$$", "")
-        .replace('$', "");
+    result = result.replace('\u{00A0}', " ");
+    result = result.replace('\u{00D7}', "x");
+    result = result.replace("$$", "");
+    result = result.replace('$', "");
 
-    if let Ok(re) = Regex::new(r"\\times") {
-        result = re.replace_all(&result, "x").to_string();
-    }
+    result = result.replace("\\times", "x");
 
     result.to_lowercase()
 }
 
 /// Verify that markdown contains the expected web page content.
 #[must_use]
+#[allow(clippy::too_many_lines, clippy::cast_precision_loss)]
 pub fn verify_markdown_content(
     web_content: &WebContent,
     markdown_text: &str,
@@ -233,18 +218,19 @@ pub fn verify_markdown_content(
 
     // Check code blocks (fuzzy matching)
     let normalized_markdown_for_code = normalize_code(markdown_text);
+    let punctuation_only_re = Regex::new(r"^[{}\[\](),;]+$").ok();
     for code in &web_content.code_blocks {
         total_checks += 1;
         let normalized_code_full = normalize_code(code);
 
         let lines: Vec<&str> = code
             .lines()
-            .map(|l| l.trim())
+            .map(str::trim)
             .filter(|l| {
                 l.len() > 3
-                    && !Regex::new(r"^[{}\[\](),;]+$")
-                        .map(|re| re.is_match(l))
-                        .unwrap_or(false)
+                    && !punctuation_only_re
+                        .as_ref()
+                        .is_some_and(|re| re.is_match(l))
             })
             .collect();
 
@@ -305,6 +291,7 @@ pub fn verify_markdown_content(
     }
 
     // Check blockquote formulas
+    let blockquote_re = Regex::new(r"(?m)^>.*$").unwrap();
     for formula in &web_content.blockquote_formulas {
         total_checks += 1;
         let normalized_formula = formula.split_whitespace().collect::<Vec<_>>().join(" ");
@@ -320,7 +307,6 @@ pub fn verify_markdown_content(
             .collect();
 
         // Find blockquote lines
-        let blockquote_re = Regex::new(r"(?m)^>.*$").unwrap();
         let blockquote_lines: Vec<&str> = blockquote_re
             .find_iter(markdown_text)
             .map(|m| m.as_str())
@@ -367,6 +353,7 @@ pub fn verify_markdown_content(
                 r"(?i)!\[(?:\*\*)?(?:Figure|Рис\.?|Рисунок)\s*\d+[\s\S]*?\]\(images/figure-\d+\.(png|jpg)\)",
             )
             .unwrap();
+            #[allow(clippy::cast_possible_truncation)]
             let figure_count = figure_re.find_iter(markdown_text).count() as u32;
             if figure_count >= expected {
                 passed_checks += 1;

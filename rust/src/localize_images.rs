@@ -172,26 +172,22 @@ pub async fn localize_images(markdown_text: &str, options: &LocalizeOptions) -> 
         }
 
         // Download the image
-        match download_image(&image.url).await {
-            Ok(buffer) => {
-                downloaded_count += 1;
-                replacements.push(ImageReplacement {
-                    from: image.full_match.clone(),
-                    to: format!("![{}]({relative_path})", image.alt_text),
-                    buffer: Some(buffer),
-                    filename: local_filename,
-                });
-                metadata.push(ImageMetadata {
-                    index: i + 1,
-                    original_url: image.url.clone(),
-                    alt_text: image.alt_text.clone(),
-                    local_path: relative_path,
-                });
-            }
-            Err(_) => {
-                // Keep original URL if download fails
-            }
+        if let Ok(buffer) = download_image(&image.url).await {
+            downloaded_count += 1;
+            replacements.push(ImageReplacement {
+                from: image.full_match.clone(),
+                to: format!("![{}]({relative_path})", image.alt_text),
+                buffer: Some(buffer),
+                filename: local_filename,
+            });
+            metadata.push(ImageMetadata {
+                index: i + 1,
+                original_url: image.url.clone(),
+                alt_text: image.alt_text.clone(),
+                local_path: relative_path,
+            });
         }
+        // Keep original URL if download fails
     }
 
     // Apply replacements to markdown

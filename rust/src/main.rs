@@ -45,6 +45,7 @@ use web_capture::{
     about = "Capture web pages as HTML, Markdown, or PNG",
     version
 )]
+#[allow(clippy::struct_excessive_bools)]
 struct Args {
     /// URL to capture (required in capture mode)
     #[arg(index = 1)]

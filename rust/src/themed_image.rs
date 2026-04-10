@@ -81,6 +81,7 @@ pub struct DualThemeResult {
 ///
 /// Note: Full browser automation requires browser-commander.
 /// This implementation returns an error indicating the requirement.
+#[allow(clippy::unused_async)]
 pub async fn capture_dual_theme_screenshots(
     url: &str,
     _options: &ThemedImageOptions,

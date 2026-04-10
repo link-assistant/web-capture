@@ -99,11 +99,10 @@ pub fn get_article(config: &BatchConfig, version: &str) -> Result<ArticleConfig,
     })?;
 
     // Merge defaults
-    if let Some(ref defaults) = config.defaults {
-        Ok(merge_config(defaults, article))
-    } else {
-        Ok(article.clone())
-    }
+    Ok(config.defaults.as_ref().map_or_else(
+        || article.clone(),
+        |defaults| merge_config(defaults, article),
+    ))
 }
 
 /// Get all article versions from configuration.
@@ -119,11 +118,10 @@ pub fn get_all_articles(config: &BatchConfig) -> Vec<ArticleConfig> {
         .articles
         .values()
         .map(|article| {
-            if let Some(ref defaults) = config.defaults {
-                merge_config(defaults, article)
-            } else {
-                article.clone()
-            }
+            config.defaults.as_ref().map_or_else(
+                || article.clone(),
+                |defaults| merge_config(defaults, article),
+            )
         })
         .collect()
 }

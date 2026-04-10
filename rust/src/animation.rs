@@ -18,21 +18,16 @@
 use serde::{Deserialize, Serialize};
 
 /// Capture mode for animation.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]
 pub enum CaptureMode {
     /// Polling-based capture (cross-browser compatible)
+    #[default]
     Screenshot,
     /// CDP-based push capture (Chromium only)
     Screencast,
     /// Deterministic frame-perfect capture (Chromium only)
     Beginframe,
-}
-
-impl Default for CaptureMode {
-    fn default() -> Self {
-        Self::Screenshot
-    }
 }
 
 impl std::fmt::Display for CaptureMode {
@@ -59,20 +54,16 @@ impl std::str::FromStr for CaptureMode {
 }
 
 /// Output format for animation.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]
 pub enum AnimationFormat {
+    #[default]
     Gif,
     PngSequence,
 }
 
-impl Default for AnimationFormat {
-    fn default() -> Self {
-        Self::Gif
-    }
-}
-
 /// Options for animation capture.
+#[allow(clippy::struct_excessive_bools)]
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AnimationOptions {
     pub max_size: u32,
@@ -155,13 +146,17 @@ pub fn compare_frames(frame1: &[u8], frame2: &[u8]) -> f64 {
         .filter(|(a, b)| a == b)
         .count();
 
-    matching_bytes as f64 / frame1.len() as f64
+    #[allow(clippy::cast_precision_loss)]
+    {
+        matching_bytes as f64 / frame1.len() as f64
+    }
 }
 
 /// Capture animation frames from a web page.
 ///
 /// Note: Full browser automation requires browser-commander.
 /// This implementation returns an error indicating the requirement.
+#[allow(clippy::unused_async)]
 pub async fn capture_animation_frames(
     url: &str,
     _options: &AnimationOptions,
