@@ -641,41 +641,5 @@ async fn capture_url(
 
 /// Normalize URL to ensure it's absolute
 fn normalize_url(url: &str) -> Result<String, String> {
-    if url.is_empty() {
-        return Err("Missing url parameter".to_string());
-    }
-
-    let absolute_url = if url.starts_with("http://") || url.starts_with("https://") {
-        url.to_string()
-    } else {
-        format!("https://{url}")
-    };
-
-    // Validate the URL
-    Url::parse(&absolute_url).map_err(|e| format!("Invalid URL: {e}"))?;
-
-    Ok(absolute_url)
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn test_normalize_url_already_absolute() {
-        assert_eq!(
-            normalize_url("https://example.com").unwrap(),
-            "https://example.com"
-        );
-    }
-
-    #[test]
-    fn test_normalize_url_relative() {
-        assert_eq!(normalize_url("example.com").unwrap(), "https://example.com");
-    }
-
-    #[test]
-    fn test_normalize_url_empty() {
-        assert!(normalize_url("").is_err());
-    }
+    web_capture::html::normalize_url(url)
 }
