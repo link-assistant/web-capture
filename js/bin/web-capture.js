@@ -144,6 +144,12 @@ const config = makeConfig({
         description: 'Show detailed output',
         default: false,
       })
+      .option('apiToken', {
+        type: 'string',
+        description:
+          'API token for authenticated capture (e.g., Google Docs private documents). Can also be set via API_TOKEN env variable.',
+        default: getenv('API_TOKEN', undefined),
+      })
       .help('help')
       .alias('help', 'h')
       .version()
@@ -161,12 +167,26 @@ const config = makeConfig({
         'web-capture https://example.com --format markdown --output page.md',
         'Capture URL as Markdown to file'
       )
+      .option('capture', {
+        type: 'string',
+        description:
+          'Capture method: browser (default, uses Puppeteer/Playwright) or api (direct HTTP fetch, for Google Docs etc.)',
+        default: 'browser',
+      })
       .example(
         'web-capture https://example.com --format png --engine playwright -o screenshot.png',
         'Capture screenshot using Playwright'
       )
+      .example(
+        'web-capture https://docs.google.com/document/d/DOC_ID/edit --format markdown',
+        'Capture Google Doc as Markdown (API-based, public doc)'
+      )
+      .example(
+        'web-capture https://docs.google.com/document/d/DOC_ID/edit --format markdown --apiToken YOUR_TOKEN',
+        'Capture private Google Doc with API token'
+      )
       .epilogue(
-        'API Endpoints (in server mode):\n  GET /html?url=<URL>&engine=<ENGINE>           Get rendered HTML\n  GET /markdown?url=<URL>                       Get Markdown conversion\n  GET /image?url=<URL>&format=png|jpeg&theme=light|dark  Screenshot\n  GET /archive?url=<URL>&localImages=true&documentFormat=markdown|html  ZIP archive\n  GET /pdf?url=<URL>&theme=light|dark           PDF with embedded images\n  GET /docx?url=<URL>                           DOCX with embedded images\n  GET /fetch?url=<URL>                          Proxy fetch\n  GET /stream?url=<URL>                         Streaming proxy'
+        'API Endpoints (in server mode):\n  GET /html?url=<URL>&engine=<ENGINE>           Get rendered HTML\n  GET /markdown?url=<URL>                       Get Markdown conversion\n  GET /image?url=<URL>&format=png|jpeg&theme=light|dark  Screenshot\n  GET /archive?url=<URL>&localImages=true&documentFormat=markdown|html  ZIP archive\n  GET /pdf?url=<URL>&theme=light|dark           PDF with embedded images\n  GET /docx?url=<URL>                           DOCX with embedded images\n  GET /fetch?url=<URL>                          Proxy fetch\n  GET /stream?url=<URL>                         Streaming proxy\n  GET /gdocs?url=<URL>&format=markdown|html|txt  Google Docs capture'
       )
       .strict(),
   lenv: {
@@ -194,6 +214,9 @@ async function startServer(port) {
       console.log(`  GET /docx?url=<URL>       - DOCX with embedded images`);
       console.log(`  GET /fetch?url=<URL>      - Proxy fetch content`);
       console.log(`  GET /stream?url=<URL>     - Stream content`);
+      console.log(
+        `  GET /gdocs?url=<URL>      - Capture Google Docs document`
+      );
       console.log('');
       console.log('Press Ctrl+C to stop the server');
       resolve(server);
@@ -257,8 +280,49 @@ async function captureUrl(url, options) {
     convertRelativeUrls,
   } = await import('../src/lib.js');
   const { createBrowser } = await import('../src/browser.js');
+  const { isGoogleDocsUrl, fetchGoogleDoc, fetchGoogleDocAsMarkdown } =
+    await import('../src/gdocs.js');
 
   const normalizedFormat = format.toLowerCase();
+
+  // Auto-detect Google Docs URLs and use API-based capture
+  if (isGoogleDocsUrl(absoluteUrl)) {
+    try {
+      const apiToken = options.apiToken;
+      if (normalizedFormat === 'markdown' || normalizedFormat === 'md') {
+        const result = await fetchGoogleDocAsMarkdown(absoluteUrl, {
+          apiToken,
+        });
+        if (output) {
+          fs.writeFileSync(output, result.markdown, 'utf-8');
+          console.error(`Google Doc Markdown saved to: ${output}`);
+        } else {
+          process.stdout.write(result.markdown);
+        }
+      } else {
+        const gdocsFormat =
+          normalizedFormat === 'png' || normalizedFormat === 'image'
+            ? 'html'
+            : normalizedFormat;
+        const result = await fetchGoogleDoc(absoluteUrl, {
+          format: gdocsFormat,
+          apiToken,
+        });
+        if (output) {
+          fs.writeFileSync(output, result.content, 'utf-8');
+          console.error(
+            `Google Doc (${gdocsFormat}) saved to: ${output}`
+          );
+        } else {
+          process.stdout.write(result.content);
+        }
+      }
+      return;
+    } catch (err) {
+      console.error(`Error capturing Google Doc: ${err.message}`);
+      process.exit(1);
+    }
+  }
 
   try {
     if (normalizedFormat === 'jpeg') {
@@ -606,6 +670,7 @@ async function main() {
       postProcess: config.postProcess,
       detectCodeLanguage: config.detectCodeLanguage,
       dualTheme: config.dualTheme,
+      apiToken: config.apiToken,
     });
   } else {
     // No arguments - show error
