@@ -214,9 +214,7 @@ async function startServer(port) {
       console.log(`  GET /docx?url=<URL>       - DOCX with embedded images`);
       console.log(`  GET /fetch?url=<URL>      - Proxy fetch content`);
       console.log(`  GET /stream?url=<URL>     - Stream content`);
-      console.log(
-        `  GET /gdocs?url=<URL>      - Capture Google Docs document`
-      );
+      console.log(`  GET /gdocs?url=<URL>      - Capture Google Docs document`);
       console.log('');
       console.log('Press Ctrl+C to stop the server');
       resolve(server);
@@ -310,9 +308,7 @@ async function captureUrl(url, options) {
         });
         if (output) {
           fs.writeFileSync(output, result.content, 'utf-8');
-          console.error(
-            `Google Doc (${gdocsFormat}) saved to: ${output}`
-          );
+          console.error(`Google Doc (${gdocsFormat}) saved to: ${output}`);
         } else {
           process.stdout.write(result.content);
         }

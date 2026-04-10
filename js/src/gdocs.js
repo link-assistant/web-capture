@@ -7,8 +7,7 @@
 import fetch from 'node-fetch';
 import { convertHtmlToMarkdown } from './lib.js';
 
-const GDOCS_URL_PATTERN =
-  /docs\.google\.com\/document\/d\/([a-zA-Z0-9_-]+)/;
+const GDOCS_URL_PATTERN = /docs\.google\.com\/document\/d\/([a-zA-Z0-9_-]+)/;
 
 const GDOCS_EXPORT_BASE = 'https://docs.google.com/document/d';
 

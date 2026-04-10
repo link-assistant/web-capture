@@ -38,9 +38,7 @@ describe('gdocs', () => {
 
     it('returns false for Google Sheets URL', () => {
       expect(
-        isGoogleDocsUrl(
-          'https://docs.google.com/spreadsheets/d/abc123/edit'
-        )
+        isGoogleDocsUrl('https://docs.google.com/spreadsheets/d/abc123/edit')
       ).toBe(false);
     });
 
@@ -80,9 +78,7 @@ describe('gdocs', () => {
 
     it('extracts document ID with hyphens and underscores', () => {
       expect(
-        extractDocumentId(
-          'https://docs.google.com/document/d/abc-123_XYZ/'
-        )
+        extractDocumentId('https://docs.google.com/document/d/abc-123_XYZ/')
       ).toBe('abc-123_XYZ');
     });
 
