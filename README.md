@@ -41,7 +41,9 @@ Both implementations expose the same API:
 | Endpoint | Description |
 |----------|-------------|
 | `GET /html?url=<URL>` | Get rendered HTML content |
-| `GET /markdown?url=<URL>` | Get Markdown conversion |
+| `GET /markdown?url=<URL>` | Get Markdown conversion (default: Turndown) |
+| `GET /markdown?url=<URL>&converter=kreuzberg` | High-performance Markdown conversion via [html-to-markdown](https://github.com/kreuzberg-dev/html-to-markdown) |
+| `GET /markdown?url=<URL>&converter=kreuzberg&format=json` | Structured result with metadata, tables, and warnings |
 | `GET /image?url=<URL>` | Get PNG screenshot |
 | `GET /fetch?url=<URL>` | Proxy fetch content |
 | `GET /stream?url=<URL>` | Stream content |
@@ -155,7 +157,7 @@ cargo fmt            # Format code
 ## Features
 
 - **HTML Rendering**: Fetch and render HTML with JavaScript support via headless browsers
-- **Markdown Conversion**: Clean HTML-to-Markdown conversion with proper formatting
+- **Markdown Conversion**: Clean HTML-to-Markdown conversion with proper formatting, with optional high-performance [kreuzberg html-to-markdown](https://github.com/kreuzberg-dev/html-to-markdown) backend (150-280 MB/s, structured results)
 - **Screenshots**: Capture PNG screenshots of web pages
 - **URL Normalization**: Convert relative URLs to absolute
 - **Encoding Detection**: Automatic charset detection and UTF-8 conversion
@@ -180,8 +182,21 @@ The Rust implementation uses:
 
 [Unlicense](LICENSE) — This is free and unencumbered software released into the public domain. You are free to copy, modify, publish, use, compile, sell, or distribute this software for any purpose, commercial or non-commercial, and by any means. See [https://unlicense.org](https://unlicense.org) for details.
 
+## Markdown Converters
+
+web-capture supports two HTML-to-Markdown converters:
+
+| Converter | Selection | Throughput | Structured Results | Used In |
+|-----------|-----------|------------|-------------------|---------|
+| **Turndown** (default) | `converter=turndown` | ~5-10 MB/s | No | JS implementation |
+| **html2md** (default) | N/A (Rust only) | ~20-40 MB/s | No | Rust implementation |
+| **kreuzberg** | `converter=kreuzberg` | 150-280 MB/s | Yes (metadata, tables) | Both JS and Rust |
+
+The kreuzberg converter is powered by [html-to-markdown](https://github.com/kreuzberg-dev/html-to-markdown) and uses the same Rust core across both implementations, ensuring consistent output. See [integration analysis](docs/html-to-markdown-integration.md) for details.
+
 ## Related Projects
 
 - [browser-commander](https://github.com/link-foundation/browser-commander) - Browser automation library used in Rust implementation
 - [turndown](https://github.com/mixmark-io/turndown) - HTML to Markdown converter used in JS implementation
 - [html2md](https://github.com/nickyc975/html2md-rs) - HTML to Markdown converter used in Rust implementation
+- [html-to-markdown](https://github.com/kreuzberg-dev/html-to-markdown) - High-performance HTML to Markdown converter (kreuzberg), integrated as optional converter
