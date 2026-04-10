@@ -67,6 +67,12 @@ base64 = "0.22"
 # Regex for URL conversion
 regex = "1.11"
 
+# HTML entity decoding
+html-escape = "0.2"
+
+# ZIP archive creation
+zip = { version = "4.0", default-features = false, features = ["deflate"] }
+
 [dev-dependencies]
 tokio-test = "0.4"
 

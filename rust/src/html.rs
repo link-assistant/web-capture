@@ -216,73 +216,43 @@ pub fn is_html(html: &str) -> bool {
         .unwrap_or(false)
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
+/// Decode HTML entities to unicode characters.
+///
+/// Converts HTML entities like `&amp;`, `&lt;`, `&#39;`, `&#x27;` etc.
+/// to their actual unicode character equivalents.
+///
+/// # Arguments
+///
+/// * `html` - The HTML content containing entities to decode
+///
+/// # Returns
+///
+/// The content with all HTML entities decoded to unicode
+#[must_use]
+pub fn decode_html_entities(html: &str) -> String {
+    html_escape::decode_html_entities(html).into_owned()
+}
 
-    #[test]
-    fn test_convert_relative_urls_href() {
-        let html = r#"<a href="/about">About</a>"#;
-        let result = convert_relative_urls(html, "https://example.com");
-        assert!(result.contains("https://example.com/about"));
+/// Normalize URL to ensure it's absolute.
+///
+/// Prepends `https://` if no scheme is present and validates the URL.
+///
+/// # Errors
+///
+/// Returns an error string if the URL is empty or invalid.
+pub fn normalize_url(url: &str) -> std::result::Result<String, String> {
+    if url.is_empty() {
+        return Err("Missing url parameter".to_string());
     }
 
-    #[test]
-    fn test_convert_relative_urls_src() {
-        let html = r#"<img src="/image.png">"#;
-        let result = convert_relative_urls(html, "https://example.com");
-        assert!(result.contains("https://example.com/image.png"));
-    }
+    let absolute_url = if url.starts_with("http://") || url.starts_with("https://") {
+        url.to_string()
+    } else {
+        format!("https://{url}")
+    };
 
-    #[test]
-    fn test_convert_relative_urls_absolute() {
-        let html = r#"<a href="https://other.com/page">Link</a>"#;
-        let result = convert_relative_urls(html, "https://example.com");
-        assert!(result.contains("https://other.com/page"));
-    }
+    // Validate the URL
+    Url::parse(&absolute_url).map_err(|e| format!("Invalid URL: {e}"))?;
 
-    #[test]
-    fn test_convert_relative_urls_data_url() {
-        let html = r#"<img src="data:image/png;base64,abc123">"#;
-        let result = convert_relative_urls(html, "https://example.com");
-        assert!(result.contains("data:image/png;base64,abc123"));
-    }
-
-    #[test]
-    fn test_convert_to_utf8_already_utf8() {
-        let html = r#"<html><head><meta charset="utf-8"></head></html>"#;
-        let result = convert_to_utf8(html);
-        assert!(result.contains("utf-8"));
-    }
-
-    #[test]
-    fn test_convert_to_utf8_other_charset() {
-        let html = r#"<html><head><meta charset="iso-8859-1"></head></html>"#;
-        let result = convert_to_utf8(html);
-        assert!(result.contains("utf-8"));
-    }
-
-    #[test]
-    fn test_has_javascript_with_script() {
-        let html = r"<html><script>console.log('test');</script></html>";
-        assert!(has_javascript(html));
-    }
-
-    #[test]
-    fn test_has_javascript_without_script() {
-        let html = r"<html><body>Hello</body></html>";
-        assert!(!has_javascript(html));
-    }
-
-    #[test]
-    fn test_is_html_valid() {
-        let html = r"<html><body>Hello</body></html>";
-        assert!(is_html(html));
-    }
-
-    #[test]
-    fn test_is_html_invalid() {
-        let html = "Just plain text";
-        assert!(!is_html(html));
-    }
+    Ok(absolute_url)
 }

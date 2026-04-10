@@ -11,6 +11,7 @@ import { docxHandler } from './docx.js';
 import { animationHandler } from './animation.js';
 import { figuresHandler } from './figures.js';
 import { themedImageHandler } from './themed-image.js';
+import { gdocsHandler } from './gdocs.js';
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -27,6 +28,7 @@ app.get('/docx', docxHandler);
 app.get('/animation', animationHandler);
 app.get('/figures', figuresHandler);
 app.get('/themed-image', themedImageHandler);
+app.get('/gdocs', gdocsHandler);
 
 // Start the server if this is the main module
 const isMainModule =
