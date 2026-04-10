@@ -138,8 +138,7 @@ mod tests {
 
     #[test]
     fn test_convert_removes_script() {
-        let html =
-            r"<html><body><script>alert('test');</script><p>Content</p></body></html>";
+        let html = r"<html><body><script>alert('test');</script><p>Content</p></body></html>";
         let result = convert_with_kreuzberg(html, None).unwrap();
         assert!(!result.content.contains("alert"));
         assert!(result.content.contains("Content"));
