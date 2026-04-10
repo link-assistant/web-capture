@@ -98,7 +98,7 @@ fn test_extract_base64_images_multiple() {
 
 #[test]
 fn test_extract_base64_images_no_images() {
-    let html = r#"<p>No images here</p>"#;
+    let html = r"<p>No images here</p>";
     let (updated, images) = extract_base64_images(html);
 
     assert!(images.is_empty());
