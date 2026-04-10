@@ -12,11 +12,11 @@
 
 // Load use-m dynamically
 const { use } = eval(
-  await (await fetch("https://unpkg.com/use-m/use.js")).text(),
+  await (await fetch('https://unpkg.com/use-m/use.js')).text()
 );
 
 // Import command-stream for shell command execution
-const { $ } = await use("command-stream");
+const { $ } = await use('command-stream');
 
 try {
   // Get current npm version
@@ -45,35 +45,35 @@ try {
   } catch (updateError) {
     console.warn(`Warning: npm install -g failed: ${updateError.message}`);
     console.warn(
-      "This is likely the Node.js 22.22.2 broken npm issue (actions/runner-images#13883).",
+      'This is likely the Node.js 22.22.2 broken npm issue (actions/runner-images#13883).'
     );
 
     // Try corepack as fallback
-    console.warn("Trying corepack as fallback...");
+    console.warn('Trying corepack as fallback...');
     try {
       await $`corepack enable`;
       await $`corepack prepare npm@11 --activate`;
       updated = true;
     } catch (corepackError) {
       console.warn(
-        `Warning: corepack fallback also failed: ${corepackError.message}`,
+        `Warning: corepack fallback also failed: ${corepackError.message}`
       );
       // Check if current npm version already supports OIDC (>= 11.5.1)
-      const majorVersion = parseInt(currentVersion.split(".")[0], 10);
+      const majorVersion = parseInt(currentVersion.split('.')[0], 10);
       if (majorVersion >= 11) {
         console.log(
-          "Current npm version already supports OIDC trusted publishing",
+          'Current npm version already supports OIDC trusted publishing'
         );
         updated = true;
       } else {
         console.error(
-          `ERROR: Could not update npm to >= 11.5.1 for OIDC trusted publishing.`,
+          `ERROR: Could not update npm to >= 11.5.1 for OIDC trusted publishing.`
         );
         console.error(
-          `Current npm version ${currentVersion} does not support OIDC.`,
+          `Current npm version ${currentVersion} does not support OIDC.`
         );
         console.error(
-          "npm publish will likely fail. See: https://github.com/actions/runner-images/issues/13883",
+          'npm publish will likely fail. See: https://github.com/actions/runner-images/issues/13883'
         );
         // Do not exit — let the publish step fail with a clear error instead
         // This allows the version bump to complete even if publish fails
@@ -86,6 +86,6 @@ try {
   const updatedVersion = updatedResult.stdout.trim();
   console.log(`Updated npm version: ${updatedVersion}`);
 } catch (error) {
-  console.error("Error updating npm:", error.message);
+  console.error('Error updating npm:', error.message);
   process.exit(1);
 }

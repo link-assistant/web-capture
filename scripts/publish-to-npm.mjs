@@ -13,26 +13,26 @@
  * - lino-arguments: Unified configuration from CLI args, env vars, and .lenv files
  */
 
-import { readFileSync, appendFileSync } from "fs";
+import { readFileSync, appendFileSync } from 'fs';
 
-const PACKAGE_NAME = "@link-assistant/web-capture";
+const PACKAGE_NAME = '@link-assistant/web-capture';
 
 // Load use-m dynamically
 const { use } = eval(
-  await (await fetch("https://unpkg.com/use-m/use.js")).text(),
+  await (await fetch('https://unpkg.com/use-m/use.js')).text()
 );
 
 // Import link-foundation libraries
-const { $ } = await use("command-stream");
-const { makeConfig } = await use("lino-arguments");
+const { $ } = await use('command-stream');
+const { makeConfig } = await use('lino-arguments');
 
 // Parse CLI arguments using lino-arguments
 const config = makeConfig({
   yargs: ({ yargs, getenv }) =>
-    yargs.option("should-pull", {
-      type: "boolean",
-      default: getenv("SHOULD_PULL", false),
-      describe: "Pull latest changes before publishing",
+    yargs.option('should-pull', {
+      type: 'boolean',
+      default: getenv('SHOULD_PULL', false),
+      describe: 'Pull latest changes before publishing',
     }),
 });
 
@@ -68,13 +68,13 @@ async function main() {
     }
 
     // Get current version
-    const packageJson = JSON.parse(readFileSync("./package.json", "utf8"));
+    const packageJson = JSON.parse(readFileSync('./package.json', 'utf8'));
     const currentVersion = packageJson.version;
     console.log(`Current version to publish: ${currentVersion}`);
 
     // Check if this version is already published on npm
     console.log(
-      `Checking if version ${currentVersion} is already published...`,
+      `Checking if version ${currentVersion} is already published...`
     );
     const checkResult =
       await $`npm view "${PACKAGE_NAME}@${currentVersion}" version`.run({
@@ -85,14 +85,14 @@ async function main() {
     // Exit code 0 means version exists, non-zero means version not found
     if (checkResult.code === 0) {
       console.log(`Version ${currentVersion} is already published to npm`);
-      setOutput("published", "true");
-      setOutput("published_version", currentVersion);
-      setOutput("already_published", "true");
+      setOutput('published', 'true');
+      setOutput('published_version', currentVersion);
+      setOutput('already_published', 'true');
       return;
     } else {
       // Version not found on npm (E404), proceed with publish
       console.log(
-        `Version ${currentVersion} not found on npm, proceeding with publish...`,
+        `Version ${currentVersion} not found on npm, proceeding with publish...`
       );
     }
 
@@ -106,7 +106,7 @@ async function main() {
         await $`npm publish --provenance --access public`;
 
         // Verify the version was actually published
-        console.log("Verifying publish...");
+        console.log('Verifying publish...');
         await sleep(3000); // Wait for npm registry to propagate
         const verifyResult =
           await $`npm view "${PACKAGE_NAME}@${currentVersion}" version`.run({
@@ -114,20 +114,20 @@ async function main() {
           });
         if (verifyResult.code !== 0) {
           throw new Error(
-            `Publish verification failed: version ${currentVersion} not found on npm after publish`,
+            `Publish verification failed: version ${currentVersion} not found on npm after publish`
           );
         }
 
-        setOutput("published", "true");
-        setOutput("published_version", currentVersion);
+        setOutput('published', 'true');
+        setOutput('published_version', currentVersion);
         console.log(
-          `\u2705 Published ${PACKAGE_NAME}@${currentVersion} to npm`,
+          `\u2705 Published ${PACKAGE_NAME}@${currentVersion} to npm`
         );
         return;
       } catch (error) {
         if (i < MAX_RETRIES) {
           console.log(
-            `Publish failed: ${error.message}, waiting ${RETRY_DELAY / 1000}s before retry...`,
+            `Publish failed: ${error.message}, waiting ${RETRY_DELAY / 1000}s before retry...`
           );
           await sleep(RETRY_DELAY);
         }
@@ -137,7 +137,7 @@ async function main() {
     console.error(`\u274C Failed to publish after ${MAX_RETRIES} attempts`);
     process.exit(1);
   } catch (error) {
-    console.error("Error:", error.message);
+    console.error('Error:', error.message);
     process.exit(1);
   }
 }
