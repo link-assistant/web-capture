@@ -1,5 +1,11 @@
 # @link-assistant/web-capture
 
+## 1.4.1
+
+### Patch Changes
+
+- 4570a2b: Fix CI/CD release pipeline: resolve git show path bug in version-and-commit.mjs where `git show origin/main:package.json` failed because git show uses repo-root-relative paths (should be `js/package.json`). Add npx-based fallback in setup-npm.mjs for Node.js 22.22.2 broken npm issue.
+
 ## 1.4.0
 
 ### Minor Changes
