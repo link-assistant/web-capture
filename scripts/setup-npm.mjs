@@ -48,35 +48,48 @@ try {
       'This is likely the Node.js 22.22.2 broken npm issue (actions/runner-images#13883).'
     );
 
-    // Try corepack as fallback
-    console.warn('Trying corepack as fallback...');
+    // Fallback 1: Use npx to download and install npm@11 via a fresh copy
+    // npx downloads packages to a cache and runs them, bypassing the broken
+    // global npm's rebuild/arborist code path.
+    console.warn('Trying npx-based install as fallback...');
     try {
-      await $`corepack enable`;
-      await $`corepack prepare npm@11 --activate`;
+      await $`npx --yes npm@11 install -g npm@11`;
       updated = true;
-    } catch (corepackError) {
+    } catch (npxError) {
       console.warn(
-        `Warning: corepack fallback also failed: ${corepackError.message}`
+        `Warning: npx-based install failed: ${npxError.message}`
       );
-      // Check if current npm version already supports OIDC (>= 11.5.1)
-      const majorVersion = parseInt(currentVersion.split('.')[0], 10);
-      if (majorVersion >= 11) {
-        console.log(
-          'Current npm version already supports OIDC trusted publishing'
-        );
+
+      // Fallback 2: Try corepack
+      console.warn('Trying corepack as fallback...');
+      try {
+        await $`corepack enable`;
+        await $`corepack prepare npm@11 --activate`;
         updated = true;
-      } else {
-        console.error(
-          `ERROR: Could not update npm to >= 11.5.1 for OIDC trusted publishing.`
+      } catch (corepackError) {
+        console.warn(
+          `Warning: corepack fallback also failed: ${corepackError.message}`
         );
-        console.error(
-          `Current npm version ${currentVersion} does not support OIDC.`
-        );
-        console.error(
-          'npm publish will likely fail. See: https://github.com/actions/runner-images/issues/13883'
-        );
-        // Do not exit — let the publish step fail with a clear error instead
-        // This allows the version bump to complete even if publish fails
+        // Check if current npm version already supports OIDC (>= 11.5.1)
+        const majorVersion = parseInt(currentVersion.split('.')[0], 10);
+        if (majorVersion >= 11) {
+          console.log(
+            'Current npm version already supports OIDC trusted publishing'
+          );
+          updated = true;
+        } else {
+          console.error(
+            `ERROR: Could not update npm to >= 11.5.1 for OIDC trusted publishing.`
+          );
+          console.error(
+            `Current npm version ${currentVersion} does not support OIDC.`
+          );
+          console.error(
+            'npm publish will likely fail. See: https://github.com/actions/runner-images/issues/13883'
+          );
+          // Do not exit — let the publish step fail with a clear error instead
+          // This allows the version bump to complete even if publish fails
+        }
       }
     }
   }

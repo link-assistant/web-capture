@@ -126,7 +126,15 @@ function countChangesets() {
  */
 async function getVersion(source = 'local') {
   if (source === 'remote') {
-    const result = await $`git show origin/main:package.json`.run({
+    // git show uses repo-root-relative paths, but this script runs from
+    // a subdirectory (e.g., js/). Use git rev-parse --show-prefix to get
+    // the current directory relative to the repo root.
+    const prefixResult = await $`git rev-parse --show-prefix`.run({
+      capture: true,
+    });
+    const prefix = prefixResult.stdout.trim();
+    const gitPath = `${prefix}package.json`;
+    const result = await $`git show origin/main:${gitPath}`.run({
       capture: true,
     });
     return JSON.parse(result.stdout).version;
