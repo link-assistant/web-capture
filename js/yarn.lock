@@ -1099,6 +1099,13 @@
   resolved "https://registry.npmjs.org/@colors/colors/-/colors-1.5.0.tgz"
   integrity sha512-ooWCrlZP11i8GImSjTHYHLkvFDP48nS4+204nGb1RiX/WXYHmJA2III9/e2DWVabCESdW7hBAEzHRqUn9OUVvQ==
 
+"@emnapi/runtime@1.9.1":
+  version "1.9.1"
+  resolved "https://registry.npmjs.org/@emnapi/runtime/-/runtime-1.9.1.tgz"
+  integrity sha512-VYi5+ZVLhpgK4hQ0TAjiQiZ6ol0oe4mBx7mVv7IflsiEp0OWoVsp/+f9Vc1hOhE0TtkORVrI1GvzyreqpgWtkA==
+  dependencies:
+    tslib "^2.4.0"
+
 "@eslint-community/eslint-utils@^4.8.0":
   version "4.9.0"
   resolved "https://registry.npmjs.org/@eslint-community/eslint-utils/-/eslint-utils-4.9.0.tgz"
@@ -1490,6 +1497,18 @@
     "@jscpd/core" "4.0.1"
     reprism "^0.0.11"
     spark-md5 "^3.0.2"
+
+"@kreuzberg/html-to-markdown-node-linux-x64-gnu@^3.1.0":
+  version "3.1.0"
+  resolved "https://registry.npmjs.org/@kreuzberg/html-to-markdown-node-linux-x64-gnu/-/html-to-markdown-node-linux-x64-gnu-3.1.0.tgz"
+  integrity sha512-JviBVeecElHkMoA0b3A5cBPdwjsu2HXL5pPG67HBkVCJYZLSjSIn9q8Bii1NUWp6lpxl5naZbncxcrnEo9rIyA==
+
+"@kreuzberg/html-to-markdown-node@^3.1.0":
+  version "3.1.0"
+  resolved "https://registry.npmjs.org/@kreuzberg/html-to-markdown-node/-/html-to-markdown-node-3.1.0.tgz"
+  integrity sha512-6M+8rFvTahQHwTqFqh9PNuMIQWQ3Db2c6/s591pSmoUlT7W/dmdVDTq6ZLlMiM9pcIzRTGXvEF5eUQ08L4YVWQ==
+  dependencies:
+    "@emnapi/runtime" "1.9.1"
 
 "@manypkg/find-root@^1.1.0":
   version "1.1.0"
@@ -5844,7 +5863,7 @@ tr46@~0.0.3:
   resolved "https://registry.npmjs.org/tr46/-/tr46-0.0.3.tgz"
   integrity sha512-N3WMsuqV66lT30CrXNbEjx4GEwlow3v6rr4mCcv6prnfwhS01rkgyFdjPNBYd9br7LpXV1+Emh01fHnq2Gdgrw==
 
-tslib@^2.0.1:
+tslib@^2.0.1, tslib@^2.4.0:
   version "2.8.1"
   resolved "https://registry.npmjs.org/tslib/-/tslib-2.8.1.tgz"
   integrity sha512-oJFu94HQb+KVduSUQL7wnpmqnfmLsOA/nAh6b6EH0wCEoK0/mPeXU6c3wKDV83MkOuHPRHtSXKKU99IBazS/2w==
