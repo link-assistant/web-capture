@@ -132,6 +132,16 @@ const config = makeConfig({
           'Base directory for auto-derived output paths when -o is omitted (default: ./data/web-capture)',
         default: getenv('WEB_CAPTURE_DATA_DIR', './data/web-capture'),
       })
+      .option('archive', {
+        type: 'string',
+        description:
+          'Create archive output. Formats: zip (default), 7z, tar.gz (alias gz), tar. Use without value for zip.',
+      })
+      .option('noExtractImages', {
+        type: 'boolean',
+        description: 'Alias for --embed-images: keep images inline as base64',
+        default: false,
+      })
       .option('dualTheme', {
         type: 'boolean',
         description:
@@ -712,6 +722,21 @@ async function main() {
     // Server mode
     await startServer(config.port);
   } else if (url) {
+    // --no-extract-images is an alias for --embed-images
+    if (config.noExtractImages) {
+      config.embedImages = true;
+    }
+    // --archive flag overrides format
+    if (config.archive !== undefined) {
+      const archiveFormat = config.archive === true || config.archive === '' ? 'zip' : config.archive;
+      const validFormats = ['zip', '7z', 'tar.gz', 'gz', 'tar'];
+      if (!validFormats.includes(archiveFormat)) {
+        console.error(`Error: Unsupported archive format "${archiveFormat}". Supported: ${validFormats.join(', ')}`);
+        process.exit(1);
+      }
+      config.archiveFormat = archiveFormat === 'gz' ? 'tar.gz' : archiveFormat;
+      config.format = 'archive';
+    }
     // Capture mode
     await captureUrl(url, {
       format: config.format,
@@ -733,6 +758,7 @@ async function main() {
       embedImages: config.embedImages,
       imagesDir: config.imagesDir,
       dataDir: config.dataDir,
+      archiveFormat: config.archiveFormat,
     });
   } else {
     // No arguments - show error

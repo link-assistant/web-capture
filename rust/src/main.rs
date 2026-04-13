@@ -100,6 +100,14 @@ struct Args {
     #[arg(long, default_value = "./data/web-capture", env = "WEB_CAPTURE_DATA_DIR")]
     data_dir: String,
 
+    /// Create archive output. Formats: zip (default), 7z, tar.gz (alias gz), tar
+    #[arg(long, num_args = 0..=1, default_missing_value = "zip")]
+    archive: Option<String>,
+
+    /// Alias for --embed-images: keep images inline as base64
+    #[arg(long, default_value_t = false)]
+    no_extract_images: bool,
+
     /// Capture both light and dark theme screenshots
     #[arg(long, default_value_t = false)]
     dual_theme: bool,
@@ -156,14 +164,35 @@ async fn main() -> anyhow::Result<()> {
         .with(tracing_subscriber::fmt::layer())
         .init();
 
-    let args = Args::parse();
+    let mut args = Args::parse();
+
+    // --no-extract-images is an alias for --embed-images
+    if args.no_extract_images {
+        args.embed_images = true;
+    }
+
+    // --archive flag validation and format override
+    let effective_format;
+    if let Some(ref archive_fmt) = args.archive {
+        let fmt = if archive_fmt.is_empty() { "zip" } else { archive_fmt.as_str() };
+        match fmt {
+            "zip" | "7z" | "tar.gz" | "gz" | "tar" => {}
+            other => {
+                eprintln!("Error: Unsupported archive format \"{other}\". Supported: zip, 7z, tar.gz, gz, tar");
+                std::process::exit(1);
+            }
+        }
+        effective_format = "archive".to_string();
+    } else {
+        effective_format = args.format.clone();
+    }
 
     if args.serve {
         // Server mode
         start_server(args.port).await?;
     } else if let Some(ref url) = args.url {
         // Capture mode
-        capture_url(url, &args.format, args.output.as_ref(), &args).await?;
+        capture_url(url, &effective_format, args.output.as_ref(), &args).await?;
     } else {
         eprintln!("Error: Missing URL or --serve flag");
         eprintln!("Run with --help for usage information");
