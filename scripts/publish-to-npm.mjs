@@ -100,24 +100,29 @@ async function main() {
     // Strategy:
     // 1. Try OIDC trusted publishing (npm publish --provenance --access public)
     // 2. If OIDC fails with 404 (not configured on npmjs.org), fall back to token-based auth
-    // 3. If token-based auth also fails, try changeset publish as last resort
     for (let i = 1; i <= MAX_RETRIES; i++) {
       console.log(`Publish attempt ${i} of ${MAX_RETRIES}...`);
       try {
         // Try OIDC trusted publishing first
         console.log('Trying OIDC trusted publishing...');
-        const publishResult = await $`npm publish --provenance --access public`.run({ capture: true });
-
-        if (publishResult.code !== 0) {
-          const stderr = publishResult.stderr || '';
+        let oidcFailed = false;
+        try {
+          await $`npm publish --provenance --access public`;
+        } catch (oidcError) {
+          const errorMsg = oidcError.message || '';
           // 404 on PUT means OIDC trusted publishing is not configured for this package
-          if (stderr.includes('404') || stderr.includes('Not Found')) {
-            console.log('OIDC trusted publishing not configured for this package, trying token-based publish...');
-            // Fall back to token-based auth (uses NODE_AUTH_TOKEN from environment)
-            await $`npm publish --access public`;
+          if (errorMsg.includes('404') || errorMsg.includes('Not Found') || errorMsg.includes('E404')) {
+            console.log('OIDC trusted publishing returned 404 (not configured for this package scope)');
+            oidcFailed = true;
           } else {
-            throw new Error(`npm publish failed: ${stderr}`);
+            throw oidcError;
           }
+        }
+
+        if (oidcFailed) {
+          // Fall back to token-based auth (uses NODE_AUTH_TOKEN from environment)
+          console.log('Falling back to token-based publish...');
+          await $`npm publish --access public`;
         }
 
         // Verify the version was actually published
