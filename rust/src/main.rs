@@ -96,6 +96,10 @@ struct Args {
     #[arg(long, default_value = "images", env = "WEB_CAPTURE_IMAGES_DIR")]
     images_dir: String,
 
+    /// Base directory for auto-derived output paths when -o is omitted (default: ./data/web-capture)
+    #[arg(long, default_value = "./data/web-capture", env = "WEB_CAPTURE_DATA_DIR")]
+    data_dir: String,
+
     /// Capture both light and dark theme screenshots
     #[arg(long, default_value_t = false)]
     dual_theme: bool,
@@ -580,7 +584,17 @@ async fn capture_url(
                     web_capture::gdocs::fetch_google_doc_as_markdown(&absolute_url, api_token)
                         .await?;
                 let mut markdown = result.content;
-                if let Some(path) = output {
+                let is_stdout = output.map_or(false, |p| p.as_os_str() == "-");
+                let derived;
+                let effective_output = if is_stdout {
+                    None
+                } else if let Some(path) = output {
+                    Some(path.clone())
+                } else {
+                    derived = derive_output_path(&absolute_url, "md", &args.data_dir);
+                    Some(derived)
+                };
+                if let Some(ref path) = effective_output {
                     if !args.embed_images {
                         if let Some(output_dir) = path.parent() {
                             let extraction = web_capture::extract_images::extract_and_save_images(
@@ -612,7 +626,20 @@ async fn capture_url(
                 let result =
                     web_capture::gdocs::fetch_google_doc(&absolute_url, gdocs_format, api_token)
                         .await?;
-                if let Some(path) = output {
+                let is_stdout = output.map_or(false, |p| p.as_os_str() == "-");
+                let derived;
+                let effective_output = if is_stdout {
+                    None
+                } else if let Some(path) = output {
+                    Some(path.clone())
+                } else {
+                    derived = derive_output_path(&absolute_url, gdocs_format, &args.data_dir);
+                    Some(derived)
+                };
+                if let Some(ref path) = effective_output {
+                    if let Some(parent) = path.parent() {
+                        std::fs::create_dir_all(parent).ok();
+                    }
                     fs::write(path, &result.content).await?;
                     eprintln!("Google Doc ({}) saved to: {}", gdocs_format, path.display());
                 } else {
@@ -637,7 +664,17 @@ async fn capture_url(
             let result = convert_html_to_markdown_enhanced(&html, Some(&absolute_url), &options)?;
             let mut markdown = result.markdown;
 
-            if let Some(path) = output {
+            let is_stdout = output.map_or(false, |p| p.as_os_str() == "-");
+            let derived;
+            let effective_output = if is_stdout {
+                None
+            } else if let Some(path) = output {
+                Some(path.clone())
+            } else {
+                derived = derive_output_path(&absolute_url, "md", &args.data_dir);
+                Some(derived)
+            };
+            if let Some(ref path) = effective_output {
                 if !args.embed_images {
                     if let Some(output_dir) = path.parent() {
                         let extraction = web_capture::extract_images::extract_and_save_images(
@@ -653,6 +690,9 @@ async fn capture_url(
                             );
                         }
                     }
+                }
+                if let Some(parent) = path.parent() {
+                    std::fs::create_dir_all(parent).ok();
                 }
                 fs::write(path, &markdown).await?;
                 eprintln!("Markdown saved to: {}", path.display());
@@ -694,7 +734,20 @@ async fn capture_url(
                 convert_relative_urls(&utf8_html, &absolute_url)
             };
 
-            if let Some(path) = output {
+            let is_stdout = output.map_or(false, |p| p.as_os_str() == "-");
+            let derived;
+            let effective_output = if is_stdout {
+                None
+            } else if let Some(path) = output {
+                Some(path.clone())
+            } else {
+                derived = derive_output_path(&absolute_url, "html", &args.data_dir);
+                Some(derived)
+            };
+            if let Some(ref path) = effective_output {
+                if let Some(parent) = path.parent() {
+                    std::fs::create_dir_all(parent).ok();
+                }
                 fs::write(path, &result).await?;
                 eprintln!("HTML saved to: {}", path.display());
             } else {
@@ -704,6 +757,16 @@ async fn capture_url(
     }
 
     Ok(())
+}
+
+/// Derive an output file path from a URL when -o is not provided.
+fn derive_output_path(absolute_url: &str, ext: &str, data_dir: &str) -> PathBuf {
+    let parsed = Url::parse(absolute_url).unwrap_or_else(|_| Url::parse("https://unknown").unwrap());
+    let host = parsed.host_str().unwrap_or("unknown");
+    let url_path = parsed.path().trim_start_matches('/').trim_end_matches('/');
+    let dir = PathBuf::from(data_dir).join(host).join(url_path);
+    std::fs::create_dir_all(&dir).ok();
+    dir.join(format!("document.{ext}"))
 }
 
 /// Normalize URL to ensure it's absolute

@@ -126,6 +126,12 @@ const config = makeConfig({
           'Directory name for extracted images, relative to output file (default: images)',
         default: getenv('WEB_CAPTURE_IMAGES_DIR', 'images'),
       })
+      .option('dataDir', {
+        type: 'string',
+        description:
+          'Base directory for auto-derived output paths when -o is omitted (default: ./data/web-capture)',
+        default: getenv('WEB_CAPTURE_DATA_DIR', './data/web-capture'),
+      })
       .option('dualTheme', {
         type: 'boolean',
         description:
@@ -248,10 +254,20 @@ async function startServer(port) {
   });
 }
 
+function deriveOutputPath(absoluteUrl, ext, dataDir) {
+  const parsed = new URL(absoluteUrl);
+  const host = parsed.hostname;
+  let urlPath = parsed.pathname.replace(/\/+$/, '') || '';
+  urlPath = urlPath.replace(/^\//, '');
+  const dir = path.join(dataDir, host, urlPath);
+  fs.mkdirSync(dir, { recursive: true });
+  return path.join(dir, `document.${ext}`);
+}
+
 async function captureUrl(url, options) {
   const {
     format,
-    output,
+    output: explicitOutput,
     engine,
     theme,
     width,
@@ -263,6 +279,7 @@ async function captureUrl(url, options) {
     localImages,
     embedImages,
     imagesDir,
+    dataDir,
   } = options;
 
   // Ensure URL is absolute
@@ -298,6 +315,10 @@ async function captureUrl(url, options) {
           apiToken,
         });
         let { markdown } = result;
+        const output =
+          explicitOutput === '-'
+            ? null
+            : explicitOutput || deriveOutputPath(absoluteUrl, 'md', dataDir);
         if (output && !embedImages) {
           const outputDir = path.dirname(path.resolve(output));
           const extraction = extractAndSaveImages(markdown, outputDir, {
@@ -311,6 +332,7 @@ async function captureUrl(url, options) {
           }
         }
         if (output) {
+          fs.mkdirSync(path.dirname(output), { recursive: true });
           fs.writeFileSync(output, markdown, 'utf-8');
           console.error(`Google Doc Markdown saved to: ${output}`);
         } else {
@@ -325,7 +347,13 @@ async function captureUrl(url, options) {
           format: gdocsFormat,
           apiToken,
         });
+        const output =
+          explicitOutput === '-'
+            ? null
+            : explicitOutput ||
+              deriveOutputPath(absoluteUrl, gdocsFormat, dataDir);
         if (output) {
+          fs.mkdirSync(path.dirname(output), { recursive: true });
           fs.writeFileSync(output, result.content, 'utf-8');
           console.error(`Google Doc (${gdocsFormat}) saved to: ${output}`);
         } else {
@@ -552,6 +580,10 @@ async function captureUrl(url, options) {
       });
       let markdown = result.markdown;
 
+      const output =
+        explicitOutput === '-'
+          ? null
+          : explicitOutput || deriveOutputPath(absoluteUrl, 'md', dataDir);
       if (output && !embedImages) {
         const outputDir = path.dirname(path.resolve(output));
         const extraction = extractAndSaveImages(markdown, outputDir, {
@@ -566,6 +598,7 @@ async function captureUrl(url, options) {
       }
 
       if (output) {
+        fs.mkdirSync(path.dirname(output), { recursive: true });
         fs.writeFileSync(output, markdown, 'utf-8');
         console.error(`Markdown saved to: ${output}`);
       } else {
@@ -653,7 +686,12 @@ async function captureUrl(url, options) {
         resultHtml = convertRelativeUrls(utf8Html, absoluteUrl);
       }
 
+      const output =
+        explicitOutput === '-'
+          ? null
+          : explicitOutput || deriveOutputPath(absoluteUrl, 'html', dataDir);
       if (output) {
+        fs.mkdirSync(path.dirname(output), { recursive: true });
         fs.writeFileSync(output, resultHtml, 'utf-8');
         console.error(`HTML saved to: ${output}`);
       } else {
@@ -694,6 +732,7 @@ async function main() {
       apiToken: config.apiToken,
       embedImages: config.embedImages,
       imagesDir: config.imagesDir,
+      dataDir: config.dataDir,
     });
   } else {
     // No arguments - show error
