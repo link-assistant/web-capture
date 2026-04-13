@@ -23,6 +23,7 @@ on:
         default: 'instant'
         options:
           - instant
+          - changelog-pr
       bump_type:
         description: 'Manual release type'
         required: true
@@ -36,7 +37,13 @@ on:
         required: false
         type: string
 
-concurrency: ${{ github.workflow }}-${{ github.ref }}
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  CARGO_TERM_COLOR: always
+  RUSTFLAGS: -Dwarnings
 
 defaults:
   run:
@@ -63,6 +70,8 @@ jobs:
             ~/.cargo/git
             rust/target
           key: ${{ runner.os }}-cargo-${{ hashFiles('rust/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-
 
       - name: Check formatting
         run: cargo fmt --all -- --check
@@ -92,9 +101,14 @@ jobs:
             ~/.cargo/git
             rust/target
           key: ${{ runner.os }}-cargo-${{ hashFiles('rust/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-
 
       - name: Run tests
-        run: cargo test --all-features
+        run: cargo test --all-features --verbose
+
+      - name: Run doc tests
+        run: cargo test --doc --verbose
 
   # Build check
   build:
@@ -115,9 +129,14 @@ jobs:
             ~/.cargo/git
             rust/target
           key: ${{ runner.os }}-cargo-${{ hashFiles('rust/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-
 
       - name: Build release
         run: cargo build --release
+
+      - name: Check package
+        run: cargo package --list --allow-dirty
 
       - name: Build Docker image
         run: docker build -t web-capture-rust .
@@ -134,6 +153,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -151,6 +171,8 @@ jobs:
             ~/.cargo/git
             rust/target
           key: ${{ runner.os }}-cargo-${{ hashFiles('rust/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-
 
       - name: Check if version changed
         id: version_check
@@ -180,6 +202,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -197,6 +220,8 @@ jobs:
             ~/.cargo/git
             rust/target
           key: ${{ runner.os }}-cargo-${{ hashFiles('rust/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-
 
       - name: Version and commit
         id: version
@@ -214,3 +239,50 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: node ../scripts/rust-create-github-release.mjs --release-version "${{ steps.version.outputs.version }}" --repository "${{ github.repository }}" --description "${{ github.event.inputs.description }}" --commit-sha "${{ github.sha }}"
+
+  # Manual Changelog PR - creates a PR with version bump for review before release
+  changelog-pr:
+    name: Rust - Create Changelog PR
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.release_mode == 'changelog-pr'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.x'
+
+      - name: Bump version in Cargo.toml and CHANGELOG.md
+        working-directory: .
+        run: |
+          cd rust
+          node ../scripts/rust-version-bump.mjs --bump-type "${{ github.event.inputs.bump_type }}" --description "${{ github.event.inputs.description }}"
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: 'chore(rust): bump version (${{ github.event.inputs.bump_type }})'
+          branch: changelog-rust-manual-release-${{ github.run_id }}
+          delete-branch: true
+          title: 'chore(rust): manual ${{ github.event.inputs.bump_type }} release'
+          body: |
+            ## Manual Release Request (Rust)
+
+            This PR was created by a manual workflow trigger to prepare a **${{ github.event.inputs.bump_type }}** release.
+
+            ### Release Details
+            - **Type:** ${{ github.event.inputs.bump_type }}
+            - **Description:** ${{ github.event.inputs.description || 'Manual release' }}
+            - **Triggered by:** @${{ github.actor }}
+
+            ### Next Steps
+            1. Review the version bump and changelog in this PR
+            2. Merge this PR to main
+            3. The automated release workflow will publish to crates.io and create a GitHub release

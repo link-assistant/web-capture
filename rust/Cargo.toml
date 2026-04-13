@@ -20,8 +20,10 @@ path = "src/main.rs"
 
 [dependencies]
 # Browser automation using browser-commander from link-foundation
-# Note: browser-commander is available but optional, as it requires Chrome to be installed
-# browser-commander = "0.4"
+browser-commander = { version = "0.9", optional = true }
+
+# Unified configuration from CLI args, env vars, and .lenv files
+lino-arguments = "0.3"
 
 # Async runtime
 tokio = { version = "1.0", features = ["full"] }
@@ -72,6 +74,10 @@ html-escape = "0.2"
 
 # ZIP archive creation
 zip = { version = "4.0", default-features = false, features = ["deflate"] }
+
+[features]
+default = []
+browser = ["browser-commander"]
 
 [dev-dependencies]
 tokio-test = "0.4"

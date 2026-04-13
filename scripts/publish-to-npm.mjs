@@ -96,18 +96,33 @@ async function main() {
       );
     }
 
-    // Publish to npm using direct npm publish with retry logic
-    // Note: We use `npm publish` directly instead of `changeset publish` because
-    // `changeset publish` does not properly support OIDC trusted publishing for
-    // scoped packages and does not propagate publish failures (exits 0 on error).
+    // Publish to npm with retry logic
+    // Strategy:
+    // 1. Try OIDC trusted publishing (npm publish --provenance --access public)
+    // 2. If OIDC fails with 404 (not configured on npmjs.org), fall back to token-based auth
+    // 3. If token-based auth also fails, try changeset publish as last resort
     for (let i = 1; i <= MAX_RETRIES; i++) {
       console.log(`Publish attempt ${i} of ${MAX_RETRIES}...`);
       try {
-        await $`npm publish --provenance --access public`;
+        // Try OIDC trusted publishing first
+        console.log('Trying OIDC trusted publishing...');
+        const publishResult = await $`npm publish --provenance --access public`.run({ capture: true });
+
+        if (publishResult.code !== 0) {
+          const stderr = publishResult.stderr || '';
+          // 404 on PUT means OIDC trusted publishing is not configured for this package
+          if (stderr.includes('404') || stderr.includes('Not Found')) {
+            console.log('OIDC trusted publishing not configured for this package, trying token-based publish...');
+            // Fall back to token-based auth (uses NODE_AUTH_TOKEN from environment)
+            await $`npm publish --access public`;
+          } else {
+            throw new Error(`npm publish failed: ${stderr}`);
+          }
+        }
 
         // Verify the version was actually published
         console.log('Verifying publish...');
-        await sleep(3000); // Wait for npm registry to propagate
+        await sleep(5000);
         const verifyResult =
           await $`npm view "${PACKAGE_NAME}@${currentVersion}" version`.run({
             capture: true,
