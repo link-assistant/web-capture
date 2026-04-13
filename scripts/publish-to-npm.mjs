@@ -96,18 +96,40 @@ async function main() {
       );
     }
 
-    // Publish to npm using direct npm publish with retry logic
-    // Note: We use `npm publish` directly instead of `changeset publish` because
-    // `changeset publish` does not properly support OIDC trusted publishing for
-    // scoped packages and does not propagate publish failures (exits 0 on error).
+    // Publish to npm with retry logic using OIDC trusted publishing
     for (let i = 1; i <= MAX_RETRIES; i++) {
       console.log(`Publish attempt ${i} of ${MAX_RETRIES}...`);
       try {
-        await $`npm publish --provenance --access public`;
+        console.log('Publishing with OIDC trusted publishing...');
+        try {
+          await $`npm publish --provenance --access public`;
+        } catch (publishError) {
+          const errorMsg = publishError.message || String(publishError);
+          if (errorMsg.includes('404') || errorMsg.includes('Not Found') || errorMsg.includes('E404')) {
+            console.error(`\n\u274C OIDC trusted publishing is not configured for ${PACKAGE_NAME} on npmjs.org.`);
+            console.error(`\nThe first version of a package must be published manually to establish the package on the registry.`);
+            console.error(`After manual publish, configure OIDC trusted publishing on npmjs.org for automated CI/CD releases.\n`);
+            console.error(`To publish manually, run these commands locally:\n`);
+            console.error(`  1. Log in to npm:`);
+            console.error(`     npm login`);
+            console.error(`  2. Navigate to the JS package directory:`);
+            console.error(`     cd js`);
+            console.error(`  3. Publish the package:`);
+            console.error(`     npm publish --access public`);
+            console.error(`  4. Configure OIDC trusted publishing on npmjs.org:`);
+            console.error(`     - Go to https://www.npmjs.com/package/${PACKAGE_NAME}/access`);
+            console.error(`     - Under "Publishing access", add a trusted publisher`);
+            console.error(`     - Set repository to: ${process.env.GITHUB_REPOSITORY || 'link-assistant/web-capture'}`);
+            console.error(`     - Set workflow to: js.yml`);
+            console.error(`     - Set environment to: (leave empty or set to your environment name)\n`);
+            process.exit(1);
+          }
+          throw publishError;
+        }
 
         // Verify the version was actually published
         console.log('Verifying publish...');
-        await sleep(3000); // Wait for npm registry to propagate
+        await sleep(5000);
         const verifyResult =
           await $`npm view "${PACKAGE_NAME}@${currentVersion}" version`.run({
             capture: true,

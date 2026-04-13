@@ -1,0 +1,640 @@
+JS - Release	UNKNOWN STEP	﻿2026-04-11T05:48:11.9339486Z Current runner version: '2.333.1'
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:11.9363710Z ##[group]Runner Image Provisioner
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:11.9364465Z Hosted Compute Agent
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:11.9365095Z Version: 20260213.493
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:11.9365715Z Commit: 5c115507f6dd24b8de37d8bbe0bb4509d0cc0fa3
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:11.9366415Z Build Date: 2026-02-13T00:28:41Z
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:11.9367466Z Worker ID: {5393c39f-bdb8-49c7-be96-db044f9c80f5}
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:11.9368165Z Azure Region: westcentralus
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:11.9368741Z ##[endgroup]
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:11.9370073Z ##[group]Operating System
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:11.9371057Z Ubuntu
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:11.9371499Z 24.04.4
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:11.9371941Z LTS
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:11.9372432Z ##[endgroup]
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:11.9372926Z ##[group]Runner Image
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:11.9373459Z Image: ubuntu-24.04
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:11.9374077Z Version: 20260406.80.1
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:11.9375230Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20260406.80/images/ubuntu/Ubuntu2404-Readme.md
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:11.9376726Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20260406.80
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:11.9377596Z ##[endgroup]
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:11.9378750Z ##[group]GITHUB_TOKEN Permissions
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:11.9380949Z Contents: write
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:11.9381533Z Metadata: read
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:11.9382075Z PullRequests: write
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:11.9382619Z ##[endgroup]
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:11.9384536Z Secret source: Actions
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:11.9385320Z Prepare workflow directory
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:11.9844469Z Prepare all required actions
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:11.9881360Z Getting action download info
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:12.4016518Z Download action repository 'actions/checkout@v4' (SHA:34e114876b0b11c390a56381ad16ebd13914f8d5)
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:12.5427642Z Download action repository 'actions/setup-node@v4' (SHA:49933ea5288caeca8642d1e84afbd3f7d6820020)
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:12.8201715Z Complete job name: JS - Release
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:12.8902878Z ##[group]Run actions/checkout@v4
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:12.8903711Z with:
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:12.8904088Z   fetch-depth: 0
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:12.8904512Z   repository: link-assistant/web-capture
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:12.8905210Z   token: ***
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:12.8905589Z   ssh-strict: true
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:12.8905981Z   ssh-user: git
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:12.8906386Z   persist-credentials: true
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:12.8906832Z   clean: true
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:12.8907223Z   sparse-checkout-cone-mode: true
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:12.8907689Z   fetch-tags: false
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:12.8908082Z   show-progress: true
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:12.8908467Z   lfs: false
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:12.8908852Z   submodules: false
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:12.8909245Z   set-safe-directory: true
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:12.8909960Z ##[endgroup]
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:12.9997550Z Syncing repository: link-assistant/web-capture
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:13.0000303Z ##[group]Getting Git version info
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:13.0001869Z Working directory is '/home/runner/work/web-capture/web-capture'
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:13.0003541Z [command]/usr/bin/git version
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:13.0038557Z git version 2.53.0
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:13.0065752Z ##[endgroup]
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:13.0090725Z Temporarily overriding HOME='/home/runner/work/_temp/69b274c4-ef78-4527-b1ae-83dd58670371' before making global git config changes
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:13.0093080Z Adding repository directory to the temporary git global config as a safe directory
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:13.0097155Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/web-capture/web-capture
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:13.0131314Z Deleting the contents of '/home/runner/work/web-capture/web-capture'
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:13.0136353Z ##[group]Initializing the repository
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:13.0141415Z [command]/usr/bin/git init /home/runner/work/web-capture/web-capture
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:13.0227233Z hint: Using 'master' as the name for the initial branch. This default branch name
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:13.0229212Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:13.0231290Z hint: to use in all of your new repositories, which will suppress this warning,
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:13.0233080Z hint: call:
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:13.0233858Z hint:
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:13.0234843Z hint: 	git config --global init.defaultBranch <name>
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:13.0236233Z hint:
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:13.0237459Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:13.0239404Z hint: 'development'. The just-created branch can be renamed via this command:
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:13.0241231Z hint:
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:13.0242228Z hint: 	git branch -m <name>
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:13.0243301Z hint:
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:13.0244955Z hint: Disable this message with "git config set advice.defaultBranchName false"
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:13.0247071Z Initialized empty Git repository in /home/runner/work/web-capture/web-capture/.git/
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:13.0250982Z [command]/usr/bin/git remote add origin https://github.com/link-assistant/web-capture
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:13.0271110Z ##[endgroup]
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:13.0272391Z ##[group]Disabling automatic garbage collection
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:13.0276033Z [command]/usr/bin/git config --local gc.auto 0
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:13.0315246Z ##[endgroup]
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:13.0316767Z ##[group]Setting up auth
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:13.0318260Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:13.0353008Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:13.0636435Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:13.0665799Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:13.0888572Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:13.0917608Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:13.1135797Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:13.1167952Z ##[endgroup]
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:13.1168801Z ##[group]Fetching the repository
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:13.1177369Z [command]/usr/bin/git -c protocol.version=2 fetch --prune --no-recurse-submodules origin +refs/heads/*:refs/remotes/origin/* +refs/tags/*:refs/tags/*
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:14.2105965Z From https://github.com/link-assistant/web-capture
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:14.2131824Z  * [new branch]      issue-1-5017a66c05a8  -> origin/issue-1-5017a66c05a8
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:14.2142005Z  * [new branch]      issue-11-2861fe92     -> origin/issue-11-2861fe92
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:14.2143468Z  * [new branch]      issue-13-a8f3466f6d79 -> origin/issue-13-a8f3466f6d79
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:14.2144975Z  * [new branch]      issue-15-ba41292e60dd -> origin/issue-15-ba41292e60dd
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:14.2146291Z  * [new branch]      issue-17-d61fd69fb1d0 -> origin/issue-17-d61fd69fb1d0
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:14.2147158Z  * [new branch]      issue-19-7350892c64e0 -> origin/issue-19-7350892c64e0
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:14.2148036Z  * [new branch]      issue-21-ae540dd05ccf -> origin/issue-21-ae540dd05ccf
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:14.2148904Z  * [new branch]      issue-24-000cedc18c0c -> origin/issue-24-000cedc18c0c
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:14.2149889Z  * [new branch]      issue-26-f5bc08d1c062 -> origin/issue-26-f5bc08d1c062
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:14.2151247Z  * [new branch]      issue-28-9ae2d8528d6f -> origin/issue-28-9ae2d8528d6f
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:14.2152311Z  * [new branch]      issue-29-1750ff5496be -> origin/issue-29-1750ff5496be
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:14.2153348Z  * [new branch]      issue-3-e1f5cfd3      -> origin/issue-3-e1f5cfd3
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:14.2154458Z  * [new branch]      issue-31-e38e38b91777 -> origin/issue-31-e38e38b91777
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:14.2155566Z  * [new branch]      issue-33-597c234012bd -> origin/issue-33-597c234012bd
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:14.2157749Z  * [new branch]      issue-36-4868dc6a6cd1 -> origin/issue-36-4868dc6a6cd1
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:14.2159415Z  * [new branch]      issue-38-1c6b407f9682 -> origin/issue-38-1c6b407f9682
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:14.2161482Z  * [new branch]      issue-40-aea0c7bbe29d -> origin/issue-40-aea0c7bbe29d
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:14.2163188Z  * [new branch]      issue-42-51e981719f34 -> origin/issue-42-51e981719f34
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:14.2164797Z  * [new branch]      issue-5-37ef445c      -> origin/issue-5-37ef445c
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:14.2166340Z  * [new branch]      issue-7-c22ac3d5      -> origin/issue-7-c22ac3d5
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:14.2167948Z  * [new branch]      issue-8-2bf69acf      -> origin/issue-8-2bf69acf
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:14.2169400Z  * [new branch]      main                  -> origin/main
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:14.2170870Z  * [new tag]         v1.1.1                -> v1.1.1
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:14.2172116Z  * [new tag]         v1.1.2                -> v1.1.2
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:14.2173288Z  * [new tag]         v1.1.3                -> v1.1.3
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:14.2174412Z  * [new tag]         v1.2.0                -> v1.2.0
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:14.2175531Z  * [new tag]         v1.3.0                -> v1.3.0
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:14.2193149Z [command]/usr/bin/git branch --list --remote origin/main
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:14.2218814Z   origin/main
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:14.2229452Z [command]/usr/bin/git rev-parse refs/remotes/origin/main
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:14.2250323Z 4c80b8eda211decb14e0f484015545a3c2b9c7fc
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:14.2262887Z ##[endgroup]
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:14.2264035Z ##[group]Determining the checkout info
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:14.2265287Z ##[endgroup]
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:14.2265843Z [command]/usr/bin/git sparse-checkout disable
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:14.2301427Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:14.2328372Z ##[group]Checking out the ref
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:14.2333262Z [command]/usr/bin/git checkout --progress --force -B main refs/remotes/origin/main
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:14.2493293Z Switched to a new branch 'main'
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:14.2496287Z branch 'main' set up to track 'origin/main'.
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:14.2503996Z ##[endgroup]
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:14.2538477Z [command]/usr/bin/git log -1 --format=%H
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:14.2560948Z 4c80b8eda211decb14e0f484015545a3c2b9c7fc
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:14.2835047Z ##[group]Run actions/setup-node@v4
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:14.2835754Z with:
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:14.2836184Z   node-version: 22.x
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:14.2836796Z   registry-url: https://registry.npmjs.org
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:14.2837589Z   always-auth: false
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:14.2838113Z   check-latest: false
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:14.2838896Z   token: ***
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:14.2839355Z ##[endgroup]
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:14.4592761Z Found in cache @ /opt/hostedtoolcache/node/22.22.2/x64
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:14.4599040Z ##[group]Environment details
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:17.4776264Z node: v22.22.2
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:17.4776903Z npm: 10.9.7
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:17.4777301Z yarn: 1.22.22
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:17.4780138Z ##[endgroup]
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:17.4901717Z ##[group]Run npm install
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:17.4902060Z [36;1mnpm install[0m
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:17.4965621Z shell: /usr/bin/bash -e {0}
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:17.4965905Z env:
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:17.4966178Z   NPM_CONFIG_USERCONFIG: /home/runner/work/_temp/.npmrc
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:17.4966545Z   NODE_AUTH_TOKEN: XXXXX-XXXXX-XXXXX-XXXXX
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:17.4966843Z ##[endgroup]
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:20.3451095Z npm warn deprecated supertest@6.3.4: Please upgrade to supertest v7.1.3+, see release notes at https://github.com/forwardemail/supertest/releases/tag/v7.1.3 - maintenance is supported by Forward Email @ https://forwardemail.net
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:21.4260558Z npm warn deprecated inflight@1.0.6: This module is not supported, and leaks memory. Do not use it. Check out lru-cache if you want a good and tested way to coalesce async requests by a key value, which is much more comprehensive and powerful.
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:21.5205642Z npm warn deprecated glob@7.2.3: Glob versions prior to v9 are no longer supported
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:22.2642987Z npm warn deprecated superagent@8.1.2: Please upgrade to superagent v10.2.2+, see release notes at https://github.com/forwardemail/superagent/releases/tag/v10.2.2 - maintenance is supported by Forward Email @ https://forwardemail.net
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:23.8580119Z npm warn deprecated puppeteer@24.8.2: < 24.15.0 is no longer supported
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:24.3943724Z npm warn deprecated glob@10.5.0: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:32.3056476Z 
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:32.3057688Z > @link-assistant/web-capture@1.4.0 prepare
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:32.3058368Z > husky || true
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:32.3058714Z 
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:32.3526360Z .git can't be found
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:32.3527019Z added 857 packages, and audited 858 packages in 15s
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:32.3527407Z 
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:32.3529307Z 136 packages are looking for funding
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:32.3529875Z   run `npm fund` for details
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:32.3660828Z 
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:32.3661661Z 14 vulnerabilities (1 low, 5 moderate, 6 high, 2 critical)
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:32.3662229Z 
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:32.3662544Z To address all issues, run:
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:32.3663090Z   npm audit fix
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:32.3663379Z 
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:32.3663648Z Run `npm audit` for details.
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:32.4238088Z ##[group]Run node ../scripts/setup-npm.mjs
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:32.4238437Z [36;1mnode ../scripts/setup-npm.mjs[0m
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:32.4260006Z shell: /usr/bin/bash -e {0}
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:32.4260238Z env:
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:32.4260749Z   NPM_CONFIG_USERCONFIG: /home/runner/work/_temp/.npmrc
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:32.4261068Z   NODE_AUTH_TOKEN: XXXXX-XXXXX-XXXXX-XXXXX
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:32.4261312Z ##[endgroup]
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:34.2077842Z 10.9.7
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:34.2121649Z Current npm version: 10.9.7
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:37.0035510Z npm error code MODULE_NOT_FOUND
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:37.0036831Z npm error Cannot find module 'promise-retry'
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:37.0037335Z npm error Require stack:
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:37.0038467Z npm error - /opt/hostedtoolcache/node/22.22.2/x64/lib/node_modules/npm/node_modules/@npmcli/arborist/lib/arborist/rebuild.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:37.0040581Z npm error - /opt/hostedtoolcache/node/22.22.2/x64/lib/node_modules/npm/node_modules/@npmcli/arborist/lib/arborist/index.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:37.0042507Z npm error - /opt/hostedtoolcache/node/22.22.2/x64/lib/node_modules/npm/node_modules/@npmcli/arborist/lib/index.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:37.0044197Z npm error - /opt/hostedtoolcache/node/22.22.2/x64/lib/node_modules/npm/node_modules/libnpmfund/lib/index.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:37.0045746Z npm error - /opt/hostedtoolcache/node/22.22.2/x64/lib/node_modules/npm/lib/utils/reify-output.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:37.0047200Z npm error - /opt/hostedtoolcache/node/22.22.2/x64/lib/node_modules/npm/lib/utils/reify-finish.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:37.0049653Z npm error - /opt/hostedtoolcache/node/22.22.2/x64/lib/node_modules/npm/lib/commands/install.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:37.0051115Z npm error - /opt/hostedtoolcache/node/22.22.2/x64/lib/node_modules/npm/lib/npm.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:37.0052255Z npm error - /opt/hostedtoolcache/node/22.22.2/x64/lib/node_modules/npm/lib/cli/entry.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:37.0053466Z npm error - /opt/hostedtoolcache/node/22.22.2/x64/lib/node_modules/npm/lib/cli.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:37.0054599Z npm error - /opt/hostedtoolcache/node/22.22.2/x64/lib/node_modules/npm/bin/npm-cli.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:37.0056149Z npm error A complete log of this run can be found in: /home/runner/.npm/_logs/2026-04-11T05_48_34_265Z-debug-0.log
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:37.1031205Z 10.9.7
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:37.1087695Z Updated npm version: 10.9.7
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:37.1189692Z ##[group]Run # Count changeset files (excluding README.md and config.json)
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:37.1190226Z [36;1m# Count changeset files (excluding README.md and config.json)[0m
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:37.1191157Z [36;1mCHANGESET_COUNT=$(find .changeset -name "*.md" ! -name "README.md" | wc -l)[0m
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:37.1191787Z [36;1mecho "Found $CHANGESET_COUNT changeset file(s)"[0m
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:37.1192273Z [36;1mecho "has_changesets=$([[ $CHANGESET_COUNT -gt 0 ]] && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT[0m
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:37.1213955Z shell: /usr/bin/bash -e {0}
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:37.1214176Z env:
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:37.1214396Z   NPM_CONFIG_USERCONFIG: /home/runner/work/_temp/.npmrc
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:37.1214716Z   NODE_AUTH_TOKEN: XXXXX-XXXXX-XXXXX-XXXXX
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:37.1214960Z ##[endgroup]
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:37.1278384Z Found 1 changeset file(s)
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:37.1325330Z ##[group]Run node ../scripts/version-and-commit.mjs --mode changeset
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:37.1325781Z [36;1mnode ../scripts/version-and-commit.mjs --mode changeset[0m
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:37.1344993Z shell: /usr/bin/bash -e {0}
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:37.1345198Z env:
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:37.1345417Z   NPM_CONFIG_USERCONFIG: /home/runner/work/_temp/.npmrc
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:37.1345719Z   NODE_AUTH_TOKEN: XXXXX-XXXXX-XXXXX-XXXXX
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:37.1345972Z ##[endgroup]
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:39.5492045Z 📝 Loaded 2 variables from .lenv
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:39.5589408Z Parsed configuration: { mode: 'changeset', bumpType: '', description: '(none)' }
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:39.5759721Z Checking for remote changes...
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:39.9083323Z From https://github.com/link-assistant/web-capture
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:39.9084089Z  * branch            main       -> FETCH_HEAD
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:39.9200926Z 4c80b8eda211decb14e0f484015545a3c2b9c7fc
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:39.9271922Z 4c80b8eda211decb14e0f484015545a3c2b9c7fc
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:39.9279259Z Current version: 1.4.0
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:39.9279680Z Running changeset version...
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:40.0237420Z 
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:40.0238063Z > @link-assistant/web-capture@1.4.0 changeset:version
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:40.0238741Z > node ../scripts/changeset-version.mjs
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:40.0239052Z 
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:40.7130897Z Running changeset version...
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:41.3831289Z 🦋  All files have been updated. Review them and commit at your leisure
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:41.4002001Z 
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:41.4002407Z Synchronizing package-lock.json...
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:42.5783868Z 
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:42.5784602Z > @link-assistant/web-capture@1.4.1 prepare
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:42.5785065Z > husky || true
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:42.5785234Z 
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:42.6173143Z .git can't be found
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:42.6174016Z up to date, audited 860 packages in 1s
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:42.6174502Z 
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:42.6174772Z 136 packages are looking for funding
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:42.6175232Z   run `npm fund` for details
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:42.6375438Z 
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:42.6376030Z 14 vulnerabilities (1 low, 5 moderate, 6 high, 2 critical)
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:42.6376505Z 
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:42.6376721Z To address all issues, run:
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:42.6377139Z   npm audit fix
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:42.6377345Z 
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:42.6377543Z Run `npm audit` for details.
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:42.6502337Z 
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:42.6503125Z ✅ Version bump complete with synchronized package-lock.json
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:42.6626166Z New version: 1.4.1
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:42.6769462Z  D js/.changeset/fix-cicd-release-pipeline.md
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:42.6770043Z  M js/CHANGELOG.md
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:42.6770591Z  M js/package-lock.json
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:42.6771011Z  M js/package.json
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:42.6776212Z Changes detected, committing...
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:42.7091810Z [main 69f5461] 1.4.1
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:42.7092524Z  4 files changed, 9 insertions(+), 8 deletions(-)
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:42.7093399Z  delete mode 100644 js/.changeset/fix-cicd-release-pipeline.md
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:43.6096207Z To https://github.com/link-assistant/web-capture
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:43.6096815Z    4c80b8e..69f5461  main -> main
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:43.6143497Z ✅ Version bump committed and pushed to main
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:43.6249203Z ##[group]Run node ../scripts/publish-to-npm.mjs --should-pull
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:43.6249629Z [36;1mnode ../scripts/publish-to-npm.mjs --should-pull[0m
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:43.6271184Z shell: /usr/bin/bash -e {0}
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:43.6271557Z env:
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:43.6271783Z   NPM_CONFIG_USERCONFIG: /home/runner/work/_temp/.npmrc
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:43.6272089Z   NODE_AUTH_TOKEN: XXXXX-XXXXX-XXXXX-XXXXX
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:43.6272329Z ##[endgroup]
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:44.7695067Z 📝 Loaded 2 variables from .lenv
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:45.1002735Z From https://github.com/link-assistant/web-capture
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:45.1003418Z  * branch            main       -> FETCH_HEAD
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:45.1063238Z Already up to date.
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:45.1079594Z Current version to publish: 1.4.1
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:45.1080610Z Checking if version 1.4.1 is already published...
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:45.7726870Z npm error code E404
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:45.7727983Z npm error 404 No match found for version 1.4.1
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:45.7728544Z npm error 404
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:45.7729186Z npm error 404  '@link-assistant/web-capture@1.4.1' is not in this registry.
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:45.7729789Z npm error 404
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:45.7730256Z npm error 404 Note that you can also install from a
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:45.7731165Z npm error 404 tarball, folder, http url, or git url.
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:45.7739150Z npm error A complete log of this run can be found in: /home/runner/.npm/_logs/2026-04-11T05_48_45_159Z-debug-0.log
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:45.7796749Z Version 1.4.1 not found on npm, proceeding with publish...
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:45.7797350Z Publish attempt 1 of 3...
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:46.0590595Z 
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:46.0591603Z > @link-assistant/web-capture@1.4.1 prepare
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:46.0592056Z > husky || true
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:46.0592183Z 
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:46.7944026Z npm warn publish npm auto-corrected some errors in your package.json when publishing.  Please run "npm pkg fix" to address these errors.
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:46.7945208Z npm warn publish errors corrected:
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:46.7945860Z npm warn publish "bin[web-capture]" script name was cleaned
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:46.7983441Z npm notice
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:46.7985503Z npm notice 📦  @link-assistant/web-capture@1.4.1
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:46.7986345Z npm notice Tarball Contents
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:46.7989271Z npm notice 271B .changeset/config.json
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:46.7989836Z npm notice 510B .changeset/README.md
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:46.7990517Z npm notice 390B .jscpd.json
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:46.7990921Z npm notice 184B .lenv
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:46.7991311Z npm notice 77B .prettierignore
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:46.7991570Z npm notice 173B .prettierrc
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:46.7991806Z npm notice 1.1kB CHANGELOG.md
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:46.7992036Z npm notice 1.1kB Dockerfile
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:46.7992254Z npm notice 13.4kB README.md
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:46.7992505Z npm notice 178B babel.config.cjs
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:46.7992781Z npm notice 23.9kB bin/web-capture.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:46.7993071Z npm notice 148B docker-compose.yml
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:46.7993444Z npm notice 3.4kB eslint.config.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:46.7994026Z npm notice 1.5kB examples/js/engine_comparison.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:46.7994649Z npm notice 675B examples/js/html_download.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:46.7995283Z npm notice 1.1kB examples/js/image_download.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:46.7995912Z npm notice 681B examples/js/markdown_download.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:46.7996434Z npm notice 884B examples/js/playwright_example.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:46.7997092Z npm notice 410B examples/python/html_download.py
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:46.7997770Z npm notice 690B examples/python/image_download.py
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:46.7998437Z npm notice 416B examples/python/markdown_download.py
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:46.7999049Z npm notice 838B examples/python/playwright_example.py
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:46.7999543Z npm notice 481B jest.config.mjs
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:46.7999964Z npm notice 3.1kB package.json
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:46.8000544Z npm notice 9.0kB src/animation.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:46.8000826Z npm notice 6.5kB src/archive.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:46.8001334Z npm notice 5.2kB src/batch.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:46.8001609Z npm notice 8.5kB src/browser.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:46.8001844Z npm notice 5.4kB src/docx.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:46.8002078Z npm notice 1.1kB src/fetch.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:46.8002475Z npm notice 5.9kB src/figures.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:46.8002723Z npm notice 10.1kB src/gdocs.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:46.8002958Z npm notice 2.5kB src/html.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:46.8003186Z npm notice 3.6kB src/image.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:46.8003432Z npm notice 2.4kB src/index.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:46.8003666Z npm notice 3.6kB src/latex.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:46.8003890Z npm notice 17.0kB src/lib.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:46.8004170Z npm notice 5.2kB src/localize-images.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:46.8004465Z npm notice 543B src/markdown.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:46.8004722Z npm notice 9.0kB src/metadata.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:46.8005215Z npm notice 2.5kB src/pdf.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:46.8005647Z npm notice 5.2kB src/popups.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:46.8006111Z npm notice 7.5kB src/postprocess.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:46.8006381Z npm notice 1.3kB src/retry.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:46.8006623Z npm notice 1.3kB src/stream.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:46.8006882Z npm notice 4.9kB src/themed-image.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:46.8007153Z npm notice 9.3kB src/verify.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:46.8007438Z npm notice 6.5kB tests/e2e/docker.test.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:46.8007755Z npm notice 4.1kB tests/e2e/process.test.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:46.8008086Z npm notice 1.2kB tests/fixtures/habr-articles.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:46.8008476Z npm notice 6.9kB tests/integration/api-endpoints.test.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:46.8008894Z npm notice 4.1kB tests/integration/browser-engines.test.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:46.8009305Z npm notice 10.9kB tests/integration/habr-article.test.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:46.8009643Z npm notice 190B tests/jest.setup.mjs
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:46.8009934Z npm notice 6.7kB tests/mock/index.test.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:46.8010256Z npm notice 1.1kB tests/unit/animation.test.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:46.8010744Z npm notice 3.4kB tests/unit/batch.test.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:46.8011062Z npm notice 6.2kB tests/unit/browser.test.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:46.8011373Z npm notice 5.0kB tests/unit/cli.test.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:46.8011749Z npm notice 1.6kB tests/unit/convertRelativeUrls.test.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:46.8012201Z npm notice 2.3kB tests/unit/figures.test.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:46.8012515Z npm notice 6.3kB tests/unit/gdocs.test.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:46.8012828Z npm notice 19.6kB tests/unit/html2md.test.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:46.8013133Z npm notice 4.1kB tests/unit/latex.test.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:46.8013472Z npm notice 2.5kB tests/unit/localize-images.test.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:46.8013818Z npm notice 4.5kB tests/unit/metadata.test.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:46.8014169Z npm notice 3.4kB tests/unit/postprocess.test.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:46.8014494Z npm notice 2.9kB tests/unit/retry.test.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:46.8014796Z npm notice 5.3kB tests/unit/verify.test.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:46.8015067Z npm notice Tarball Details
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:46.8015365Z npm notice name: @link-assistant/web-capture
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:46.8015651Z npm notice version: 1.4.1
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:46.8015997Z npm notice filename: link-assistant-web-capture-1.4.1.tgz
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:46.8016361Z npm notice package size: 69.5 kB
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:46.8016967Z npm notice unpacked size: 292.1 kB
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:46.8017558Z npm notice shasum: 201981c6e86af9fd94e8a23360cc3f426ada3fbe
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:46.8018296Z npm notice integrity: sha512-QuVRT5vLSwKeb[...]8o1gUpRPZs/eQ==
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:46.8018870Z npm notice total files: 69
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:46.8019210Z npm notice
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:46.8019905Z npm notice Publishing to https://registry.npmjs.org/ with tag latest and public access
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:48.0347741Z npm notice publish Signed provenance statement with source and build information from GitHub Actions
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:48.0349335Z npm notice publish Provenance statement published to transparency log: https://search.sigstore.dev/?logIndex=1277242346
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:48.2683400Z npm error code E404
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:48.2684782Z npm error 404 Not Found - PUT https://registry.npmjs.org/@link-assistant%2fweb-capture - Not found
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:48.2685697Z npm error 404
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:48.2686420Z npm error 404  '@link-assistant/web-capture@1.4.1' is not in this registry.
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:48.2687119Z npm error 404
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:48.2687996Z npm error 404 Note that you can also install from a
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:48.2688747Z npm error 404 tarball, folder, http url, or git url.
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:48.2693558Z npm error A complete log of this run can be found in: /home/runner/.npm/_logs/2026-04-11T05_48_45_831Z-debug-0.log
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:48.2818782Z .git can't be foundVerifying publish...
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:51.6292550Z npm error code E404
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:51.6293286Z npm error 404 No match found for version 1.4.1
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:51.6293863Z npm error 404
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:51.6294349Z npm error 404  '@link-assistant/web-capture@1.4.1' is not in this registry.
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:51.6294806Z npm error 404
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:51.6295149Z npm error 404 Note that you can also install from a
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:51.6295643Z npm error 404 tarball, folder, http url, or git url.
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:51.6304873Z npm error A complete log of this run can be found in: /home/runner/.npm/_logs/2026-04-11T05_48_51_338Z-debug-0.log
+JS - Release	UNKNOWN STEP	2026-04-11T05:48:51.6365701Z Publish failed: Publish verification failed: version 1.4.1 not found on npm after publish, waiting 10s before retry...
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:01.6464697Z Publish attempt 2 of 3...
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:01.9054297Z 
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:01.9054863Z > @link-assistant/web-capture@1.4.1 prepare
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:01.9055378Z > husky || true
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:01.9055518Z 
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:02.6308701Z npm warn publish npm auto-corrected some errors in your package.json when publishing.  Please run "npm pkg fix" to address these errors.
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:02.6309436Z npm warn publish errors corrected:
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:02.6310046Z npm warn publish "bin[web-capture]" script name was cleaned
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:02.6345157Z npm notice
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:02.6346054Z npm notice 📦  @link-assistant/web-capture@1.4.1
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:02.6346685Z npm notice Tarball Contents
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:02.6349726Z npm notice 271B .changeset/config.json
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:02.6350317Z npm notice 510B .changeset/README.md
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:02.6351156Z npm notice 390B .jscpd.json
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:02.6351581Z npm notice 184B .lenv
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:02.6352048Z npm notice 77B .prettierignore
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:02.6352523Z npm notice 173B .prettierrc
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:02.6352979Z npm notice 1.1kB CHANGELOG.md
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:02.6353439Z npm notice 1.1kB Dockerfile
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:02.6353882Z npm notice 13.4kB README.md
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:02.6354376Z npm notice 178B babel.config.cjs
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:02.6354922Z npm notice 23.9kB bin/web-capture.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:02.6355490Z npm notice 148B docker-compose.yml
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:02.6356032Z npm notice 3.4kB eslint.config.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:02.6356642Z npm notice 1.5kB examples/js/engine_comparison.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:02.6357256Z npm notice 675B examples/js/html_download.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:02.6357906Z npm notice 1.1kB examples/js/image_download.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:02.6358559Z npm notice 681B examples/js/markdown_download.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:02.6359259Z npm notice 884B examples/js/playwright_example.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:02.6359978Z npm notice 410B examples/python/html_download.py
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:02.6360936Z npm notice 690B examples/python/image_download.py
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:02.6361633Z npm notice 416B examples/python/markdown_download.py
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:02.6362418Z npm notice 838B examples/python/playwright_example.py
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:02.6363086Z npm notice 481B jest.config.mjs
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:02.6363568Z npm notice 3.1kB package.json
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:02.6364080Z npm notice 9.0kB src/animation.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:02.6364579Z npm notice 6.5kB src/archive.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:02.6365050Z npm notice 5.2kB src/batch.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:02.6365545Z npm notice 8.5kB src/browser.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:02.6365973Z npm notice 5.4kB src/docx.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:02.6366380Z npm notice 1.1kB src/fetch.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:02.6367146Z npm notice 5.9kB src/figures.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:02.6367704Z npm notice 10.1kB src/gdocs.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:02.6368168Z npm notice 2.5kB src/html.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:02.6368610Z npm notice 3.6kB src/image.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:02.6369442Z npm notice 2.4kB src/index.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:02.6369832Z npm notice 3.6kB src/latex.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:02.6370289Z npm notice 17.0kB src/lib.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:02.6371061Z npm notice 5.2kB src/localize-images.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:02.6371613Z npm notice 543B src/markdown.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:02.6372341Z npm notice 9.0kB src/metadata.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:02.6372727Z npm notice 2.5kB src/pdf.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:02.6373201Z npm notice 5.2kB src/popups.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:02.6373660Z npm notice 7.5kB src/postprocess.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:02.6374089Z npm notice 1.3kB src/retry.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:02.6374505Z npm notice 1.3kB src/stream.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:02.6375005Z npm notice 4.9kB src/themed-image.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:02.6375534Z npm notice 9.3kB src/verify.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:02.6376101Z npm notice 6.5kB tests/e2e/docker.test.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:02.6376733Z npm notice 4.1kB tests/e2e/process.test.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:02.6377375Z npm notice 1.2kB tests/fixtures/habr-articles.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:02.6378132Z npm notice 6.9kB tests/integration/api-endpoints.test.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:02.6378895Z npm notice 4.1kB tests/integration/browser-engines.test.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:02.6379688Z npm notice 10.9kB tests/integration/habr-article.test.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:02.6380291Z npm notice 190B tests/jest.setup.mjs
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:02.6381123Z npm notice 6.7kB tests/mock/index.test.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:02.6381744Z npm notice 1.1kB tests/unit/animation.test.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:02.6382432Z npm notice 3.4kB tests/unit/batch.test.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:02.6383028Z npm notice 6.2kB tests/unit/browser.test.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:02.6383635Z npm notice 5.0kB tests/unit/cli.test.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:02.6384329Z npm notice 1.6kB tests/unit/convertRelativeUrls.test.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:02.6385054Z npm notice 2.3kB tests/unit/figures.test.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:02.6385694Z npm notice 6.3kB tests/unit/gdocs.test.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:02.6386305Z npm notice 19.6kB tests/unit/html2md.test.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:02.6386920Z npm notice 4.1kB tests/unit/latex.test.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:02.6387563Z npm notice 2.5kB tests/unit/localize-images.test.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:02.6388232Z npm notice 4.5kB tests/unit/metadata.test.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:02.6388895Z npm notice 3.4kB tests/unit/postprocess.test.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:02.6389480Z npm notice 2.9kB tests/unit/retry.test.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:02.6390019Z npm notice 5.3kB tests/unit/verify.test.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:02.6390766Z npm notice Tarball Details
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:02.6391322Z npm notice name: @link-assistant/web-capture
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:02.6391870Z npm notice version: 1.4.1
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:02.6392542Z npm notice filename: link-assistant-web-capture-1.4.1.tgz
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:02.6393239Z npm notice package size: 69.5 kB
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:02.6393779Z npm notice unpacked size: 292.1 kB
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:02.6394479Z npm notice shasum: 201981c6e86af9fd94e8a23360cc3f426ada3fbe
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:02.6395351Z npm notice integrity: sha512-QuVRT5vLSwKeb[...]8o1gUpRPZs/eQ==
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:02.6396015Z npm notice total files: 69
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:02.6396417Z npm notice
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:02.6397258Z npm notice Publishing to https://registry.npmjs.org/ with tag latest and public access
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:03.4444609Z npm notice publish Signed provenance statement with source and build information from GitHub Actions
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:03.4446175Z npm notice publish Provenance statement published to transparency log: https://search.sigstore.dev/?logIndex=1277245255
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:03.6926569Z npm error code E404
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:03.6927697Z npm error 404 Not Found - PUT https://registry.npmjs.org/@link-assistant%2fweb-capture - Not found
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:03.6928573Z npm error 404
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:03.6929278Z npm error 404  '@link-assistant/web-capture@1.4.1' is not in this registry.
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:03.6930315Z npm error 404
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:03.6931193Z npm error 404 Note that you can also install from a
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:03.6932028Z npm error 404 tarball, folder, http url, or git url.
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:03.6935931Z npm error A complete log of this run can be found in: /home/runner/.npm/_logs/2026-04-11T05_49_01_701Z-debug-0.log
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:03.7047300Z .git can't be foundVerifying publish...
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:07.0522416Z npm error code E404
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:07.0523049Z npm error 404 No match found for version 1.4.1
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:07.0523593Z npm error 404
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:07.0524300Z npm error 404  '@link-assistant/web-capture@1.4.1' is not in this registry.
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:07.0524979Z npm error 404
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:07.0525494Z npm error 404 Note that you can also install from a
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:07.0526193Z npm error 404 tarball, folder, http url, or git url.
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:07.0535243Z npm error A complete log of this run can be found in: /home/runner/.npm/_logs/2026-04-11T05_49_06_763Z-debug-0.log
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:07.0598199Z Publish failed: Publish verification failed: version 1.4.1 not found on npm after publish, waiting 10s before retry...
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:17.0702930Z Publish attempt 3 of 3...
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:17.3254566Z 
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:17.3255293Z > @link-assistant/web-capture@1.4.1 prepare
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:17.3255664Z > husky || true
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:17.3255794Z 
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:18.0524493Z npm warn publish npm auto-corrected some errors in your package.json when publishing.  Please run "npm pkg fix" to address these errors.
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:18.0525560Z npm warn publish errors corrected:
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:18.0526275Z npm warn publish "bin[web-capture]" script name was cleaned
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:18.0566806Z npm notice
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:18.0567855Z npm notice 📦  @link-assistant/web-capture@1.4.1
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:18.0568425Z npm notice Tarball Contents
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:18.0571039Z npm notice 271B .changeset/config.json
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:18.0571562Z npm notice 510B .changeset/README.md
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:18.0571866Z npm notice 390B .jscpd.json
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:18.0572183Z npm notice 184B .lenv
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:18.0572639Z npm notice 77B .prettierignore
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:18.0573103Z npm notice 173B .prettierrc
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:18.0573575Z npm notice 1.1kB CHANGELOG.md
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:18.0574033Z npm notice 1.1kB Dockerfile
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:18.0574456Z npm notice 13.4kB README.md
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:18.0574944Z npm notice 178B babel.config.cjs
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:18.0575478Z npm notice 23.9kB bin/web-capture.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:18.0576053Z npm notice 148B docker-compose.yml
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:18.0576589Z npm notice 3.4kB eslint.config.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:18.0576922Z npm notice 1.5kB examples/js/engine_comparison.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:18.0577277Z npm notice 675B examples/js/html_download.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:18.0577613Z npm notice 1.1kB examples/js/image_download.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:18.0577950Z npm notice 681B examples/js/markdown_download.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:18.0578305Z npm notice 884B examples/js/playwright_example.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:18.0578671Z npm notice 410B examples/python/html_download.py
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:18.0598698Z npm notice 690B examples/python/image_download.py
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:18.0599224Z npm notice 416B examples/python/markdown_download.py
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:18.0599662Z npm notice 838B examples/python/playwright_example.py
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:18.0600238Z npm notice 481B jest.config.mjs
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:18.0601622Z npm notice 3.1kB package.json
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:18.0602083Z npm notice 9.0kB src/animation.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:18.0602371Z npm notice 6.5kB src/archive.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:18.0602629Z npm notice 5.2kB src/batch.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:18.0603104Z npm notice 8.5kB src/browser.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:18.0603508Z npm notice 5.4kB src/docx.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:18.0603904Z npm notice 1.1kB src/fetch.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:18.0604323Z npm notice 5.9kB src/figures.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:18.0604752Z npm notice 10.1kB src/gdocs.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:18.0605141Z npm notice 2.5kB src/html.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:18.0605754Z npm notice 3.6kB src/image.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:18.0606167Z npm notice 2.4kB src/index.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:18.0606543Z npm notice 3.6kB src/latex.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:18.0606769Z npm notice 17.0kB src/lib.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:18.0607048Z npm notice 5.2kB src/localize-images.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:18.0607524Z npm notice 543B src/markdown.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:18.0607783Z npm notice 9.0kB src/metadata.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:18.0608038Z npm notice 2.5kB src/pdf.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:18.0608282Z npm notice 5.2kB src/popups.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:18.0608555Z npm notice 7.5kB src/postprocess.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:18.0608811Z npm notice 1.3kB src/retry.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:18.0609241Z npm notice 1.3kB src/stream.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:18.0609627Z npm notice 4.9kB src/themed-image.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:18.0610020Z npm notice 9.3kB src/verify.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:18.0610625Z npm notice 6.5kB tests/e2e/docker.test.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:18.0611098Z npm notice 4.1kB tests/e2e/process.test.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:18.0611595Z npm notice 1.2kB tests/fixtures/habr-articles.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:18.0612297Z npm notice 6.9kB tests/integration/api-endpoints.test.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:18.0613042Z npm notice 4.1kB tests/integration/browser-engines.test.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:18.0613766Z npm notice 10.9kB tests/integration/habr-article.test.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:18.0614371Z npm notice 190B tests/jest.setup.mjs
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:18.0614887Z npm notice 6.7kB tests/mock/index.test.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:18.0615457Z npm notice 1.1kB tests/unit/animation.test.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:18.0616025Z npm notice 3.4kB tests/unit/batch.test.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:18.0616420Z npm notice 6.2kB tests/unit/browser.test.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:18.0616726Z npm notice 5.0kB tests/unit/cli.test.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:18.0617078Z npm notice 1.6kB tests/unit/convertRelativeUrls.test.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:18.0617422Z npm notice 2.3kB tests/unit/figures.test.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:18.0617731Z npm notice 6.3kB tests/unit/gdocs.test.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:18.0618037Z npm notice 19.6kB tests/unit/html2md.test.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:18.0618349Z npm notice 4.1kB tests/unit/latex.test.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:18.0618698Z npm notice 2.5kB tests/unit/localize-images.test.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:18.0619034Z npm notice 4.5kB tests/unit/metadata.test.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:18.0619363Z npm notice 3.4kB tests/unit/postprocess.test.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:18.0619685Z npm notice 2.9kB tests/unit/retry.test.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:18.0619977Z npm notice 5.3kB tests/unit/verify.test.js
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:18.0620242Z npm notice Tarball Details
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:18.0620904Z npm notice name: @link-assistant/web-capture
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:18.0621383Z npm notice version: 1.4.1
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:18.0621803Z npm notice filename: link-assistant-web-capture-1.4.1.tgz
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:18.0622152Z npm notice package size: 69.5 kB
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:18.0622428Z npm notice unpacked size: 292.1 kB
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:18.0622775Z npm notice shasum: 201981c6e86af9fd94e8a23360cc3f426ada3fbe
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:18.0623212Z npm notice integrity: sha512-QuVRT5vLSwKeb[...]8o1gUpRPZs/eQ==
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:18.0623547Z npm notice total files: 69
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:18.0623832Z npm notice
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:18.0624575Z npm notice Publishing to https://registry.npmjs.org/ with tag latest and public access
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:18.8592774Z npm notice publish Signed provenance statement with source and build information from GitHub Actions
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:18.8594391Z npm notice publish Provenance statement published to transparency log: https://search.sigstore.dev/?logIndex=1277248091
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:19.1325985Z npm error code E404
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:19.1328568Z npm error 404 Not Found - PUT https://registry.npmjs.org/@link-assistant%2fweb-capture - Not found
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:19.1329441Z npm error 404
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:19.1330164Z npm error 404  '@link-assistant/web-capture@1.4.1' is not in this registry.
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:19.1331170Z npm error 404
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:19.1331699Z npm error 404 Note that you can also install from a
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:19.1332541Z npm error 404 tarball, folder, http url, or git url.
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:19.1336255Z npm error A complete log of this run can be found in: /home/runner/.npm/_logs/2026-04-11T05_49_17_122Z-debug-0.log
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:19.1452807Z .git can't be foundVerifying publish...
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:22.5132987Z npm error code E404
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:22.5134029Z npm error 404 No match found for version 1.4.1
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:22.5134617Z npm error 404
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:22.5135219Z npm error 404  '@link-assistant/web-capture@1.4.1' is not in this registry.
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:22.5135645Z npm error 404
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:22.5135977Z npm error 404 Note that you can also install from a
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:22.5136450Z npm error 404 tarball, folder, http url, or git url.
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:22.5145834Z npm error A complete log of this run can be found in: /home/runner/.npm/_logs/2026-04-11T05_49_22_203Z-debug-0.log
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:22.5209742Z ❌ Failed to publish after 3 attempts
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:22.5278523Z ##[error]Process completed with exit code 1.
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:22.5402145Z Post job cleanup.
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:22.6337878Z [command]/usr/bin/git version
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:22.6374566Z git version 2.53.0
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:22.6418700Z Temporarily overriding HOME='/home/runner/work/_temp/0de5a55b-6f38-4759-a763-9afa9e175f03' before making global git config changes
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:22.6419680Z Adding repository directory to the temporary git global config as a safe directory
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:22.6431531Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/web-capture/web-capture
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:22.6465079Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:22.6497703Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:22.6716016Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:22.6735851Z http.https://github.com/.extraheader
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:22.6748285Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:22.6778093Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:22.6994857Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:22.7024720Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:22.7360025Z Cleaning up orphan processes
+JS - Release	UNKNOWN STEP	2026-04-11T05:49:22.7769637Z ##[warning]Node.js 20 actions are deprecated. The following actions are running on Node.js 20 and may not work as expected: actions/checkout@v4, actions/setup-node@v4. Actions will be forced to run with Node.js 24 by default starting June 2nd, 2026. Node.js 20 will be removed from the runner on September 16th, 2026. Please check if updated versions of these actions are available that support Node.js 24. To opt into Node.js 24 now, set the FORCE_JAVASCRIPT_ACTIONS_TO_NODE24=true environment variable on the runner or in your workflow file. Once Node.js 24 becomes the default, you can temporarily opt out by setting ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION=true. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/

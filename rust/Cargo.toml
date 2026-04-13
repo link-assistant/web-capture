@@ -9,7 +9,7 @@ documentation = "https://docs.rs/web-capture"
 readme = "README.md"
 keywords = ["web", "capture", "screenshot", "markdown", "html"]
 categories = ["command-line-utilities", "web-programming"]
-rust-version = "1.75"
+rust-version = "1.88"
 
 [lib]
 path = "src/lib.rs"
@@ -20,8 +20,10 @@ path = "src/main.rs"
 
 [dependencies]
 # Browser automation using browser-commander from link-foundation
-# Note: browser-commander is available but optional, as it requires Chrome to be installed
-# browser-commander = "0.4"
+browser-commander = "0.9"
+
+# Unified configuration from CLI args, env vars, and .lenv files
+lino-arguments = "0.3"
 
 # Async runtime
 tokio = { version = "1.0", features = ["full"] }
