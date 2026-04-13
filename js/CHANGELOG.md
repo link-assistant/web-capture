@@ -1,5 +1,11 @@
 # @link-assistant/web-capture
 
+## 1.4.3
+
+### Patch Changes
+
+- c9d1132: Fix cargo publish token resolution: fallback to CARGO_TOKEN when CARGO_REGISTRY_TOKEN is not set, and fail instead of silently skipping publish
+
 ## 1.4.2
 
 ### Patch Changes
