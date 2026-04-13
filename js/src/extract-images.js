@@ -38,7 +38,10 @@ export function extractAndSaveImages(markdown, outputDir, options = {}) {
         return match;
       }
 
-      const hash = createHash('sha256').update(buffer).digest('hex').slice(0, 8);
+      const hash = createHash('sha256')
+        .update(buffer)
+        .digest('hex')
+        .slice(0, 8);
       const filename = `image-${hash}.${ext}`;
       const relativePath = `${imagesDir}/${filename}`;
 

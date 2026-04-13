@@ -403,7 +403,7 @@ async function captureUrl(url, options) {
           fullPage,
         });
         const outPath =
-          output ||
+          explicitOutput ||
           `${new URL(absoluteUrl).hostname.replace(/\./g, '_')}_${Date.now()}.jpg`;
         fs.writeFileSync(outPath, buffer);
         console.error(`JPEG screenshot saved to: ${outPath}`);
@@ -433,7 +433,7 @@ async function captureUrl(url, options) {
           printBackground: true,
           margin: { top: '1cm', right: '1cm', bottom: '1cm', left: '1cm' },
         });
-        const outPath = output || 'page.pdf';
+        const outPath = explicitOutput || 'page.pdf';
         fs.writeFileSync(outPath, pdfBuffer);
         console.error(`PDF saved to: ${outPath}`);
       } finally {
@@ -470,7 +470,7 @@ async function captureUrl(url, options) {
       }
       const doc = new Document({ sections: [{ children }] });
       const buffer = await Packer.toBuffer(doc);
-      const outPath = output || 'page.docx';
+      const outPath = explicitOutput || 'page.docx';
       fs.writeFileSync(outPath, buffer);
       console.error(`DOCX saved to: ${outPath}`);
     } else if (normalizedFormat === 'archive' || normalizedFormat === 'zip') {
@@ -492,7 +492,7 @@ async function captureUrl(url, options) {
 
       const docFormat = options.documentFormat === 'html' ? 'html' : 'markdown';
       const outPath =
-        output ||
+        explicitOutput ||
         `${new URL(absoluteUrl).hostname.replace(/\./g, '-')}-archive.zip`;
       const outStream = fs.createWriteStream(outPath);
       const archive = archiver.default
@@ -640,9 +640,9 @@ async function captureUrl(url, options) {
 
         const buffer = await page.screenshot({ type: 'png' });
 
-        if (output) {
-          fs.writeFileSync(output, buffer);
-          console.error(`Screenshot saved to: ${output}`);
+        if (explicitOutput) {
+          fs.writeFileSync(explicitOutput, buffer);
+          console.error(`Screenshot saved to: ${explicitOutput}`);
         } else {
           // Generate default filename based on URL
           const urlObj = new URL(absoluteUrl);
@@ -728,10 +728,15 @@ async function main() {
     }
     // --archive flag overrides format
     if (config.archive !== undefined) {
-      const archiveFormat = config.archive === true || config.archive === '' ? 'zip' : config.archive;
+      const archiveFormat =
+        config.archive === true || config.archive === ''
+          ? 'zip'
+          : config.archive;
       const validFormats = ['zip', '7z', 'tar.gz', 'gz', 'tar'];
       if (!validFormats.includes(archiveFormat)) {
-        console.error(`Error: Unsupported archive format "${archiveFormat}". Supported: ${validFormats.join(', ')}`);
+        console.error(
+          `Error: Unsupported archive format "${archiveFormat}". Supported: ${validFormats.join(', ')}`
+        );
         process.exit(1);
       }
       config.archiveFormat = archiveFormat === 'gz' ? 'tar.gz' : archiveFormat;

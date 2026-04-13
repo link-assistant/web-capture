@@ -133,7 +133,8 @@ fn test_preserves_alt_text() {
 fn test_svg_data_uri() {
     let dir = create_temp_dir();
     let svg = r#"<svg xmlns="http://www.w3.org/2000/svg" width="1" height="1"><rect fill="red" width="1" height="1"/></svg>"#;
-    let svg_b64 = base64::Engine::encode(&base64::engine::general_purpose::STANDARD, svg.as_bytes());
+    let svg_b64 =
+        base64::Engine::encode(&base64::engine::general_purpose::STANDARD, svg.as_bytes());
     let md = format!("![icon](data:image/svg+xml;base64,{svg_b64})");
 
     let result = extract_and_save_images(&md, &dir, "images").unwrap();

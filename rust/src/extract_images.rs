@@ -58,22 +58,22 @@ pub fn extract_and_save_images(
                 other => other,
             };
 
-            match base64::engine::general_purpose::STANDARD.decode(base64_data) {
-                Ok(data) => {
-                    let mut hasher = DefaultHasher::new();
-                    data.hash(&mut hasher);
-                    let hash = format!("{:016x}", hasher.finish());
-                    let hash_prefix = &hash[..8];
-                    let filename = format!("image-{hash_prefix}.{ext}");
-                    let relative_path = format!("{images_dir}/{filename}");
-                    debug!("Extracted image: {} ({} bytes)", filename, data.len());
-                    images.push((filename, data));
-                    return format!("![{alt_text}]({relative_path})");
-                }
-                Err(_) => {
-                    return format!("![{alt_text}](data:image/{mime_ext};base64,{base64_data})");
-                }
-            }
+            base64::engine::general_purpose::STANDARD
+                .decode(base64_data)
+                .map_or_else(
+                    |_| format!("![{alt_text}](data:image/{mime_ext};base64,{base64_data})"),
+                    |data| {
+                        let mut hasher = DefaultHasher::new();
+                        data.hash(&mut hasher);
+                        let hash = format!("{:016x}", hasher.finish());
+                        let hash_prefix = &hash[..8];
+                        let filename = format!("image-{hash_prefix}.{ext}");
+                        let relative_path = format!("{images_dir}/{filename}");
+                        debug!("Extracted image: {} ({} bytes)", filename, data.len());
+                        images.push((filename, data));
+                        format!("![{alt_text}]({relative_path})")
+                    },
+                )
         });
 
     let extracted = images.len();

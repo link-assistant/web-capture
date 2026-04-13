@@ -97,7 +97,11 @@ struct Args {
     images_dir: String,
 
     /// Base directory for auto-derived output paths when -o is omitted (default: ./data/web-capture)
-    #[arg(long, default_value = "./data/web-capture", env = "WEB_CAPTURE_DATA_DIR")]
+    #[arg(
+        long,
+        default_value = "./data/web-capture",
+        env = "WEB_CAPTURE_DATA_DIR"
+    )]
     data_dir: String,
 
     /// Create archive output. Formats: zip (default), 7z, tar.gz (alias gz), tar
@@ -172,9 +176,12 @@ async fn main() -> anyhow::Result<()> {
     }
 
     // --archive flag validation and format override
-    let effective_format;
-    if let Some(ref archive_fmt) = args.archive {
-        let fmt = if archive_fmt.is_empty() { "zip" } else { archive_fmt.as_str() };
+    let effective_format = if let Some(ref archive_fmt) = args.archive {
+        let fmt = if archive_fmt.is_empty() {
+            "zip"
+        } else {
+            archive_fmt.as_str()
+        };
         match fmt {
             "zip" | "7z" | "tar.gz" | "gz" | "tar" => {}
             other => {
@@ -182,10 +189,10 @@ async fn main() -> anyhow::Result<()> {
                 std::process::exit(1);
             }
         }
-        effective_format = "archive".to_string();
+        "archive".to_string()
     } else {
-        effective_format = args.format.clone();
-    }
+        args.format.clone()
+    };
 
     if args.serve {
         // Server mode
@@ -613,7 +620,7 @@ async fn capture_url(
                     web_capture::gdocs::fetch_google_doc_as_markdown(&absolute_url, api_token)
                         .await?;
                 let mut markdown = result.content;
-                let is_stdout = output.map_or(false, |p| p.as_os_str() == "-");
+                let is_stdout = output.is_some_and(|p| p.as_os_str() == "-");
                 let derived;
                 let effective_output = if is_stdout {
                     None
@@ -655,7 +662,7 @@ async fn capture_url(
                 let result =
                     web_capture::gdocs::fetch_google_doc(&absolute_url, gdocs_format, api_token)
                         .await?;
-                let is_stdout = output.map_or(false, |p| p.as_os_str() == "-");
+                let is_stdout = output.is_some_and(|p| p.as_os_str() == "-");
                 let derived;
                 let effective_output = if is_stdout {
                     None
@@ -693,7 +700,7 @@ async fn capture_url(
             let result = convert_html_to_markdown_enhanced(&html, Some(&absolute_url), &options)?;
             let mut markdown = result.markdown;
 
-            let is_stdout = output.map_or(false, |p| p.as_os_str() == "-");
+            let is_stdout = output.is_some_and(|p| p.as_os_str() == "-");
             let derived;
             let effective_output = if is_stdout {
                 None
@@ -763,7 +770,7 @@ async fn capture_url(
                 convert_relative_urls(&utf8_html, &absolute_url)
             };
 
-            let is_stdout = output.map_or(false, |p| p.as_os_str() == "-");
+            let is_stdout = output.is_some_and(|p| p.as_os_str() == "-");
             let derived;
             let effective_output = if is_stdout {
                 None
@@ -790,7 +797,8 @@ async fn capture_url(
 
 /// Derive an output file path from a URL when -o is not provided.
 fn derive_output_path(absolute_url: &str, ext: &str, data_dir: &str) -> PathBuf {
-    let parsed = Url::parse(absolute_url).unwrap_or_else(|_| Url::parse("https://unknown").unwrap());
+    let parsed =
+        Url::parse(absolute_url).unwrap_or_else(|_| Url::parse("https://unknown").unwrap());
     let host = parsed.host_str().unwrap_or("unknown");
     let url_path = parsed.path().trim_start_matches('/').trim_end_matches('/');
     let dir = PathBuf::from(data_dir).join(host).join(url_path);
