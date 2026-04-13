@@ -324,7 +324,9 @@ async function captureUrl(url, options) {
           });
           if (extraction.extracted > 0) {
             markdown = extraction.markdown;
-            console.error(`Extracted ${extraction.extracted} images to ${imagesDir}/`);
+            console.error(
+              `Extracted ${extraction.extracted} images to ${imagesDir}/`
+            );
           }
         }
         if (output) {
@@ -576,7 +578,9 @@ async function captureUrl(url, options) {
         });
         if (extraction.extracted > 0) {
           markdown = extraction.markdown;
-          console.error(`Extracted ${extraction.extracted} images to ${imagesDir}/`);
+          console.error(
+            `Extracted ${extraction.extracted} images to ${imagesDir}/`
+          );
         }
       }
 

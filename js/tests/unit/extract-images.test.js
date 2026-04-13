@@ -1,7 +1,10 @@
 import fs from 'fs';
 import path from 'path';
 import os from 'os';
-import { extractAndSaveImages, hasBase64Images } from '../../src/extract-images.js';
+import {
+  extractAndSaveImages,
+  hasBase64Images,
+} from '../../src/extract-images.js';
 
 describe('extract-images module', () => {
   let tmpDir;
@@ -18,7 +21,8 @@ describe('extract-images module', () => {
   const TINY_PNG =
     'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg==';
   // 1x1 white JPEG as base64
-  const TINY_JPEG = '/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAP///wAAAf/bAEMA/9sAQwD/2wBDAf///wAAAf/bAEMA/9sAQwD/2Q==';
+  const TINY_JPEG =
+    '/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAP///wAAAf/bAEMA/9sAQwD/2wBDAf///wAAAf/bAEMA/9sAQwD/2Q==';
 
   describe('extractAndSaveImages', () => {
     it('extracts a single PNG image from markdown', () => {
@@ -101,9 +105,9 @@ describe('extract-images module', () => {
 
   describe('hasBase64Images', () => {
     it('returns true when markdown has base64 images', () => {
-      expect(
-        hasBase64Images(`![x](data:image/png;base64,${TINY_PNG})`)
-      ).toBe(true);
+      expect(hasBase64Images(`![x](data:image/png;base64,${TINY_PNG})`)).toBe(
+        true
+      );
     });
 
     it('returns false when no base64 images', () => {
