@@ -9,7 +9,7 @@ documentation = "https://docs.rs/web-capture"
 readme = "README.md"
 keywords = ["web", "capture", "screenshot", "markdown", "html"]
 categories = ["command-line-utilities", "web-programming"]
-rust-version = "1.75"
+rust-version = "1.88"
 
 [lib]
 path = "src/lib.rs"
