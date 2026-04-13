@@ -10,10 +10,8 @@ use tracing::debug;
 fn base64_md_image_pattern() -> &'static Regex {
     static PATTERN: OnceLock<Regex> = OnceLock::new();
     PATTERN.get_or_init(|| {
-        Regex::new(
-            r"!\[([^\]]*)\]\(data:image/(png|jpeg|jpg|gif|webp|svg\+xml);base64,([^)]+)\)",
-        )
-        .unwrap()
+        Regex::new(r"!\[([^\]]*)\]\(data:image/(png|jpeg|jpg|gif|webp|svg\+xml);base64,([^)]+)\)")
+            .unwrap()
     })
 }
 
@@ -48,35 +46,32 @@ pub fn extract_and_save_images(
     let mut images: Vec<(String, Vec<u8>)> = Vec::new();
 
     let updated_markdown =
-        base64_md_image_pattern()
-            .replace_all(markdown, |caps: &regex::Captures<'_>| {
-                let alt_text = &caps[1];
-                let mime_ext = &caps[2];
-                let base64_data = &caps[3];
+        base64_md_image_pattern().replace_all(markdown, |caps: &regex::Captures<'_>| {
+            let alt_text = &caps[1];
+            let mime_ext = &caps[2];
+            let base64_data = &caps[3];
 
-                idx += 1;
-                let ext = match mime_ext {
-                    "jpeg" => "jpg",
-                    "svg+xml" => "svg",
-                    other => other,
-                };
-                let filename = format!("image-{idx:03}.{ext}");
-                let relative_path = format!("{images_dir}/{filename}");
+            idx += 1;
+            let ext = match mime_ext {
+                "jpeg" => "jpg",
+                "svg+xml" => "svg",
+                other => other,
+            };
+            let filename = format!("image-{idx:03}.{ext}");
+            let relative_path = format!("{images_dir}/{filename}");
 
-                match base64::engine::general_purpose::STANDARD.decode(base64_data) {
-                    Ok(data) => {
-                        debug!("Extracted image: {} ({} bytes)", filename, data.len());
-                        images.push((filename, data));
-                    }
-                    Err(_) => {
-                        return format!(
-                            "![{alt_text}](data:image/{mime_ext};base64,{base64_data})"
-                        );
-                    }
+            match base64::engine::general_purpose::STANDARD.decode(base64_data) {
+                Ok(data) => {
+                    debug!("Extracted image: {} ({} bytes)", filename, data.len());
+                    images.push((filename, data));
                 }
+                Err(_) => {
+                    return format!("![{alt_text}](data:image/{mime_ext};base64,{base64_data})");
+                }
+            }
 
-                format!("![{alt_text}]({relative_path})")
-            });
+            format!("![{alt_text}]({relative_path})")
+        });
 
     let extracted = images.len();
 

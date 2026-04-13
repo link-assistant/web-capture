@@ -67,7 +67,7 @@ struct Args {
     #[arg(short, long)]
     output: Option<PathBuf>,
 
-    /// Extract LaTeX formulas from img.formula, KaTeX, MathJax (default: true).
+    /// Extract LaTeX formulas from img.formula, `KaTeX`, `MathJax` (default: true).
     /// Use --no-extract-latex to disable.
     #[arg(long, default_value_t = true, env = "WEB_CAPTURE_EXTRACT_LATEX")]
     extract_latex: bool,
@@ -583,12 +583,11 @@ async fn capture_url(
                 if let Some(path) = output {
                     if !args.embed_images {
                         if let Some(output_dir) = path.parent() {
-                            let extraction =
-                                web_capture::extract_images::extract_and_save_images(
-                                    &markdown,
-                                    output_dir,
-                                    &args.images_dir,
-                                )?;
+                            let extraction = web_capture::extract_images::extract_and_save_images(
+                                &markdown,
+                                output_dir,
+                                &args.images_dir,
+                            )?;
                             if extraction.extracted > 0 {
                                 markdown = extraction.markdown;
                                 eprintln!(
@@ -635,19 +634,17 @@ async fn capture_url(
                 post_process: args.post_process,
                 detect_code_language: args.detect_code_language,
             };
-            let result =
-                convert_html_to_markdown_enhanced(&html, Some(&absolute_url), &options)?;
+            let result = convert_html_to_markdown_enhanced(&html, Some(&absolute_url), &options)?;
             let mut markdown = result.markdown;
 
             if let Some(path) = output {
                 if !args.embed_images {
                     if let Some(output_dir) = path.parent() {
-                        let extraction =
-                            web_capture::extract_images::extract_and_save_images(
-                                &markdown,
-                                output_dir,
-                                &args.images_dir,
-                            )?;
+                        let extraction = web_capture::extract_images::extract_and_save_images(
+                            &markdown,
+                            output_dir,
+                            &args.images_dir,
+                        )?;
                         if extraction.extracted > 0 {
                             markdown = extraction.markdown;
                             eprintln!(
