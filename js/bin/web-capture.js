@@ -295,12 +295,8 @@ async function captureUrl(url, options) {
   }
 
   // Import required modules
-  const {
-    fetchHtml,
-    convertHtmlToMarkdown,
-    convertToUtf8,
-    convertRelativeUrls,
-  } = await import('../src/lib.js');
+  const { fetchHtml, convertToUtf8, convertRelativeUrls } =
+    await import('../src/lib.js');
   const { createBrowser } = await import('../src/browser.js');
   const { isGoogleDocsUrl, fetchGoogleDoc, fetchGoogleDocAsMarkdown } =
     await import('../src/gdocs.js');
