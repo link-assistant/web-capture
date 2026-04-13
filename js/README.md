@@ -233,31 +233,31 @@ web-capture --serve [--port <port>]
 web-capture <url> [options]
 ```
 
-| Option                   | Short | Description                                    | Default                              |
-| ------------------------ | ----- | ---------------------------------------------- | ------------------------------------ |
-| `--format`               | `-f`  | Output format (see below)                      | `markdown`                           |
-| `--output`               | `-o`  | Output file path. Use `-o -` for stdout        | auto-derived from URL                |
-| `--data-dir`             |       | Base directory for auto-derived output paths   | `./data/web-capture`                 |
-| `--engine`               | `-e`  | Browser engine: `puppeteer`, `playwright`      | `puppeteer` (or BROWSER_ENGINE env)  |
-| `--theme`                | `-t`  | Color scheme: `light`, `dark`, `no-preference` | browser default                      |
-| `--width`                |       | Viewport width in pixels                       | 1280                                 |
-| `--height`               |       | Viewport height in pixels                      | 800                                  |
-| `--quality`              |       | JPEG quality 0-100                             | 80                                   |
-| `--fullPage`             |       | Capture full scrollable page                   | false                                |
-| `--embed-images`         |       | Keep images as inline base64 data URIs         | false                                |
-| `--no-extract-images`    |       | Alias for `--embed-images`                     | false                                |
-| `--images-dir`           |       | Subdirectory name for extracted images         | `images`                             |
-| `--archive`              |       | Create archive: `zip`, `7z`, `tar.gz`, `tar`  | -                                    |
-| `--document-format`      |       | Document format in archive: `markdown`, `html` | `markdown`                          |
-| `--localImages`          |       | Download images locally in archive mode        | true                                 |
-| `--extract-latex`        |       | Extract LaTeX formulas                         | true                                 |
-| `--no-extract-latex`     |       | Disable LaTeX extraction                       | -                                    |
-| `--extract-metadata`     |       | Extract article metadata                       | true                                 |
-| `--no-extract-metadata`  |       | Disable metadata extraction                    | -                                    |
-| `--post-process`         |       | Apply post-processing                          | true                                 |
-| `--no-post-process`      |       | Disable post-processing                        | -                                    |
-| `--detect-code-language` |       | Detect code block languages                    | true                                 |
-| `--no-detect-code-language` |    | Disable code language detection                | -                                    |
+| Option                      | Short | Description                                    | Default                             |
+| --------------------------- | ----- | ---------------------------------------------- | ----------------------------------- |
+| `--format`                  | `-f`  | Output format (see below)                      | `markdown`                          |
+| `--output`                  | `-o`  | Output file path. Use `-o -` for stdout        | auto-derived from URL               |
+| `--data-dir`                |       | Base directory for auto-derived output paths   | `./data/web-capture`                |
+| `--engine`                  | `-e`  | Browser engine: `puppeteer`, `playwright`      | `puppeteer` (or BROWSER_ENGINE env) |
+| `--theme`                   | `-t`  | Color scheme: `light`, `dark`, `no-preference` | browser default                     |
+| `--width`                   |       | Viewport width in pixels                       | 1280                                |
+| `--height`                  |       | Viewport height in pixels                      | 800                                 |
+| `--quality`                 |       | JPEG quality 0-100                             | 80                                  |
+| `--fullPage`                |       | Capture full scrollable page                   | false                               |
+| `--embed-images`            |       | Keep images as inline base64 data URIs         | false                               |
+| `--no-extract-images`       |       | Alias for `--embed-images`                     | false                               |
+| `--images-dir`              |       | Subdirectory name for extracted images         | `images`                            |
+| `--archive`                 |       | Create archive: `zip`, `7z`, `tar.gz`, `tar`   | -                                   |
+| `--document-format`         |       | Document format in archive: `markdown`, `html` | `markdown`                          |
+| `--localImages`             |       | Download images locally in archive mode        | true                                |
+| `--extract-latex`           |       | Extract LaTeX formulas                         | true                                |
+| `--no-extract-latex`        |       | Disable LaTeX extraction                       | -                                   |
+| `--extract-metadata`        |       | Extract article metadata                       | true                                |
+| `--no-extract-metadata`     |       | Disable metadata extraction                    | -                                   |
+| `--post-process`            |       | Apply post-processing                          | true                                |
+| `--no-post-process`         |       | Disable post-processing                        | -                                   |
+| `--detect-code-language`    |       | Detect code block languages                    | true                                |
+| `--no-detect-code-language` |       | Disable code language detection                | -                                   |
 
 **Supported formats:**
 
@@ -282,18 +282,18 @@ Configuration values are resolved with the following priority (highest to lowest
 
 ### Environment Variables
 
-| Variable                           | Description                        | Default            |
-| ---------------------------------- | ---------------------------------- | ------------------ |
-| `PORT`                             | Server port                        | `3000`             |
-| `BROWSER_ENGINE`                   | Browser engine                     | `puppeteer`        |
-| `API_TOKEN`                        | API token for authenticated capture| -                  |
-| `WEB_CAPTURE_DATA_DIR`             | Base directory for output          | `./data/web-capture`|
-| `WEB_CAPTURE_EMBED_IMAGES`         | `0`/`1` — keep images inline      | `0`                |
-| `WEB_CAPTURE_IMAGES_DIR`           | Subdirectory for extracted images  | `images`           |
-| `WEB_CAPTURE_EXTRACT_LATEX`        | `0`/`1` — extract LaTeX           | `1`                |
-| `WEB_CAPTURE_EXTRACT_METADATA`     | `0`/`1` — extract metadata        | `1`                |
-| `WEB_CAPTURE_POST_PROCESS`         | `0`/`1` — post-processing         | `1`                |
-| `WEB_CAPTURE_DETECT_CODE_LANGUAGE` | `0`/`1` — detect code langs       | `1`                |
+| Variable                           | Description                         | Default              |
+| ---------------------------------- | ----------------------------------- | -------------------- |
+| `PORT`                             | Server port                         | `3000`               |
+| `BROWSER_ENGINE`                   | Browser engine                      | `puppeteer`          |
+| `API_TOKEN`                        | API token for authenticated capture | -                    |
+| `WEB_CAPTURE_DATA_DIR`             | Base directory for output           | `./data/web-capture` |
+| `WEB_CAPTURE_EMBED_IMAGES`         | `0`/`1` — keep images inline        | `0`                  |
+| `WEB_CAPTURE_IMAGES_DIR`           | Subdirectory for extracted images   | `images`             |
+| `WEB_CAPTURE_EXTRACT_LATEX`        | `0`/`1` — extract LaTeX             | `1`                  |
+| `WEB_CAPTURE_EXTRACT_METADATA`     | `0`/`1` — extract metadata          | `1`                  |
+| `WEB_CAPTURE_POST_PROCESS`         | `0`/`1` — post-processing           | `1`                  |
+| `WEB_CAPTURE_DETECT_CODE_LANGUAGE` | `0`/`1` — detect code langs         | `1`                  |
 
 ## Browser Engine Support
 
