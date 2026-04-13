@@ -39,7 +39,9 @@ fn test_extract_single_png() {
     let img_path = entries[0].as_ref().unwrap().path();
     let filename = img_path.file_name().unwrap().to_str().unwrap();
     assert!(filename.starts_with("image-"));
-    assert!(filename.ends_with(".png"));
+    assert!(std::path::Path::new(filename)
+        .extension()
+        .is_some_and(|ext| ext.eq_ignore_ascii_case("png")));
 
     let buf = fs::read(&img_path).unwrap();
     assert!(!buf.is_empty());

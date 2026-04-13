@@ -129,7 +129,8 @@ const config = makeConfig({
       .option('dataDir', {
         type: 'string',
         description:
-          'Base directory for auto-derived output paths when -o is omitted (default: ./data/web-capture)',
+          'Base directory for auto-derived output paths when -o is omitted ' +
+          '(default: ./data/web-capture)',
         default: getenv('WEB_CAPTURE_DATA_DIR', './data/web-capture'),
       })
       .option('archive', {
