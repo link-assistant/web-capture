@@ -75,7 +75,7 @@ Priority 3: No token → exit(1) with clear error message
 
 ## Template Repo Issue
 
-The `rust-ai-driven-development-pipeline-template` has a minor inconsistency: the workflow-level env uses `secrets.CARGO_REGISTRY_TOKEN || secrets.CARGO_TOKEN` fallback, but publish steps hardcode only `secrets.CARGO_TOKEN`. This means if only `CARGO_REGISTRY_TOKEN` is configured, the per-step env would be empty (though the script compensates). This was reported as an issue.
+The `rust-ai-driven-development-pipeline-template` has a minor inconsistency: the workflow-level env uses `secrets.CARGO_REGISTRY_TOKEN || secrets.CARGO_TOKEN` fallback, but publish steps hardcode only `secrets.CARGO_TOKEN`. This means if only `CARGO_REGISTRY_TOKEN` is configured, the per-step env would be empty (though the script compensates). Reported as [link-foundation/rust-ai-driven-development-pipeline-template#32](https://github.com/link-foundation/rust-ai-driven-development-pipeline-template/issues/32).
 
 ## Verification
 
