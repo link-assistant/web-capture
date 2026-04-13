@@ -1,5 +1,11 @@
 # @link-assistant/web-capture
 
+## 1.4.2
+
+### Patch Changes
+
+- 94c1953: Update lino-arguments to ^0.3.0, fix npm publish OIDC fallback, and align CI/CD workflows with reference repo best practices
+
 ## 1.4.1
 
 ### Patch Changes
