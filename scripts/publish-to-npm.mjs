@@ -96,33 +96,35 @@ async function main() {
       );
     }
 
-    // Publish to npm with retry logic
-    // Strategy:
-    // 1. Try OIDC trusted publishing (npm publish --provenance --access public)
-    // 2. If OIDC fails with 404 (not configured on npmjs.org), fall back to token-based auth
+    // Publish to npm with retry logic using OIDC trusted publishing
     for (let i = 1; i <= MAX_RETRIES; i++) {
       console.log(`Publish attempt ${i} of ${MAX_RETRIES}...`);
       try {
-        // Try OIDC trusted publishing first
-        console.log('Trying OIDC trusted publishing...');
-        let oidcFailed = false;
+        console.log('Publishing with OIDC trusted publishing...');
         try {
           await $`npm publish --provenance --access public`;
-        } catch (oidcError) {
-          const errorMsg = oidcError.message || '';
-          // 404 on PUT means OIDC trusted publishing is not configured for this package
+        } catch (publishError) {
+          const errorMsg = publishError.message || String(publishError);
           if (errorMsg.includes('404') || errorMsg.includes('Not Found') || errorMsg.includes('E404')) {
-            console.log('OIDC trusted publishing returned 404 (not configured for this package scope)');
-            oidcFailed = true;
-          } else {
-            throw oidcError;
+            console.error(`\n\u274C OIDC trusted publishing is not configured for ${PACKAGE_NAME} on npmjs.org.`);
+            console.error(`\nThe first version of a package must be published manually to establish the package on the registry.`);
+            console.error(`After manual publish, configure OIDC trusted publishing on npmjs.org for automated CI/CD releases.\n`);
+            console.error(`To publish manually, run these commands locally:\n`);
+            console.error(`  1. Log in to npm:`);
+            console.error(`     npm login`);
+            console.error(`  2. Navigate to the JS package directory:`);
+            console.error(`     cd js`);
+            console.error(`  3. Publish the package:`);
+            console.error(`     npm publish --access public`);
+            console.error(`  4. Configure OIDC trusted publishing on npmjs.org:`);
+            console.error(`     - Go to https://www.npmjs.com/package/${PACKAGE_NAME}/access`);
+            console.error(`     - Under "Publishing access", add a trusted publisher`);
+            console.error(`     - Set repository to: ${process.env.GITHUB_REPOSITORY || 'link-assistant/web-capture'}`);
+            console.error(`     - Set workflow to: js.yml`);
+            console.error(`     - Set environment to: (leave empty or set to your environment name)\n`);
+            process.exit(1);
           }
-        }
-
-        if (oidcFailed) {
-          // Fall back to token-based auth (uses NODE_AUTH_TOKEN from environment)
-          console.log('Falling back to token-based publish...');
-          await $`npm publish --access public`;
+          throw publishError;
         }
 
         // Verify the version was actually published

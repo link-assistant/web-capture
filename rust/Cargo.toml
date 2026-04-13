@@ -20,7 +20,7 @@ path = "src/main.rs"
 
 [dependencies]
 # Browser automation using browser-commander from link-foundation
-browser-commander = { version = "0.9", optional = true }
+browser-commander = "0.9"
 
 # Unified configuration from CLI args, env vars, and .lenv files
 lino-arguments = "0.3"
@@ -74,10 +74,6 @@ html-escape = "0.2"
 
 # ZIP archive creation
 zip = { version = "4.0", default-features = false, features = ["deflate"] }
-
-[features]
-default = []
-browser = ["browser-commander"]
 
 [dev-dependencies]
 tokio-test = "0.4"
