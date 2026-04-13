@@ -67,25 +67,34 @@ struct Args {
     #[arg(short, long)]
     output: Option<PathBuf>,
 
-    /// Use enhanced markdown conversion with LaTeX extraction, metadata, and post-processing
-    #[arg(long, default_value_t = false)]
-    enhanced: bool,
-
-    /// Extract LaTeX formulas from img.formula, `KaTeX`, `MathJax` (default: true when --enhanced)
-    #[arg(long, default_value_t = true)]
+    /// Extract LaTeX formulas from img.formula, KaTeX, MathJax (default: true).
+    /// Use --no-extract-latex to disable.
+    #[arg(long, default_value_t = true, env = "WEB_CAPTURE_EXTRACT_LATEX")]
     extract_latex: bool,
 
-    /// Extract article metadata (author, date, hubs, tags) (default: true when --enhanced)
-    #[arg(long, default_value_t = true)]
+    /// Extract article metadata (author, date, hubs, tags) (default: true).
+    /// Use --no-extract-metadata to disable.
+    #[arg(long, default_value_t = true, env = "WEB_CAPTURE_EXTRACT_METADATA")]
     extract_metadata: bool,
 
-    /// Apply post-processing (unicode normalization, LaTeX spacing) (default: true when --enhanced)
-    #[arg(long, default_value_t = true)]
+    /// Apply post-processing (unicode normalization, LaTeX spacing) (default: true).
+    /// Use --no-post-process to disable.
+    #[arg(long, default_value_t = true, env = "WEB_CAPTURE_POST_PROCESS")]
     post_process: bool,
 
-    /// Detect and correct code block languages (default: true when --enhanced)
-    #[arg(long, default_value_t = true)]
+    /// Detect and correct code block languages (default: true).
+    /// Use --no-detect-code-language to disable.
+    #[arg(long, default_value_t = true, env = "WEB_CAPTURE_DETECT_CODE_LANGUAGE")]
     detect_code_language: bool,
+
+    /// Keep images as inline base64 data URIs instead of extracting to files (default: false).
+    /// Use --embed-images to keep base64 inline.
+    #[arg(long, default_value_t = false, env = "WEB_CAPTURE_EMBED_IMAGES")]
+    embed_images: bool,
+
+    /// Directory name for extracted images, relative to output file (default: images)
+    #[arg(long, default_value = "images", env = "WEB_CAPTURE_IMAGES_DIR")]
+    images_dir: String,
 
     /// Capture both light and dark theme screenshots
     #[arg(long, default_value_t = false)]
@@ -570,11 +579,29 @@ async fn capture_url(
                 let result =
                     web_capture::gdocs::fetch_google_doc_as_markdown(&absolute_url, api_token)
                         .await?;
+                let mut markdown = result.content;
                 if let Some(path) = output {
-                    fs::write(path, &result.content).await?;
+                    if !args.embed_images {
+                        if let Some(output_dir) = path.parent() {
+                            let extraction =
+                                web_capture::extract_images::extract_and_save_images(
+                                    &markdown,
+                                    output_dir,
+                                    &args.images_dir,
+                                )?;
+                            if extraction.extracted > 0 {
+                                markdown = extraction.markdown;
+                                eprintln!(
+                                    "Extracted {} images to {}/",
+                                    extraction.extracted, args.images_dir
+                                );
+                            }
+                        }
+                    }
+                    fs::write(path, &markdown).await?;
                     eprintln!("Google Doc Markdown saved to: {}", path.display());
                 } else {
-                    print!("{}", result.content);
+                    print!("{markdown}");
                 }
             }
             _ => {
@@ -601,21 +628,35 @@ async fn capture_url(
         "markdown" | "md" => {
             let html = fetch_html(&absolute_url).await?;
 
-            let markdown = if args.enhanced {
-                let options = EnhancedOptions {
-                    extract_latex: args.extract_latex,
-                    extract_metadata: args.extract_metadata,
-                    post_process: args.post_process,
-                    detect_code_language: args.detect_code_language,
-                };
-                let result =
-                    convert_html_to_markdown_enhanced(&html, Some(&absolute_url), &options)?;
-                result.markdown
-            } else {
-                convert_html_to_markdown(&html, Some(&absolute_url))?
+            // Enhanced conversion is now the default
+            let options = EnhancedOptions {
+                extract_latex: args.extract_latex,
+                extract_metadata: args.extract_metadata,
+                post_process: args.post_process,
+                detect_code_language: args.detect_code_language,
             };
+            let result =
+                convert_html_to_markdown_enhanced(&html, Some(&absolute_url), &options)?;
+            let mut markdown = result.markdown;
 
             if let Some(path) = output {
+                if !args.embed_images {
+                    if let Some(output_dir) = path.parent() {
+                        let extraction =
+                            web_capture::extract_images::extract_and_save_images(
+                                &markdown,
+                                output_dir,
+                                &args.images_dir,
+                            )?;
+                        if extraction.extracted > 0 {
+                            markdown = extraction.markdown;
+                            eprintln!(
+                                "Extracted {} images to {}/",
+                                extraction.extracted, args.images_dir
+                            );
+                        }
+                    }
+                }
                 fs::write(path, &markdown).await?;
                 eprintln!("Markdown saved to: {}", path.display());
             } else {
