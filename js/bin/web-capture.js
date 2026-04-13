@@ -5,6 +5,7 @@
 // 2. Capture mode: web-capture <url> [options]
 
 import fs from 'fs';
+import path from 'path';
 import { URL } from 'node:url';
 import { makeConfig } from 'lino-arguments';
 
@@ -89,35 +90,56 @@ const config = makeConfig({
         type: 'string',
         description: 'Path to .lenv configuration file',
       })
-      .option('enhanced', {
-        type: 'boolean',
-        description:
-          'Use enhanced markdown conversion with LaTeX extraction, metadata, and post-processing (default: false)',
-        default: false,
-      })
       .option('extractLatex', {
         type: 'boolean',
         description:
-          'Extract LaTeX formulas from img.formula, KaTeX, MathJax (default: true when --enhanced)',
-        default: true,
+          'Extract LaTeX formulas from img.formula, KaTeX, MathJax (default: true). Use --no-extract-latex to disable.',
+        default:
+          process.env.WEB_CAPTURE_EXTRACT_LATEX !== undefined
+            ? process.env.WEB_CAPTURE_EXTRACT_LATEX === '1'
+            : true,
       })
       .option('extractMetadata', {
         type: 'boolean',
         description:
-          'Extract article metadata (author, date, hubs, tags) (default: true when --enhanced)',
-        default: true,
+          'Extract article metadata (author, date, hubs, tags) (default: true). Use --no-extract-metadata to disable.',
+        default:
+          process.env.WEB_CAPTURE_EXTRACT_METADATA !== undefined
+            ? process.env.WEB_CAPTURE_EXTRACT_METADATA === '1'
+            : true,
       })
       .option('postProcess', {
         type: 'boolean',
         description:
-          'Apply post-processing (unicode normalization, LaTeX spacing) (default: true when --enhanced)',
-        default: true,
+          'Apply post-processing (unicode normalization, LaTeX spacing) (default: true). Use --no-post-process to disable.',
+        default:
+          process.env.WEB_CAPTURE_POST_PROCESS !== undefined
+            ? process.env.WEB_CAPTURE_POST_PROCESS === '1'
+            : true,
       })
       .option('detectCodeLanguage', {
         type: 'boolean',
         description:
-          'Detect and correct code block languages (default: true when --enhanced)',
-        default: true,
+          'Detect and correct code block languages (default: true). Use --no-detect-code-language to disable.',
+        default:
+          process.env.WEB_CAPTURE_DETECT_CODE_LANGUAGE !== undefined
+            ? process.env.WEB_CAPTURE_DETECT_CODE_LANGUAGE === '1'
+            : true,
+      })
+      .option('embedImages', {
+        type: 'boolean',
+        description:
+          'Keep images as inline base64 data URIs instead of extracting to files (default: false). Use --embed-images to enable.',
+        default:
+          process.env.WEB_CAPTURE_EMBED_IMAGES !== undefined
+            ? process.env.WEB_CAPTURE_EMBED_IMAGES === '1'
+            : false,
+      })
+      .option('imagesDir', {
+        type: 'string',
+        description:
+          'Directory name for extracted images, relative to output file (default: images)',
+        default: process.env.WEB_CAPTURE_IMAGES_DIR || 'images',
       })
       .option('dualTheme', {
         type: 'boolean',
@@ -254,6 +276,8 @@ async function captureUrl(url, options) {
     // localImages is used by archive format
     // eslint-disable-next-line no-unused-vars
     localImages,
+    embedImages,
+    imagesDir,
   } = options;
 
   // Ensure URL is absolute
@@ -280,6 +304,7 @@ async function captureUrl(url, options) {
   const { createBrowser } = await import('../src/browser.js');
   const { isGoogleDocsUrl, fetchGoogleDoc, fetchGoogleDocAsMarkdown } =
     await import('../src/gdocs.js');
+  const { extractAndSaveImages } = await import('../src/extract-images.js');
 
   const normalizedFormat = format.toLowerCase();
 
@@ -291,11 +316,22 @@ async function captureUrl(url, options) {
         const result = await fetchGoogleDocAsMarkdown(absoluteUrl, {
           apiToken,
         });
+        let { markdown } = result;
+        if (output && !embedImages) {
+          const outputDir = path.dirname(path.resolve(output));
+          const extraction = extractAndSaveImages(markdown, outputDir, {
+            imagesDir,
+          });
+          if (extraction.extracted > 0) {
+            markdown = extraction.markdown;
+            console.error(`Extracted ${extraction.extracted} images to ${imagesDir}/`);
+          }
+        }
         if (output) {
-          fs.writeFileSync(output, result.markdown, 'utf-8');
+          fs.writeFileSync(output, markdown, 'utf-8');
           console.error(`Google Doc Markdown saved to: ${output}`);
         } else {
-          process.stdout.write(result.markdown);
+          process.stdout.write(markdown);
         }
       } else {
         const gdocsFormat =
@@ -522,21 +558,26 @@ async function captureUrl(url, options) {
       await new Promise((resolve) => outStream.on('close', resolve));
       console.error(`Archive saved to: ${outPath}`);
     } else if (normalizedFormat === 'markdown' || normalizedFormat === 'md') {
-      // Markdown format
+      // Markdown format — enhanced conversion is now the default
       const html = await fetchHtml(absoluteUrl);
-      let markdown;
+      const { convertHtmlToMarkdownEnhanced } = await import('../src/lib.js');
+      const result = convertHtmlToMarkdownEnhanced(html, absoluteUrl, {
+        extractLatex: options.extractLatex,
+        extractMetadata: options.extractMetadata,
+        postProcess: options.postProcess,
+        detectCodeLanguage: options.detectCodeLanguage,
+      });
+      let markdown = result.markdown;
 
-      if (options.enhanced) {
-        const { convertHtmlToMarkdownEnhanced } = await import('../src/lib.js');
-        const result = convertHtmlToMarkdownEnhanced(html, absoluteUrl, {
-          extractLatex: options.extractLatex,
-          extractMetadata: options.extractMetadata,
-          postProcess: options.postProcess,
-          detectCodeLanguage: options.detectCodeLanguage,
+      if (output && !embedImages) {
+        const outputDir = path.dirname(path.resolve(output));
+        const extraction = extractAndSaveImages(markdown, outputDir, {
+          imagesDir,
         });
-        markdown = result.markdown;
-      } else {
-        markdown = convertHtmlToMarkdown(html, absoluteUrl);
+        if (extraction.extracted > 0) {
+          markdown = extraction.markdown;
+          console.error(`Extracted ${extraction.extracted} images to ${imagesDir}/`);
+        }
       }
 
       if (output) {
@@ -660,13 +701,14 @@ async function main() {
       fullPage: config.fullPage,
       localImages: config.localImages,
       documentFormat: config.documentFormat,
-      enhanced: config.enhanced,
       extractLatex: config.extractLatex,
       extractMetadata: config.extractMetadata,
       postProcess: config.postProcess,
       detectCodeLanguage: config.detectCodeLanguage,
       dualTheme: config.dualTheme,
       apiToken: config.apiToken,
+      embedImages: config.embedImages,
+      imagesDir: config.imagesDir,
     });
   } else {
     // No arguments - show error
