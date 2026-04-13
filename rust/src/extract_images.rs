@@ -2,7 +2,9 @@
 
 use base64::Engine;
 use regex::Regex;
+use std::collections::hash_map::DefaultHasher;
 use std::fs;
+use std::hash::{Hash, Hasher};
 use std::path::Path;
 use std::sync::OnceLock;
 use tracing::debug;
@@ -42,7 +44,6 @@ pub fn extract_and_save_images(
     images_dir: &str,
 ) -> crate::Result<ExtractionResult> {
     let images_path = output_dir.join(images_dir);
-    let mut idx = 0u32;
     let mut images: Vec<(String, Vec<u8>)> = Vec::new();
 
     let updated_markdown =
@@ -51,26 +52,28 @@ pub fn extract_and_save_images(
             let mime_ext = &caps[2];
             let base64_data = &caps[3];
 
-            idx += 1;
             let ext = match mime_ext {
                 "jpeg" => "jpg",
                 "svg+xml" => "svg",
                 other => other,
             };
-            let filename = format!("image-{idx:03}.{ext}");
-            let relative_path = format!("{images_dir}/{filename}");
 
             match base64::engine::general_purpose::STANDARD.decode(base64_data) {
                 Ok(data) => {
+                    let mut hasher = DefaultHasher::new();
+                    data.hash(&mut hasher);
+                    let hash = format!("{:016x}", hasher.finish());
+                    let hash_prefix = &hash[..8];
+                    let filename = format!("image-{hash_prefix}.{ext}");
+                    let relative_path = format!("{images_dir}/{filename}");
                     debug!("Extracted image: {} ({} bytes)", filename, data.len());
                     images.push((filename, data));
+                    return format!("![{alt_text}]({relative_path})");
                 }
                 Err(_) => {
                     return format!("![{alt_text}](data:image/{mime_ext};base64,{base64_data})");
                 }
             }
-
-            format!("![{alt_text}]({relative_path})")
         });
 
     let extracted = images.len();

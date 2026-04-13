@@ -1,3 +1,4 @@
+import { createHash } from 'crypto';
 import fs from 'fs';
 import path from 'path';
 import os from 'os';
@@ -24,16 +25,26 @@ describe('extract-images module', () => {
   const TINY_JPEG =
     '/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAP///wAAAf/bAEMA/9sAQwD/2wBDAf///wAAAf/bAEMA/9sAQwD/2Q==';
 
+  function contentHash(base64Data) {
+    const buf = Buffer.from(base64Data, 'base64');
+    return createHash('sha256').update(buf).digest('hex').slice(0, 8);
+  }
+
+  const PNG_HASH = contentHash(TINY_PNG);
+  const JPEG_HASH = contentHash(TINY_JPEG);
+
   describe('extractAndSaveImages', () => {
     it('extracts a single PNG image from markdown', () => {
       const md = `# Hello\n\n![test](data:image/png;base64,${TINY_PNG})\n\nEnd.`;
       const result = extractAndSaveImages(md, tmpDir);
 
       expect(result.extracted).toBe(1);
-      expect(result.markdown).toContain('![test](images/image-001.png)');
+      expect(result.markdown).toContain(
+        `![test](images/image-${PNG_HASH}.png)`
+      );
       expect(result.markdown).not.toContain('data:image');
 
-      const imgPath = path.join(tmpDir, 'images', 'image-001.png');
+      const imgPath = path.join(tmpDir, 'images', `image-${PNG_HASH}.png`);
       expect(fs.existsSync(imgPath)).toBe(true);
       const buf = fs.readFileSync(imgPath);
       expect(buf.length).toBeGreaterThan(0);
@@ -42,7 +53,19 @@ describe('extract-images module', () => {
       expect(buf[1]).toBe(0x50); // P
     });
 
-    it('extracts multiple images with sequential numbering', () => {
+    it('extracts multiple images with content-hash filenames', () => {
+      const md = [
+        `![a](data:image/png;base64,${TINY_PNG})`,
+        `![b](data:image/jpeg;base64,${TINY_JPEG})`,
+      ].join('\n');
+
+      const result = extractAndSaveImages(md, tmpDir);
+      expect(result.extracted).toBe(2);
+      expect(result.markdown).toContain(`images/image-${PNG_HASH}.png`);
+      expect(result.markdown).toContain(`images/image-${JPEG_HASH}.jpg`);
+    });
+
+    it('produces stable filenames for duplicate images', () => {
       const md = [
         `![a](data:image/png;base64,${TINY_PNG})`,
         `![b](data:image/png;base64,${TINY_PNG})`,
@@ -50,8 +73,11 @@ describe('extract-images module', () => {
 
       const result = extractAndSaveImages(md, tmpDir);
       expect(result.extracted).toBe(2);
-      expect(result.markdown).toContain('images/image-001.png');
-      expect(result.markdown).toContain('images/image-002.png');
+      // Both should produce the same hash-based filename
+      const matches = result.markdown.match(
+        new RegExp(`image-${PNG_HASH}\\.png`, 'g')
+      );
+      expect(matches).toHaveLength(2);
     });
 
     it('handles JPEG mime type correctly', () => {
@@ -59,7 +85,7 @@ describe('extract-images module', () => {
       const result = extractAndSaveImages(md, tmpDir);
 
       expect(result.extracted).toBe(1);
-      expect(result.markdown).toContain('images/image-001.jpg');
+      expect(result.markdown).toContain(`images/image-${JPEG_HASH}.jpg`);
     });
 
     it('uses custom imagesDir', () => {
@@ -69,9 +95,9 @@ describe('extract-images module', () => {
       });
 
       expect(result.extracted).toBe(1);
-      expect(result.markdown).toContain('my-images/image-001.png');
+      expect(result.markdown).toContain(`my-images/image-${PNG_HASH}.png`);
       expect(
-        fs.existsSync(path.join(tmpDir, 'my-images', 'image-001.png'))
+        fs.existsSync(path.join(tmpDir, 'my-images', `image-${PNG_HASH}.png`))
       ).toBe(true);
     });
 
@@ -98,8 +124,24 @@ describe('extract-images module', () => {
       const result = extractAndSaveImages(md, tmpDir);
 
       expect(result.markdown).toContain(
-        '![A descriptive alt text](images/image-001.png)'
+        `![A descriptive alt text](images/image-${PNG_HASH}.png)`
       );
+    });
+
+    it('handles SVG data URIs', () => {
+      const svgContent = '<svg xmlns="http://www.w3.org/2000/svg" width="1" height="1"><rect fill="red" width="1" height="1"/></svg>';
+      const svgBase64 = Buffer.from(svgContent).toString('base64');
+      const svgHash = contentHash(svgBase64);
+      const md = `![icon](data:image/svg+xml;base64,${svgBase64})`;
+      const result = extractAndSaveImages(md, tmpDir);
+
+      expect(result.extracted).toBe(1);
+      expect(result.markdown).toContain(`images/image-${svgHash}.svg`);
+
+      const imgPath = path.join(tmpDir, 'images', `image-${svgHash}.svg`);
+      expect(fs.existsSync(imgPath)).toBe(true);
+      const content = fs.readFileSync(imgPath, 'utf-8');
+      expect(content).toContain('<svg');
     });
   });
 

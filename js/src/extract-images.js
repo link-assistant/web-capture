@@ -1,3 +1,4 @@
+import { createHash } from 'crypto';
 import fs from 'fs';
 import path from 'path';
 
@@ -7,6 +8,10 @@ const BASE64_IMAGE_REGEX =
 /**
  * Extract base64 data URI images from markdown text, save them as files,
  * and rewrite references to relative paths.
+ *
+ * Uses content-hash filenames (first 8 hex chars of SHA-256) so that
+ * re-captures of the same document produce stable file names regardless
+ * of image order.
  *
  * @param {string} markdown - Markdown content with data URI images
  * @param {string} outputDir - Directory where the markdown file is being written
@@ -18,24 +23,26 @@ export function extractAndSaveImages(markdown, outputDir, options = {}) {
   const { imagesDir = 'images' } = options;
   const imagesPath = path.resolve(outputDir, imagesDir);
 
-  let idx = 0;
   const images = [];
 
   const updatedMarkdown = markdown.replace(
     BASE64_IMAGE_REGEX,
     (match, altText, mimeExt, base64Data) => {
-      idx++;
       const ext =
         mimeExt === 'jpeg' ? 'jpg' : mimeExt === 'svg+xml' ? 'svg' : mimeExt;
-      const filename = `image-${String(idx).padStart(3, '0')}.${ext}`;
-      const relativePath = `${imagesDir}/${filename}`;
 
+      let buffer;
       try {
-        const buffer = Buffer.from(base64Data, 'base64');
-        images.push({ filename, buffer });
+        buffer = Buffer.from(base64Data, 'base64');
       } catch {
         return match;
       }
+
+      const hash = createHash('sha256').update(buffer).digest('hex').slice(0, 8);
+      const filename = `image-${hash}.${ext}`;
+      const relativePath = `${imagesDir}/${filename}`;
+
+      images.push({ filename, buffer });
 
       return `![${altText}](${relativePath})`;
     }
