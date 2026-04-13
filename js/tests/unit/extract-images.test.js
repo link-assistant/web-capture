@@ -129,7 +129,8 @@ describe('extract-images module', () => {
     });
 
     it('handles SVG data URIs', () => {
-      const svgContent = '<svg xmlns="http://www.w3.org/2000/svg" width="1" height="1"><rect fill="red" width="1" height="1"/></svg>';
+      const svgContent =
+        '<svg xmlns="http://www.w3.org/2000/svg" width="1" height="1"><rect fill="red" width="1" height="1"/></svg>';
       const svgBase64 = Buffer.from(svgContent).toString('base64');
       const svgHash = contentHash(svgBase64);
       const md = `![icon](data:image/svg+xml;base64,${svgBase64})`;
