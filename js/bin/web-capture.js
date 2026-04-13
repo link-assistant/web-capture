@@ -34,8 +34,8 @@ const config = makeConfig({
         alias: 'f',
         type: 'string',
         description:
-          'Output format: html, markdown, md, image, png, jpeg, pdf, docx, archive',
-        default: 'html',
+          'Output format: markdown, md, html, image, png, jpeg, pdf, docx, archive',
+        default: 'markdown',
       })
       .option('theme', {
         alias: 't',
@@ -94,52 +94,37 @@ const config = makeConfig({
         type: 'boolean',
         description:
           'Extract LaTeX formulas from img.formula, KaTeX, MathJax (default: true). Use --no-extract-latex to disable.',
-        default:
-          process.env.WEB_CAPTURE_EXTRACT_LATEX !== undefined
-            ? process.env.WEB_CAPTURE_EXTRACT_LATEX === '1'
-            : true,
+        default: getenv('WEB_CAPTURE_EXTRACT_LATEX', true),
       })
       .option('extractMetadata', {
         type: 'boolean',
         description:
           'Extract article metadata (author, date, hubs, tags) (default: true). Use --no-extract-metadata to disable.',
-        default:
-          process.env.WEB_CAPTURE_EXTRACT_METADATA !== undefined
-            ? process.env.WEB_CAPTURE_EXTRACT_METADATA === '1'
-            : true,
+        default: getenv('WEB_CAPTURE_EXTRACT_METADATA', true),
       })
       .option('postProcess', {
         type: 'boolean',
         description:
           'Apply post-processing (unicode normalization, LaTeX spacing) (default: true). Use --no-post-process to disable.',
-        default:
-          process.env.WEB_CAPTURE_POST_PROCESS !== undefined
-            ? process.env.WEB_CAPTURE_POST_PROCESS === '1'
-            : true,
+        default: getenv('WEB_CAPTURE_POST_PROCESS', true),
       })
       .option('detectCodeLanguage', {
         type: 'boolean',
         description:
           'Detect and correct code block languages (default: true). Use --no-detect-code-language to disable.',
-        default:
-          process.env.WEB_CAPTURE_DETECT_CODE_LANGUAGE !== undefined
-            ? process.env.WEB_CAPTURE_DETECT_CODE_LANGUAGE === '1'
-            : true,
+        default: getenv('WEB_CAPTURE_DETECT_CODE_LANGUAGE', true),
       })
       .option('embedImages', {
         type: 'boolean',
         description:
           'Keep images as inline base64 data URIs instead of extracting to files (default: false). Use --embed-images to enable.',
-        default:
-          process.env.WEB_CAPTURE_EMBED_IMAGES !== undefined
-            ? process.env.WEB_CAPTURE_EMBED_IMAGES === '1'
-            : false,
+        default: getenv('WEB_CAPTURE_EMBED_IMAGES', false),
       })
       .option('imagesDir', {
         type: 'string',
         description:
           'Directory name for extracted images, relative to output file (default: images)',
-        default: process.env.WEB_CAPTURE_IMAGES_DIR || 'images',
+        default: getenv('WEB_CAPTURE_IMAGES_DIR', 'images'),
       })
       .option('dualTheme', {
         type: 'boolean',

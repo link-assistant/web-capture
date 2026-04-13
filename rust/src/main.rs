@@ -59,8 +59,8 @@ struct Args {
     #[arg(short, long, default_value = "3000", env = "PORT")]
     port: u16,
 
-    /// Output format: html, markdown/md, image/png
-    #[arg(short, long, default_value = "html")]
+    /// Output format: markdown/md, html, image/png
+    #[arg(short, long, default_value = "markdown")]
     format: String,
 
     /// Output file path (default: stdout for text, auto-generated for images)
