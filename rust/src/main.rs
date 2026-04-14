@@ -345,7 +345,7 @@ async fn markdown_handler(Query(params): Query<MarkdownQuery>) -> Response {
         }
     };
 
-    if params.keep_original_links || !params.embed_images {
+    if !params.embed_images {
         let result = web_capture::extract_images::strip_base64_images(&markdown);
         markdown = result.markdown;
     }
