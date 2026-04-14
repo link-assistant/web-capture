@@ -330,7 +330,56 @@ async function captureUrl(url, options) {
   if (isGoogleDocsUrl(absoluteUrl)) {
     try {
       const apiToken = options.apiToken;
-      if (normalizedFormat === 'markdown' || normalizedFormat === 'md') {
+      const { extractAndSaveImages } = await import('../src/extract-images.js');
+      if (normalizedFormat === 'archive' || normalizedFormat === 'zip') {
+        const { fetchGoogleDocAsArchive } = await import('../src/gdocs.js');
+        const { default: archiver } = await import('archiver');
+        const archiveFormat = options.archiveFormat || 'zip';
+        const ext =
+          archiveFormat === 'tar.gz' || archiveFormat === 'gz'
+            ? 'tar.gz'
+            : archiveFormat === '7z'
+              ? '7z'
+              : archiveFormat === 'tar'
+                ? 'tar'
+                : 'zip';
+        const archiveResult = await fetchGoogleDocAsArchive(absoluteUrl, {
+          apiToken,
+        });
+        const output =
+          explicitOutput === '-'
+            ? null
+            : explicitOutput || deriveOutputPath(absoluteUrl, ext, dataDir);
+        if (output) {
+          const outStream = fs.createWriteStream(output);
+          const archive = archiver.default
+            ? archiver.default('zip', { zlib: { level: 9 } })
+            : archiver('zip', { zlib: { level: 9 } });
+          archive.pipe(outStream);
+          archive.append(archiveResult.markdown, { name: 'article.md' });
+          archive.append(archiveResult.html, { name: 'article.html' });
+          for (const img of archiveResult.images) {
+            archive.append(img.data, { name: `images/${img.filename}` });
+          }
+          await archive.finalize();
+          await new Promise((resolve) => outStream.on('close', resolve));
+          console.error(`Google Doc (archive) saved to: ${output}`);
+        } else {
+          const { PassThrough } = await import('stream');
+          const passthrough = new PassThrough();
+          const archiverMod = await import('archiver');
+          const archiverFn = archiverMod.default?.default || archiverMod.default;
+          const archive = archiverFn('zip', { zlib: { level: 9 } });
+          archive.pipe(passthrough);
+          passthrough.pipe(process.stdout);
+          archive.append(archiveResult.markdown, { name: 'article.md' });
+          archive.append(archiveResult.html, { name: 'article.html' });
+          for (const img of archiveResult.images) {
+            archive.append(img.data, { name: `images/${img.filename}` });
+          }
+          await archive.finalize();
+        }
+      } else if (normalizedFormat === 'markdown' || normalizedFormat === 'md') {
         const result = await fetchGoogleDocAsMarkdown(absoluteUrl, {
           apiToken,
         });
@@ -339,16 +388,29 @@ async function captureUrl(url, options) {
           explicitOutput === '-'
             ? null
             : explicitOutput || deriveOutputPath(absoluteUrl, 'md', dataDir);
-        if (output && !embedImages) {
-          const strip = stripBase64Images(markdown);
-          if (strip.stripped > 0) {
-            markdown = strip.markdown;
-            console.error(
-              `Stripped ${strip.stripped} base64 images (keeping original links)`
-            );
-          }
-        }
         if (output) {
+          if (embedImages) {
+            // Keep base64 data URIs inline
+          } else if (keepOriginalLinks) {
+            const strip = stripBase64Images(markdown);
+            if (strip.stripped > 0) {
+              markdown = strip.markdown;
+              console.error(
+                `Stripped ${strip.stripped} base64 images (keeping original links)`
+              );
+            }
+          } else {
+            const outputDir = path.dirname(output);
+            const extracted = extractAndSaveImages(markdown, outputDir, {
+              imagesDir: options.imagesDir || 'images',
+            });
+            if (extracted.extracted > 0) {
+              markdown = extracted.markdown;
+              console.error(
+                `Extracted ${extracted.extracted} images to ${options.imagesDir || 'images'}/`
+              );
+            }
+          }
           fs.mkdirSync(path.dirname(output), { recursive: true });
           fs.writeFileSync(output, markdown, 'utf-8');
           console.error(`Google Doc Markdown saved to: ${output}`);
@@ -593,6 +655,7 @@ async function captureUrl(url, options) {
       // Markdown format — enhanced conversion is now the default
       const html = await fetchHtml(absoluteUrl);
       const { convertHtmlToMarkdownEnhanced } = await import('../src/lib.js');
+      const { extractAndSaveImages } = await import('../src/extract-images.js');
       const result = convertHtmlToMarkdownEnhanced(html, absoluteUrl, {
         extractLatex: options.extractLatex,
         extractMetadata: options.extractMetadata,
@@ -605,13 +668,28 @@ async function captureUrl(url, options) {
         explicitOutput === '-'
           ? null
           : explicitOutput || deriveOutputPath(absoluteUrl, 'md', dataDir);
-      if (output && !embedImages) {
-        const strip = stripBase64Images(markdown);
-        if (strip.stripped > 0) {
-          markdown = strip.markdown;
-          console.error(
-            `Stripped ${strip.stripped} base64 images (keeping original links)`
-          );
+      if (output) {
+        if (embedImages) {
+          // Keep base64 data URIs inline
+        } else if (keepOriginalLinks) {
+          const strip = stripBase64Images(markdown);
+          if (strip.stripped > 0) {
+            markdown = strip.markdown;
+            console.error(
+              `Stripped ${strip.stripped} base64 images (keeping original links)`
+            );
+          }
+        } else {
+          const outputDir = path.dirname(output);
+          const extracted = extractAndSaveImages(markdown, outputDir, {
+            imagesDir: options.imagesDir || 'images',
+          });
+          if (extracted.extracted > 0) {
+            markdown = extracted.markdown;
+            console.error(
+              `Extracted ${extracted.extracted} images to ${options.imagesDir || 'images'}/`
+            );
+          }
         }
       }
 

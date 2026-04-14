@@ -11,10 +11,7 @@ export async function markdownHandler(req, res) {
   try {
     const html = await fetchHtml(url);
     let markdown = convertHtmlToMarkdown(html, url);
-    if (keepOriginalLinks) {
-      const strip = stripBase64Images(markdown);
-      markdown = strip.markdown;
-    } else if (!embedImages) {
+    if (!embedImages) {
       const strip = stripBase64Images(markdown);
       markdown = strip.markdown;
     }
