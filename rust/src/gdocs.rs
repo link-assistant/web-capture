@@ -313,8 +313,7 @@ pub async fn fetch_google_doc_as_archive(
 
     let (local_html, images) = extract_base64_images(&result.content);
 
-    let markdown =
-        crate::markdown::convert_html_to_markdown(&local_html, None)?;
+    let markdown = crate::markdown::convert_html_to_markdown(&local_html, None)?;
 
     debug!(
         "Archive prepared: {} images extracted, {} bytes HTML, {} bytes Markdown",

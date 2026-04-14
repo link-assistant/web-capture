@@ -655,7 +655,8 @@ async fn capture_url(
                 let archive_result =
                     web_capture::gdocs::fetch_google_doc_as_archive(&absolute_url, api_token)
                         .await?;
-                let zip_bytes = web_capture::gdocs::create_archive_zip(&archive_result, !args.no_pretty_html)?;
+                let zip_bytes =
+                    web_capture::gdocs::create_archive_zip(&archive_result, !args.no_pretty_html)?;
                 let is_stdout = output.is_some_and(|p| p.as_os_str() == "-");
                 let derived;
                 let effective_output = if is_stdout {
@@ -798,7 +799,8 @@ async fn capture_url(
                 document_id: String::new(),
                 export_url: absolute_url.clone(),
             };
-            let zip_bytes = web_capture::gdocs::create_archive_zip(&archive_result, !args.no_pretty_html)?;
+            let zip_bytes =
+                web_capture::gdocs::create_archive_zip(&archive_result, !args.no_pretty_html)?;
 
             let is_stdout = output.is_some_and(|p| p.as_os_str() == "-");
             let derived;

@@ -287,7 +287,9 @@ async function sendGDocsArchive(res, url, apiToken) {
   const archive = archiver('zip', { zlib: { level: 9 } });
   archive.pipe(res);
   archive.append(archiveResult.markdown, { name: 'document.md' });
-  archive.append(prettyPrintHtml(archiveResult.html), { name: 'document.html' });
+  archive.append(prettyPrintHtml(archiveResult.html), {
+    name: 'document.html',
+  });
   for (const img of archiveResult.images) {
     archive.append(img.data, { name: `images/${img.filename}` });
   }

@@ -358,7 +358,9 @@ async function captureUrl(url, options) {
           archive.pipe(outStream);
           const { prettyPrintHtml: ppHtml } = await import('../src/lib.js');
           archive.append(archiveResult.markdown, { name: 'document.md' });
-          archive.append(ppHtml(archiveResult.html), { name: 'document.html' });
+          archive.append(ppHtml(archiveResult.html), {
+            name: 'document.html',
+          });
           for (const img of archiveResult.images) {
             archive.append(img.data, { name: `images/${img.filename}` });
           }
@@ -376,7 +378,9 @@ async function captureUrl(url, options) {
           passthrough.pipe(process.stdout);
           const { prettyPrintHtml: ppHtml2 } = await import('../src/lib.js');
           archive.append(archiveResult.markdown, { name: 'document.md' });
-          archive.append(ppHtml2(archiveResult.html), { name: 'document.html' });
+          archive.append(ppHtml2(archiveResult.html), {
+            name: 'document.html',
+          });
           for (const img of archiveResult.images) {
             archive.append(img.data, { name: `images/${img.filename}` });
           }
