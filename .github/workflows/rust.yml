@@ -4,16 +4,8 @@ on:
   push:
     branches:
       - main
-    paths:
-      - 'rust/**'
-      - 'scripts/rust-*.mjs'
-      - '.github/workflows/rust.yml'
   pull_request:
     types: [opened, synchronize, reopened]
-    paths:
-      - 'rust/**'
-      - 'scripts/rust-*.mjs'
-      - '.github/workflows/rust.yml'
   workflow_dispatch:
     inputs:
       release_mode:
@@ -52,10 +44,45 @@ defaults:
     working-directory: rust
 
 jobs:
-  # Linting and formatting
+  # === DETECT CHANGES - determines which jobs should run ===
+  detect-changes:
+    name: Rust - Detect Changes
+    runs-on: ubuntu-latest
+    if: github.event_name != 'workflow_dispatch'
+    outputs:
+      rust-code-changed: ${{ steps.changes.outputs.rust-code-changed }}
+      rust-changed: ${{ steps.changes.outputs.rust-changed }}
+      rust-scripts-changed: ${{ steps.changes.outputs.rust-scripts-changed }}
+      rust-workflow-changed: ${{ steps.changes.outputs.rust-workflow-changed }}
+      any-rust-code-changed: ${{ steps.changes.outputs.any-rust-code-changed }}
+      any-code-changed: ${{ steps.changes.outputs.any-code-changed }}
+      docs-changed: ${{ steps.changes.outputs.docs-changed }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Detect changes
+        id: changes
+        working-directory: .
+        env:
+          GITHUB_EVENT_NAME: ${{ github.event_name }}
+          GITHUB_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          GITHUB_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: node scripts/detect-code-changes.mjs
+
+  # Linting and formatting - runs when Rust-relevant files change
   lint:
     name: Rust - Lint and Format Check
     runs-on: ubuntu-latest
+    needs: [detect-changes]
+    if: |
+      always() && !cancelled() && (
+        github.event_name == 'push' ||
+        github.event_name == 'workflow_dispatch' ||
+        needs.detect-changes.outputs.any-rust-code-changed == 'true' ||
+        needs.detect-changes.outputs.docs-changed == 'true'
+      )
     steps:
       - uses: actions/checkout@v4
 
@@ -81,10 +108,17 @@ jobs:
       - name: Run Clippy
         run: cargo clippy --all-targets --all-features -- -D warnings
 
-  # Test matrix: Rust on multiple OS
+  # Test matrix: Rust on multiple OS - only runs when Rust code changes
   test:
     name: Rust - Test (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
+    needs: [detect-changes]
+    if: |
+      always() && !cancelled() && (
+        github.event_name == 'push' ||
+        github.event_name == 'workflow_dispatch' ||
+        needs.detect-changes.outputs.any-rust-code-changed == 'true'
+      )
     strategy:
       fail-fast: false
       matrix:
@@ -112,11 +146,15 @@ jobs:
       - name: Run doc tests
         run: cargo test --doc --verbose
 
-  # Build check
+  # Build check - only runs when Rust code changes
   build:
     name: Rust - Build
     runs-on: ubuntu-latest
     needs: [lint, test]
+    if: |
+      !cancelled() &&
+      needs.lint.result == 'success' &&
+      needs.test.result == 'success'
     steps:
       - uses: actions/checkout@v4
 

@@ -25,29 +25,33 @@ FROM debian:bullseye-slim
 
 WORKDIR /app
 
-# Install dependencies for headless Chrome
-RUN apt-get update && apt-get install -y \
-    chromium \
-    fonts-liberation \
-    libasound2 \
-    libatk-bridge2.0-0 \
-    libatk1.0-0 \
-    libatspi2.0-0 \
-    libcups2 \
-    libdbus-1-3 \
-    libdrm2 \
-    libgbm1 \
-    libgtk-3-0 \
-    libnspr4 \
-    libnss3 \
-    libxcomposite1 \
-    libxdamage1 \
-    libxfixes3 \
-    libxrandr2 \
-    libxshmfence1 \
-    xdg-utils \
-    ca-certificates \
-    --no-install-recommends && \
+# Install dependencies for headless Chrome (with retries for transient network errors)
+RUN apt-get update && \
+    for i in 1 2 3; do \
+      apt-get install -y \
+        chromium \
+        fonts-liberation \
+        libasound2 \
+        libatk-bridge2.0-0 \
+        libatk1.0-0 \
+        libatspi2.0-0 \
+        libcups2 \
+        libdbus-1-3 \
+        libdrm2 \
+        libgbm1 \
+        libgtk-3-0 \
+        libnspr4 \
+        libnss3 \
+        libxcomposite1 \
+        libxdamage1 \
+        libxfixes3 \
+        libxrandr2 \
+        libxshmfence1 \
+        xdg-utils \
+        ca-certificates \
+        --no-install-recommends && break || \
+      { echo "apt-get install attempt $i failed, retrying..."; sleep 5; }; \
+    done && \
     rm -rf /var/lib/apt/lists/*
 
 # Set Chrome/Chromium environment variables
