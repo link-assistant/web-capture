@@ -1,5 +1,11 @@
 # @link-assistant/web-capture
 
+## 1.5.1
+
+### Patch Changes
+
+- e6dea94: Fix Google Docs capture: archive produces real zip, default markdown extracts images to files instead of stripping
+
 ## 1.5.0
 
 ### Minor Changes
