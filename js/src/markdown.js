@@ -6,8 +6,8 @@ export async function markdownHandler(req, res) {
   if (!url) {
     return res.status(400).send('Missing `url` parameter');
   }
-  const embedImages = req.query.embedImages !== 'false';
-  const keepOriginalLinks = req.query.keepOriginalLinks === 'true';
+  const embedImages = req.query.embedImages === 'true';
+  const keepOriginalLinks = req.query.keepOriginalLinks !== 'false';
   try {
     const html = await fetchHtml(url);
     let markdown = convertHtmlToMarkdown(html, url);

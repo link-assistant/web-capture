@@ -66,9 +66,9 @@ web-capture --serve --port 8080
 
 ### API Endpoints (Server Mode)
 
-- **Markdown**: `GET /markdown?url=<URL>` (images embedded as base64 by default)
-- **Markdown (no base64)**: `GET /markdown?url=<URL>&embedImages=false`
-- **Markdown (original links)**: `GET /markdown?url=<URL>&keepOriginalLinks=true`
+- **Markdown**: `GET /markdown?url=<URL>` (original links kept, base64 stripped by default)
+- **Markdown (base64 inline)**: `GET /markdown?url=<URL>&embedImages=true`
+- **Markdown (all images stripped)**: `GET /markdown?url=<URL>&keepOriginalLinks=false`
 - **HTML**: `GET /html?url=<URL>`
 - **PNG screenshot**: `GET /image?url=<URL>`
 - **Google Docs**: `GET /gdocs?url=<URL>&format=markdown`

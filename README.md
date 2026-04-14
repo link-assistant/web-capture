@@ -113,9 +113,9 @@ Both implementations expose the same API:
 | Endpoint                                         | Description                                               |
 | ------------------------------------------------ | --------------------------------------------------------- |
 | `GET /html?url=<URL>`                            | Get rendered HTML content                                 |
-| `GET /markdown?url=<URL>`                        | Get Markdown (images embedded as base64 by default)       |
-| `GET /markdown?url=<URL>&embedImages=false`      | Get Markdown with base64 images stripped                  |
-| `GET /markdown?url=<URL>&keepOriginalLinks=true` | Get Markdown keeping only original remote URLs            |
+| `GET /markdown?url=<URL>`                         | Get Markdown (original links kept, base64 stripped)       |
+| `GET /markdown?url=<URL>&embedImages=true`        | Get Markdown with base64 images inline                    |
+| `GET /markdown?url=<URL>&keepOriginalLinks=false` | Get Markdown with all images stripped                     |
 | `GET /image?url=<URL>`                           | Get PNG screenshot                                        |
 | `GET /archive?url=<URL>`                         | ZIP archive with markdown + images extracted to `images/` |
 | `GET /archive?url=<URL>&keepOriginalLinks=true`  | ZIP archive keeping original remote image URLs            |

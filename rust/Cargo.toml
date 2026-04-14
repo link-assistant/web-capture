@@ -18,6 +18,14 @@ path = "src/lib.rs"
 name = "web-capture"
 path = "src/main.rs"
 
+[[test]]
+name = "unit"
+path = "tests/unit/mod.rs"
+
+[[test]]
+name = "integration"
+path = "tests/integration/mod.rs"
+
 [dependencies]
 # Browser automation using browser-commander from link-foundation
 browser-commander = "0.9"

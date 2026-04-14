@@ -157,9 +157,9 @@ struct UrlQuery {
 #[derive(Debug, Deserialize)]
 struct MarkdownQuery {
     url: String,
-    #[serde(default = "default_true", rename = "embedImages")]
+    #[serde(default, rename = "embedImages")]
     embed_images: bool,
-    #[serde(default, rename = "keepOriginalLinks")]
+    #[serde(default = "default_true", rename = "keepOriginalLinks")]
     keep_original_links: bool,
 }
 
@@ -656,29 +656,13 @@ async fn capture_url(
                 };
                 if let Some(ref path) = effective_output {
                     if !args.embed_images {
-                        if args.keep_original_links {
-                            let result =
-                                web_capture::extract_images::strip_base64_images(&markdown);
-                            if result.stripped > 0 {
-                                markdown = result.markdown;
-                                eprintln!(
-                                    "Stripped {} base64 images (keeping original links)",
-                                    result.stripped
-                                );
-                            }
-                        } else if let Some(output_dir) = path.parent() {
-                            let extraction = web_capture::extract_images::extract_and_save_images(
-                                &markdown,
-                                output_dir,
-                                &args.images_dir,
-                            )?;
-                            if extraction.extracted > 0 {
-                                markdown = extraction.markdown;
-                                eprintln!(
-                                    "Extracted {} images to {}/",
-                                    extraction.extracted, args.images_dir
-                                );
-                            }
+                        let result = web_capture::extract_images::strip_base64_images(&markdown);
+                        if result.stripped > 0 {
+                            markdown = result.markdown;
+                            eprintln!(
+                                "Stripped {} base64 images (keeping original links)",
+                                result.stripped
+                            );
                         }
                     }
                     fs::write(path, &markdown).await?;
@@ -746,28 +730,13 @@ async fn capture_url(
             };
             if let Some(ref path) = effective_output {
                 if !args.embed_images {
-                    if args.keep_original_links {
-                        let result = web_capture::extract_images::strip_base64_images(&markdown);
-                        if result.stripped > 0 {
-                            markdown = result.markdown;
-                            eprintln!(
-                                "Stripped {} base64 images (keeping original links)",
-                                result.stripped
-                            );
-                        }
-                    } else if let Some(output_dir) = path.parent() {
-                        let extraction = web_capture::extract_images::extract_and_save_images(
-                            &markdown,
-                            output_dir,
-                            &args.images_dir,
-                        )?;
-                        if extraction.extracted > 0 {
-                            markdown = extraction.markdown;
-                            eprintln!(
-                                "Extracted {} images to {}/",
-                                extraction.extracted, args.images_dir
-                            );
-                        }
+                    let result = web_capture::extract_images::strip_base64_images(&markdown);
+                    if result.stripped > 0 {
+                        markdown = result.markdown;
+                        eprintln!(
+                            "Stripped {} base64 images (keeping original links)",
+                            result.stripped
+                        );
                     }
                 }
                 if let Some(parent) = path.parent() {

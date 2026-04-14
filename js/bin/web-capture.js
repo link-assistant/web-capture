@@ -296,6 +296,7 @@ async function captureUrl(url, options) {
     // eslint-disable-next-line no-unused-vars
     localImages,
     embedImages,
+    // eslint-disable-next-line no-unused-vars
     imagesDir,
     dataDir,
     keepOriginalLinks,
@@ -321,8 +322,7 @@ async function captureUrl(url, options) {
   const { createBrowser } = await import('../src/browser.js');
   const { isGoogleDocsUrl, fetchGoogleDoc, fetchGoogleDocAsMarkdown } =
     await import('../src/gdocs.js');
-  const { extractAndSaveImages, stripBase64Images } =
-    await import('../src/extract-images.js');
+  const { stripBase64Images } = await import('../src/extract-images.js');
 
   const normalizedFormat = format.toLowerCase();
 
@@ -340,25 +340,12 @@ async function captureUrl(url, options) {
             ? null
             : explicitOutput || deriveOutputPath(absoluteUrl, 'md', dataDir);
         if (output && !embedImages) {
-          if (keepOriginalLinks) {
-            const strip = stripBase64Images(markdown);
-            if (strip.stripped > 0) {
-              markdown = strip.markdown;
-              console.error(
-                `Stripped ${strip.stripped} base64 images (keeping original links)`
-              );
-            }
-          } else {
-            const outputDir = path.dirname(path.resolve(output));
-            const extraction = extractAndSaveImages(markdown, outputDir, {
-              imagesDir,
-            });
-            if (extraction.extracted > 0) {
-              markdown = extraction.markdown;
-              console.error(
-                `Extracted ${extraction.extracted} images to ${imagesDir}/`
-              );
-            }
+          const strip = stripBase64Images(markdown);
+          if (strip.stripped > 0) {
+            markdown = strip.markdown;
+            console.error(
+              `Stripped ${strip.stripped} base64 images (keeping original links)`
+            );
           }
         }
         if (output) {
@@ -619,25 +606,12 @@ async function captureUrl(url, options) {
           ? null
           : explicitOutput || deriveOutputPath(absoluteUrl, 'md', dataDir);
       if (output && !embedImages) {
-        if (keepOriginalLinks) {
-          const strip = stripBase64Images(markdown);
-          if (strip.stripped > 0) {
-            markdown = strip.markdown;
-            console.error(
-              `Stripped ${strip.stripped} base64 images (keeping original links)`
-            );
-          }
-        } else {
-          const outputDir = path.dirname(path.resolve(output));
-          const extraction = extractAndSaveImages(markdown, outputDir, {
-            imagesDir,
-          });
-          if (extraction.extracted > 0) {
-            markdown = extraction.markdown;
-            console.error(
-              `Extracted ${extraction.extracted} images to ${imagesDir}/`
-            );
-          }
+        const strip = stripBase64Images(markdown);
+        if (strip.stripped > 0) {
+          markdown = strip.markdown;
+          console.error(
+            `Stripped ${strip.stripped} base64 images (keeping original links)`
+          );
         }
       }
 
