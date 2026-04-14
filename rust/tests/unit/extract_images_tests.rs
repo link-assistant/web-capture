@@ -175,7 +175,9 @@ fn test_extract_base64_to_buffers() {
 
     assert_eq!(result.images.len(), 1);
     assert!(result.images[0].filename.starts_with("image-"));
-    assert!(result.images[0].filename.ends_with(".png"));
+    assert!(std::path::Path::new(&result.images[0].filename)
+        .extension()
+        .is_some_and(|ext| ext.eq_ignore_ascii_case("png")));
     assert!(!result.images[0].data.is_empty());
     assert!(result
         .markdown
