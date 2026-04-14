@@ -101,30 +101,41 @@ async function main() {
       console.log(`Publish attempt ${i} of ${MAX_RETRIES}...`);
       try {
         console.log('Publishing with OIDC trusted publishing...');
-        try {
-          await $`npm publish --provenance --access public`;
-        } catch (publishError) {
-          const errorMsg = publishError.message || String(publishError);
-          if (errorMsg.includes('404') || errorMsg.includes('Not Found') || errorMsg.includes('E404')) {
-            console.error(`\n\u274C OIDC trusted publishing is not configured for ${PACKAGE_NAME} on npmjs.org.`);
-            console.error(`\nThe first version of a package must be published manually to establish the package on the registry.`);
-            console.error(`After manual publish, configure OIDC trusted publishing on npmjs.org for automated CI/CD releases.\n`);
-            console.error(`To publish manually, run these commands locally:\n`);
-            console.error(`  1. Log in to npm:`);
-            console.error(`     npm login`);
-            console.error(`  2. Navigate to the JS package directory:`);
-            console.error(`     cd js`);
-            console.error(`  3. Publish the package:`);
-            console.error(`     npm publish --access public`);
-            console.error(`  4. Configure OIDC trusted publishing on npmjs.org:`);
-            console.error(`     - Go to https://www.npmjs.com/package/${PACKAGE_NAME}/access`);
-            console.error(`     - Under "Publishing access", add a trusted publisher`);
-            console.error(`     - Set repository to: ${process.env.GITHUB_REPOSITORY || 'link-assistant/web-capture'}`);
-            console.error(`     - Set workflow to: js.yml`);
-            console.error(`     - Set environment to: (leave empty or set to your environment name)\n`);
-            process.exit(1);
-          }
-          throw publishError;
+        const publishResult = await $`npm publish --provenance --access public`.run({
+          capture: true,
+        });
+
+        const combinedOutput = `${publishResult.stdout || ''}\n${publishResult.stderr || ''}`;
+
+        // Detect 404 errors indicating the package doesn't exist on npm yet
+        // (first-time publish requires manual setup of the package on npmjs.org)
+        if (
+          publishResult.code !== 0 &&
+          (combinedOutput.includes('E404') ||
+            combinedOutput.includes('Not Found') ||
+            combinedOutput.includes('is not in this registry'))
+        ) {
+          console.error(`\n\u274C OIDC trusted publishing failed with 404 for ${PACKAGE_NAME}.`);
+          console.error(`\nThe first version of a package must be published manually to establish the package on the registry.`);
+          console.error(`After manual publish, configure OIDC trusted publishing on npmjs.org for automated CI/CD releases.\n`);
+          console.error(`To publish manually, run these commands locally:\n`);
+          console.error(`  1. Log in to npm:`);
+          console.error(`     npm login`);
+          console.error(`  2. Navigate to the JS package directory:`);
+          console.error(`     cd js`);
+          console.error(`  3. Publish the package:`);
+          console.error(`     npm publish --access public`);
+          console.error(`  4. Configure OIDC trusted publishing on npmjs.org:`);
+          console.error(`     - Go to https://www.npmjs.com/package/${PACKAGE_NAME}/access`);
+          console.error(`     - Under "Publishing access", add a trusted publisher`);
+          console.error(`     - Set repository to: ${process.env.GITHUB_REPOSITORY || 'link-assistant/web-capture'}`);
+          console.error(`     - Set workflow to: js.yml`);
+          console.error(`     - Set environment to: (leave empty or set to your environment name)\n`);
+          process.exit(1);
+        }
+
+        if (publishResult.code !== 0) {
+          throw new Error(`npm publish failed with exit code ${publishResult.code}: ${combinedOutput}`);
         }
 
         // Verify the version was actually published
