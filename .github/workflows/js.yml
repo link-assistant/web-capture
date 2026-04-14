@@ -68,12 +68,12 @@ jobs:
           GITHUB_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
         run: node scripts/detect-code-changes.mjs
 
-  # Changeset check - only runs on PRs with JS code changes
+  # Changeset check - only runs on PRs with JS package source changes
   changeset-check:
     name: JS - Check for Changesets
     runs-on: ubuntu-latest
     needs: [detect-changes]
-    if: github.event_name == 'pull_request' && needs.detect-changes.outputs.any-js-code-changed == 'true'
+    if: github.event_name == 'pull_request' && needs.detect-changes.outputs.js-code-changed == 'true'
     steps:
       - uses: actions/checkout@v4
         with:
