@@ -1,5 +1,11 @@
 # @link-assistant/web-capture
 
+## 1.7.0
+
+### Minor Changes
+
+- b6d77d6: Fix archive quality bugs: relative image paths in markdown, HTML pretty-printing, entity decoding, and rename article to document filenames
+
 ## 1.5.1
 
 ### Patch Changes
