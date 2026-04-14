@@ -220,9 +220,9 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
-          node-version: '22.x'
+          node-version: '24.x'
 
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@stable
@@ -297,9 +297,9 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
-          node-version: '22.x'
+          node-version: '24.x'
 
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@stable
@@ -347,9 +347,9 @@ jobs:
           fetch-depth: 0
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
-          node-version: '22.x'
+          node-version: '24.x'
 
       - name: Bump version in Cargo.toml and CHANGELOG.md
         working-directory: .

@@ -101,7 +101,10 @@ async function main() {
       console.log(`Publish attempt ${i} of ${MAX_RETRIES}...`);
       try {
         console.log('Publishing with OIDC trusted publishing...');
-        const publishResult = await $`npm publish --provenance --access public`.run({
+        console.log(`Node.js version: ${process.version}`);
+        const npmVersionResult = await $`npm --version`.run({ capture: true });
+        console.log(`npm version: ${(npmVersionResult.stdout || '').trim()}`);
+        const publishResult = await $`npm publish --provenance --access public --verbose`.run({
           capture: true,
         });
 
@@ -109,12 +112,42 @@ async function main() {
 
         // Detect 404 errors indicating the package doesn't exist on npm yet
         // (first-time publish requires manual setup of the package on npmjs.org)
+        if (publishResult.code !== 0) {
+          console.error(`\nnpm publish exited with code ${publishResult.code}`);
+          console.error(`--- stdout ---\n${publishResult.stdout || '(empty)'}`);
+          console.error(`--- stderr ---\n${publishResult.stderr || '(empty)'}`);
+        }
+
+        // Check for OIDC token exchange failure in verbose output
+        const oidcTokenFailed = combinedOutput.includes('oidc Failed token exchange') ||
+          combinedOutput.includes('OIDC token exchange error');
+        const oidcTokenSucceeded = combinedOutput.includes('oidc Successfully retrieved and set token');
+
+        if (oidcTokenFailed) {
+          console.error(`\n\u274C OIDC token exchange failed. This usually means the trusted publisher configuration on npmjs.org does not match the workflow.`);
+          console.error(`Check: repository name, workflow filename, and environment must match exactly (case-sensitive).`);
+          console.error(`See: https://docs.npmjs.com/trusted-publishers#troubleshooting\n`);
+        }
+        if (publishResult.code === 0 && !oidcTokenSucceeded && !oidcTokenFailed) {
+          console.log('Note: OIDC token exchange status not detected in output. Publish may have used fallback authentication.');
+        }
+
         if (
           publishResult.code !== 0 &&
           (combinedOutput.includes('E404') ||
             combinedOutput.includes('Not Found') ||
             combinedOutput.includes('is not in this registry'))
         ) {
+          if (oidcTokenFailed) {
+            console.error(`\n\u274C OIDC token exchange failed with 404 for ${PACKAGE_NAME}.`);
+            console.error(`The OIDC handshake was rejected by the npm registry. This is NOT a "package not found" error.`);
+            console.error(`\nCommon causes:`);
+            console.error(`  - Node.js version too old (use Node 24+, not 22 or 20)`);
+            console.error(`  - Trusted publisher config mismatch (repo name, workflow filename, environment)`);
+            console.error(`  - .npmrc file interfering with OIDC (check NPM_CONFIG_USERCONFIG)\n`);
+            process.exit(1);
+          }
+
           console.error(`\n\u274C OIDC trusted publishing failed with 404 for ${PACKAGE_NAME}.`);
           console.error(`\nThe first version of a package must be published manually to establish the package on the registry.`);
           console.error(`After manual publish, configure OIDC trusted publishing on npmjs.org for automated CI/CD releases.\n`);
