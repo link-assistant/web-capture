@@ -5,6 +5,7 @@
 // 2. Capture mode: web-capture <url> [options]
 
 import fs from 'fs';
+import path from 'path';
 import { URL } from 'node:url';
 import { makeConfig } from 'lino-arguments';
 
@@ -33,8 +34,8 @@ const config = makeConfig({
         alias: 'f',
         type: 'string',
         description:
-          'Output format: html, markdown, md, image, png, jpeg, pdf, docx, archive',
-        default: 'html',
+          'Output format: markdown, md, html, image, png, jpeg, pdf, docx, archive',
+        default: 'markdown',
       })
       .option('theme', {
         alias: 't',
@@ -89,35 +90,65 @@ const config = makeConfig({
         type: 'string',
         description: 'Path to .lenv configuration file',
       })
-      .option('enhanced', {
-        type: 'boolean',
-        description:
-          'Use enhanced markdown conversion with LaTeX extraction, metadata, and post-processing (default: false)',
-        default: false,
-      })
       .option('extractLatex', {
         type: 'boolean',
         description:
-          'Extract LaTeX formulas from img.formula, KaTeX, MathJax (default: true when --enhanced)',
-        default: true,
+          'Extract LaTeX formulas from img.formula, KaTeX, MathJax (default: true). Use --no-extract-latex to disable.',
+        default: getenv('WEB_CAPTURE_EXTRACT_LATEX', true),
       })
       .option('extractMetadata', {
         type: 'boolean',
         description:
-          'Extract article metadata (author, date, hubs, tags) (default: true when --enhanced)',
-        default: true,
+          'Extract article metadata (author, date, hubs, tags) (default: true). Use --no-extract-metadata to disable.',
+        default: getenv('WEB_CAPTURE_EXTRACT_METADATA', true),
       })
       .option('postProcess', {
         type: 'boolean',
         description:
-          'Apply post-processing (unicode normalization, LaTeX spacing) (default: true when --enhanced)',
-        default: true,
+          'Apply post-processing (unicode normalization, LaTeX spacing) (default: true). Use --no-post-process to disable.',
+        default: getenv('WEB_CAPTURE_POST_PROCESS', true),
       })
       .option('detectCodeLanguage', {
         type: 'boolean',
         description:
-          'Detect and correct code block languages (default: true when --enhanced)',
-        default: true,
+          'Detect and correct code block languages (default: true). Use --no-detect-code-language to disable.',
+        default: getenv('WEB_CAPTURE_DETECT_CODE_LANGUAGE', true),
+      })
+      .option('embedImages', {
+        type: 'boolean',
+        description:
+          'Keep images as inline base64 data URIs instead of extracting to files (default: false). Use --embed-images to enable.',
+        default: getenv('WEB_CAPTURE_EMBED_IMAGES', false),
+      })
+      .option('imagesDir', {
+        type: 'string',
+        description:
+          'Directory name for extracted images, relative to output file (default: images)',
+        default: getenv('WEB_CAPTURE_IMAGES_DIR', 'images'),
+      })
+      .option('dataDir', {
+        type: 'string',
+        description:
+          'Base directory for auto-derived output paths when -o is omitted ' +
+          '(default: ./data/web-capture)',
+        default: getenv('WEB_CAPTURE_DATA_DIR', './data/web-capture'),
+      })
+      .option('archive', {
+        type: 'string',
+        description:
+          'Create archive output. Formats: zip (default), 7z, tar.gz (alias gz), tar. Use without value for zip.',
+      })
+      .option('noExtractImages', {
+        type: 'boolean',
+        description: 'Alias for --embed-images: keep images inline as base64',
+        default: false,
+      })
+      .option('keepOriginalLinks', {
+        type: 'boolean',
+        description:
+          'Keep original remote image URLs instead of downloading or extracting. ' +
+          'Base64 data URIs are stripped (no original URL to restore).',
+        default: getenv('WEB_CAPTURE_KEEP_ORIGINAL_LINKS', false),
       })
       .option('dualTheme', {
         type: 'boolean',
@@ -241,10 +272,20 @@ async function startServer(port) {
   });
 }
 
+function deriveOutputPath(absoluteUrl, ext, dataDir) {
+  const parsed = new URL(absoluteUrl);
+  const host = parsed.hostname;
+  let urlPath = parsed.pathname.replace(/\/+$/, '') || '';
+  urlPath = urlPath.replace(/^\//, '');
+  const dir = path.join(dataDir, host, urlPath);
+  fs.mkdirSync(dir, { recursive: true });
+  return path.join(dir, `document.${ext}`);
+}
+
 async function captureUrl(url, options) {
   const {
     format,
-    output,
+    output: explicitOutput,
     engine,
     theme,
     width,
@@ -254,6 +295,11 @@ async function captureUrl(url, options) {
     // localImages is used by archive format
     // eslint-disable-next-line no-unused-vars
     localImages,
+    embedImages,
+    // eslint-disable-next-line no-unused-vars
+    imagesDir,
+    dataDir,
+    keepOriginalLinks,
   } = options;
 
   // Ensure URL is absolute
@@ -271,15 +317,12 @@ async function captureUrl(url, options) {
   }
 
   // Import required modules
-  const {
-    fetchHtml,
-    convertHtmlToMarkdown,
-    convertToUtf8,
-    convertRelativeUrls,
-  } = await import('../src/lib.js');
+  const { fetchHtml, convertToUtf8, convertRelativeUrls } =
+    await import('../src/lib.js');
   const { createBrowser } = await import('../src/browser.js');
   const { isGoogleDocsUrl, fetchGoogleDoc, fetchGoogleDocAsMarkdown } =
     await import('../src/gdocs.js');
+  const { stripBase64Images } = await import('../src/extract-images.js');
 
   const normalizedFormat = format.toLowerCase();
 
@@ -291,11 +334,26 @@ async function captureUrl(url, options) {
         const result = await fetchGoogleDocAsMarkdown(absoluteUrl, {
           apiToken,
         });
+        let { markdown } = result;
+        const output =
+          explicitOutput === '-'
+            ? null
+            : explicitOutput || deriveOutputPath(absoluteUrl, 'md', dataDir);
+        if (output && !embedImages) {
+          const strip = stripBase64Images(markdown);
+          if (strip.stripped > 0) {
+            markdown = strip.markdown;
+            console.error(
+              `Stripped ${strip.stripped} base64 images (keeping original links)`
+            );
+          }
+        }
         if (output) {
-          fs.writeFileSync(output, result.markdown, 'utf-8');
+          fs.mkdirSync(path.dirname(output), { recursive: true });
+          fs.writeFileSync(output, markdown, 'utf-8');
           console.error(`Google Doc Markdown saved to: ${output}`);
         } else {
-          process.stdout.write(result.markdown);
+          process.stdout.write(markdown);
         }
       } else {
         const gdocsFormat =
@@ -306,7 +364,13 @@ async function captureUrl(url, options) {
           format: gdocsFormat,
           apiToken,
         });
+        const output =
+          explicitOutput === '-'
+            ? null
+            : explicitOutput ||
+              deriveOutputPath(absoluteUrl, gdocsFormat, dataDir);
         if (output) {
+          fs.mkdirSync(path.dirname(output), { recursive: true });
           fs.writeFileSync(output, result.content, 'utf-8');
           console.error(`Google Doc (${gdocsFormat}) saved to: ${output}`);
         } else {
@@ -346,7 +410,7 @@ async function captureUrl(url, options) {
           fullPage,
         });
         const outPath =
-          output ||
+          explicitOutput ||
           `${new URL(absoluteUrl).hostname.replace(/\./g, '_')}_${Date.now()}.jpg`;
         fs.writeFileSync(outPath, buffer);
         console.error(`JPEG screenshot saved to: ${outPath}`);
@@ -376,7 +440,7 @@ async function captureUrl(url, options) {
           printBackground: true,
           margin: { top: '1cm', right: '1cm', bottom: '1cm', left: '1cm' },
         });
-        const outPath = output || 'page.pdf';
+        const outPath = explicitOutput || 'page.pdf';
         fs.writeFileSync(outPath, pdfBuffer);
         console.error(`PDF saved to: ${outPath}`);
       } finally {
@@ -413,7 +477,7 @@ async function captureUrl(url, options) {
       }
       const doc = new Document({ sections: [{ children }] });
       const buffer = await Packer.toBuffer(doc);
-      const outPath = output || 'page.docx';
+      const outPath = explicitOutput || 'page.docx';
       fs.writeFileSync(outPath, buffer);
       console.error(`DOCX saved to: ${outPath}`);
     } else if (normalizedFormat === 'archive' || normalizedFormat === 'zip') {
@@ -435,7 +499,7 @@ async function captureUrl(url, options) {
 
       const docFormat = options.documentFormat === 'html' ? 'html' : 'markdown';
       const outPath =
-        output ||
+        explicitOutput ||
         `${new URL(absoluteUrl).hostname.replace(/\./g, '-')}-archive.zip`;
       const outStream = fs.createWriteStream(outPath);
       const archive = archiver.default
@@ -460,7 +524,11 @@ async function captureUrl(url, options) {
 
       // Build image map for local downloads
       const imageMap = new Map();
-      if (options.localImages && uniqueImages.length > 0) {
+      if (
+        options.localImages &&
+        !keepOriginalLinks &&
+        uniqueImages.length > 0
+      ) {
         let idx = 1;
         for (const imgUrl of uniqueImages) {
           const ext = imgUrl.match(/\.(jpe?g|gif|webp|svg|png)/i)?.[1] || 'png';
@@ -522,24 +590,33 @@ async function captureUrl(url, options) {
       await new Promise((resolve) => outStream.on('close', resolve));
       console.error(`Archive saved to: ${outPath}`);
     } else if (normalizedFormat === 'markdown' || normalizedFormat === 'md') {
-      // Markdown format
+      // Markdown format — enhanced conversion is now the default
       const html = await fetchHtml(absoluteUrl);
-      let markdown;
+      const { convertHtmlToMarkdownEnhanced } = await import('../src/lib.js');
+      const result = convertHtmlToMarkdownEnhanced(html, absoluteUrl, {
+        extractLatex: options.extractLatex,
+        extractMetadata: options.extractMetadata,
+        postProcess: options.postProcess,
+        detectCodeLanguage: options.detectCodeLanguage,
+      });
+      let markdown = result.markdown;
 
-      if (options.enhanced) {
-        const { convertHtmlToMarkdownEnhanced } = await import('../src/lib.js');
-        const result = convertHtmlToMarkdownEnhanced(html, absoluteUrl, {
-          extractLatex: options.extractLatex,
-          extractMetadata: options.extractMetadata,
-          postProcess: options.postProcess,
-          detectCodeLanguage: options.detectCodeLanguage,
-        });
-        markdown = result.markdown;
-      } else {
-        markdown = convertHtmlToMarkdown(html, absoluteUrl);
+      const output =
+        explicitOutput === '-'
+          ? null
+          : explicitOutput || deriveOutputPath(absoluteUrl, 'md', dataDir);
+      if (output && !embedImages) {
+        const strip = stripBase64Images(markdown);
+        if (strip.stripped > 0) {
+          markdown = strip.markdown;
+          console.error(
+            `Stripped ${strip.stripped} base64 images (keeping original links)`
+          );
+        }
       }
 
       if (output) {
+        fs.mkdirSync(path.dirname(output), { recursive: true });
         fs.writeFileSync(output, markdown, 'utf-8');
         console.error(`Markdown saved to: ${output}`);
       } else {
@@ -571,9 +648,9 @@ async function captureUrl(url, options) {
 
         const buffer = await page.screenshot({ type: 'png' });
 
-        if (output) {
-          fs.writeFileSync(output, buffer);
-          console.error(`Screenshot saved to: ${output}`);
+        if (explicitOutput) {
+          fs.writeFileSync(explicitOutput, buffer);
+          console.error(`Screenshot saved to: ${explicitOutput}`);
         } else {
           // Generate default filename based on URL
           const urlObj = new URL(absoluteUrl);
@@ -627,7 +704,12 @@ async function captureUrl(url, options) {
         resultHtml = convertRelativeUrls(utf8Html, absoluteUrl);
       }
 
+      const output =
+        explicitOutput === '-'
+          ? null
+          : explicitOutput || deriveOutputPath(absoluteUrl, 'html', dataDir);
       if (output) {
+        fs.mkdirSync(path.dirname(output), { recursive: true });
         fs.writeFileSync(output, resultHtml, 'utf-8');
         console.error(`HTML saved to: ${output}`);
       } else {
@@ -648,6 +730,26 @@ async function main() {
     // Server mode
     await startServer(config.port);
   } else if (url) {
+    // --no-extract-images is an alias for --embed-images
+    if (config.noExtractImages) {
+      config.embedImages = true;
+    }
+    // --archive flag overrides format
+    if (config.archive !== undefined) {
+      const archiveFormat =
+        config.archive === true || config.archive === ''
+          ? 'zip'
+          : config.archive;
+      const validFormats = ['zip', '7z', 'tar.gz', 'gz', 'tar'];
+      if (!validFormats.includes(archiveFormat)) {
+        console.error(
+          `Error: Unsupported archive format "${archiveFormat}". Supported: ${validFormats.join(', ')}`
+        );
+        process.exit(1);
+      }
+      config.archiveFormat = archiveFormat === 'gz' ? 'tar.gz' : archiveFormat;
+      config.format = 'archive';
+    }
     // Capture mode
     await captureUrl(url, {
       format: config.format,
@@ -660,13 +762,17 @@ async function main() {
       fullPage: config.fullPage,
       localImages: config.localImages,
       documentFormat: config.documentFormat,
-      enhanced: config.enhanced,
       extractLatex: config.extractLatex,
       extractMetadata: config.extractMetadata,
       postProcess: config.postProcess,
       detectCodeLanguage: config.detectCodeLanguage,
       dualTheme: config.dualTheme,
       apiToken: config.apiToken,
+      embedImages: config.embedImages,
+      imagesDir: config.imagesDir,
+      dataDir: config.dataDir,
+      archiveFormat: config.archiveFormat,
+      keepOriginalLinks: config.keepOriginalLinks,
     });
   } else {
     // No arguments - show error

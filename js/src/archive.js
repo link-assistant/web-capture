@@ -25,6 +25,7 @@ import {
   convertRelativeUrls,
 } from './lib.js';
 import { retry } from './retry.js';
+import { extractBase64ToBuffers } from './extract-images.js';
 
 export async function archiveHandler(req, res) {
   const url = req.query.url;
@@ -32,7 +33,11 @@ export async function archiveHandler(req, res) {
     return res.status(400).send('Missing `url` parameter');
   }
 
-  const localImages = req.query.localImages !== 'false'; // default true
+  const keepOriginalLinks = req.query.keepOriginalLinks === 'true';
+  const localImages = keepOriginalLinks
+    ? false
+    : req.query.localImages !== 'false';
+  const embedImages = req.query.embedImages === 'true';
   const documentFormat =
     req.query.documentFormat === 'html' ? 'html' : 'markdown';
 
@@ -158,9 +163,16 @@ export async function archiveHandler(req, res) {
       let markdown = convertHtmlToMarkdown(html, absoluteUrl);
 
       if (localImages && imageMap.size > 0) {
-        // Rewrite image URLs in markdown to local paths
         for (const [remoteUrl, localPath] of imageMap) {
           markdown = markdown.split(remoteUrl).join(localPath);
+        }
+      }
+
+      if (!embedImages && !keepOriginalLinks) {
+        const b64 = extractBase64ToBuffers(markdown, 'images');
+        markdown = b64.markdown;
+        for (const img of b64.images) {
+          archive.append(img.buffer, { name: `images/${img.filename}` });
         }
       }
 

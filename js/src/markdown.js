@@ -1,14 +1,23 @@
 import { fetchHtml, convertHtmlToMarkdown } from './lib.js';
+import { stripBase64Images } from './extract-images.js';
 
 export async function markdownHandler(req, res) {
   const url = req.query.url;
   if (!url) {
     return res.status(400).send('Missing `url` parameter');
   }
+  const embedImages = req.query.embedImages === 'true';
+  const keepOriginalLinks = req.query.keepOriginalLinks !== 'false';
   try {
     const html = await fetchHtml(url);
-    // Pass baseUrl to convertHtmlToMarkdown so all URLs are absolute
-    const markdown = convertHtmlToMarkdown(html, url);
+    let markdown = convertHtmlToMarkdown(html, url);
+    if (keepOriginalLinks) {
+      const strip = stripBase64Images(markdown);
+      markdown = strip.markdown;
+    } else if (!embedImages) {
+      const strip = stripBase64Images(markdown);
+      markdown = strip.markdown;
+    }
     res.type('text/markdown').send(markdown);
   } catch (err) {
     console.error(err);
