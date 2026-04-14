@@ -73,6 +73,10 @@
     "microservice"
   ],
   "license": "Unlicense",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/link-assistant/web-capture"
+  },
   "engines": {
     "node": ">=22.0.0 <23.0.0"
   },
