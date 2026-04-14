@@ -96,10 +96,55 @@ This repo is a **monorepo** with both JS and Rust code, so the detect-changes sc
 | `.github/workflows/js.yml` | Removed `paths:` filters, added `detect-changes` job, gated all jobs on outputs |
 | `.github/workflows/rust.yml` | Removed `paths:` filters, added `detect-changes` job, gated all jobs on outputs |
 
+## Second Bug: Full-PR diff in detect-changes script
+
+### Discovery
+
+After implementing the detect-changes script, commit `aa262e5` (which only reverted `.gitkeep`) still triggered all CI jobs. The initial script used `GITHUB_BASE_SHA...GITHUB_HEAD_SHA` for PRs — identical to the `paths:` filter behavior.
+
+### Root cause: GitHub Actions synthetic merge commit
+
+GitHub Actions creates a **synthetic merge commit** for `pull_request` events:
+- `HEAD` = merge commit (not the actual PR head)
+- `HEAD^` = base branch (first parent)
+- `HEAD^2` = actual PR head commit (second parent)
+
+Even `git diff HEAD^ HEAD` gives the full PR diff, because `HEAD^` is the base branch.
+
+### Fix: Per-commit diff via merge commit detection
+
+The script now detects merge commits and uses `HEAD^2^..HEAD^2` to get the per-commit diff:
+
+```javascript
+function isMergeCommit() {
+  const parentCount = exec('git cat-file -p HEAD')
+    .split('\n')
+    .filter((line) => line.startsWith('parent ')).length;
+  return parentCount > 1;
+}
+```
+
+For merge commits: `git diff HEAD^2^ HEAD^2` (latest PR commit only)
+For push events: `git diff HEAD^ HEAD` (regular per-commit diff)
+
+### CI verification
+
+Commit `d87498f` (changed only `scripts/detect-code-changes.mjs`):
+- Rust detect-changes log: `Merge commit detected → Comparing HEAD^2^ to HEAD^2 → any-rust-code-changed=false`
+- All Rust jobs correctly **skipped**
+- JS jobs correctly **ran** (JS script changed)
+
+### Template repos affected
+
+The same bug exists in both template repositories. Issues filed:
+- [js-ai-driven-development-pipeline-template#31](https://github.com/link-foundation/js-ai-driven-development-pipeline-template/issues/31)
+- [rust-ai-driven-development-pipeline-template#34](https://github.com/link-foundation/rust-ai-driven-development-pipeline-template/issues/34)
+
 ## Verification
 
 With this fix, if commit `0e9b6e8c` were pushed again:
 - `detect-changes` job would run (lightweight, ~5s)
-- All outputs would be `false`
+- Merge commit detected, per-commit diff used (`HEAD^2^..HEAD^2`)
+- All outputs would be `false` (only `.gitkeep` changed)
 - All downstream jobs (lint, test, build) would be **skipped**
 - CI minutes saved: ~15-30 minutes per non-code commit
