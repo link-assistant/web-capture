@@ -185,6 +185,7 @@ jobs:
         timeout-minutes: 5
 
   # Release - only runs on main after tests pass (for push events)
+  # Self-healing: detects unreleased commits and auto-bumps patch version
   release:
     name: JS - Release
     needs: [lint, test]
@@ -217,22 +218,40 @@ jobs:
       - name: Update npm for OIDC trusted publishing
         run: node ../scripts/setup-npm.mjs
 
-      - name: Check for changesets
-        id: check_changesets
-        run: |
-          # Count changeset files (excluding README.md and config.json)
-          CHANGESET_COUNT=$(find .changeset -name "*.md" ! -name "README.md" | wc -l)
-          echo "Found $CHANGESET_COUNT changeset file(s)"
-          echo "has_changesets=$([[ $CHANGESET_COUNT -gt 0 ]] && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
+      - name: Check if release is needed
+        id: release_check
+        run: node ../scripts/check-release-needed.mjs
 
-      - name: Version packages and commit to main
-        if: steps.check_changesets.outputs.has_changesets == 'true'
+      - name: Auto-bump patch version for unreleased changes
+        if: steps.release_check.outputs.should_release == 'true' && steps.release_check.outputs.needs_auto_bump == 'true'
+        id: auto_bump
+        working-directory: .
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          cd js
+          node ../scripts/instant-version-bump.mjs --bump-type patch --description "Auto-release unreleased changes"
+          cd ..
+          git add -A
+          NEW_VERSION=$(node -p "require('./js/package.json').version")
+          git commit -m "chore(js): auto-bump to ${NEW_VERSION} for unreleased changes"
+          git push origin main
+          echo "version=${NEW_VERSION}" >> $GITHUB_OUTPUT
+          echo "Auto-bumped to ${NEW_VERSION}"
+
+      - name: Version packages and commit to main (changeset flow)
+        if: steps.release_check.outputs.has_changesets == 'true' && steps.release_check.outputs.needs_auto_bump != 'true'
         id: version
         run: node ../scripts/version-and-commit.mjs --mode changeset
 
       - name: Publish to npm
-        # Run if version was committed OR if a previous attempt already committed (for re-runs)
-        if: steps.version.outputs.version_committed == 'true' || steps.version.outputs.already_released == 'true'
+        if: |
+          steps.release_check.outputs.should_release == 'true' && (
+            steps.version.outputs.version_committed == 'true' ||
+            steps.version.outputs.already_released == 'true' ||
+            steps.auto_bump.outputs.version != '' ||
+            steps.release_check.outputs.needs_auto_bump == 'false'
+          )
         id: publish
         run: node ../scripts/publish-to-npm.mjs --should-pull
 

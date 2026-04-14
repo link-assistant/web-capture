@@ -182,10 +182,15 @@ jobs:
         run: docker build -t web-capture-rust .
 
   # Release - only runs on main after tests pass (for push events)
+  # Self-healing: detects unreleased commits and auto-bumps patch version
   release:
     name: Rust - Release
     needs: [lint, test, build]
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    if: |
+      !cancelled() &&
+      github.ref == 'refs/heads/main' &&
+      github.event_name == 'push' &&
+      needs.build.result == 'success'
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -214,12 +219,39 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-cargo-
 
-      - name: Check if version changed
-        id: version_check
-        run: node ../scripts/rust-version-check.mjs
+      - name: Check if release is needed
+        id: release_check
+        run: node ../scripts/rust-check-release-needed.mjs
+
+      - name: Auto-bump patch version for unreleased changes
+        if: steps.release_check.outputs.should_release == 'true' && steps.release_check.outputs.needs_auto_bump == 'true'
+        id: auto_bump
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          node ../scripts/rust-version-bump.mjs --bump-type patch --description "Auto-release unreleased changes"
+          git add -A
+          NEW_VERSION=$(grep -m1 '^version' Cargo.toml | sed 's/.*"\(.*\)"/\1/')
+          git commit -m "chore(rust): auto-bump to ${NEW_VERSION} for unreleased changes"
+          git push origin main
+          echo "version=${NEW_VERSION}" >> $GITHUB_OUTPUT
+          echo "Auto-bumped to ${NEW_VERSION}"
+
+      - name: Determine release version
+        id: version
+        run: |
+          if [ -n "${{ steps.auto_bump.outputs.version }}" ]; then
+            echo "version=${{ steps.auto_bump.outputs.version }}" >> $GITHUB_OUTPUT
+          else
+            echo "version=${{ steps.release_check.outputs.version }}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Build release
+        if: steps.release_check.outputs.should_release == 'true'
+        run: cargo build --release
 
       - name: Publish to crates.io
-        if: steps.version_check.outputs.should_release == 'true'
+        if: steps.release_check.outputs.should_release == 'true'
         id: publish
         env:
           CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN || secrets.CARGO_TOKEN }}
@@ -230,7 +262,7 @@ jobs:
         if: steps.publish.outputs.published == 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: node ../scripts/rust-create-github-release.mjs --release-version "${{ steps.version_check.outputs.version }}" --repository "${{ github.repository }}" --commit-sha "${{ github.sha }}"
+        run: node ../scripts/rust-create-github-release.mjs --release-version "${{ steps.version.outputs.version }}" --repository "${{ github.repository }}" --commit-sha "${{ github.sha }}"
 
   # Manual Instant Release
   instant-release:
