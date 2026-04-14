@@ -7,14 +7,10 @@ export async function markdownHandler(req, res) {
     return res.status(400).send('Missing `url` parameter');
   }
   const embedImages = req.query.embedImages === 'true';
-  const keepOriginalLinks = req.query.keepOriginalLinks !== 'false';
   try {
     const html = await fetchHtml(url);
     let markdown = convertHtmlToMarkdown(html, url);
-    if (keepOriginalLinks) {
-      const strip = stripBase64Images(markdown);
-      markdown = strip.markdown;
-    } else if (!embedImages) {
+    if (!embedImages) {
       const strip = stripBase64Images(markdown);
       markdown = strip.markdown;
     }

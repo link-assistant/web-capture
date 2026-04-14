@@ -1,6 +1,6 @@
 use web_capture::gdocs::{
-    build_export_url, extract_base64_images, extract_bearer_token, extract_document_id,
-    is_google_docs_url,
+    build_export_url, create_archive_zip, extract_base64_images, extract_bearer_token,
+    extract_document_id, is_google_docs_url, ExtractedImage, GDocsArchiveResult,
 };
 
 #[test]
@@ -114,4 +114,86 @@ fn test_extract_base64_images_preserves_non_data_images() {
     assert_eq!(images[0].filename, "image-01.gif");
     assert!(updated.contains("https://example.com/photo.png"));
     assert!(updated.contains("images/image-01.gif"));
+}
+
+#[test]
+fn test_create_archive_zip_produces_valid_zip() {
+    let png_bytes = base64::Engine::decode(
+        &base64::engine::general_purpose::STANDARD,
+        "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg==",
+    )
+    .unwrap();
+
+    let archive = GDocsArchiveResult {
+        html: "<html><body><img src=\"images/image-01.png\"><p>Hello</p></body></html>".to_string(),
+        markdown: "# Hello\n\n![test](images/image-01.png)\n".to_string(),
+        images: vec![ExtractedImage {
+            filename: "image-01.png".to_string(),
+            data: png_bytes.clone(),
+            mime_type: "image/png".to_string(),
+        }],
+        document_id: "test-doc".to_string(),
+        export_url: "https://docs.google.com/document/d/test-doc/export?format=html".to_string(),
+    };
+
+    let zip_bytes = create_archive_zip(&archive).unwrap();
+
+    // Verify it's a real ZIP (magic bytes: PK\x03\x04)
+    assert!(zip_bytes.len() > 4);
+    assert_eq!(&zip_bytes[0..4], b"PK\x03\x04");
+
+    // Verify contents using zip crate
+    let reader = std::io::Cursor::new(&zip_bytes);
+    let mut zip = zip::ZipArchive::new(reader).unwrap();
+
+    let mut found_md = false;
+    let mut found_html = false;
+    let mut found_image = false;
+
+    for i in 0..zip.len() {
+        let file = zip.by_index(i).unwrap();
+        match file.name() {
+            "article.md" => {
+                found_md = true;
+                let content: Vec<u8> = std::io::Read::bytes(file).map(|b| b.unwrap()).collect();
+                let text = String::from_utf8(content).unwrap();
+                assert!(text.contains("# Hello"));
+                assert!(text.contains("images/image-01.png"));
+            }
+            "article.html" => {
+                found_html = true;
+                let content: Vec<u8> = std::io::Read::bytes(file).map(|b| b.unwrap()).collect();
+                let text = String::from_utf8(content).unwrap();
+                assert!(text.contains("images/image-01.png"));
+            }
+            "images/image-01.png" => {
+                found_image = true;
+                let content: Vec<u8> = std::io::Read::bytes(file).map(|b| b.unwrap()).collect();
+                assert_eq!(content, png_bytes);
+            }
+            _ => {}
+        }
+    }
+
+    assert!(found_md, "ZIP must contain article.md");
+    assert!(found_html, "ZIP must contain article.html");
+    assert!(found_image, "ZIP must contain images/image-01.png");
+}
+
+#[test]
+fn test_create_archive_zip_empty_images() {
+    let archive = GDocsArchiveResult {
+        html: "<html><body>No images</body></html>".to_string(),
+        markdown: "# No images\n".to_string(),
+        images: vec![],
+        document_id: "empty-doc".to_string(),
+        export_url: "https://docs.google.com/document/d/empty-doc/export?format=html".to_string(),
+    };
+
+    let zip_bytes = create_archive_zip(&archive).unwrap();
+    assert_eq!(&zip_bytes[0..4], b"PK\x03\x04");
+
+    let reader = std::io::Cursor::new(&zip_bytes);
+    let zip = zip::ZipArchive::new(reader).unwrap();
+    assert_eq!(zip.len(), 2); // article.md + article.html only
 }
