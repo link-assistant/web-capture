@@ -156,9 +156,7 @@ describe('extract-images module', () => {
       expect(result.images).toHaveLength(1);
       expect(result.images[0].filename).toMatch(/^image-[0-9a-f]{8}\.png$/);
       expect(result.images[0].buffer.length).toBeGreaterThan(0);
-      expect(result.markdown).toContain(
-        `images/${result.images[0].filename}`
-      );
+      expect(result.markdown).toContain(`images/${result.images[0].filename}`);
       expect(result.markdown).not.toContain('data:image');
     });
 
