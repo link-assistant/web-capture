@@ -368,7 +368,8 @@ async function captureUrl(url, options) {
           const { PassThrough } = await import('stream');
           const passthrough = new PassThrough();
           const archiverMod = await import('archiver');
-          const archiverFn = archiverMod.default?.default || archiverMod.default;
+          const archiverFn =
+            archiverMod.default?.default || archiverMod.default;
           const archive = archiverFn('zip', { zlib: { level: 9 } });
           archive.pipe(passthrough);
           passthrough.pipe(process.stdout);
