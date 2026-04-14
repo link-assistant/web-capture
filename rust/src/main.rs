@@ -639,6 +639,39 @@ async fn capture_url(
     if web_capture::gdocs::is_google_docs_url(&absolute_url) {
         let api_token = args.api_token.as_deref();
         match format.to_lowercase().as_str() {
+            "archive" => {
+                let archive_fmt = args.archive.as_deref().unwrap_or("zip");
+                let ext = match archive_fmt {
+                    "tar.gz" | "gz" => "tar.gz",
+                    "7z" => "7z",
+                    "tar" => "tar",
+                    _ => "zip",
+                };
+                let archive_result =
+                    web_capture::gdocs::fetch_google_doc_as_archive(&absolute_url, api_token)
+                        .await?;
+                let zip_bytes = web_capture::gdocs::create_archive_zip(&archive_result)?;
+                let is_stdout = output.is_some_and(|p| p.as_os_str() == "-");
+                let derived;
+                let effective_output = if is_stdout {
+                    None
+                } else if let Some(path) = output {
+                    Some(path.clone())
+                } else {
+                    derived = derive_output_path(&absolute_url, ext, &args.data_dir);
+                    Some(derived)
+                };
+                if let Some(ref path) = effective_output {
+                    if let Some(parent) = path.parent() {
+                        std::fs::create_dir_all(parent).ok();
+                    }
+                    fs::write(path, &zip_bytes).await?;
+                    eprintln!("Google Doc (archive) saved to: {}", path.display());
+                } else {
+                    use std::io::Write;
+                    std::io::stdout().write_all(&zip_bytes)?;
+                }
+            }
             "markdown" | "md" => {
                 let result =
                     web_capture::gdocs::fetch_google_doc_as_markdown(&absolute_url, api_token)
@@ -655,13 +688,29 @@ async fn capture_url(
                     Some(derived)
                 };
                 if let Some(ref path) = effective_output {
-                    if !args.embed_images {
+                    if args.embed_images {
+                        // Keep base64 data URIs inline
+                    } else if args.keep_original_links {
                         let result = web_capture::extract_images::strip_base64_images(&markdown);
                         if result.stripped > 0 {
                             markdown = result.markdown;
                             eprintln!(
                                 "Stripped {} base64 images (keeping original links)",
                                 result.stripped
+                            );
+                        }
+                    } else {
+                        let output_dir = path.parent().unwrap_or(path);
+                        let result = web_capture::extract_images::extract_and_save_images(
+                            &markdown,
+                            output_dir,
+                            &args.images_dir,
+                        )?;
+                        if result.extracted > 0 {
+                            markdown = result.markdown;
+                            eprintln!(
+                                "Extracted {} images to {}/",
+                                result.extracted, args.images_dir
                             );
                         }
                     }
@@ -705,6 +754,66 @@ async fn capture_url(
     }
 
     match format.to_lowercase().as_str() {
+        "archive" => {
+            let archive_fmt = args.archive.as_deref().unwrap_or("zip");
+            let ext = match archive_fmt {
+                "tar.gz" | "gz" => "tar.gz",
+                "7z" => "7z",
+                "tar" => "tar",
+                _ => "zip",
+            };
+
+            let html = fetch_html(&absolute_url).await?;
+            let options = EnhancedOptions {
+                extract_latex: args.extract_latex,
+                extract_metadata: args.extract_metadata,
+                post_process: args.post_process,
+                detect_code_language: args.detect_code_language,
+            };
+            let enhanced = convert_html_to_markdown_enhanced(&html, Some(&absolute_url), &options)?;
+            let markdown = enhanced.markdown;
+
+            let buffers =
+                web_capture::extract_images::extract_base64_to_buffers(&markdown, &args.images_dir)?;
+
+            let archive_result = web_capture::gdocs::GDocsArchiveResult {
+                html: html.clone(),
+                markdown: buffers.markdown,
+                images: buffers
+                    .images
+                    .into_iter()
+                    .map(|b| web_capture::gdocs::ExtractedImage {
+                        filename: b.filename,
+                        data: b.data,
+                        mime_type: String::new(),
+                    })
+                    .collect(),
+                document_id: String::new(),
+                export_url: absolute_url.clone(),
+            };
+            let zip_bytes = web_capture::gdocs::create_archive_zip(&archive_result)?;
+
+            let is_stdout = output.is_some_and(|p| p.as_os_str() == "-");
+            let derived;
+            let effective_output = if is_stdout {
+                None
+            } else if let Some(path) = output {
+                Some(path.clone())
+            } else {
+                derived = derive_output_path(&absolute_url, ext, &args.data_dir);
+                Some(derived)
+            };
+            if let Some(ref path) = effective_output {
+                if let Some(parent) = path.parent() {
+                    std::fs::create_dir_all(parent).ok();
+                }
+                fs::write(path, &zip_bytes).await?;
+                eprintln!("Archive saved to: {}", path.display());
+            } else {
+                use std::io::Write;
+                std::io::stdout().write_all(&zip_bytes)?;
+            }
+        }
         "markdown" | "md" => {
             let html = fetch_html(&absolute_url).await?;
 
@@ -729,13 +838,29 @@ async fn capture_url(
                 Some(derived)
             };
             if let Some(ref path) = effective_output {
-                if !args.embed_images {
+                if args.embed_images {
+                    // Keep base64 data URIs inline
+                } else if args.keep_original_links {
                     let result = web_capture::extract_images::strip_base64_images(&markdown);
                     if result.stripped > 0 {
                         markdown = result.markdown;
                         eprintln!(
                             "Stripped {} base64 images (keeping original links)",
                             result.stripped
+                        );
+                    }
+                } else {
+                    let output_dir = path.parent().unwrap_or(path);
+                    let result = web_capture::extract_images::extract_and_save_images(
+                        &markdown,
+                        output_dir,
+                        &args.images_dir,
+                    )?;
+                    if result.extracted > 0 {
+                        markdown = result.markdown;
+                        eprintln!(
+                            "Extracted {} images to {}/",
+                            result.extracted, args.images_dir
                         );
                     }
                 }
