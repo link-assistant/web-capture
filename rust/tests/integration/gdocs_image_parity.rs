@@ -1,7 +1,8 @@
 use web_capture::gdocs::extract_base64_images;
 use web_capture::markdown::convert_html_to_markdown;
 
-const PNG_B64: &str = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=";
+const PNG_B64: &str =
+    "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=";
 
 #[test]
 fn img_inside_heading_is_kept_in_markdown() {

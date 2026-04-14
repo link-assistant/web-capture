@@ -111,9 +111,8 @@ fn hoist_images_from_headings(html: &str) -> String {
     let mut result = html.to_string();
 
     for level in 1..=6 {
-        let heading_re = Regex::new(
-            &format!(r"(?si)(<h{level}\b[^>]*>)(.*?)(</h{level}>)")
-        ).expect("valid regex");
+        let heading_re = Regex::new(&format!(r"(?si)(<h{level}\b[^>]*>)(.*?)(</h{level}>)"))
+            .expect("valid regex");
 
         result = heading_re
             .replace_all(&result, |caps: &regex::Captures<'_>| {
@@ -121,10 +120,7 @@ fn hoist_images_from_headings(html: &str) -> String {
                 let inner = &caps[2];
                 let close = &caps[3];
 
-                let imgs: Vec<&str> = img_re
-                    .find_iter(inner)
-                    .map(|m| m.as_str())
-                    .collect();
+                let imgs: Vec<&str> = img_re.find_iter(inner).map(|m| m.as_str()).collect();
 
                 if imgs.is_empty() {
                     return caps[0].to_string();
