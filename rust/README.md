@@ -96,24 +96,24 @@ Capture a URL directly:
 web-capture <url> [options]
 ```
 
-| Option                      | Short | Description                                           | Default                |
-| --------------------------- | ----- | ----------------------------------------------------- | ---------------------- |
-| `--format`                  | `-f`  | Output format: `markdown`/`md`, `html`, `image`/`png` | `markdown`             |
-| `--output`                  | `-o`  | Output file path. Use `-o -` for stdout               | auto-derived from URL  |
-| `--data-dir`                |       | Base directory for auto-derived output paths          | `./data/web-capture`   |
-| `--embed-images`            |       | Keep images as inline base64 data URIs                | false                  |
-| `--no-extract-images`       |       | Alias for `--embed-images`                            | false                  |
-| `--keep-original-links`     |       | Keep original remote URLs, strip base64               | false                  |
-| `--images-dir`              |       | Subdirectory name for extracted images                | `images`               |
-| `--archive`                 |       | Create archive: `zip`, `7z`, `tar.gz`, `tar`         | -                      |
-| `--extract-latex`           |       | Extract LaTeX formulas                                | true                   |
-| `--no-extract-latex`        |       | Disable LaTeX extraction                              | -                      |
-| `--extract-metadata`        |       | Extract article metadata                              | true                   |
-| `--no-extract-metadata`     |       | Disable metadata extraction                           | -                      |
-| `--post-process`            |       | Apply post-processing                                 | true                   |
-| `--no-post-process`         |       | Disable post-processing                               | -                      |
-| `--detect-code-language`    |       | Detect code block languages                           | true                   |
-| `--no-detect-code-language` |       | Disable code language detection                       | -                      |
+| Option                      | Short | Description                                           | Default               |
+| --------------------------- | ----- | ----------------------------------------------------- | --------------------- |
+| `--format`                  | `-f`  | Output format: `markdown`/`md`, `html`, `image`/`png` | `markdown`            |
+| `--output`                  | `-o`  | Output file path. Use `-o -` for stdout               | auto-derived from URL |
+| `--data-dir`                |       | Base directory for auto-derived output paths          | `./data/web-capture`  |
+| `--embed-images`            |       | Keep images as inline base64 data URIs                | false                 |
+| `--no-extract-images`       |       | Alias for `--embed-images`                            | false                 |
+| `--keep-original-links`     |       | Keep original remote URLs, strip base64               | false                 |
+| `--images-dir`              |       | Subdirectory name for extracted images                | `images`              |
+| `--archive`                 |       | Create archive: `zip`, `7z`, `tar.gz`, `tar`          | -                     |
+| `--extract-latex`           |       | Extract LaTeX formulas                                | true                  |
+| `--no-extract-latex`        |       | Disable LaTeX extraction                              | -                     |
+| `--extract-metadata`        |       | Extract article metadata                              | true                  |
+| `--no-extract-metadata`     |       | Disable metadata extraction                           | -                     |
+| `--post-process`            |       | Apply post-processing                                 | true                  |
+| `--no-post-process`         |       | Disable post-processing                               | -                     |
+| `--detect-code-language`    |       | Detect code block languages                           | true                  |
+| `--no-detect-code-language` |       | Disable code language detection                       | -                     |
 
 ### Examples
 
@@ -149,19 +149,19 @@ docker run -p 3000:3000 web-capture-rust
 
 ### Environment Variables
 
-| Variable                           | Description                        | Default            |
-| ---------------------------------- | ---------------------------------- | ------------------ |
-| `PORT`                             | Server port                        | `3000`             |
-| `API_TOKEN`                        | API token for authenticated capture| -                  |
-| `WEB_CAPTURE_DATA_DIR`             | Base directory for output          | `./data/web-capture`|
-| `WEB_CAPTURE_EMBED_IMAGES`         | `0`/`1` — keep images inline      | `0`                |
-| `WEB_CAPTURE_KEEP_ORIGINAL_LINKS`  | `0`/`1` — keep original remote URLs| `0`                |
-| `WEB_CAPTURE_IMAGES_DIR`           | Subdirectory for extracted images  | `images`           |
-| `WEB_CAPTURE_EXTRACT_LATEX`        | `0`/`1` — extract LaTeX           | `1`                |
-| `WEB_CAPTURE_EXTRACT_METADATA`     | `0`/`1` — extract metadata        | `1`                |
-| `WEB_CAPTURE_POST_PROCESS`         | `0`/`1` — post-processing         | `1`                |
-| `WEB_CAPTURE_DETECT_CODE_LANGUAGE` | `0`/`1` — detect code langs       | `1`                |
-| `RUST_LOG`                         | Log level (e.g. `web_capture=debug`)| `web_capture=info` |
+| Variable                           | Description                          | Default              |
+| ---------------------------------- | ------------------------------------ | -------------------- |
+| `PORT`                             | Server port                          | `3000`               |
+| `API_TOKEN`                        | API token for authenticated capture  | -                    |
+| `WEB_CAPTURE_DATA_DIR`             | Base directory for output            | `./data/web-capture` |
+| `WEB_CAPTURE_EMBED_IMAGES`         | `0`/`1` — keep images inline         | `0`                  |
+| `WEB_CAPTURE_KEEP_ORIGINAL_LINKS`  | `0`/`1` — keep original remote URLs  | `0`                  |
+| `WEB_CAPTURE_IMAGES_DIR`           | Subdirectory for extracted images    | `images`             |
+| `WEB_CAPTURE_EXTRACT_LATEX`        | `0`/`1` — extract LaTeX              | `1`                  |
+| `WEB_CAPTURE_EXTRACT_METADATA`     | `0`/`1` — extract metadata           | `1`                  |
+| `WEB_CAPTURE_POST_PROCESS`         | `0`/`1` — post-processing            | `1`                  |
+| `WEB_CAPTURE_DETECT_CODE_LANGUAGE` | `0`/`1` — detect code langs          | `1`                  |
+| `RUST_LOG`                         | Log level (e.g. `web_capture=debug`) | `web_capture=info`   |
 
 ## Library Usage
 

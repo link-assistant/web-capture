@@ -124,11 +124,11 @@ GET /markdown?url=<URL>
 
 Converts the HTML content of the specified URL to Markdown format. By default, images are embedded as base64 data URIs (single self-contained response). Use `embedImages=false` to strip base64 images, or `keepOriginalLinks=true` to keep only original remote URLs.
 
-| Parameter           | Required | Description                                       | Default |
-| ------------------- | -------- | ------------------------------------------------- | ------- |
-| `url`               | Yes      | URL to fetch                                      | -       |
-| `embedImages`       | No       | Keep base64 images inline (`true`/`false`)        | `true`  |
-| `keepOriginalLinks` | No       | Keep original remote URLs, strip base64           | `false` |
+| Parameter           | Required | Description                                | Default |
+| ------------------- | -------- | ------------------------------------------ | ------- |
+| `url`               | Yes      | URL to fetch                               | -       |
+| `embedImages`       | No       | Keep base64 images inline (`true`/`false`) | `true`  |
+| `keepOriginalLinks` | No       | Keep original remote URLs, strip base64    | `false` |
 
 ### Image Endpoint
 

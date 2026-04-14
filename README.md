@@ -19,10 +19,10 @@ A CLI and microservice to fetch URLs and render them as:
 
 This repository contains two implementations with compatible APIs:
 
-| Implementation | Directory | Package | Status |
-|---------------|-----------|---------|--------|
-| **JavaScript/Node.js** | [`./js`](./js) | [@link-assistant/web-capture](https://www.npmjs.com/package/@link-assistant/web-capture) | Production |
-| **Rust** | [`./rust`](./rust) | [web-capture](https://crates.io/crates/web-capture) | Production |
+| Implementation         | Directory          | Package                                                                                  | Status     |
+| ---------------------- | ------------------ | ---------------------------------------------------------------------------------------- | ---------- |
+| **JavaScript/Node.js** | [`./js`](./js)     | [@link-assistant/web-capture](https://www.npmjs.com/package/@link-assistant/web-capture) | Production |
+| **Rust**               | [`./rust`](./rust) | [web-capture](https://crates.io/crates/web-capture)                                      | Production |
 
 Both implementations provide the same CLI interface and HTTP API endpoints, allowing you to choose based on your deployment preferences.
 
@@ -73,58 +73,58 @@ web-capture --serve --port 8080
 
 ## CLI Options
 
-| Option | Short | Description | Default |
-|--------|-------|-------------|---------|
-| `--serve` | `-s` | Start as HTTP API server | - |
-| `--port` | `-p` | Port to listen on | 3000 |
-| `--format` | `-f` | Output format: `markdown`/`md`, `html`, `image`/`png`, `jpeg`, `pdf`, `docx`, `archive` | `markdown` |
-| `--output` | `-o` | Output file path. Use `-o -` for stdout | auto-derived from URL |
-| `--data-dir` | | Base directory for auto-derived output paths | `./data/web-capture` |
-| `--engine` | `-e` | Browser engine (JS only): `puppeteer`, `playwright` | `puppeteer` |
-| `--embed-images` | | Keep images as inline base64 data URIs | `false` |
-| `--no-extract-images` | | Alias for `--embed-images` | `false` |
-| `--keep-original-links` | | Keep original remote image URLs, strip base64 | `false` |
-| `--images-dir` | | Subdirectory name for extracted images | `images` |
-| `--archive` | | Create archive: `zip` (default), `7z`, `tar.gz`, `tar` | - |
-| `--extract-latex` | | Extract LaTeX formulas | `true` |
-| `--extract-metadata` | | Extract article metadata | `true` |
-| `--post-process` | | Apply post-processing | `true` |
-| `--detect-code-language` | | Detect code block languages | `true` |
+| Option                   | Short | Description                                                                             | Default               |
+| ------------------------ | ----- | --------------------------------------------------------------------------------------- | --------------------- |
+| `--serve`                | `-s`  | Start as HTTP API server                                                                | -                     |
+| `--port`                 | `-p`  | Port to listen on                                                                       | 3000                  |
+| `--format`               | `-f`  | Output format: `markdown`/`md`, `html`, `image`/`png`, `jpeg`, `pdf`, `docx`, `archive` | `markdown`            |
+| `--output`               | `-o`  | Output file path. Use `-o -` for stdout                                                 | auto-derived from URL |
+| `--data-dir`             |       | Base directory for auto-derived output paths                                            | `./data/web-capture`  |
+| `--engine`               | `-e`  | Browser engine (JS only): `puppeteer`, `playwright`                                     | `puppeteer`           |
+| `--embed-images`         |       | Keep images as inline base64 data URIs                                                  | `false`               |
+| `--no-extract-images`    |       | Alias for `--embed-images`                                                              | `false`               |
+| `--keep-original-links`  |       | Keep original remote image URLs, strip base64                                           | `false`               |
+| `--images-dir`           |       | Subdirectory name for extracted images                                                  | `images`              |
+| `--archive`              |       | Create archive: `zip` (default), `7z`, `tar.gz`, `tar`                                  | -                     |
+| `--extract-latex`        |       | Extract LaTeX formulas                                                                  | `true`                |
+| `--extract-metadata`     |       | Extract article metadata                                                                | `true`                |
+| `--post-process`         |       | Apply post-processing                                                                   | `true`                |
+| `--detect-code-language` |       | Detect code block languages                                                             | `true`                |
 
 ## Environment Variables
 
 All flags can be controlled via environment variables:
 
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `WEB_CAPTURE_DATA_DIR` | Base directory for output | `./data/web-capture` |
-| `WEB_CAPTURE_EMBED_IMAGES` | `0`/`1` — keep images inline | `0` |
-| `WEB_CAPTURE_KEEP_ORIGINAL_LINKS` | `0`/`1` — keep original remote URLs | `0` |
-| `WEB_CAPTURE_IMAGES_DIR` | Subdirectory for extracted images | `images` |
-| `WEB_CAPTURE_EXTRACT_LATEX` | `0`/`1` — extract LaTeX | `1` |
-| `WEB_CAPTURE_EXTRACT_METADATA` | `0`/`1` — extract metadata | `1` |
-| `WEB_CAPTURE_POST_PROCESS` | `0`/`1` — post-processing | `1` |
-| `WEB_CAPTURE_DETECT_CODE_LANGUAGE` | `0`/`1` — detect code langs | `1` |
+| Variable                           | Description                         | Default              |
+| ---------------------------------- | ----------------------------------- | -------------------- |
+| `WEB_CAPTURE_DATA_DIR`             | Base directory for output           | `./data/web-capture` |
+| `WEB_CAPTURE_EMBED_IMAGES`         | `0`/`1` — keep images inline        | `0`                  |
+| `WEB_CAPTURE_KEEP_ORIGINAL_LINKS`  | `0`/`1` — keep original remote URLs | `0`                  |
+| `WEB_CAPTURE_IMAGES_DIR`           | Subdirectory for extracted images   | `images`             |
+| `WEB_CAPTURE_EXTRACT_LATEX`        | `0`/`1` — extract LaTeX             | `1`                  |
+| `WEB_CAPTURE_EXTRACT_METADATA`     | `0`/`1` — extract metadata          | `1`                  |
+| `WEB_CAPTURE_POST_PROCESS`         | `0`/`1` — post-processing           | `1`                  |
+| `WEB_CAPTURE_DETECT_CODE_LANGUAGE` | `0`/`1` — detect code langs         | `1`                  |
 
 ## API Endpoints
 
 Both implementations expose the same API:
 
-| Endpoint | Description |
-|----------|-------------|
-| `GET /html?url=<URL>` | Get rendered HTML content |
-| `GET /markdown?url=<URL>` | Get Markdown (images embedded as base64 by default) |
-| `GET /markdown?url=<URL>&embedImages=false` | Get Markdown with base64 images stripped |
-| `GET /markdown?url=<URL>&keepOriginalLinks=true` | Get Markdown keeping only original remote URLs |
-| `GET /image?url=<URL>` | Get PNG screenshot |
-| `GET /archive?url=<URL>` | ZIP archive with markdown + images extracted to `images/` |
-| `GET /archive?url=<URL>&keepOriginalLinks=true` | ZIP archive keeping original remote image URLs |
-| `GET /archive?url=<URL>&embedImages=true` | ZIP archive with base64 images inline |
-| `GET /pdf?url=<URL>` | PDF with embedded images |
-| `GET /docx?url=<URL>` | DOCX with embedded images |
-| `GET /fetch?url=<URL>` | Proxy fetch content |
-| `GET /stream?url=<URL>` | Stream content |
-| `GET /gdocs?url=<URL>` | Google Docs capture |
+| Endpoint                                         | Description                                               |
+| ------------------------------------------------ | --------------------------------------------------------- |
+| `GET /html?url=<URL>`                            | Get rendered HTML content                                 |
+| `GET /markdown?url=<URL>`                        | Get Markdown (images embedded as base64 by default)       |
+| `GET /markdown?url=<URL>&embedImages=false`      | Get Markdown with base64 images stripped                  |
+| `GET /markdown?url=<URL>&keepOriginalLinks=true` | Get Markdown keeping only original remote URLs            |
+| `GET /image?url=<URL>`                           | Get PNG screenshot                                        |
+| `GET /archive?url=<URL>`                         | ZIP archive with markdown + images extracted to `images/` |
+| `GET /archive?url=<URL>&keepOriginalLinks=true`  | ZIP archive keeping original remote image URLs            |
+| `GET /archive?url=<URL>&embedImages=true`        | ZIP archive with base64 images inline                     |
+| `GET /pdf?url=<URL>`                             | PDF with embedded images                                  |
+| `GET /docx?url=<URL>`                            | DOCX with embedded images                                 |
+| `GET /fetch?url=<URL>`                           | Proxy fetch content                                       |
+| `GET /stream?url=<URL>`                          | Stream content                                            |
+| `GET /gdocs?url=<URL>`                           | Google Docs capture                                       |
 
 ## Docker
 
