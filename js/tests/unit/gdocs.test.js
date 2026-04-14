@@ -6,7 +6,11 @@ import {
   extractBase64Images,
   GDOCS_EXPORT_FORMATS,
 } from '../../src/gdocs.js';
-import { extractAndSaveImages, extractBase64ToBuffers, stripBase64Images } from '../../src/extract-images.js';
+import {
+  extractAndSaveImages,
+  extractBase64ToBuffers,
+  stripBase64Images,
+} from '../../src/extract-images.js';
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
@@ -206,7 +210,8 @@ describe('gdocs', () => {
   });
 
   describe('image extraction pipeline (issue #53)', () => {
-    const TINY_PNG = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg==';
+    const TINY_PNG =
+      'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg==';
     let tmpDir;
 
     beforeEach(() => {

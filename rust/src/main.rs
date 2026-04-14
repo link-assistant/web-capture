@@ -155,6 +155,7 @@ struct UrlQuery {
 
 /// Query parameters for /markdown endpoint
 #[derive(Debug, Deserialize)]
+#[allow(dead_code)]
 struct MarkdownQuery {
     url: String,
     #[serde(default, rename = "embedImages")]
@@ -773,8 +774,10 @@ async fn capture_url(
             let enhanced = convert_html_to_markdown_enhanced(&html, Some(&absolute_url), &options)?;
             let markdown = enhanced.markdown;
 
-            let buffers =
-                web_capture::extract_images::extract_base64_to_buffers(&markdown, &args.images_dir)?;
+            let buffers = web_capture::extract_images::extract_base64_to_buffers(
+                &markdown,
+                &args.images_dir,
+            )?;
 
             let archive_result = web_capture::gdocs::GDocsArchiveResult {
                 html: html.clone(),
