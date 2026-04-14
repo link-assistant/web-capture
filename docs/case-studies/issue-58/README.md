@@ -44,9 +44,9 @@ After the v0.2.1 release (which fixed the ZIP container issues from #53), five n
 
 ### Bug D: Incomplete HTML Entity Decoding
 
-**Root cause**: The entity decoding in `rust/src/gdocs.rs:148-151` decodes the raw Google Docs export content. However, `decode_html_entities` is applied *before* the HTML is parsed for image extraction and Markdown conversion. The Markdown converter (`html2md`) may re-introduce entities during conversion. Additionally, in `rust/src/markdown.rs:43`, `decode_html_entities` is called on the Markdown output, but `html2md::parse_html` can produce entities that `html_escape::decode_html_entities` doesn't fully handle (e.g., `&nbsp;` → non-breaking space should become a regular space in Markdown context).
+**Root cause**: The entity decoding in `rust/src/gdocs.rs:148-151` decodes the raw Google Docs export content. However, `decode_html_entities` is applied *before* the HTML is parsed for image extraction and Markdown conversion. The Markdown converter (`html2md`) may re-introduce entities during conversion. Additionally, in `rust/src/markdown.rs:43`, `decode_html_entities` is called on the Markdown output, but `html2md::parse_html` can produce entities that `html_escape::decode_html_entities` doesn't fully handle.
 
-**Fix**: Ensure the decode step happens as the final post-processing step on the output content, and handle `&nbsp;` specifically (replace with regular space in Markdown).
+**Fix**: Ensure the decode step happens as the final post-processing step on the output content. Non-breaking spaces (`\u00A0`) are preserved as `&nbsp;` entities for clear semantic marking — HTML decoding should not make breaking changes to the markup.
 
 ### Bug E: `article.*` vs `document.*` Filenames
 
@@ -74,5 +74,5 @@ See the pull request diff for the complete implementation.
 
 ### Libraries Considered for Bug D (Entity Decoding)
 
-- **Rust**: Already using `html-escape` crate — it handles named and numeric entities. Added `&nbsp;` → space normalization as a post-processing step.
-- **JS**: Already using `he` library — comprehensive entity decoder. Same `&nbsp;` normalization added.
+- **Rust**: Already using `html-escape` crate — it handles named and numeric entities. Non-breaking spaces are preserved as `&nbsp;` entities for clear marking.
+- **JS**: Already using `he` library — comprehensive entity decoder. Same `&nbsp;` preservation applied.
