@@ -45,11 +45,9 @@ npm error 404  '@link-assistant/web-capture@1.5.1' is not in this registry.
 
 The publish command's stderr contains the 404 error, but command-stream's `$` template tag throws an exception with a generic message before the `catch` block can check for `errorMsg.includes('404')`.
 
-### Root Cause 3: `js.yml` — `cancel-in-progress: true` on main
+### Note: `cancel-in-progress: true` is intentional
 
-**What happens:** The workflow uses `cancel-in-progress: true` unconditionally. When the version-and-commit step pushes a new commit to main (line 2459-2463 in the log: `[main c6dd289] 1.5.1` → `8b178a7..c6dd289 main -> main`), this triggers a new workflow run. If concurrency cancellation fires, it can cancel the active release workflow mid-publish.
-
-**Template comparison:** The `js-ai-driven-development-pipeline-template` uses `cancel-in-progress: ${{ github.ref == 'refs/heads/main' }}` which is inverted — it only cancels on main. The correct pattern for this project is `cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}` — queue on main (never cancel releases), cancel on PR branches (cancel stale checks).
+The workflow uses `cancel-in-progress: true` unconditionally. This is a deliberate design choice to reduce load on GitHub Actions. The CI/CD pipeline is designed to work correctly even if a previous run on main gets cancelled — the release process is idempotent and can be re-run.
 
 ## Solutions Implemented
 
@@ -69,12 +67,6 @@ Also changed the script to **exit with error code 1** when all strategies fail, 
 
 Changed the publish command from `await $\`npm publish ...\`` (which throws on non-zero exit) to `await $\`npm publish ...\`.run({ capture: true })` which captures stdout/stderr and exit code without throwing. This allows reliable pattern matching on the output for 404 errors and other failure modes.
 
-### Fix 3: `js.yml` — Fix concurrency for main branch
-
-Changed `cancel-in-progress: true` to `cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}`:
-- **Main branch:** Runs queue sequentially (never cancel an active release)
-- **PR branches:** Cancel stale runs when new commits are pushed
-
 ## Template Comparison
 
 Key differences found between this project and `link-foundation/js-ai-driven-development-pipeline-template`:
@@ -82,7 +74,6 @@ Key differences found between this project and `link-foundation/js-ai-driven-dev
 | Feature | Template | This Project | Action Needed |
 |---------|----------|-------------|---------------|
 | npm upgrade fallbacks | Only `npm install -g npm@latest` (no fallbacks) | 4 strategies with curl fallback | Template also needs fix |
-| Concurrency on main | `cancel-in-progress: ${{ github.ref == 'refs/heads/main' }}` (inverted logic) | Fixed to `${{ github.ref != 'refs/heads/main' }}` | Template has inverted logic bug |
 | Node.js version | 20.x | 22.x | 22.x triggers the broken npm issue |
 | test-compilation job | Present | Absent | Nice-to-have |
 | check-file-line-limits | Present | Absent | Nice-to-have |
