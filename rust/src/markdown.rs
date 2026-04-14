@@ -4,6 +4,7 @@
 
 use crate::html::convert_relative_urls;
 use crate::Result;
+use regex::Regex;
 use scraper::{Html, Selector};
 use tracing::{debug, info};
 
@@ -36,8 +37,13 @@ pub fn convert_html_to_markdown(html: &str, base_url: Option<&str>) -> Result<St
     // Parse and clean the HTML
     let cleaned_html = clean_html(&processed_html);
 
+    // Move <img> elements out of headings so html2md always sees them.
+    // Some html2md versions only emit text children for <h1>..<h6>,
+    // silently dropping inline images.
+    let heading_safe_html = hoist_images_from_headings(&cleaned_html);
+
     // Convert to Markdown using html2md
-    let markdown = html2md::parse_html(&cleaned_html);
+    let markdown = html2md::parse_html(&heading_safe_html);
 
     // Decode HTML entities to unicode characters
     let decoded_markdown = crate::html::decode_html_entities(&markdown);
@@ -91,6 +97,46 @@ fn clean_html(html: &str) -> String {
     }
 
     cleaned
+}
+
+/// Move `<img>` tags out of `<h1>`..`<h6>` elements.
+///
+/// Rewrites `<hN>...<img ...>...text</hN>` →
+/// `<hN>...text</hN>\n<p><img ...></p>` so that any HTML→Markdown
+/// converter sees the images at block level.
+fn hoist_images_from_headings(html: &str) -> String {
+    use std::fmt::Write;
+
+    let img_re = Regex::new(r"<img\s[^>]*>").expect("valid regex");
+    let mut result = html.to_string();
+
+    for level in 1..=6 {
+        let heading_re = Regex::new(&format!(r"(?si)(<h{level}\b[^>]*>)(.*?)(</h{level}>)"))
+            .expect("valid regex");
+
+        result = heading_re
+            .replace_all(&result, |caps: &regex::Captures<'_>| {
+                let open = &caps[1];
+                let inner = &caps[2];
+                let close = &caps[3];
+
+                let imgs: Vec<&str> = img_re.find_iter(inner).map(|m| m.as_str()).collect();
+
+                if imgs.is_empty() {
+                    return caps[0].to_string();
+                }
+
+                let stripped = img_re.replace_all(inner, "").to_string();
+                let mut out = format!("{open}{stripped}{close}");
+                for img in imgs {
+                    write!(out, "\n<p>{img}</p>").expect("write to String");
+                }
+                out
+            })
+            .into_owned();
+    }
+
+    result
 }
 
 /// Clean up Markdown output
