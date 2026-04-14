@@ -356,8 +356,9 @@ async function captureUrl(url, options) {
             ? archiver.default('zip', { zlib: { level: 9 } })
             : archiver('zip', { zlib: { level: 9 } });
           archive.pipe(outStream);
-          archive.append(archiveResult.markdown, { name: 'article.md' });
-          archive.append(archiveResult.html, { name: 'article.html' });
+          const { prettyPrintHtml: ppHtml } = await import('../src/lib.js');
+          archive.append(archiveResult.markdown, { name: 'document.md' });
+          archive.append(ppHtml(archiveResult.html), { name: 'document.html' });
           for (const img of archiveResult.images) {
             archive.append(img.data, { name: `images/${img.filename}` });
           }
@@ -373,8 +374,9 @@ async function captureUrl(url, options) {
           const archive = archiverFn('zip', { zlib: { level: 9 } });
           archive.pipe(passthrough);
           passthrough.pipe(process.stdout);
-          archive.append(archiveResult.markdown, { name: 'article.md' });
-          archive.append(archiveResult.html, { name: 'article.html' });
+          const { prettyPrintHtml: ppHtml2 } = await import('../src/lib.js');
+          archive.append(archiveResult.markdown, { name: 'document.md' });
+          archive.append(ppHtml2(archiveResult.html), { name: 'document.html' });
           for (const img of archiveResult.images) {
             archive.append(img.data, { name: `images/${img.filename}` });
           }
@@ -619,7 +621,8 @@ async function captureUrl(url, options) {
             }
           });
         }
-        archive.append($out.html(), { name: 'article.html' });
+        const { prettyPrintHtml } = await import('../src/lib.js');
+        archive.append(prettyPrintHtml($out.html()), { name: 'document.html' });
       } else {
         let markdown = convertHtmlToMarkdown(html, absoluteUrl);
         if (imageMap.size > 0) {
@@ -627,7 +630,7 @@ async function captureUrl(url, options) {
             markdown = markdown.split(remoteUrl).join(localPath);
           }
         }
-        archive.append(markdown, { name: 'article.md' });
+        archive.append(markdown, { name: 'document.md' });
       }
 
       // Download images

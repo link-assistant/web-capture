@@ -22,7 +22,7 @@ describe('batch module', () => {
     },
     defaults: {
       archivePath: 'archive',
-      markdownFile: 'article.md',
+      markdownFile: 'document.md',
       imagesDir: 'images',
       hasLocalImages: true,
     },
@@ -37,7 +37,7 @@ describe('batch module', () => {
 
     it('merges defaults into article config', () => {
       const article = getArticle(sampleConfig, '0.0.0');
-      expect(article.markdownFile).toBe('article.md');
+      expect(article.markdownFile).toBe('document.md');
       expect(article.hasLocalImages).toBe(true);
     });
 
@@ -59,7 +59,7 @@ describe('batch module', () => {
     it('returns all articles with defaults merged', () => {
       const articles = getAllArticles(sampleConfig);
       expect(articles).toHaveLength(2);
-      expect(articles[0].markdownFile).toBe('article.md');
+      expect(articles[0].markdownFile).toBe('document.md');
       expect(articles[1].language).toBe('ru');
     });
   });
@@ -78,7 +78,7 @@ describe('batch module', () => {
     it('sets default archive paths', () => {
       const config = createConfigFromUrls(['https://habr.com/article/123']);
       expect(config.articles['1'].archivePath).toContain('habr-com');
-      expect(config.articles['1'].markdownFile).toBe('article.md');
+      expect(config.articles['1'].markdownFile).toBe('document.md');
     });
   });
 

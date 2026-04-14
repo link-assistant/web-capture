@@ -42,8 +42,11 @@ pub fn convert_html_to_markdown(html: &str, base_url: Option<&str>) -> Result<St
     // Decode HTML entities to unicode characters
     let decoded_markdown = crate::html::decode_html_entities(&markdown);
 
+    // Normalize non-breaking spaces to regular spaces in Markdown text
+    let normalized_markdown = decoded_markdown.replace('\u{00A0}', " ");
+
     // Clean up the markdown output
-    let cleaned_markdown = clean_markdown(&decoded_markdown);
+    let cleaned_markdown = clean_markdown(&normalized_markdown);
 
     info!(
         "Successfully converted to Markdown ({} bytes)",

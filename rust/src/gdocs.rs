@@ -293,8 +293,8 @@ pub fn extract_base64_images(html: &str) -> (String, Vec<ExtractedImage>) {
 /// converts to Markdown, and returns all components ready for archiving.
 ///
 /// The archive contains:
-/// - `article.md` — Markdown version
-/// - `article.html` — HTML version with local image paths
+/// - `document.md` — Markdown version
+/// - `document.html` — HTML version with local image paths
 /// - `images/` — extracted images
 ///
 /// # Arguments
@@ -314,7 +314,7 @@ pub async fn fetch_google_doc_as_archive(
     let (local_html, images) = extract_base64_images(&result.content);
 
     let markdown =
-        crate::markdown::convert_html_to_markdown(&local_html, Some(&result.export_url))?;
+        crate::markdown::convert_html_to_markdown(&local_html, None)?;
 
     debug!(
         "Archive prepared: {} images extracted, {} bytes HTML, {} bytes Markdown",
@@ -334,10 +334,18 @@ pub async fn fetch_google_doc_as_archive(
 
 /// Create a ZIP archive from a `GDocsArchiveResult`.
 ///
+/// # Arguments
+///
+/// * `archive` - The archive result to bundle
+/// * `pretty_html` - Whether to pretty-print the HTML output
+///
 /// # Errors
 ///
 /// Returns an error if ZIP creation fails.
-pub fn create_archive_zip(archive: &GDocsArchiveResult) -> crate::Result<Vec<u8>> {
+pub fn create_archive_zip(
+    archive: &GDocsArchiveResult,
+    pretty_html: bool,
+) -> crate::Result<Vec<u8>> {
     let mut buf = std::io::Cursor::new(Vec::new());
 
     {
@@ -345,13 +353,18 @@ pub fn create_archive_zip(archive: &GDocsArchiveResult) -> crate::Result<Vec<u8>
         let options = zip::write::SimpleFileOptions::default()
             .compression_method(zip::CompressionMethod::Deflated);
 
-        zip.start_file("article.md", options)
+        zip.start_file("document.md", options)
             .map_err(|e| WebCaptureError::IoError(std::io::Error::other(e)))?;
         zip.write_all(archive.markdown.as_bytes())?;
 
-        zip.start_file("article.html", options)
+        let html_output = if pretty_html {
+            crate::html::pretty_print_html(&archive.html)
+        } else {
+            archive.html.clone()
+        };
+        zip.start_file("document.html", options)
             .map_err(|e| WebCaptureError::IoError(std::io::Error::other(e)))?;
-        zip.write_all(archive.html.as_bytes())?;
+        zip.write_all(html_output.as_bytes())?;
 
         for img in &archive.images {
             zip.start_file(format!("images/{}", img.filename), options)

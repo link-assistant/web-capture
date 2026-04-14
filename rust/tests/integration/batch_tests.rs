@@ -24,7 +24,7 @@ fn sample_config() -> BatchConfig {
     BatchConfig {
         articles,
         defaults: Some(ArticleConfig {
-            markdown_file: Some("article.md".to_string()),
+            markdown_file: Some("document.md".to_string()),
             images_dir: Some("images".to_string()),
             ..Default::default()
         }),
@@ -35,7 +35,7 @@ fn sample_config() -> BatchConfig {
 fn test_get_article_merges_defaults() {
     let config = sample_config();
     let article = get_article(&config, "2").unwrap();
-    assert_eq!(article.markdown_file, Some("article.md".to_string()));
+    assert_eq!(article.markdown_file, Some("document.md".to_string()));
     assert_eq!(article.images_dir, Some("images".to_string()));
 }
 

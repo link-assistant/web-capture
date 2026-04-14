@@ -136,7 +136,7 @@ fn test_create_archive_zip_produces_valid_zip() {
         export_url: "https://docs.google.com/document/d/test-doc/export?format=html".to_string(),
     };
 
-    let zip_bytes = create_archive_zip(&archive).unwrap();
+    let zip_bytes = create_archive_zip(&archive, false).unwrap();
 
     // Verify it's a real ZIP (magic bytes: PK\x03\x04)
     assert!(zip_bytes.len() > 4);
@@ -153,14 +153,14 @@ fn test_create_archive_zip_produces_valid_zip() {
     for i in 0..zip.len() {
         let file = zip.by_index(i).unwrap();
         match file.name() {
-            "article.md" => {
+            "document.md" => {
                 found_md = true;
                 let content: Vec<u8> = std::io::Read::bytes(file).map(|b| b.unwrap()).collect();
                 let text = String::from_utf8(content).unwrap();
                 assert!(text.contains("# Hello"));
                 assert!(text.contains("images/image-01.png"));
             }
-            "article.html" => {
+            "document.html" => {
                 found_html = true;
                 let content: Vec<u8> = std::io::Read::bytes(file).map(|b| b.unwrap()).collect();
                 let text = String::from_utf8(content).unwrap();
@@ -175,8 +175,8 @@ fn test_create_archive_zip_produces_valid_zip() {
         }
     }
 
-    assert!(found_md, "ZIP must contain article.md");
-    assert!(found_html, "ZIP must contain article.html");
+    assert!(found_md, "ZIP must contain document.md");
+    assert!(found_html, "ZIP must contain document.html");
     assert!(found_image, "ZIP must contain images/image-01.png");
 }
 
@@ -190,10 +190,10 @@ fn test_create_archive_zip_empty_images() {
         export_url: "https://docs.google.com/document/d/empty-doc/export?format=html".to_string(),
     };
 
-    let zip_bytes = create_archive_zip(&archive).unwrap();
+    let zip_bytes = create_archive_zip(&archive, false).unwrap();
     assert_eq!(&zip_bytes[0..4], b"PK\x03\x04");
 
     let reader = std::io::Cursor::new(&zip_bytes);
     let zip = zip::ZipArchive::new(reader).unwrap();
-    assert_eq!(zip.len(), 2); // article.md + article.html only
+    assert_eq!(zip.len(), 2); // document.md + document.html only
 }

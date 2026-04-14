@@ -167,7 +167,8 @@ export function convertHtmlToMarkdown(html, baseUrl) {
   });
   turndown.use(turndownPluginGfm.gfm);
   // Decode HTML entities to unicode after markdown conversion
-  return he.decode(turndown.turndown($.html()));
+  // Normalize non-breaking spaces to regular spaces in Markdown text
+  return he.decode(turndown.turndown($.html())).replace(/\u00A0/g, ' ');
 }
 
 // Convert relative URLs to absolute URLs in HTML content
@@ -502,7 +503,8 @@ export function convertHtmlToMarkdownEnhanced(html, baseUrl, options = {}) {
   turndown.use(turndownPluginGfm.gfm);
 
   // Decode HTML entities to unicode after markdown conversion
-  let markdown = he.decode(turndown.turndown($.html()));
+  // Normalize non-breaking spaces to regular spaces in Markdown text
+  let markdown = he.decode(turndown.turndown($.html())).replace(/\u00A0/g, ' ');
 
   // Apply post-processing
   if (postProcess) {
@@ -552,4 +554,45 @@ export function ensureUtf8(html) {
     html = html.replace(/<head[^>]*>/i, '$&<meta charset="utf-8">');
   }
   return html;
+}
+
+const VOID_TAGS = new Set([
+  'area', 'base', 'br', 'col', 'embed', 'hr', 'img',
+  'input', 'link', 'meta', 'param', 'source', 'track', 'wbr',
+]);
+
+export function prettyPrintHtml(html) {
+  const tagRe = /(<\/?[a-zA-Z][^>]*?>)/g;
+  const parts = html.split(tagRe).filter(Boolean);
+  let indent = 0;
+  const indentStr = '  ';
+  const lines = [];
+
+  for (const part of parts) {
+    const isTag = part.startsWith('<');
+    if (!isTag) {
+      const text = part.trim();
+      if (text) {
+        lines.push(indentStr.repeat(indent) + text);
+      }
+      continue;
+    }
+    const isClosing = part.startsWith('</');
+    const tagMatch = part.match(/^<\/?([a-zA-Z][a-zA-Z0-9]*)/);
+    const tagName = tagMatch ? tagMatch[1].toLowerCase() : '';
+    const isVoid = VOID_TAGS.has(tagName);
+    const isSelfClosing = part.endsWith('/>');
+
+    if (isClosing) {
+      indent = Math.max(0, indent - 1);
+      lines.push(indentStr.repeat(indent) + part);
+    } else if (isVoid || isSelfClosing) {
+      lines.push(indentStr.repeat(indent) + part);
+    } else {
+      lines.push(indentStr.repeat(indent) + part);
+      indent++;
+    }
+  }
+
+  return lines.join('\n') + '\n';
 }

@@ -233,6 +233,106 @@ pub fn decode_html_entities(html: &str) -> String {
     html_escape::decode_html_entities(html).into_owned()
 }
 
+/// Pretty-print HTML with indentation.
+///
+/// Adds newlines and indentation to make HTML human-readable.
+/// Void elements (br, hr, img, input, meta, link) are not indented as blocks.
+///
+/// # Arguments
+///
+/// * `html` - The HTML content to format
+///
+/// # Returns
+///
+/// The pretty-printed HTML content
+#[must_use]
+pub fn pretty_print_html(html: &str) -> String {
+    use regex::Regex;
+    use std::sync::OnceLock;
+
+    static TAG_RE: OnceLock<Regex> = OnceLock::new();
+    let tag_re = TAG_RE.get_or_init(|| Regex::new(r"(</?[a-zA-Z][^>]*?>)").unwrap());
+
+    static VOID_RE: OnceLock<Regex> = OnceLock::new();
+    let void_re = VOID_RE
+        .get_or_init(|| Regex::new(r"(?i)^<(area|base|br|col|embed|hr|img|input|link|meta|param|source|track|wbr)\b").unwrap());
+
+    let mut result = String::with_capacity(html.len() * 2);
+    let mut indent: usize = 0;
+    let indent_str = "  ";
+
+    for part in tag_re.split(html).enumerate().zip(
+        std::iter::once("".to_string()).chain(
+            tag_re
+                .find_iter(html)
+                .map(|m| m.as_str().to_string()),
+        ),
+    ) {
+        // This interleaving is complex; let's use a simpler approach
+        let _ = part;
+    }
+
+    // Simpler approach: split by tags, process each
+    result.clear();
+    let mut last_end = 0;
+    let mut parts: Vec<(bool, &str)> = Vec::new(); // (is_tag, content)
+
+    for m in tag_re.find_iter(html) {
+        let before = &html[last_end..m.start()];
+        if !before.trim().is_empty() {
+            parts.push((false, before));
+        }
+        parts.push((true, m.as_str()));
+        last_end = m.end();
+    }
+    let trailing = &html[last_end..];
+    if !trailing.trim().is_empty() {
+        parts.push((false, trailing));
+    }
+
+    for (is_tag, content) in &parts {
+        if *is_tag {
+            let tag = *content;
+            let is_closing = tag.starts_with("</");
+            let is_void = void_re.is_match(tag);
+            let is_self_closing = tag.ends_with("/>");
+
+            if is_closing {
+                indent = indent.saturating_sub(1);
+                for _ in 0..indent {
+                    result.push_str(indent_str);
+                }
+                result.push_str(tag);
+                result.push('\n');
+            } else if is_void || is_self_closing {
+                for _ in 0..indent {
+                    result.push_str(indent_str);
+                }
+                result.push_str(tag);
+                result.push('\n');
+            } else {
+                for _ in 0..indent {
+                    result.push_str(indent_str);
+                }
+                result.push_str(tag);
+                result.push('\n');
+                indent += 1;
+            }
+        } else {
+            let text = content.trim();
+            if !text.is_empty() {
+                for _ in 0..indent {
+                    result.push_str(indent_str);
+                }
+                result.push_str(text);
+                result.push('\n');
+            }
+        }
+    }
+
+    result
+}
+
 /// Normalize URL to ensure it's absolute.
 ///
 /// Prepends `https://` if no scheme is present and validates the URL.
