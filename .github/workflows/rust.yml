@@ -29,9 +29,12 @@ on:
         required: false
         type: string
 
+# Concurrency: Only one workflow run per branch at a time
+# - For main branch (releases): cancel older runs to prevent blocking newer releases
+# - For PR branches: queue runs to avoid cancelling checks on force-pushes
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.ref == 'refs/heads/main' }}
 
 env:
   CARGO_TERM_COLOR: always
@@ -358,7 +361,7 @@ jobs:
           node ../scripts/rust-version-bump.mjs --bump-type "${{ github.event.inputs.bump_type }}" --description "${{ github.event.inputs.description }}"
 
       - name: Create Pull Request
-        uses: peter-evans/create-pull-request@v7
+        uses: peter-evans/create-pull-request@v8
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           commit-message: 'chore(rust): bump version (${{ github.event.inputs.bump_type }})'
