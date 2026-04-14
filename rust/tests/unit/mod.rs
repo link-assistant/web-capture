@@ -1,0 +1,9 @@
+mod extract_images_tests;
+mod html_tests;
+mod latex_tests;
+mod lib_tests;
+mod localize_images_tests;
+mod markdown_tests;
+mod metadata_tests;
+mod postprocess_tests;
+mod verify_tests;

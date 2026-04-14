@@ -122,11 +122,13 @@ Returns the raw HTML content of the specified URL.
 GET /markdown?url=<URL>
 ```
 
-Converts the HTML content of the specified URL to Markdown format.
+Converts the HTML content of the specified URL to Markdown format. By default, images are embedded as base64 data URIs (single self-contained response). Use `embedImages=false` to strip base64 images, or `keepOriginalLinks=true` to keep only original remote URLs.
 
-| Parameter | Required | Description  | Default |
-| --------- | -------- | ------------ | ------- |
-| `url`     | Yes      | URL to fetch | -       |
+| Parameter           | Required | Description                                       | Default |
+| ------------------- | -------- | ------------------------------------------------- | ------- |
+| `url`               | Yes      | URL to fetch                                      | -       |
+| `embedImages`       | No       | Keep base64 images inline (`true`/`false`)        | `true`  |
+| `keepOriginalLinks` | No       | Keep original remote URLs, strip base64           | `false` |
 
 ### Image Endpoint
 
@@ -156,11 +158,13 @@ GET /archive?url=<URL>&localImages=true&documentFormat=markdown
 
 Returns a ZIP archive containing either `article.md` or `article.html` and asset directories (`images/`, `css/`).
 
-| Parameter        | Required | Description                              | Default    |
-| ---------------- | -------- | ---------------------------------------- | ---------- |
-| `url`            | Yes      | URL to archive                           | -          |
-| `localImages`    | No       | Download images locally into the archive | true       |
-| `documentFormat` | No       | Document format: `markdown` or `html`    | `markdown` |
+| Parameter           | Required | Description                                  | Default    |
+| ------------------- | -------- | -------------------------------------------- | ---------- |
+| `url`               | Yes      | URL to archive                               | -          |
+| `localImages`       | No       | Download images locally into the archive     | `true`     |
+| `documentFormat`    | No       | Document format: `markdown` or `html`        | `markdown` |
+| `embedImages`       | No       | Keep base64 images inline in the document    | `false`    |
+| `keepOriginalLinks` | No       | Keep original remote URLs (skip downloading) | `false`    |
 
 **Archive structure** (with `localImages=true`):
 
@@ -246,6 +250,7 @@ web-capture <url> [options]
 | `--fullPage`                |       | Capture full scrollable page                   | false                               |
 | `--embed-images`            |       | Keep images as inline base64 data URIs         | false                               |
 | `--no-extract-images`       |       | Alias for `--embed-images`                     | false                               |
+| `--keep-original-links`     |       | Keep original remote URLs, strip base64        | false                               |
 | `--images-dir`              |       | Subdirectory name for extracted images         | `images`                            |
 | `--archive`                 |       | Create archive: `zip`, `7z`, `tar.gz`, `tar`   | -                                   |
 | `--document-format`         |       | Document format in archive: `markdown`, `html` | `markdown`                          |
@@ -289,6 +294,7 @@ Configuration values are resolved with the following priority (highest to lowest
 | `API_TOKEN`                        | API token for authenticated capture | -                    |
 | `WEB_CAPTURE_DATA_DIR`             | Base directory for output           | `./data/web-capture` |
 | `WEB_CAPTURE_EMBED_IMAGES`         | `0`/`1` — keep images inline        | `0`                  |
+| `WEB_CAPTURE_KEEP_ORIGINAL_LINKS`  | `0`/`1` — keep original remote URLs | `0`                  |
 | `WEB_CAPTURE_IMAGES_DIR`           | Subdirectory for extracted images   | `images`             |
 | `WEB_CAPTURE_EXTRACT_LATEX`        | `0`/`1` — extract LaTeX             | `1`                  |
 | `WEB_CAPTURE_EXTRACT_METADATA`     | `0`/`1` — extract metadata          | `1`                  |

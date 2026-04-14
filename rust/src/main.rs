@@ -112,6 +112,11 @@ struct Args {
     #[arg(long, default_value_t = false)]
     no_extract_images: bool,
 
+    /// Keep original remote image URLs instead of downloading or extracting.
+    /// Base64 data URIs are stripped (no original URL to restore).
+    #[arg(long, default_value_t = false, env = "WEB_CAPTURE_KEEP_ORIGINAL_LINKS")]
+    keep_original_links: bool,
+
     /// Capture both light and dark theme screenshots
     #[arg(long, default_value_t = false)]
     dual_theme: bool,
@@ -146,6 +151,20 @@ struct Args {
 #[derive(Debug, Deserialize)]
 struct UrlQuery {
     url: String,
+}
+
+/// Query parameters for /markdown endpoint
+#[derive(Debug, Deserialize)]
+struct MarkdownQuery {
+    url: String,
+    #[serde(default = "default_true", rename = "embedImages")]
+    embed_images: bool,
+    #[serde(default, rename = "keepOriginalLinks")]
+    keep_original_links: bool,
+}
+
+const fn default_true() -> bool {
+    true
 }
 
 /// Query parameters for Google Docs endpoint
@@ -300,7 +319,7 @@ async fn html_handler(Query(params): Query<UrlQuery>) -> Response {
 }
 
 /// Markdown endpoint handler
-async fn markdown_handler(Query(params): Query<UrlQuery>) -> Response {
+async fn markdown_handler(Query(params): Query<MarkdownQuery>) -> Response {
     let url = match normalize_url(&params.url) {
         Ok(url) => url,
         Err(e) => return (StatusCode::BAD_REQUEST, e).into_response(),
@@ -314,7 +333,7 @@ async fn markdown_handler(Query(params): Query<UrlQuery>) -> Response {
         }
     };
 
-    let markdown = match convert_html_to_markdown(&html, Some(&url)) {
+    let mut markdown = match convert_html_to_markdown(&html, Some(&url)) {
         Ok(md) => md,
         Err(e) => {
             error!("Failed to convert to Markdown: {}", e);
@@ -325,6 +344,11 @@ async fn markdown_handler(Query(params): Query<UrlQuery>) -> Response {
                 .into_response();
         }
     };
+
+    if params.keep_original_links || !params.embed_images {
+        let result = web_capture::extract_images::strip_base64_images(&markdown);
+        markdown = result.markdown;
+    }
 
     (
         StatusCode::OK,
@@ -632,7 +656,17 @@ async fn capture_url(
                 };
                 if let Some(ref path) = effective_output {
                     if !args.embed_images {
-                        if let Some(output_dir) = path.parent() {
+                        if args.keep_original_links {
+                            let result =
+                                web_capture::extract_images::strip_base64_images(&markdown);
+                            if result.stripped > 0 {
+                                markdown = result.markdown;
+                                eprintln!(
+                                    "Stripped {} base64 images (keeping original links)",
+                                    result.stripped
+                                );
+                            }
+                        } else if let Some(output_dir) = path.parent() {
                             let extraction = web_capture::extract_images::extract_and_save_images(
                                 &markdown,
                                 output_dir,
@@ -712,7 +746,16 @@ async fn capture_url(
             };
             if let Some(ref path) = effective_output {
                 if !args.embed_images {
-                    if let Some(output_dir) = path.parent() {
+                    if args.keep_original_links {
+                        let result = web_capture::extract_images::strip_base64_images(&markdown);
+                        if result.stripped > 0 {
+                            markdown = result.markdown;
+                            eprintln!(
+                                "Stripped {} base64 images (keeping original links)",
+                                result.stripped
+                            );
+                        }
+                    } else if let Some(output_dir) = path.parent() {
                         let extraction = web_capture::extract_images::extract_and_save_images(
                             &markdown,
                             output_dir,

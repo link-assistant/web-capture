@@ -91,6 +91,89 @@ pub fn extract_and_save_images(
     })
 }
 
+/// Extract base64 images from markdown into memory buffers without writing to disk.
+/// Intended for streaming into archives.
+pub fn extract_base64_to_buffers(
+    markdown: &str,
+    images_dir: &str,
+) -> crate::Result<ExtractedBuffers> {
+    let mut images: Vec<ImageBuffer> = Vec::new();
+
+    let updated_markdown =
+        base64_md_image_pattern().replace_all(markdown, |caps: &regex::Captures<'_>| {
+            let alt_text = &caps[1];
+            let mime_ext = &caps[2];
+            let base64_data = &caps[3];
+
+            let ext = match mime_ext {
+                "jpeg" => "jpg",
+                "svg+xml" => "svg",
+                other => other,
+            };
+
+            base64::engine::general_purpose::STANDARD
+                .decode(base64_data)
+                .map_or_else(
+                    |_| format!("![{alt_text}](data:image/{mime_ext};base64,{base64_data})"),
+                    |data| {
+                        let mut hasher = DefaultHasher::new();
+                        data.hash(&mut hasher);
+                        let hash = format!("{:016x}", hasher.finish());
+                        let hash_prefix = &hash[..8];
+                        let filename = format!("image-{hash_prefix}.{ext}");
+                        let relative_path = format!("{images_dir}/{filename}");
+                        images.push(ImageBuffer { filename, data });
+                        format!("![{alt_text}]({relative_path})")
+                    },
+                )
+        });
+
+    Ok(ExtractedBuffers {
+        markdown: updated_markdown.into_owned(),
+        images,
+    })
+}
+
+/// Result of extracting base64 images to memory buffers.
+#[derive(Debug, Clone)]
+pub struct ExtractedBuffers {
+    pub markdown: String,
+    pub images: Vec<ImageBuffer>,
+}
+
+/// An extracted image as an in-memory buffer.
+#[derive(Debug, Clone)]
+pub struct ImageBuffer {
+    pub filename: String,
+    pub data: Vec<u8>,
+}
+
+/// Strip base64 data URI images from markdown, leaving alt text placeholders.
+#[must_use]
+pub fn strip_base64_images(markdown: &str) -> StrippedResult {
+    let mut stripped = 0;
+    let updated = base64_md_image_pattern().replace_all(markdown, |caps: &regex::Captures<'_>| {
+        stripped += 1;
+        let alt_text = &caps[1];
+        if alt_text.is_empty() {
+            String::new()
+        } else {
+            format!("*[image: {alt_text}]*")
+        }
+    });
+    StrippedResult {
+        markdown: updated.into_owned(),
+        stripped,
+    }
+}
+
+/// Result of stripping base64 images.
+#[derive(Debug, Clone)]
+pub struct StrippedResult {
+    pub markdown: String,
+    pub stripped: usize,
+}
+
 /// Check if markdown contains any base64 data URI images.
 #[must_use]
 pub fn has_base64_images(markdown: &str) -> bool {

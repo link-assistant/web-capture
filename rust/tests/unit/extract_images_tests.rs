@@ -1,6 +1,8 @@
 use std::fs;
 use std::path::PathBuf;
-use web_capture::extract_images::{extract_and_save_images, has_base64_images};
+use web_capture::extract_images::{
+    extract_and_save_images, extract_base64_to_buffers, has_base64_images, strip_base64_images,
+};
 
 // 1x1 red PNG pixel as base64
 const TINY_PNG: &str = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg==";
@@ -163,4 +165,71 @@ fn test_has_base64_images_true() {
 fn test_has_base64_images_false() {
     assert!(!has_base64_images("![x](https://example.com/img.png)"));
     assert!(!has_base64_images(""));
+}
+
+#[test]
+fn test_extract_base64_to_buffers() {
+    let md = format!("# Hello\n\n![test](data:image/png;base64,{TINY_PNG})\n\nEnd.");
+
+    let result = extract_base64_to_buffers(&md, "images").unwrap();
+
+    assert_eq!(result.images.len(), 1);
+    assert!(result.images[0].filename.starts_with("image-"));
+    assert!(result.images[0].filename.ends_with(".png"));
+    assert!(!result.images[0].data.is_empty());
+    assert!(result
+        .markdown
+        .contains(&format!("images/{}", result.images[0].filename)));
+    assert!(!result.markdown.contains("data:image"));
+}
+
+#[test]
+fn test_extract_base64_to_buffers_custom_dir() {
+    let md = format!("![img](data:image/png;base64,{TINY_PNG})");
+
+    let result = extract_base64_to_buffers(&md, "assets").unwrap();
+
+    assert!(result.markdown.contains("assets/image-"));
+}
+
+#[test]
+fn test_strip_base64_images_with_alt() {
+    let md = format!("![my image](data:image/png;base64,{TINY_PNG})");
+
+    let result = strip_base64_images(&md);
+
+    assert_eq!(result.stripped, 1);
+    assert_eq!(result.markdown, "*[image: my image]*");
+    assert!(!result.markdown.contains("data:image"));
+}
+
+#[test]
+fn test_strip_base64_images_empty_alt() {
+    let md = format!("![](data:image/png;base64,{TINY_PNG})");
+
+    let result = strip_base64_images(&md);
+
+    assert_eq!(result.stripped, 1);
+    assert!(result.markdown.is_empty());
+}
+
+#[test]
+fn test_strip_base64_preserves_remote_urls() {
+    let md = "![remote](https://example.com/img.png)";
+
+    let result = strip_base64_images(md);
+
+    assert_eq!(result.stripped, 0);
+    assert_eq!(result.markdown, md);
+}
+
+#[test]
+fn test_strip_base64_multiple_images() {
+    let md = format!("![a](data:image/png;base64,{TINY_PNG})\n![c](https://example.com/img.png)");
+
+    let result = strip_base64_images(&md);
+
+    assert_eq!(result.stripped, 1);
+    assert!(result.markdown.contains("*[image: a]*"));
+    assert!(result.markdown.contains("https://example.com/img.png"));
 }

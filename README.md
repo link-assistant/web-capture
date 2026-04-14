@@ -83,6 +83,7 @@ web-capture --serve --port 8080
 | `--engine` | `-e` | Browser engine (JS only): `puppeteer`, `playwright` | `puppeteer` |
 | `--embed-images` | | Keep images as inline base64 data URIs | `false` |
 | `--no-extract-images` | | Alias for `--embed-images` | `false` |
+| `--keep-original-links` | | Keep original remote image URLs, strip base64 | `false` |
 | `--images-dir` | | Subdirectory name for extracted images | `images` |
 | `--archive` | | Create archive: `zip` (default), `7z`, `tar.gz`, `tar` | - |
 | `--extract-latex` | | Extract LaTeX formulas | `true` |
@@ -98,6 +99,7 @@ All flags can be controlled via environment variables:
 |----------|-------------|---------|
 | `WEB_CAPTURE_DATA_DIR` | Base directory for output | `./data/web-capture` |
 | `WEB_CAPTURE_EMBED_IMAGES` | `0`/`1` — keep images inline | `0` |
+| `WEB_CAPTURE_KEEP_ORIGINAL_LINKS` | `0`/`1` — keep original remote URLs | `0` |
 | `WEB_CAPTURE_IMAGES_DIR` | Subdirectory for extracted images | `images` |
 | `WEB_CAPTURE_EXTRACT_LATEX` | `0`/`1` — extract LaTeX | `1` |
 | `WEB_CAPTURE_EXTRACT_METADATA` | `0`/`1` — extract metadata | `1` |
@@ -111,9 +113,13 @@ Both implementations expose the same API:
 | Endpoint | Description |
 |----------|-------------|
 | `GET /html?url=<URL>` | Get rendered HTML content |
-| `GET /markdown?url=<URL>` | Get Markdown conversion |
+| `GET /markdown?url=<URL>` | Get Markdown (images embedded as base64 by default) |
+| `GET /markdown?url=<URL>&embedImages=false` | Get Markdown with base64 images stripped |
+| `GET /markdown?url=<URL>&keepOriginalLinks=true` | Get Markdown keeping only original remote URLs |
 | `GET /image?url=<URL>` | Get PNG screenshot |
-| `GET /archive?url=<URL>` | ZIP archive with markdown + images |
+| `GET /archive?url=<URL>` | ZIP archive with markdown + images extracted to `images/` |
+| `GET /archive?url=<URL>&keepOriginalLinks=true` | ZIP archive keeping original remote image URLs |
+| `GET /archive?url=<URL>&embedImages=true` | ZIP archive with base64 images inline |
 | `GET /pdf?url=<URL>` | PDF with embedded images |
 | `GET /docx?url=<URL>` | DOCX with embedded images |
 | `GET /fetch?url=<URL>` | Proxy fetch content |

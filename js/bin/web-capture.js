@@ -143,6 +143,13 @@ const config = makeConfig({
         description: 'Alias for --embed-images: keep images inline as base64',
         default: false,
       })
+      .option('keepOriginalLinks', {
+        type: 'boolean',
+        description:
+          'Keep original remote image URLs instead of downloading or extracting. ' +
+          'Base64 data URIs are stripped (no original URL to restore).',
+        default: getenv('WEB_CAPTURE_KEEP_ORIGINAL_LINKS', false),
+      })
       .option('dualTheme', {
         type: 'boolean',
         description:
@@ -291,6 +298,7 @@ async function captureUrl(url, options) {
     embedImages,
     imagesDir,
     dataDir,
+    keepOriginalLinks,
   } = options;
 
   // Ensure URL is absolute
@@ -313,7 +321,8 @@ async function captureUrl(url, options) {
   const { createBrowser } = await import('../src/browser.js');
   const { isGoogleDocsUrl, fetchGoogleDoc, fetchGoogleDocAsMarkdown } =
     await import('../src/gdocs.js');
-  const { extractAndSaveImages } = await import('../src/extract-images.js');
+  const { extractAndSaveImages, stripBase64Images } =
+    await import('../src/extract-images.js');
 
   const normalizedFormat = format.toLowerCase();
 
@@ -331,15 +340,25 @@ async function captureUrl(url, options) {
             ? null
             : explicitOutput || deriveOutputPath(absoluteUrl, 'md', dataDir);
         if (output && !embedImages) {
-          const outputDir = path.dirname(path.resolve(output));
-          const extraction = extractAndSaveImages(markdown, outputDir, {
-            imagesDir,
-          });
-          if (extraction.extracted > 0) {
-            markdown = extraction.markdown;
-            console.error(
-              `Extracted ${extraction.extracted} images to ${imagesDir}/`
-            );
+          if (keepOriginalLinks) {
+            const strip = stripBase64Images(markdown);
+            if (strip.stripped > 0) {
+              markdown = strip.markdown;
+              console.error(
+                `Stripped ${strip.stripped} base64 images (keeping original links)`
+              );
+            }
+          } else {
+            const outputDir = path.dirname(path.resolve(output));
+            const extraction = extractAndSaveImages(markdown, outputDir, {
+              imagesDir,
+            });
+            if (extraction.extracted > 0) {
+              markdown = extraction.markdown;
+              console.error(
+                `Extracted ${extraction.extracted} images to ${imagesDir}/`
+              );
+            }
           }
         }
         if (output) {
@@ -518,7 +537,11 @@ async function captureUrl(url, options) {
 
       // Build image map for local downloads
       const imageMap = new Map();
-      if (options.localImages && uniqueImages.length > 0) {
+      if (
+        options.localImages &&
+        !keepOriginalLinks &&
+        uniqueImages.length > 0
+      ) {
         let idx = 1;
         for (const imgUrl of uniqueImages) {
           const ext = imgUrl.match(/\.(jpe?g|gif|webp|svg|png)/i)?.[1] || 'png';
@@ -596,15 +619,25 @@ async function captureUrl(url, options) {
           ? null
           : explicitOutput || deriveOutputPath(absoluteUrl, 'md', dataDir);
       if (output && !embedImages) {
-        const outputDir = path.dirname(path.resolve(output));
-        const extraction = extractAndSaveImages(markdown, outputDir, {
-          imagesDir,
-        });
-        if (extraction.extracted > 0) {
-          markdown = extraction.markdown;
-          console.error(
-            `Extracted ${extraction.extracted} images to ${imagesDir}/`
-          );
+        if (keepOriginalLinks) {
+          const strip = stripBase64Images(markdown);
+          if (strip.stripped > 0) {
+            markdown = strip.markdown;
+            console.error(
+              `Stripped ${strip.stripped} base64 images (keeping original links)`
+            );
+          }
+        } else {
+          const outputDir = path.dirname(path.resolve(output));
+          const extraction = extractAndSaveImages(markdown, outputDir, {
+            imagesDir,
+          });
+          if (extraction.extracted > 0) {
+            markdown = extraction.markdown;
+            console.error(
+              `Extracted ${extraction.extracted} images to ${imagesDir}/`
+            );
+          }
         }
       }
 
@@ -765,6 +798,7 @@ async function main() {
       imagesDir: config.imagesDir,
       dataDir: config.dataDir,
       archiveFormat: config.archiveFormat,
+      keepOriginalLinks: config.keepOriginalLinks,
     });
   } else {
     // No arguments - show error

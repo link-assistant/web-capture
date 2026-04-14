@@ -4,6 +4,8 @@ import path from 'path';
 import os from 'os';
 import {
   extractAndSaveImages,
+  extractBase64ToBuffers,
+  stripBase64Images,
   hasBase64Images,
 } from '../../src/extract-images.js';
 
@@ -143,6 +145,75 @@ describe('extract-images module', () => {
       expect(fs.existsSync(imgPath)).toBe(true);
       const content = fs.readFileSync(imgPath, 'utf-8');
       expect(content).toContain('<svg');
+    });
+  });
+
+  describe('extractBase64ToBuffers', () => {
+    it('extracts base64 images to in-memory buffers', () => {
+      const md = `# Hello\n\n![test](data:image/png;base64,${TINY_PNG})\n\nEnd.`;
+      const result = extractBase64ToBuffers(md);
+
+      expect(result.images).toHaveLength(1);
+      expect(result.images[0].filename).toMatch(/^image-[0-9a-f]{8}\.png$/);
+      expect(result.images[0].buffer.length).toBeGreaterThan(0);
+      expect(result.markdown).toContain(
+        `images/${result.images[0].filename}`
+      );
+      expect(result.markdown).not.toContain('data:image');
+    });
+
+    it('uses custom imagesDir prefix', () => {
+      const md = `![img](data:image/png;base64,${TINY_PNG})`;
+      const result = extractBase64ToBuffers(md, 'assets');
+
+      expect(result.markdown).toContain('assets/image-');
+    });
+
+    it('does not write files to disk', () => {
+      const md = `![img](data:image/png;base64,${TINY_PNG})`;
+      extractBase64ToBuffers(md);
+      expect(fs.existsSync(path.join(tmpDir, 'images'))).toBe(false);
+    });
+  });
+
+  describe('stripBase64Images', () => {
+    it('strips base64 images and leaves alt text placeholder', () => {
+      const md = `![my image](data:image/png;base64,${TINY_PNG})`;
+      const result = stripBase64Images(md);
+
+      expect(result.stripped).toBe(1);
+      expect(result.markdown).toBe('*[image: my image]*');
+      expect(result.markdown).not.toContain('data:image');
+    });
+
+    it('strips base64 images with empty alt text', () => {
+      const md = `![](data:image/png;base64,${TINY_PNG})`;
+      const result = stripBase64Images(md);
+
+      expect(result.stripped).toBe(1);
+      expect(result.markdown).toBe('');
+    });
+
+    it('preserves remote image URLs', () => {
+      const md = '![remote](https://example.com/img.png)';
+      const result = stripBase64Images(md);
+
+      expect(result.stripped).toBe(0);
+      expect(result.markdown).toBe(md);
+    });
+
+    it('strips multiple base64 images', () => {
+      const md = [
+        `![a](data:image/png;base64,${TINY_PNG})`,
+        `![b](data:image/jpeg;base64,${TINY_JPEG})`,
+        '![c](https://example.com/img.png)',
+      ].join('\n');
+      const result = stripBase64Images(md);
+
+      expect(result.stripped).toBe(2);
+      expect(result.markdown).toContain('*[image: a]*');
+      expect(result.markdown).toContain('*[image: b]*');
+      expect(result.markdown).toContain('https://example.com/img.png');
     });
   });
 

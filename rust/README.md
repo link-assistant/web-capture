@@ -66,10 +66,12 @@ web-capture --serve --port 8080
 
 ### API Endpoints (Server Mode)
 
-- **Markdown**: GET /markdown?url=\<URL>
-- **HTML**: GET /html?url=\<URL>
-- **PNG screenshot**: GET /image?url=\<URL>
-- **Google Docs**: GET /gdocs?url=\<URL>&format=markdown
+- **Markdown**: `GET /markdown?url=<URL>` (images embedded as base64 by default)
+- **Markdown (no base64)**: `GET /markdown?url=<URL>&embedImages=false`
+- **Markdown (original links)**: `GET /markdown?url=<URL>&keepOriginalLinks=true`
+- **HTML**: `GET /html?url=<URL>`
+- **PNG screenshot**: `GET /image?url=<URL>`
+- **Google Docs**: `GET /gdocs?url=<URL>&format=markdown`
 
 ## CLI Reference
 
@@ -101,6 +103,7 @@ web-capture <url> [options]
 | `--data-dir`                |       | Base directory for auto-derived output paths          | `./data/web-capture`   |
 | `--embed-images`            |       | Keep images as inline base64 data URIs                | false                  |
 | `--no-extract-images`       |       | Alias for `--embed-images`                            | false                  |
+| `--keep-original-links`     |       | Keep original remote URLs, strip base64               | false                  |
 | `--images-dir`              |       | Subdirectory name for extracted images                | `images`               |
 | `--archive`                 |       | Create archive: `zip`, `7z`, `tar.gz`, `tar`         | -                      |
 | `--extract-latex`           |       | Extract LaTeX formulas                                | true                   |
@@ -152,6 +155,7 @@ docker run -p 3000:3000 web-capture-rust
 | `API_TOKEN`                        | API token for authenticated capture| -                  |
 | `WEB_CAPTURE_DATA_DIR`             | Base directory for output          | `./data/web-capture`|
 | `WEB_CAPTURE_EMBED_IMAGES`         | `0`/`1` — keep images inline      | `0`                |
+| `WEB_CAPTURE_KEEP_ORIGINAL_LINKS`  | `0`/`1` — keep original remote URLs| `0`                |
 | `WEB_CAPTURE_IMAGES_DIR`           | Subdirectory for extracted images  | `images`           |
 | `WEB_CAPTURE_EXTRACT_LATEX`        | `0`/`1` — extract LaTeX           | `1`                |
 | `WEB_CAPTURE_EXTRACT_METADATA`     | `0`/`1` — extract metadata        | `1`                |
