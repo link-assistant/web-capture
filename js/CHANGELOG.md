@@ -1,5 +1,11 @@
 # @link-assistant/web-capture
 
+## 1.7.1
+
+### Patch Changes
+
+- 3ee464b: Add heading-image parity guard rail tests to prevent <img> inside headings from being silently dropped during HTML-to-Markdown conversion
+
 ## 1.7.0
 
 ### Minor Changes
