@@ -17,9 +17,9 @@
 //
 // Outputs (written to GITHUB_OUTPUT):
 //   js-code-changed, js-changed, rust-code-changed, rust-changed,
-//   scripts-changed, rust-scripts-changed, workflow-changed,
-//   js-workflow-changed, rust-workflow-changed, docs-changed,
-//   any-code-changed, any-js-code-changed, any-rust-code-changed
+//   scripts-changed, js-scripts-changed, rust-scripts-changed,
+//   workflow-changed, js-workflow-changed, rust-workflow-changed,
+//   docs-changed, any-code-changed, any-js-code-changed, any-rust-code-changed
 
 import { execSync } from 'child_process';
 import { appendFileSync } from 'fs';
@@ -128,6 +128,14 @@ function detectChanges() {
   const scriptsChanged = changedFiles.some((f) => f.startsWith('scripts/'));
   setOutput('scripts-changed', scriptsChanged ? 'true' : 'false');
 
+  const jsScriptsChanged = changedFiles.some(
+    (f) =>
+      f.startsWith('scripts/') &&
+      !f.startsWith('scripts/rust-') &&
+      f.endsWith('.mjs')
+  );
+  setOutput('js-scripts-changed', jsScriptsChanged ? 'true' : 'false');
+
   const rustScriptsChanged = changedFiles.some(
     (f) => f.startsWith('scripts/rust-') && f.endsWith('.mjs')
   );
@@ -175,7 +183,7 @@ function detectChanges() {
 
   // Composite flags for workflow gating
   const anyJsCodeChanged =
-    jsCodeChanged || scriptsChanged || jsWorkflowChanged;
+    jsCodeChanged || jsScriptsChanged || jsWorkflowChanged;
   setOutput('any-js-code-changed', anyJsCodeChanged ? 'true' : 'false');
 
   const anyRustCodeChanged =

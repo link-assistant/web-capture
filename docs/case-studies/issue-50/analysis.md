@@ -79,8 +79,8 @@ Both templates use the same approach: no `paths:` filters at the workflow trigge
 ### Key differences from templates
 
 This repo is a **monorepo** with both JS and Rust code, so the detect-changes script outputs language-specific flags:
-- `any-js-code-changed` — gates JS workflow jobs
-- `any-rust-code-changed` — gates Rust workflow jobs
+- `any-js-code-changed` — gates JS workflow jobs (includes JS scripts like `scripts/validate-changeset.mjs`, excludes Rust-specific scripts like `scripts/rust-publish-crate.mjs`)
+- `any-rust-code-changed` — gates Rust workflow jobs (includes Rust-specific scripts prefixed with `scripts/rust-*`)
 - `any-code-changed` — overall code change flag
 
 ### Additional improvements

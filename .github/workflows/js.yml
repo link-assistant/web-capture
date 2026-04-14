@@ -106,6 +106,7 @@ jobs:
     if: |
       always() && !cancelled() && (
         github.event_name == 'push' ||
+        github.event_name == 'workflow_dispatch' ||
         needs.detect-changes.outputs.any-js-code-changed == 'true' ||
         needs.detect-changes.outputs.docs-changed == 'true'
       )
@@ -135,14 +136,15 @@ jobs:
     runs-on: ${{ matrix.os }}
     timeout-minutes: 30
     needs: [detect-changes, changeset-check]
+    # Run if: push/dispatch event, OR (changeset check passed/skipped AND JS code actually changed)
     if: |
-      !cancelled() && (
+      always() && !cancelled() && (
         github.event_name == 'push' ||
-        needs.changeset-check.result == 'success' ||
-        needs.changeset-check.result == 'skipped'
-      ) && (
-        github.event_name == 'push' ||
-        needs.detect-changes.outputs.any-js-code-changed == 'true'
+        github.event_name == 'workflow_dispatch' ||
+        (
+          (needs.changeset-check.result == 'success' || needs.changeset-check.result == 'skipped') &&
+          needs.detect-changes.outputs.any-js-code-changed == 'true'
+        )
       )
     strategy:
       fail-fast: false
