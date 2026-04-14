@@ -6,7 +6,7 @@ use web_capture::postprocess::{
 #[test]
 fn test_unicode_normalization_nbsp() {
     let result = apply_unicode_normalization("hello\u{00A0}world");
-    assert_eq!(result, "hello world");
+    assert_eq!(result, "hello&nbsp;world");
 }
 
 #[test]
@@ -57,6 +57,6 @@ fn test_bold_formatting_empty_bold() {
 fn test_post_process_markdown_full() {
     let input = "hello\u{00A0}world\nwhere$x$is\nwait\u{2026}";
     let result = post_process_markdown(input, &PostProcessOptions::default());
-    assert!(result.contains("hello world"));
+    assert!(result.contains("hello&nbsp;world"));
     assert!(result.contains("wait..."));
 }

@@ -78,8 +78,8 @@ pub fn post_process_markdown(markdown: &str, options: &PostProcessOptions) -> St
 pub fn apply_unicode_normalization(text: &str) -> String {
     let mut result = text.to_string();
 
-    // Replace non-breaking spaces (U+00A0) with regular spaces
-    result = result.replace('\u{00A0}', " ");
+    // Preserve non-breaking spaces as &nbsp; entities for clear marking
+    result = result.replace('\u{00A0}', "&nbsp;");
 
     // Normalize curly quotes to straight quotes
     result = result.replace('\u{2018}', "'");

@@ -181,6 +181,12 @@ const config = makeConfig({
           'API token for authenticated capture (e.g., Google Docs private documents). Can also be set via API_TOKEN env variable.',
         default: getenv('API_TOKEN', undefined),
       })
+      .option('noPrettyHtml', {
+        type: 'boolean',
+        description:
+          'Disable HTML pretty-printing in archive output (output minified HTML instead of indented).',
+        default: getenv('WEB_CAPTURE_NO_PRETTY_HTML', false),
+      })
       .help('help')
       .alias('help', 'h')
       .version()
@@ -358,7 +364,10 @@ async function captureUrl(url, options) {
           archive.pipe(outStream);
           const { prettyPrintHtml: ppHtml } = await import('../src/lib.js');
           archive.append(archiveResult.markdown, { name: 'document.md' });
-          archive.append(ppHtml(archiveResult.html), {
+          const htmlContent = options.prettyHtml
+            ? ppHtml(archiveResult.html)
+            : archiveResult.html;
+          archive.append(htmlContent, {
             name: 'document.html',
           });
           for (const img of archiveResult.images) {
@@ -378,7 +387,10 @@ async function captureUrl(url, options) {
           passthrough.pipe(process.stdout);
           const { prettyPrintHtml: ppHtml2 } = await import('../src/lib.js');
           archive.append(archiveResult.markdown, { name: 'document.md' });
-          archive.append(ppHtml2(archiveResult.html), {
+          const htmlContent2 = options.prettyHtml
+            ? ppHtml2(archiveResult.html)
+            : archiveResult.html;
+          archive.append(htmlContent2, {
             name: 'document.html',
           });
           for (const img of archiveResult.images) {
@@ -626,7 +638,10 @@ async function captureUrl(url, options) {
           });
         }
         const { prettyPrintHtml } = await import('../src/lib.js');
-        archive.append(prettyPrintHtml($out.html()), { name: 'document.html' });
+        const formattedHtml = options.prettyHtml
+          ? prettyPrintHtml($out.html())
+          : $out.html();
+        archive.append(formattedHtml, { name: 'document.html' });
       } else {
         let markdown = convertHtmlToMarkdown(html, absoluteUrl);
         if (imageMap.size > 0) {
@@ -859,6 +874,7 @@ async function main() {
       dataDir: config.dataDir,
       archiveFormat: config.archiveFormat,
       keepOriginalLinks: config.keepOriginalLinks,
+      prettyHtml: !config.noPrettyHtml,
     });
   } else {
     // No arguments - show error

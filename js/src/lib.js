@@ -167,8 +167,8 @@ export function convertHtmlToMarkdown(html, baseUrl) {
   });
   turndown.use(turndownPluginGfm.gfm);
   // Decode HTML entities to unicode after markdown conversion
-  // Normalize non-breaking spaces to regular spaces in Markdown text
-  return he.decode(turndown.turndown($.html())).replace(/\u00A0/g, ' ');
+  // Preserve non-breaking spaces as &nbsp; entities for clear marking
+  return he.decode(turndown.turndown($.html())).replace(/\u00A0/g, '&nbsp;');
 }
 
 // Convert relative URLs to absolute URLs in HTML content

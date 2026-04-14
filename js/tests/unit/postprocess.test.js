@@ -8,8 +8,8 @@ import {
 
 describe('postprocess module', () => {
   describe('applyUnicodeNormalization', () => {
-    it('replaces non-breaking spaces with regular spaces', () => {
-      expect(applyUnicodeNormalization('hello\u00A0world')).toBe('hello world');
+    it('preserves non-breaking spaces as &nbsp; entities', () => {
+      expect(applyUnicodeNormalization('hello\u00A0world')).toBe('hello&nbsp;world');
     });
 
     it('normalizes curly quotes to straight quotes', () => {
