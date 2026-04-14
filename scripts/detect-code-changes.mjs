@@ -5,9 +5,11 @@
 // Detects what types of files changed in the latest commit and outputs
 // results for use in GitHub Actions workflow conditions.
 //
-// Always compares HEAD^ to HEAD (per-commit diff) so that a commit
-// touching only non-code files (e.g. .gitkeep) skips tests, even when
-// the overall PR contains code changes in earlier commits.
+// For PRs: GitHub Actions checks out a synthetic merge commit, so we
+// compare HEAD^2^ to HEAD^2 (the PR head's per-commit diff).
+// For pushes: compares HEAD^ to HEAD.
+// This ensures a commit touching only non-code files skips tests,
+// even when earlier commits in the same PR changed code.
 //
 // Excluded from code changes (don't require changesets):
 // - Markdown files in any folder
@@ -43,11 +45,32 @@ function setOutput(name, value) {
   console.log(`${name}=${value}`);
 }
 
+function isMergeCommit() {
+  const parentCount = exec('git cat-file -p HEAD')
+    .split('\n')
+    .filter((line) => line.startsWith('parent ')).length;
+  return parentCount > 1;
+}
+
 function getChangedFiles() {
-  // Always use per-commit diff (HEAD^ to HEAD) so that each push is
-  // evaluated on its own. This prevents a commit that only touches
-  // non-code files from triggering tests just because an earlier
-  // commit in the same PR touched code files.
+  // GitHub Actions checks out a synthetic merge commit for pull_request
+  // events: HEAD is the merge commit, HEAD^ is the base branch, HEAD^2
+  // is the actual PR head. To get the per-commit diff (what the latest
+  // push actually changed), we compare HEAD^2^ to HEAD^2.
+  // For push events, HEAD is the real commit, so HEAD^ to HEAD works.
+  if (isMergeCommit()) {
+    console.log('Merge commit detected (pull_request event)');
+    console.log('Comparing HEAD^2^ to HEAD^2 (per-commit diff of PR head)');
+    try {
+      const output = exec('git diff --name-only HEAD^2^ HEAD^2');
+      return output ? output.split('\n').filter(Boolean) : [];
+    } catch {
+      console.log('HEAD^2^ not available (first commit in PR), listing files in HEAD^2');
+      const output = exec('git diff --name-only HEAD^ HEAD^2');
+      return output ? output.split('\n').filter(Boolean) : [];
+    }
+  }
+
   console.log('Comparing HEAD^ to HEAD');
   try {
     const output = exec('git diff --name-only HEAD^ HEAD');
