@@ -2,11 +2,12 @@
 
 // Detect code changes for CI/CD pipeline
 //
-// Detects what types of files changed between two commits and outputs
+// Detects what types of files changed in the latest commit and outputs
 // results for use in GitHub Actions workflow conditions.
 //
-// For PRs: compares PR head against base branch
-// For pushes: compares HEAD against HEAD^
+// Always compares HEAD^ to HEAD (per-commit diff) so that a commit
+// touching only non-code files (e.g. .gitkeep) skips tests, even when
+// the overall PR contains code changes in earlier commits.
 //
 // Excluded from code changes (don't require changesets):
 // - Markdown files in any folder
@@ -43,29 +44,10 @@ function setOutput(name, value) {
 }
 
 function getChangedFiles() {
-  const eventName = process.env.GITHUB_EVENT_NAME || 'local';
-
-  if (eventName === 'pull_request') {
-    const baseSha = process.env.GITHUB_BASE_SHA;
-    const headSha = process.env.GITHUB_HEAD_SHA;
-
-    if (baseSha && headSha) {
-      console.log(`Comparing PR: ${baseSha}...${headSha}`);
-      try {
-        try {
-          execSync(`git cat-file -e ${baseSha}`, { stdio: 'ignore' });
-        } catch {
-          console.log('Base commit not available locally, attempting fetch...');
-          execSync(`git fetch origin ${baseSha}`, { stdio: 'inherit' });
-        }
-        const output = exec(`git diff --name-only ${baseSha} ${headSha}`);
-        return output ? output.split('\n').filter(Boolean) : [];
-      } catch (error) {
-        console.error(`Git diff failed: ${error.message}`);
-      }
-    }
-  }
-
+  // Always use per-commit diff (HEAD^ to HEAD) so that each push is
+  // evaluated on its own. This prevents a commit that only touches
+  // non-code files from triggering tests just because an earlier
+  // commit in the same PR touched code files.
   console.log('Comparing HEAD^ to HEAD');
   try {
     const output = exec('git diff --name-only HEAD^ HEAD');
