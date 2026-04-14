@@ -139,9 +139,9 @@ export function createConfigFromUrls(urls, defaults = {}) {
       url,
       title: `Article ${id}`,
       archivePath: `archive/${hostname.replace(/\./g, '-')}/${id}`,
-      markdownFile: 'article.md',
-      screenshotLightFile: 'article-light.png',
-      screenshotDarkFile: 'article-dark.png',
+      markdownFile: 'document.md',
+      screenshotLightFile: 'document-light.png',
+      screenshotDarkFile: 'document-dark.png',
       imagesDir: 'images',
       hasLocalImages: true,
     };

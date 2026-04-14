@@ -2,7 +2,7 @@
  * ZIP archive handler.
  *
  * Downloads a web page as a self-contained ZIP archive containing:
- * - article.md or article.html  (document with either remote or local asset links)
+ * - document.md or document.html  (document with either remote or local asset links)
  * - images/     (directory of downloaded images, when localImages=true)
  * - css/        (directory for stylesheets, when documentFormat=html and localImages=true)
  * - js/         (directory for scripts, when documentFormat=html and localImages=true)
@@ -23,6 +23,7 @@ import {
   fetchHtml,
   convertHtmlToMarkdown,
   convertRelativeUrls,
+  prettyPrintHtml,
 } from './lib.js';
 import { retry } from './retry.js';
 import { extractBase64ToBuffers } from './extract-images.js';
@@ -140,8 +141,8 @@ export async function archiveHandler(req, res) {
         });
       }
 
-      outputHtml = $out.html();
-      archive.append(outputHtml, { name: 'article.html' });
+      outputHtml = prettyPrintHtml($out.html());
+      archive.append(outputHtml, { name: 'document.html' });
 
       // Download and add CSS files
       for (const { url: cssUrl, localPath } of cssFiles) {
@@ -176,7 +177,7 @@ export async function archiveHandler(req, res) {
         }
       }
 
-      archive.append(markdown, { name: 'article.md' });
+      archive.append(markdown, { name: 'document.md' });
     }
 
     // Download and add images if local mode

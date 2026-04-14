@@ -1,6 +1,6 @@
 use web_capture::html::{
     convert_relative_urls, convert_to_utf8, decode_html_entities, has_javascript, is_html,
-    normalize_url,
+    normalize_url, pretty_print_html,
 };
 
 #[test]
@@ -106,4 +106,30 @@ fn test_decode_html_entities_unicode() {
 fn test_decode_html_entities_no_entities() {
     assert_eq!(decode_html_entities("plain text"), "plain text");
     assert_eq!(decode_html_entities(""), "");
+}
+
+#[test]
+fn test_pretty_print_html_basic() {
+    let html = "<html><head><title>Test</title></head><body><p>Hello</p></body></html>";
+    let result = pretty_print_html(html);
+    assert!(result.contains("  <head>"));
+    assert!(result.contains("    <title>"));
+    assert!(result.contains("  </head>"));
+    assert!(result.contains("  <body>"));
+    assert!(result.contains("    <p>"));
+}
+
+#[test]
+fn test_pretty_print_html_void_elements() {
+    let html =
+        r#"<html><head><meta charset="utf-8"></head><body><img src="test.png"><br></body></html>"#;
+    let result = pretty_print_html(html);
+    assert!(result.contains("<img"));
+    assert!(result.contains("<br>"));
+}
+
+#[test]
+fn test_pretty_print_html_empty() {
+    let result = pretty_print_html("");
+    assert!(result.is_empty());
 }

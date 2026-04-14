@@ -156,7 +156,7 @@ Returns a screenshot of the specified URL.
 GET /archive?url=<URL>&localImages=true&documentFormat=markdown
 ```
 
-Returns a ZIP archive containing either `article.md` or `article.html` and asset directories (`images/`, `css/`).
+Returns a ZIP archive containing either `document.md` or `document.html` and asset directories (`images/`, `css/`).
 
 | Parameter           | Required | Description                                  | Default    |
 | ------------------- | -------- | -------------------------------------------- | ---------- |
@@ -170,7 +170,7 @@ Returns a ZIP archive containing either `article.md` or `article.html` and asset
 
 ```
 archive.zip
-├── article.md        # or article.html when documentFormat=html
+├── document.md       # or document.html when documentFormat=html
 ├── images/
 │   ├── image-1.png
 │   ├── image-2.jpg

@@ -7,7 +7,7 @@
 import fetch from 'node-fetch';
 import he from 'he';
 import archiver from 'archiver';
-import { convertHtmlToMarkdown } from './lib.js';
+import { convertHtmlToMarkdown, prettyPrintHtml } from './lib.js';
 
 const GDOCS_URL_PATTERN = /docs\.google\.com\/document\/d\/([a-zA-Z0-9_-]+)/;
 
@@ -194,8 +194,8 @@ export function extractBase64Images(html) {
  *
  * Fetches the document as HTML, extracts embedded base64 images,
  * and bundles everything into a ZIP archive containing:
- * - article.md (Markdown version)
- * - article.html (HTML version with local image paths)
+ * - document.md (Markdown version)
+ * - document.html (HTML version with local image paths)
  * - images/ (extracted images)
  *
  * @param {string} url - Google Docs URL
@@ -213,7 +213,7 @@ export async function fetchGoogleDocAsArchive(url, options = {}) {
   const { html: localHtml, images } = extractBase64Images(result.content);
 
   // Convert the localized HTML to Markdown
-  const markdown = convertHtmlToMarkdown(localHtml, result.exportUrl);
+  const markdown = convertHtmlToMarkdown(localHtml);
 
   return {
     documentId: result.documentId,
@@ -286,8 +286,10 @@ async function sendGDocsArchive(res, url, apiToken) {
 
   const archive = archiver('zip', { zlib: { level: 9 } });
   archive.pipe(res);
-  archive.append(archiveResult.markdown, { name: 'article.md' });
-  archive.append(archiveResult.html, { name: 'article.html' });
+  archive.append(archiveResult.markdown, { name: 'document.md' });
+  archive.append(prettyPrintHtml(archiveResult.html), {
+    name: 'document.html',
+  });
   for (const img of archiveResult.images) {
     archive.append(img.data, { name: `images/${img.filename}` });
   }

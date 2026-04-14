@@ -144,9 +144,9 @@ pub fn create_config_from_urls(urls: &[String], defaults: Option<ArticleConfig>)
                 url: url.clone(),
                 title: Some(format!("Article {id}")),
                 archive_path: Some(format!("archive/{}/{id}", hostname.replace('.', "-"))),
-                markdown_file: Some("article.md".to_string()),
-                screenshot_light_file: Some("article-light.png".to_string()),
-                screenshot_dark_file: Some("article-dark.png".to_string()),
+                markdown_file: Some("document.md".to_string()),
+                screenshot_light_file: Some("document-light.png".to_string()),
+                screenshot_dark_file: Some("document-dark.png".to_string()),
                 images_dir: Some("images".to_string()),
                 has_local_images: Some(true),
                 ..Default::default()
