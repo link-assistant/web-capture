@@ -6,6 +6,10 @@ import {
   extractBase64Images,
   GDOCS_EXPORT_FORMATS,
 } from '../../src/gdocs.js';
+import { extractAndSaveImages, extractBase64ToBuffers, stripBase64Images } from '../../src/extract-images.js';
+import fs from 'fs';
+import os from 'os';
+import path from 'path';
 
 jest.setTimeout(30000);
 
@@ -198,6 +202,72 @@ describe('gdocs', () => {
       expect(images[0].filename).toBe('image-01.gif');
       expect(updated).toContain('https://example.com/photo.png');
       expect(updated).toContain('images/image-01.gif');
+    });
+  });
+
+  describe('image extraction pipeline (issue #53)', () => {
+    const TINY_PNG = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg==';
+    let tmpDir;
+
+    beforeEach(() => {
+      tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'gdocs-issue53-'));
+    });
+
+    afterEach(() => {
+      fs.rmSync(tmpDir, { recursive: true, force: true });
+    });
+
+    it('extractBase64Images from HTML produces images with data buffers', () => {
+      const html = `<html><body><img src="data:image/png;base64,${TINY_PNG}" alt="photo"><p>Hello</p></body></html>`;
+      const { html: localHtml, images } = extractBase64Images(html);
+
+      expect(images).toHaveLength(1);
+      expect(images[0].filename).toBe('image-01.png');
+      expect(images[0].data.length).toBeGreaterThan(0);
+      // Verify PNG magic bytes in extracted data
+      expect(images[0].data[0]).toBe(0x89);
+      expect(images[0].data[1]).toBe(0x50); // P
+      expect(localHtml).toContain('images/image-01.png');
+      expect(localHtml).not.toContain('data:image');
+    });
+
+    it('default markdown mode extracts base64 images to disk (not strip)', () => {
+      const markdown = `# Hello\n\n![photo](data:image/png;base64,${TINY_PNG})\n\nEnd.`;
+      const result = extractAndSaveImages(markdown, tmpDir);
+
+      expect(result.extracted).toBe(1);
+      expect(result.markdown).not.toContain('data:image');
+      expect(result.markdown).toContain('images/image-');
+      expect(result.markdown).toContain('.png');
+
+      const imagesDir = path.join(tmpDir, 'images');
+      expect(fs.existsSync(imagesDir)).toBe(true);
+      const files = fs.readdirSync(imagesDir);
+      expect(files).toHaveLength(1);
+      expect(files[0]).toMatch(/^image-.*\.png$/);
+
+      const imgBuf = fs.readFileSync(path.join(imagesDir, files[0]));
+      expect(imgBuf[0]).toBe(0x89); // PNG magic
+    });
+
+    it('keepOriginalLinks strips base64 images', () => {
+      const markdown = `![photo](data:image/png;base64,${TINY_PNG})`;
+      const result = stripBase64Images(markdown);
+
+      expect(result.stripped).toBe(1);
+      expect(result.markdown).toBe('*[image: photo]*');
+      expect(result.markdown).not.toContain('data:image');
+    });
+
+    it('extractBase64ToBuffers produces in-memory buffers for archive', () => {
+      const markdown = `![test](data:image/png;base64,${TINY_PNG})`;
+      const result = extractBase64ToBuffers(markdown);
+
+      expect(result.images).toHaveLength(1);
+      expect(result.images[0].buffer.length).toBeGreaterThan(0);
+      expect(result.images[0].buffer[0]).toBe(0x89); // PNG magic
+      expect(result.markdown).toContain('images/');
+      expect(result.markdown).not.toContain('data:image');
     });
   });
 });
