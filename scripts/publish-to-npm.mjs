@@ -2,8 +2,12 @@
 
 /**
  * Publish to npm using OIDC trusted publishing
- * Usage: node scripts/publish-to-npm.mjs [--should-pull]
+ * Usage: node scripts/publish-to-npm.mjs [--should-pull] [--js-root <path>]
  *   should_pull: Optional flag to pull latest changes before publishing (for release job)
+ *
+ * Configuration:
+ * - CLI: --js-root <path> to explicitly set JavaScript root
+ * - Environment: JS_ROOT=<path>
  *
  * IMPORTANT: Update the PACKAGE_NAME constant below to match your package.json
  *
@@ -14,6 +18,12 @@
  */
 
 import { readFileSync, appendFileSync } from 'fs';
+import {
+  getJsRoot,
+  getPackageJsonPath,
+  needsCd,
+  parseJsRootConfig,
+} from './js-paths.mjs';
 
 const PACKAGE_NAME = '@link-assistant/web-capture';
 
@@ -29,16 +39,37 @@ const { makeConfig } = await use('lino-arguments');
 // Parse CLI arguments using lino-arguments
 const config = makeConfig({
   yargs: ({ yargs, getenv }) =>
-    yargs.option('should-pull', {
-      type: 'boolean',
-      default: getenv('SHOULD_PULL', false),
-      describe: 'Pull latest changes before publishing',
-    }),
+    yargs
+      .option('should-pull', {
+        type: 'boolean',
+        default: getenv('SHOULD_PULL', false),
+        describe: 'Pull latest changes before publishing',
+      })
+      .option('js-root', {
+        type: 'string',
+        default: getenv('JS_ROOT', ''),
+        describe: 'JavaScript package root directory',
+      }),
 });
 
-const { shouldPull } = config;
+const { shouldPull, jsRoot: jsRootArg } = config;
+const jsRootConfig = jsRootArg || parseJsRootConfig();
+const jsRoot = getJsRoot({ jsRoot: jsRootConfig, verbose: true });
+
 const MAX_RETRIES = 3;
 const RETRY_DELAY = 10000; // 10 seconds
+const originalCwd = process.cwd();
+
+const FAILURE_PATTERNS = [
+  'packages failed to publish',
+  'error occurred while publishing',
+  'npm error code E',
+  'npm error 404',
+  'npm error 401',
+  'npm error 403',
+  'Access token expired',
+  'ENEEDAUTH',
+];
 
 /**
  * Sleep for specified milliseconds
@@ -46,6 +77,13 @@ const RETRY_DELAY = 10000; // 10 seconds
  */
 function sleep(ms) {
   return new Promise((resolve) => globalThis.setTimeout(resolve, ms));
+}
+
+function detectPublishFailure(output) {
+  const lower = output.toLowerCase();
+  for (const p of FAILURE_PATTERNS)
+    if (lower.includes(p.toLowerCase())) return p;
+  return null;
 }
 
 /**
@@ -68,7 +106,8 @@ async function main() {
     }
 
     // Get current version
-    const packageJson = JSON.parse(readFileSync('./package.json', 'utf8'));
+    const packageJsonPath = getPackageJsonPath({ jsRoot });
+    const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf8'));
     const currentVersion = packageJson.version;
     console.log(`Current version to publish: ${currentVersion}`);
 
@@ -165,6 +204,13 @@ async function main() {
           console.error(`     - Set workflow to: js.yml`);
           console.error(`     - Set environment to: (leave empty or set to your environment name)\n`);
           process.exit(1);
+        }
+
+        const failurePattern = detectPublishFailure(combinedOutput);
+        if (failurePattern) {
+          console.error(
+            `Detected publish failure pattern: "${failurePattern}"`
+          );
         }
 
         if (publishResult.code !== 0) {
