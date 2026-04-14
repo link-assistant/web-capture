@@ -36,6 +36,7 @@
 pub mod animation;
 pub mod batch;
 pub mod browser;
+pub mod extract_images;
 pub mod figures;
 pub mod gdocs;
 pub mod html;
