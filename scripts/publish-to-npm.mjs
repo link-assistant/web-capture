@@ -18,6 +18,7 @@
  */
 
 import { readFileSync, appendFileSync } from 'fs';
+import { fileURLToPath } from 'url';
 import {
   getJsRoot,
   getPackageJsonPath,
@@ -58,6 +59,8 @@ const jsRoot = getJsRoot({ jsRoot: jsRootConfig, verbose: true });
 
 const MAX_RETRIES = 3;
 const RETRY_DELAY = 10000; // 10 seconds
+const VERIFY_RETRIES = 12;
+const VERIFY_RETRY_DELAY = 5000; // 5 seconds
 const originalCwd = process.cwd();
 
 const FAILURE_PATTERNS = [
@@ -96,6 +99,41 @@ function setOutput(key, value) {
   if (outputFile) {
     appendFileSync(outputFile, `${key}=${value}\n`);
   }
+}
+
+async function verifyPublishedVersion(version) {
+  return verifyPublishedVersionWithRunner(version, async () =>
+    $`npm view "${PACKAGE_NAME}@${version}" version`.run({
+      capture: true,
+    }),
+    sleep
+  );
+}
+
+export async function verifyPublishedVersionWithRunner(
+  version,
+  runVerify,
+  sleepFn = sleep
+) {
+  for (let attempt = 1; attempt <= VERIFY_RETRIES; attempt++) {
+    console.log(
+      `Verifying publish (attempt ${attempt} of ${VERIFY_RETRIES})...`
+    );
+    const verifyResult = await runVerify();
+
+    if (verifyResult.code === 0 && (verifyResult.stdout || '').trim() === version)
+      return true;
+
+    if (attempt < VERIFY_RETRIES) {
+      const output = `${verifyResult.stdout || ''}\n${verifyResult.stderr || ''}`.trim();
+      if (output) {
+        console.log(`Version not visible on npm yet: ${output}`);
+      }
+      await sleepFn(VERIFY_RETRY_DELAY);
+    }
+  }
+
+  return false;
 }
 
 async function main() {
@@ -217,16 +255,13 @@ async function main() {
           throw new Error(`npm publish failed with exit code ${publishResult.code}: ${combinedOutput}`);
         }
 
-        // Verify the version was actually published
-        console.log('Verifying publish...');
-        await sleep(5000);
-        const verifyResult =
-          await $`npm view "${PACKAGE_NAME}@${currentVersion}" version`.run({
-            capture: true,
-          });
-        if (verifyResult.code !== 0) {
+        // npm metadata can lag briefly after a successful publish.
+        // Keep verification retries separate from publish retries so we don't
+        // attempt to publish the same version again while the registry catches up.
+        const published = await verifyPublishedVersion(currentVersion);
+        if (!published) {
           throw new Error(
-            `Publish verification failed: version ${currentVersion} not found on npm after publish`
+            `Publish verification failed: version ${currentVersion} not found on npm after ${VERIFY_RETRIES} checks`
           );
         }
 
@@ -254,4 +289,7 @@ async function main() {
   }
 }
 
-main();
+const entrypoint = process.argv[1] ? fileURLToPath(import.meta.url) === process.argv[1] : false;
+if (entrypoint) {
+  main();
+}
