@@ -30,6 +30,12 @@
  */
 
 import { readFileSync, readdirSync, existsSync, appendFileSync } from 'fs';
+import {
+  getJsRoot,
+  getPackageJsonPath,
+  getChangesetDir,
+  parseJsRootConfig,
+} from './js-paths.mjs';
 
 // Load use-m dynamically
 const { use } = eval(
@@ -37,6 +43,9 @@ const { use } = eval(
 );
 
 const { $ } = await use('command-stream');
+
+const jsRootConfig = parseJsRootConfig();
+const jsRoot = getJsRoot({ jsRoot: jsRootConfig, verbose: true });
 
 const JS_PUBLISHABLE_PATHS = [
   'js/src/',
@@ -54,17 +63,19 @@ function setOutput(key, value) {
 }
 
 function getPackageVersion() {
-  const pkg = JSON.parse(readFileSync('./package.json', 'utf8'));
+  const packageJsonPath = getPackageJsonPath({ jsRoot });
+  const pkg = JSON.parse(readFileSync(packageJsonPath, 'utf8'));
   return pkg.version;
 }
 
 function getPackageName() {
-  const pkg = JSON.parse(readFileSync('./package.json', 'utf8'));
+  const packageJsonPath = getPackageJsonPath({ jsRoot });
+  const pkg = JSON.parse(readFileSync(packageJsonPath, 'utf8'));
   return pkg.name;
 }
 
 function countChangesets() {
-  const changesetDir = '.changeset';
+  const changesetDir = getChangesetDir({ jsRoot });
   if (!existsSync(changesetDir)) return 0;
 
   const files = readdirSync(changesetDir);

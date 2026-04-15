@@ -13,6 +13,11 @@
  */
 
 import { readFileSync, writeFileSync } from 'fs';
+import {
+  getJsRoot,
+  getPackageJsonPath,
+  parseJsRootConfig,
+} from './js-paths.mjs';
 
 // Load use-m dynamically
 const { use } = eval(
@@ -43,6 +48,9 @@ const config = makeConfig({
 try {
   const { bumpType, description } = config;
   const finalDescription = description || `Manual ${bumpType} release`;
+  const jsRootConfig = parseJsRootConfig();
+  const jsRoot = getJsRoot({ jsRoot: jsRootConfig, verbose: true });
+  const packageJsonPath = getPackageJsonPath({ jsRoot });
 
   if (!bumpType || !['major', 'minor', 'patch'].includes(bumpType)) {
     console.error(
@@ -54,7 +62,7 @@ try {
   console.log(`\nBumping version (${bumpType})...`);
 
   // Get current version
-  const packageJson = JSON.parse(readFileSync('package.json', 'utf-8'));
+  const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf-8'));
   const oldVersion = packageJson.version;
   console.log(`Current version: ${oldVersion}`);
 
@@ -62,7 +70,7 @@ try {
   await $`npm version ${bumpType} --no-git-tag-version`;
 
   // Get new version
-  const updatedPackageJson = JSON.parse(readFileSync('package.json', 'utf-8'));
+  const updatedPackageJson = JSON.parse(readFileSync(packageJsonPath, 'utf-8'));
   const newVersion = updatedPackageJson.version;
   console.log(`New version: ${newVersion}`);
 

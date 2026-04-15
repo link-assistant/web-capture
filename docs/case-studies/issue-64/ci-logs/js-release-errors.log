@@ -1,0 +1,83 @@
+2434:JS - Release	UNKNOWN STEP	2026-04-14T15:26:28.5188045Z npm error code E404
+2435:JS - Release	UNKNOWN STEP	2026-04-14T15:26:28.5191190Z npm error 404 No match found for version 1.7.0
+2436:JS - Release	UNKNOWN STEP	2026-04-14T15:26:28.5192119Z npm error 404
+2437:JS - Release	UNKNOWN STEP	2026-04-14T15:26:28.5193731Z npm error 404  The requested resource '@link-assistant/web-capture@1.7.0' could not be found or you do not have permission to access it.
+2438:JS - Release	UNKNOWN STEP	2026-04-14T15:26:28.5194817Z npm error 404
+2439:JS - Release	UNKNOWN STEP	2026-04-14T15:26:28.5195339Z npm error 404 Note that you can also install from a
+2440:JS - Release	UNKNOWN STEP	2026-04-14T15:26:28.5196109Z npm error 404 tarball, folder, http url, or git url.
+2441:JS - Release	UNKNOWN STEP	2026-04-14T15:26:28.5206487Z npm error A complete log of this run can be found in: /home/runner/.npm/_logs/2026-04-14T15_26_27_909Z-debug-0.log
+2459:JS - Release	UNKNOWN STEP	2026-04-14T15:26:31.0939672Z npm error code E404
+2460:JS - Release	UNKNOWN STEP	2026-04-14T15:26:31.0940569Z npm error 404 No match found for version 1.7.0
+2461:JS - Release	UNKNOWN STEP	2026-04-14T15:26:31.0941111Z npm error 404
+2462:JS - Release	UNKNOWN STEP	2026-04-14T15:26:31.0946205Z npm error 404  The requested resource '@link-assistant/web-capture@1.7.0' could not be found or you do not have permission to access it.
+2463:JS - Release	UNKNOWN STEP	2026-04-14T15:26:31.0947532Z npm error 404
+2464:JS - Release	UNKNOWN STEP	2026-04-14T15:26:31.0948762Z npm error 404 Note that you can also install from a
+2465:JS - Release	UNKNOWN STEP	2026-04-14T15:26:31.0951614Z npm error 404 tarball, folder, http url, or git url.
+2466:JS - Release	UNKNOWN STEP	2026-04-14T15:26:31.0965621Z npm error A complete log of this run can be found in: /home/runner/.npm/_logs/2026-04-14T15_26_30_856Z-debug-0.log
+2477:JS - Release	UNKNOWN STEP	2026-04-14T15:26:31.2779440Z npm verbose argv "publish" "--provenance" "--access" "public" "--loglevel" "verbose"
+2486:JS - Release	UNKNOWN STEP	2026-04-14T15:26:31.8514145Z npm warn publish npm auto-corrected some errors in your package.json when publishing.  Please run "npm pkg fix" to address these errors.
+2487:JS - Release	UNKNOWN STEP	2026-04-14T15:26:31.8515346Z npm warn publish errors corrected:
+2578:JS - Release	UNKNOWN STEP	2026-04-14T15:26:33.8688805Z npm notice publish Signed provenance statement with source and build information from GitHub Actions
+2581:JS - Release	UNKNOWN STEP	2026-04-14T15:26:34.3092277Z npm verbose stack HttpErrorGeneral: 422 Unprocessable Entity - PUT https://registry.npmjs.org/@link-assistant%2fweb-capture - Error verifying sigstore provenance bundle: Failed to validate repository information: package.json: "repository.url" is "", expected to match "https://github.com/link-assistant/web-capture" from provenance
+2592:JS - Release	UNKNOWN STEP	2026-04-14T15:26:34.3109269Z npm error code E422
+2593:JS - Release	UNKNOWN STEP	2026-04-14T15:26:34.3111759Z npm error 422 Unprocessable Entity - PUT https://registry.npmjs.org/@link-assistant%2fweb-capture - Error verifying sigstore provenance bundle: Failed to validate repository information: package.json: "repository.url" is "", expected to match "https://github.com/link-assistant/web-capture" from provenance
+2600:JS - Release	UNKNOWN STEP	2026-04-14T15:26:34.3123974Z npm error A complete log of this run can be found in: /home/runner/.npm/_logs/2026-04-14T15_26_31_245Z-debug-0.log
+2614:JS - Release	UNKNOWN STEP	2026-04-14T15:26:34.3244663Z npm verbose argv "publish" "--provenance" "--access" "public" "--loglevel" "verbose"
+2619:JS - Release	UNKNOWN STEP	2026-04-14T15:26:34.3249200Z npm warn publish npm auto-corrected some errors in your package.json when publishing.  Please run "npm pkg fix" to address these errors.
+2620:JS - Release	UNKNOWN STEP	2026-04-14T15:26:34.3249819Z npm warn publish errors corrected:
+2711:JS - Release	UNKNOWN STEP	2026-04-14T15:26:34.3282332Z npm notice publish Signed provenance statement with source and build information from GitHub Actions
+2714:JS - Release	UNKNOWN STEP	2026-04-14T15:26:34.3285587Z npm verbose stack HttpErrorGeneral: 422 Unprocessable Entity - PUT https://registry.npmjs.org/@link-assistant%2fweb-capture - Error verifying sigstore provenance bundle: Failed to validate repository information: package.json: "repository.url" is "", expected to match "https://github.com/link-assistant/web-capture" from provenance
+2725:JS - Release	UNKNOWN STEP	2026-04-14T15:26:34.3295076Z npm error code E422
+2726:JS - Release	UNKNOWN STEP	2026-04-14T15:26:34.3296433Z npm error 422 Unprocessable Entity - PUT https://registry.npmjs.org/@link-assistant%2fweb-capture - Error verifying sigstore provenance bundle: Failed to validate repository information: package.json: "repository.url" is "", expected to match "https://github.com/link-assistant/web-capture" from provenance
+2733:JS - Release	UNKNOWN STEP	2026-04-14T15:26:34.3300130Z npm error A complete log of this run can be found in: /home/runner/.npm/_logs/2026-04-14T15_26_31_245Z-debug-0.log
+2735:JS - Release	UNKNOWN STEP	2026-04-14T15:26:34.3300807Z .git can't be foundPublish failed: npm publish failed with exit code 1: 
+2744:JS - Release	UNKNOWN STEP	2026-04-14T15:26:34.3303516Z npm verbose argv "publish" "--provenance" "--access" "public" "--loglevel" "verbose"
+2749:JS - Release	UNKNOWN STEP	2026-04-14T15:26:34.3307378Z npm warn publish npm auto-corrected some errors in your package.json when publishing.  Please run "npm pkg fix" to address these errors.
+2750:JS - Release	UNKNOWN STEP	2026-04-14T15:26:34.3307996Z npm warn publish errors corrected:
+2841:JS - Release	UNKNOWN STEP	2026-04-14T15:26:34.3357927Z npm notice publish Signed provenance statement with source and build information from GitHub Actions
+2844:JS - Release	UNKNOWN STEP	2026-04-14T15:26:34.3361165Z npm verbose stack HttpErrorGeneral: 422 Unprocessable Entity - PUT https://registry.npmjs.org/@link-assistant%2fweb-capture - Error verifying sigstore provenance bundle: Failed to validate repository information: package.json: "repository.url" is "", expected to match "https://github.com/link-assistant/web-capture" from provenance
+2855:JS - Release	UNKNOWN STEP	2026-04-14T15:26:34.3370770Z npm error code E422
+2856:JS - Release	UNKNOWN STEP	2026-04-14T15:26:34.3372141Z npm error 422 Unprocessable Entity - PUT https://registry.npmjs.org/@link-assistant%2fweb-capture - Error verifying sigstore provenance bundle: Failed to validate repository information: package.json: "repository.url" is "", expected to match "https://github.com/link-assistant/web-capture" from provenance
+2863:JS - Release	UNKNOWN STEP	2026-04-14T15:26:34.3375116Z npm error A complete log of this run can be found in: /home/runner/.npm/_logs/2026-04-14T15_26_31_245Z-debug-0.log
+2874:JS - Release	UNKNOWN STEP	2026-04-14T15:26:44.4950887Z npm verbose argv "publish" "--provenance" "--access" "public" "--loglevel" "verbose"
+2883:JS - Release	UNKNOWN STEP	2026-04-14T15:26:45.0007258Z npm warn publish npm auto-corrected some errors in your package.json when publishing.  Please run "npm pkg fix" to address these errors.
+2884:JS - Release	UNKNOWN STEP	2026-04-14T15:26:45.0008448Z npm warn publish errors corrected:
+2975:JS - Release	UNKNOWN STEP	2026-04-14T15:26:46.7261362Z npm notice publish Signed provenance statement with source and build information from GitHub Actions
+2978:JS - Release	UNKNOWN STEP	2026-04-14T15:26:47.3989816Z npm verbose stack HttpErrorGeneral: 422 Unprocessable Entity - PUT https://registry.npmjs.org/@link-assistant%2fweb-capture - Error verifying sigstore provenance bundle: Failed to validate repository information: package.json: "repository.url" is "", expected to match "https://github.com/link-assistant/web-capture" from provenance
+2989:JS - Release	UNKNOWN STEP	2026-04-14T15:26:47.4008534Z npm error code E422
+2990:JS - Release	UNKNOWN STEP	2026-04-14T15:26:47.4011409Z npm error 422 Unprocessable Entity - PUT https://registry.npmjs.org/@link-assistant%2fweb-capture - Error verifying sigstore provenance bundle: Failed to validate repository information: package.json: "repository.url" is "", expected to match "https://github.com/link-assistant/web-capture" from provenance
+2997:JS - Release	UNKNOWN STEP	2026-04-14T15:26:47.4018898Z npm error A complete log of this run can be found in: /home/runner/.npm/_logs/2026-04-14T15_26_44_467Z-debug-0.log
+3011:JS - Release	UNKNOWN STEP	2026-04-14T15:26:47.4128856Z npm verbose argv "publish" "--provenance" "--access" "public" "--loglevel" "verbose"
+3016:JS - Release	UNKNOWN STEP	2026-04-14T15:26:47.4132281Z npm warn publish npm auto-corrected some errors in your package.json when publishing.  Please run "npm pkg fix" to address these errors.
+3017:JS - Release	UNKNOWN STEP	2026-04-14T15:26:47.4132883Z npm warn publish errors corrected:
+3108:JS - Release	UNKNOWN STEP	2026-04-14T15:26:47.4167681Z npm notice publish Signed provenance statement with source and build information from GitHub Actions
+3111:JS - Release	UNKNOWN STEP	2026-04-14T15:26:47.4170899Z npm verbose stack HttpErrorGeneral: 422 Unprocessable Entity - PUT https://registry.npmjs.org/@link-assistant%2fweb-capture - Error verifying sigstore provenance bundle: Failed to validate repository information: package.json: "repository.url" is "", expected to match "https://github.com/link-assistant/web-capture" from provenance
+3122:JS - Release	UNKNOWN STEP	2026-04-14T15:26:47.4180448Z npm error code E422
+3123:JS - Release	UNKNOWN STEP	2026-04-14T15:26:47.4181812Z npm error 422 Unprocessable Entity - PUT https://registry.npmjs.org/@link-assistant%2fweb-capture - Error verifying sigstore provenance bundle: Failed to validate repository information: package.json: "repository.url" is "", expected to match "https://github.com/link-assistant/web-capture" from provenance
+3130:JS - Release	UNKNOWN STEP	2026-04-14T15:26:47.4184817Z npm error A complete log of this run can be found in: /home/runner/.npm/_logs/2026-04-14T15_26_44_467Z-debug-0.log
+3132:JS - Release	UNKNOWN STEP	2026-04-14T15:26:47.4185468Z .git can't be foundPublish failed: npm publish failed with exit code 1: 
+3141:JS - Release	UNKNOWN STEP	2026-04-14T15:26:47.4188533Z npm verbose argv "publish" "--provenance" "--access" "public" "--loglevel" "verbose"
+3146:JS - Release	UNKNOWN STEP	2026-04-14T15:26:47.4191882Z npm warn publish npm auto-corrected some errors in your package.json when publishing.  Please run "npm pkg fix" to address these errors.
+3147:JS - Release	UNKNOWN STEP	2026-04-14T15:26:47.4192478Z npm warn publish errors corrected:
+3238:JS - Release	UNKNOWN STEP	2026-04-14T15:26:47.4225013Z npm notice publish Signed provenance statement with source and build information from GitHub Actions
+3241:JS - Release	UNKNOWN STEP	2026-04-14T15:26:47.4228651Z npm verbose stack HttpErrorGeneral: 422 Unprocessable Entity - PUT https://registry.npmjs.org/@link-assistant%2fweb-capture - Error verifying sigstore provenance bundle: Failed to validate repository information: package.json: "repository.url" is "", expected to match "https://github.com/link-assistant/web-capture" from provenance
+3252:JS - Release	UNKNOWN STEP	2026-04-14T15:26:47.4241714Z npm error code E422
+3253:JS - Release	UNKNOWN STEP	2026-04-14T15:26:47.4243078Z npm error 422 Unprocessable Entity - PUT https://registry.npmjs.org/@link-assistant%2fweb-capture - Error verifying sigstore provenance bundle: Failed to validate repository information: package.json: "repository.url" is "", expected to match "https://github.com/link-assistant/web-capture" from provenance
+3260:JS - Release	UNKNOWN STEP	2026-04-14T15:26:47.4246072Z npm error A complete log of this run can be found in: /home/runner/.npm/_logs/2026-04-14T15_26_44_467Z-debug-0.log
+3271:JS - Release	UNKNOWN STEP	2026-04-14T15:26:57.5859233Z npm verbose argv "publish" "--provenance" "--access" "public" "--loglevel" "verbose"
+3280:JS - Release	UNKNOWN STEP	2026-04-14T15:26:58.1098625Z npm warn publish npm auto-corrected some errors in your package.json when publishing.  Please run "npm pkg fix" to address these errors.
+3281:JS - Release	UNKNOWN STEP	2026-04-14T15:26:58.1099809Z npm warn publish errors corrected:
+3372:JS - Release	UNKNOWN STEP	2026-04-14T15:27:00.3011449Z npm notice publish Signed provenance statement with source and build information from GitHub Actions
+3375:JS - Release	UNKNOWN STEP	2026-04-14T15:27:00.8162773Z npm verbose stack HttpErrorGeneral: 422 Unprocessable Entity - PUT https://registry.npmjs.org/@link-assistant%2fweb-capture - Error verifying sigstore provenance bundle: Failed to validate repository information: package.json: "repository.url" is "", expected to match "https://github.com/link-assistant/web-capture" from provenance
+3386:JS - Release	UNKNOWN STEP	2026-04-14T15:27:00.8176461Z npm error code E422
+3387:JS - Release	UNKNOWN STEP	2026-04-14T15:27:00.8178135Z npm error 422 Unprocessable Entity - PUT https://registry.npmjs.org/@link-assistant%2fweb-capture - Error verifying sigstore provenance bundle: Failed to validate repository information: package.json: "repository.url" is "", expected to match "https://github.com/link-assistant/web-capture" from provenance
+3394:JS - Release	UNKNOWN STEP	2026-04-14T15:27:00.8197661Z npm error A complete log of this run can be found in: /home/runner/.npm/_logs/2026-04-14T15_26_57_558Z-debug-0.log
+3408:JS - Release	UNKNOWN STEP	2026-04-14T15:27:00.8297865Z npm verbose argv "publish" "--provenance" "--access" "public" "--loglevel" "verbose"
+3413:JS - Release	UNKNOWN STEP	2026-04-14T15:27:00.8301367Z npm warn publish npm auto-corrected some errors in your package.json when publishing.  Please run "npm pkg fix" to address these errors.
+3414:JS - Release	UNKNOWN STEP	2026-04-14T15:27:00.8302242Z npm warn publish errors corrected:
+3505:JS - Release	UNKNOWN STEP	2026-04-14T15:27:00.8335777Z npm notice publish Signed provenance statement with source and build information from GitHub Actions
+3508:JS - Release	UNKNOWN STEP	2026-04-14T15:27:00.8339774Z npm verbose stack HttpErrorGeneral: 422 Unprocessable Entity - PUT https://registry.npmjs.org/@link-assistant%2fweb-capture - Error verifying sigstore provenance bundle: Failed to validate repository information: package.json: "repository.url" is "", expected to match "https://github.com/link-assistant/web-capture" from provenance
+3519:JS - Release	UNKNOWN STEP	2026-04-14T15:27:00.8400052Z npm error code E422
+3520:JS - Release	UNKNOWN STEP	2026-04-14T15:27:00.8401422Z npm error 422 Unprocessable Entity - PUT https://registry.npmjs.org/@link-assistant%2fweb-capture - Error verifying sigstore provenance bundle: Failed to validate repository information: package.json: "repository.url" is "", expected to match "https://github.com/link-assistant/web-capture" from provenance
+3527:JS - Release	UNKNOWN STEP	2026-04-14T15:27:00.8404420Z npm error A complete log of this run can be found in: /home/runner/.npm/_logs/2026-04-14T15_26_57_558Z-debug-0.log
+3531:JS - Release	UNKNOWN STEP	2026-04-14T15:27:00.8415086Z ##[error]Process completed with exit code 1.
