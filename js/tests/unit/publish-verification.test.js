@@ -22,9 +22,8 @@ afterAll(() => {
 
 describe('publish verification', () => {
   test('keeps polling verification through transient npm 404s', async () => {
-    const { verifyPublishedVersionWithRunner } = await import(
-      '../../../scripts/publish-to-npm.mjs'
-    );
+    const { verifyPublishedVersionWithRunner } =
+      await import('../../../scripts/publish-to-npm.mjs');
 
     const runVerify = jest
       .fn()
