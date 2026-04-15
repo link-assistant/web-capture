@@ -1,5 +1,11 @@
 # @link-assistant/web-capture
 
+## 1.7.2
+
+### Patch Changes
+
+- 9c0df3c: Retry npm publish verification long enough to tolerate registry propagation delays after a successful publish.
+
 ## 1.7.1
 
 ### Patch Changes
