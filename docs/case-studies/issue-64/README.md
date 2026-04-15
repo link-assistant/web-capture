@@ -25,7 +25,7 @@ npm error 422 Unprocessable Entity - PUT https://registry.npmjs.org/@link-assist
 
 The `js/package.json` had no `repository` field at all. When npm reads a package without this field, it treats `repository.url` as an empty string `""`, which fails sigstore's provenance validation against the expected GitHub repository URL.
 
-**Evidence**: Line 3241 of `ci-logs/js-release-24407389441.log` shows the exact npm error. The `Cargo.toml` for the Rust package already had `repository = "https://github.com/link-assistant/web-capture"` set correctly (line 7), confirming this was a JS-specific oversight.
+**Evidence**: Line 3241 of `ci-logs/js-release-errors.log` shows the exact npm error. The `Cargo.toml` for the Rust package already had `repository = "https://github.com/link-assistant/web-capture"` set correctly (line 7), confirming this was a JS-specific oversight.
 
 ### Secondary Root Cause: Divergence from template best practices
 
