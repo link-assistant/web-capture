@@ -172,15 +172,6 @@ const fn default_true() -> bool {
     true
 }
 
-/// Query parameters for Google Docs endpoint
-#[derive(Debug, Deserialize)]
-struct GDocsQuery {
-    url: String,
-    format: Option<String>,
-    #[serde(rename = "apiToken")]
-    api_token: Option<String>,
-}
-
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
     // Initialize tracing
@@ -244,7 +235,6 @@ async fn start_server(port: u16) -> anyhow::Result<()> {
         .route("/animation", get(animation_handler))
         .route("/figures", get(figures_handler))
         .route("/themed-image", get(themed_image_handler))
-        .route("/gdocs", get(gdocs_handler))
         .layer(TraceLayer::new_for_http());
 
     let addr = SocketAddr::from(([0, 0, 0, 0], port));
@@ -259,7 +249,6 @@ async fn start_server(port: u16) -> anyhow::Result<()> {
     info!("  GET /animation?url=<URL>  - Capture animation frames");
     info!("  GET /figures?url=<URL>    - Extract figure images");
     info!("  GET /themed-image?url=<URL> - Dual-theme screenshots");
-    info!("  GET /gdocs?url=<URL>&format=markdown|html|txt - Google Docs capture");
     info!("");
     info!("Press Ctrl+C to stop the server");
 
@@ -525,108 +514,6 @@ async fn themed_image_handler(Query(params): Query<UrlQuery>) -> Response {
             error!("Themed image capture error: {}", e);
             (StatusCode::INTERNAL_SERVER_ERROR, e.to_string()).into_response()
         }
-    }
-}
-
-/// Google Docs endpoint handler
-async fn gdocs_handler(
-    Query(params): Query<GDocsQuery>,
-    headers: axum::http::HeaderMap,
-) -> Response {
-    if !web_capture::gdocs::is_google_docs_url(&params.url) {
-        return (
-            StatusCode::BAD_REQUEST,
-            "URL is not a Google Docs document URL",
-        )
-            .into_response();
-    }
-
-    // Resolve API token from query, Authorization header, or X-Api-Token header
-    let api_token = params
-        .api_token
-        .as_deref()
-        .or_else(|| {
-            headers
-                .get("authorization")
-                .and_then(|v| v.to_str().ok())
-                .and_then(web_capture::gdocs::extract_bearer_token)
-        })
-        .or_else(|| headers.get("x-api-token").and_then(|v| v.to_str().ok()));
-
-    let format = params.format.as_deref().unwrap_or("markdown");
-
-    match format {
-        "archive" | "zip" => {
-            match web_capture::gdocs::fetch_google_doc_as_archive(&params.url, api_token).await {
-                Ok(archive) => match web_capture::gdocs::create_archive_zip(&archive, true) {
-                    Ok(zip_data) => {
-                        let filename = format!("gdoc-{}.zip", archive.document_id);
-                        (
-                            StatusCode::OK,
-                            [
-                                ("Content-Type", "application/zip".to_string()),
-                                (
-                                    "Content-Disposition",
-                                    format!("attachment; filename=\"{filename}\""),
-                                ),
-                            ],
-                            zip_data,
-                        )
-                            .into_response()
-                    }
-                    Err(e) => {
-                        error!("Google Docs archive error: {}", e);
-                        (StatusCode::INTERNAL_SERVER_ERROR, e.to_string()).into_response()
-                    }
-                },
-                Err(e) => {
-                    error!("Google Docs capture error: {}", e);
-                    (StatusCode::INTERNAL_SERVER_ERROR, e.to_string()).into_response()
-                }
-            }
-        }
-        "markdown" | "md" => {
-            match web_capture::gdocs::fetch_google_doc_as_markdown(&params.url, api_token).await {
-                Ok(result) => (
-                    StatusCode::OK,
-                    [("Content-Type", "text/markdown")],
-                    result.content,
-                )
-                    .into_response(),
-                Err(e) => {
-                    error!("Google Docs capture error: {}", e);
-                    (StatusCode::INTERNAL_SERVER_ERROR, e.to_string()).into_response()
-                }
-            }
-        }
-        "html" | "txt" | "pdf" | "docx" | "epub" => {
-            match web_capture::gdocs::fetch_google_doc(&params.url, format, api_token).await {
-                Ok(result) => {
-                    let content_type = match format {
-                        "txt" => "text/plain",
-                        "pdf" => "application/pdf",
-                        "docx" => "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-                        "epub" => "application/epub+zip",
-                        _ => "text/html",
-                    };
-                    (
-                        StatusCode::OK,
-                        [("Content-Type", content_type)],
-                        result.content,
-                    )
-                        .into_response()
-                }
-                Err(e) => {
-                    error!("Google Docs capture error: {}", e);
-                    (StatusCode::INTERNAL_SERVER_ERROR, e.to_string()).into_response()
-                }
-            }
-        }
-        _ => (
-            StatusCode::BAD_REQUEST,
-            format!("Unsupported format: {format}"),
-        )
-            .into_response(),
     }
 }
 

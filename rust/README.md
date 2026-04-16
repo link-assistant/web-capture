@@ -71,7 +71,6 @@ web-capture --serve --port 8080
 - **Markdown (all images stripped)**: `GET /markdown?url=<URL>&keepOriginalLinks=false`
 - **HTML**: `GET /html?url=<URL>`
 - **PNG screenshot**: `GET /image?url=<URL>`
-- **Google Docs**: `GET /gdocs?url=<URL>&format=markdown`
 
 ## CLI Reference
 

@@ -222,6 +222,7 @@ describe('CLI', () => {
       expect(result.stdout).toContain('/html');
       expect(result.stdout).toContain('/markdown');
       expect(result.stdout).toContain('/image');
+      expect(result.stdout).not.toContain('/gdocs');
     });
   });
 
