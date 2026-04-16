@@ -1,0 +1,233 @@
+Rust - Detect Changes	Set up job	﻿2026-04-16T07:17:23.9431817Z Current runner version: '2.333.1'
+Rust - Detect Changes	Set up job	2026-04-16T07:17:23.9455424Z ##[group]Runner Image Provisioner
+Rust - Detect Changes	Set up job	2026-04-16T07:17:23.9456221Z Hosted Compute Agent
+Rust - Detect Changes	Set up job	2026-04-16T07:17:23.9456864Z Version: 20260213.493
+Rust - Detect Changes	Set up job	2026-04-16T07:17:23.9457549Z Commit: 5c115507f6dd24b8de37d8bbe0bb4509d0cc0fa3
+Rust - Detect Changes	Set up job	2026-04-16T07:17:23.9458215Z Build Date: 2026-02-13T00:28:41Z
+Rust - Detect Changes	Set up job	2026-04-16T07:17:23.9458904Z Worker ID: {83f26df8-2872-42d7-911c-40dae4956006}
+Rust - Detect Changes	Set up job	2026-04-16T07:17:23.9459566Z Azure Region: westus3
+Rust - Detect Changes	Set up job	2026-04-16T07:17:23.9460354Z ##[endgroup]
+Rust - Detect Changes	Set up job	2026-04-16T07:17:23.9461795Z ##[group]Operating System
+Rust - Detect Changes	Set up job	2026-04-16T07:17:23.9462385Z Ubuntu
+Rust - Detect Changes	Set up job	2026-04-16T07:17:23.9462895Z 24.04.4
+Rust - Detect Changes	Set up job	2026-04-16T07:17:23.9463388Z LTS
+Rust - Detect Changes	Set up job	2026-04-16T07:17:23.9463832Z ##[endgroup]
+Rust - Detect Changes	Set up job	2026-04-16T07:17:23.9464342Z ##[group]Runner Image
+Rust - Detect Changes	Set up job	2026-04-16T07:17:23.9464845Z Image: ubuntu-24.04
+Rust - Detect Changes	Set up job	2026-04-16T07:17:23.9465444Z Version: 20260406.80.1
+Rust - Detect Changes	Set up job	2026-04-16T07:17:23.9466453Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20260406.80/images/ubuntu/Ubuntu2404-Readme.md
+Rust - Detect Changes	Set up job	2026-04-16T07:17:23.9468083Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20260406.80
+Rust - Detect Changes	Set up job	2026-04-16T07:17:23.9469002Z ##[endgroup]
+Rust - Detect Changes	Set up job	2026-04-16T07:17:23.9470382Z ##[group]GITHUB_TOKEN Permissions
+Rust - Detect Changes	Set up job	2026-04-16T07:17:23.9472187Z Contents: read
+Rust - Detect Changes	Set up job	2026-04-16T07:17:23.9472735Z Metadata: read
+Rust - Detect Changes	Set up job	2026-04-16T07:17:23.9473350Z Packages: read
+Rust - Detect Changes	Set up job	2026-04-16T07:17:23.9473826Z ##[endgroup]
+Rust - Detect Changes	Set up job	2026-04-16T07:17:23.9475772Z Secret source: Actions
+Rust - Detect Changes	Set up job	2026-04-16T07:17:23.9476597Z Prepare workflow directory
+Rust - Detect Changes	Set up job	2026-04-16T07:17:24.0019320Z Prepare all required actions
+Rust - Detect Changes	Set up job	2026-04-16T07:17:24.0056919Z Getting action download info
+Rust - Detect Changes	Set up job	2026-04-16T07:17:24.4185174Z Download action repository 'actions/checkout@v4' (SHA:34e114876b0b11c390a56381ad16ebd13914f8d5)
+Rust - Detect Changes	Set up job	2026-04-16T07:17:24.6132020Z Complete job name: Rust - Detect Changes
+Rust - Detect Changes	Run actions/checkout@v4	﻿2026-04-16T07:17:24.6763791Z ##[group]Run actions/checkout@v4
+Rust - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:24.6764946Z with:
+Rust - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:24.6765376Z   fetch-depth: 0
+Rust - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:24.6765834Z   repository: link-assistant/web-capture
+Rust - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:24.6766576Z   token: ***
+Rust - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:24.6766970Z   ssh-strict: true
+Rust - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:24.6767376Z   ssh-user: git
+Rust - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:24.6767805Z   persist-credentials: true
+Rust - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:24.6768504Z   clean: true
+Rust - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:24.6768922Z   sparse-checkout-cone-mode: true
+Rust - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:24.6769610Z   fetch-tags: false
+Rust - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:24.6770253Z   show-progress: true
+Rust - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:24.6770673Z   lfs: false
+Rust - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:24.6771047Z   submodules: false
+Rust - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:24.6771460Z   set-safe-directory: true
+Rust - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:24.6772202Z env:
+Rust - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:24.6772601Z   CARGO_TERM_COLOR: always
+Rust - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:24.6773080Z   RUSTFLAGS: -Dwarnings
+Rust - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:24.6773633Z   CARGO_TOKEN: ***
+Rust - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:24.6774024Z ##[endgroup]
+Rust - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:24.7845931Z Syncing repository: link-assistant/web-capture
+Rust - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:24.7847681Z ##[group]Getting Git version info
+Rust - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:24.7848431Z Working directory is '/home/runner/work/web-capture/web-capture'
+Rust - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:24.7849480Z [command]/usr/bin/git version
+Rust - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:24.7900251Z git version 2.53.0
+Rust - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:24.7925661Z ##[endgroup]
+Rust - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:24.7939327Z Temporarily overriding HOME='/home/runner/work/_temp/c6bbb08d-9631-4be3-99ff-c371b012251d' before making global git config changes
+Rust - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:24.7944603Z Adding repository directory to the temporary git global config as a safe directory
+Rust - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:24.7946031Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/web-capture/web-capture
+Rust - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:24.7975465Z Deleting the contents of '/home/runner/work/web-capture/web-capture'
+Rust - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:24.7978827Z ##[group]Initializing the repository
+Rust - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:24.7983083Z [command]/usr/bin/git init /home/runner/work/web-capture/web-capture
+Rust - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:24.8071229Z hint: Using 'master' as the name for the initial branch. This default branch name
+Rust - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:24.8073091Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+Rust - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:24.8075163Z hint: to use in all of your new repositories, which will suppress this warning,
+Rust - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:24.8076482Z hint: call:
+Rust - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:24.8077137Z hint:
+Rust - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:24.8077972Z hint: 	git config --global init.defaultBranch <name>
+Rust - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:24.8079051Z hint:
+Rust - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:24.8080318Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+Rust - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:24.8081888Z hint: 'development'. The just-created branch can be renamed via this command:
+Rust - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:24.8083150Z hint:
+Rust - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:24.8083850Z hint: 	git branch -m <name>
+Rust - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:24.8084639Z hint:
+Rust - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:24.8085722Z hint: Disable this message with "git config set advice.defaultBranchName false"
+Rust - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:24.8087520Z Initialized empty Git repository in /home/runner/work/web-capture/web-capture/.git/
+Rust - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:24.8090465Z [command]/usr/bin/git remote add origin https://github.com/link-assistant/web-capture
+Rust - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:24.8116097Z ##[endgroup]
+Rust - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:24.8117344Z ##[group]Disabling automatic garbage collection
+Rust - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:24.8120879Z [command]/usr/bin/git config --local gc.auto 0
+Rust - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:24.8148561Z ##[endgroup]
+Rust - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:24.8149796Z ##[group]Setting up auth
+Rust - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:24.8156220Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+Rust - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:24.8186432Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+Rust - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:24.8469538Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+Rust - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:24.8499566Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+Rust - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:24.8717043Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+Rust - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:24.8747511Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+Rust - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:24.8959646Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+Rust - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:24.8993179Z ##[endgroup]
+Rust - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:24.8993938Z ##[group]Fetching the repository
+Rust - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:24.9001906Z [command]/usr/bin/git -c protocol.version=2 fetch --prune --no-recurse-submodules origin +refs/heads/*:refs/remotes/origin/* +refs/tags/*:refs/tags/* +eaf4d496aaa668d020c2dcdc5ed249dba68b716a:refs/remotes/pull/71/merge
+Rust - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:26.3401172Z From https://github.com/link-assistant/web-capture
+Rust - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:26.3412322Z  * [new branch]      issue-1-5017a66c05a8                     -> origin/issue-1-5017a66c05a8
+Rust - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:26.3414552Z  * [new branch]      issue-11-2861fe92                        -> origin/issue-11-2861fe92
+Rust - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:26.3416660Z  * [new branch]      issue-13-a8f3466f6d79                    -> origin/issue-13-a8f3466f6d79
+Rust - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:26.3418810Z  * [new branch]      issue-15-ba41292e60dd                    -> origin/issue-15-ba41292e60dd
+Rust - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:26.3421229Z  * [new branch]      issue-17-d61fd69fb1d0                    -> origin/issue-17-d61fd69fb1d0
+Rust - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:26.3423591Z  * [new branch]      issue-19-7350892c64e0                    -> origin/issue-19-7350892c64e0
+Rust - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:26.3426160Z  * [new branch]      issue-21-ae540dd05ccf                    -> origin/issue-21-ae540dd05ccf
+Rust - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:26.3428896Z  * [new branch]      issue-24-000cedc18c0c                    -> origin/issue-24-000cedc18c0c
+Rust - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:26.3431756Z  * [new branch]      issue-26-f5bc08d1c062                    -> origin/issue-26-f5bc08d1c062
+Rust - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:26.3434505Z  * [new branch]      issue-28-9ae2d8528d6f                    -> origin/issue-28-9ae2d8528d6f
+Rust - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:26.3437171Z  * [new branch]      issue-29-1750ff5496be                    -> origin/issue-29-1750ff5496be
+Rust - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:26.3440352Z  * [new branch]      issue-3-e1f5cfd3                         -> origin/issue-3-e1f5cfd3
+Rust - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:26.3442836Z  * [new branch]      issue-31-e38e38b91777                    -> origin/issue-31-e38e38b91777
+Rust - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:26.3445530Z  * [new branch]      issue-33-597c234012bd                    -> origin/issue-33-597c234012bd
+Rust - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:26.3448201Z  * [new branch]      issue-36-4868dc6a6cd1                    -> origin/issue-36-4868dc6a6cd1
+Rust - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:26.3451127Z  * [new branch]      issue-38-1c6b407f9682                    -> origin/issue-38-1c6b407f9682
+Rust - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:26.3453659Z  * [new branch]      issue-40-aea0c7bbe29d                    -> origin/issue-40-aea0c7bbe29d
+Rust - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:26.3456337Z  * [new branch]      issue-42-51e981719f34                    -> origin/issue-42-51e981719f34
+Rust - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:26.3458859Z  * [new branch]      issue-44-5fc8fd3303bb                    -> origin/issue-44-5fc8fd3303bb
+Rust - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:26.3461920Z  * [new branch]      issue-46-74be9b28b867                    -> origin/issue-46-74be9b28b867
+Rust - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:26.3464391Z  * [new branch]      issue-48-fa0cc317013f                    -> origin/issue-48-fa0cc317013f
+Rust - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:26.3466910Z  * [new branch]      issue-5-37ef445c                         -> origin/issue-5-37ef445c
+Rust - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:26.3469325Z  * [new branch]      issue-50-accd5e4cfac0                    -> origin/issue-50-accd5e4cfac0
+Rust - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:26.3472126Z  * [new branch]      issue-52-b275657642c1                    -> origin/issue-52-b275657642c1
+Rust - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:26.3474479Z  * [new branch]      issue-53-ee04eb2d7520                    -> origin/issue-53-ee04eb2d7520
+Rust - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:26.3476964Z  * [new branch]      issue-56-a89df19bbdc2                    -> origin/issue-56-a89df19bbdc2
+Rust - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:26.3479909Z  * [new branch]      issue-58-c1217b0e73df                    -> origin/issue-58-c1217b0e73df
+Rust - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:26.3482212Z  * [new branch]      issue-60-7c97a8e6f23e                    -> origin/issue-60-7c97a8e6f23e
+Rust - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:26.3484294Z  * [new branch]      issue-62-5074090c911d                    -> origin/issue-62-5074090c911d
+Rust - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:26.3486064Z  * [new branch]      issue-64-fc240b6b34c4                    -> origin/issue-64-fc240b6b34c4
+Rust - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:26.3487292Z  * [new branch]      issue-66-d851400625b3                    -> origin/issue-66-d851400625b3
+Rust - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:26.3488480Z  * [new branch]      issue-68-f537a341d162                    -> origin/issue-68-f537a341d162
+Rust - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:26.3489616Z  * [new branch]      issue-7-c22ac3d5                         -> origin/issue-7-c22ac3d5
+Rust - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:26.3491091Z  * [new branch]      issue-70-46e0722472f6                    -> origin/issue-70-46e0722472f6
+Rust - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:26.3492291Z  * [new branch]      issue-8-2bf69acf                         -> origin/issue-8-2bf69acf
+Rust - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:26.3493288Z  * [new branch]      main                                     -> origin/main
+Rust - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:26.3494164Z  * [new tag]         rust-v0.1.0                              -> rust-v0.1.0
+Rust - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:26.3495040Z  * [new tag]         rust-v0.2.0                              -> rust-v0.2.0
+Rust - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:26.3495919Z  * [new tag]         rust-v0.2.1                              -> rust-v0.2.1
+Rust - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:26.3496794Z  * [new tag]         rust-v0.3.0                              -> rust-v0.3.0
+Rust - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:26.3497924Z  * [new tag]         rust-v0.3.1                              -> rust-v0.3.1
+Rust - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:26.3499380Z  * [new tag]         v1.1.1                                   -> v1.1.1
+Rust - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:26.3501086Z  * [new tag]         v1.1.2                                   -> v1.1.2
+Rust - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:26.3502487Z  * [new tag]         v1.1.3                                   -> v1.1.3
+Rust - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:26.3503859Z  * [new tag]         v1.2.0                                   -> v1.2.0
+Rust - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:26.3505267Z  * [new tag]         v1.3.0                                   -> v1.3.0
+Rust - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:26.3506876Z  * [new tag]         v1.7.2                                   -> v1.7.2
+Rust - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:26.3508015Z  * [new tag]         v1.7.3                                   -> v1.7.3
+Rust - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:26.3508962Z  * [new ref]         eaf4d496aaa668d020c2dcdc5ed249dba68b716a -> pull/71/merge
+Rust - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:26.3521870Z ##[endgroup]
+Rust - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:26.3522685Z ##[group]Determining the checkout info
+Rust - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:26.3523737Z ##[endgroup]
+Rust - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:26.3524906Z [command]/usr/bin/git sparse-checkout disable
+Rust - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:26.3565702Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+Rust - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:26.3593263Z ##[group]Checking out the ref
+Rust - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:26.3597863Z [command]/usr/bin/git checkout --progress --force refs/remotes/pull/71/merge
+Rust - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:26.3897536Z Note: switching to 'refs/remotes/pull/71/merge'.
+Rust - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:26.3899140Z
+Rust - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:26.3900648Z You are in 'detached HEAD' state. You can look around, make experimental
+Rust - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:26.3902983Z changes and commit them, and you can discard any commits you make in this
+Rust - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:26.3905240Z state without impacting any branches by switching back to a branch.
+Rust - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:26.3906582Z
+Rust - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:26.3907465Z If you want to create a new branch to retain commits you create, you may
+Rust - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:26.3909506Z do so (now or later) by using -c with the switch command. Example:
+Rust - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:26.3911090Z
+Rust - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:26.3911711Z   git switch -c <new-branch-name>
+Rust - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:26.3912682Z
+Rust - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:26.3913238Z Or undo this operation with:
+Rust - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:26.3914170Z
+Rust - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:26.3914730Z   git switch -
+Rust - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:26.3915366Z
+Rust - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:26.3916448Z Turn off this advice by setting config variable advice.detachedHead to false
+Rust - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:26.3918740Z
+Rust - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:26.3920880Z HEAD is now at eaf4d49 Merge 992b8166f6d41a207e89668af8a7e23f642a1fa1 into 8d1e1ff5dce1e32d0e3fb515aace7a06ae83696e
+Rust - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:26.3925727Z ##[endgroup]
+Rust - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:26.3947663Z [command]/usr/bin/git log -1 --format=%H
+Rust - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:26.3970693Z eaf4d496aaa668d020c2dcdc5ed249dba68b716a
+Rust - Detect Changes	Detect changes	﻿2026-04-16T07:17:26.4185916Z ##[group]Run node scripts/detect-code-changes.mjs
+Rust - Detect Changes	Detect changes	2026-04-16T07:17:26.4187624Z [36;1mnode scripts/detect-code-changes.mjs[0m
+Rust - Detect Changes	Detect changes	2026-04-16T07:17:26.4213857Z shell: /usr/bin/bash -e {0}
+Rust - Detect Changes	Detect changes	2026-04-16T07:17:26.4214962Z env:
+Rust - Detect Changes	Detect changes	2026-04-16T07:17:26.4215795Z   CARGO_TERM_COLOR: always
+Rust - Detect Changes	Detect changes	2026-04-16T07:17:26.4216855Z   RUSTFLAGS: -Dwarnings
+Rust - Detect Changes	Detect changes	2026-04-16T07:17:26.4218269Z   CARGO_TOKEN: ***
+Rust - Detect Changes	Detect changes	2026-04-16T07:17:26.4219235Z   GITHUB_EVENT_NAME: pull_request
+Rust - Detect Changes	Detect changes	2026-04-16T07:17:26.4220839Z   GITHUB_BASE_SHA: 8d1e1ff5dce1e32d0e3fb515aace7a06ae83696e
+Rust - Detect Changes	Detect changes	2026-04-16T07:17:26.4222538Z   GITHUB_HEAD_SHA: 992b8166f6d41a207e89668af8a7e23f642a1fa1
+Rust - Detect Changes	Detect changes	2026-04-16T07:17:26.4223959Z ##[endgroup]
+Rust - Detect Changes	Detect changes	2026-04-16T07:17:26.5117480Z Detecting file changes for CI/CD...
+Rust - Detect Changes	Detect changes	2026-04-16T07:17:26.5118576Z
+Rust - Detect Changes	Detect changes	2026-04-16T07:17:26.5164697Z Merge commit detected (pull_request event)
+Rust - Detect Changes	Detect changes	2026-04-16T07:17:26.5166721Z Comparing HEAD^2^ to HEAD^2 (per-commit diff of PR head)
+Rust - Detect Changes	Detect changes	2026-04-16T07:17:26.5195703Z Changed files:
+Rust - Detect Changes	Detect changes	2026-04-16T07:17:26.5197214Z   .gitkeep
+Rust - Detect Changes	Detect changes	2026-04-16T07:17:26.5197762Z
+Rust - Detect Changes	Detect changes	2026-04-16T07:17:26.5200228Z js-code-changed=false
+Rust - Detect Changes	Detect changes	2026-04-16T07:17:26.5202066Z js-changed=false
+Rust - Detect Changes	Detect changes	2026-04-16T07:17:26.5203398Z rust-code-changed=false
+Rust - Detect Changes	Detect changes	2026-04-16T07:17:26.5205209Z rust-changed=false
+Rust - Detect Changes	Detect changes	2026-04-16T07:17:26.5206623Z scripts-changed=false
+Rust - Detect Changes	Detect changes	2026-04-16T07:17:26.5208189Z js-scripts-changed=false
+Rust - Detect Changes	Detect changes	2026-04-16T07:17:26.5209589Z rust-scripts-changed=false
+Rust - Detect Changes	Detect changes	2026-04-16T07:17:26.5211280Z workflow-changed=false
+Rust - Detect Changes	Detect changes	2026-04-16T07:17:26.5212616Z js-workflow-changed=false
+Rust - Detect Changes	Detect changes	2026-04-16T07:17:26.5214245Z rust-workflow-changed=false
+Rust - Detect Changes	Detect changes	2026-04-16T07:17:26.5215725Z docs-changed=false
+Rust - Detect Changes	Detect changes	2026-04-16T07:17:26.5216302Z
+Rust - Detect Changes	Detect changes	2026-04-16T07:17:26.5216923Z Files considered as code changes:
+Rust - Detect Changes	Detect changes	2026-04-16T07:17:26.5218452Z   .gitkeep
+Rust - Detect Changes	Detect changes	2026-04-16T07:17:26.5219158Z
+Rust - Detect Changes	Detect changes	2026-04-16T07:17:26.5219751Z any-code-changed=false
+Rust - Detect Changes	Detect changes	2026-04-16T07:17:26.5221228Z any-js-code-changed=false
+Rust - Detect Changes	Detect changes	2026-04-16T07:17:26.5222607Z any-rust-code-changed=false
+Rust - Detect Changes	Detect changes	2026-04-16T07:17:26.5223296Z
+Rust - Detect Changes	Detect changes	2026-04-16T07:17:26.5223698Z Change detection completed.
+Rust - Detect Changes	Post Run actions/checkout@v4	﻿2026-04-16T07:17:26.5491140Z Post job cleanup.
+Rust - Detect Changes	Post Run actions/checkout@v4	2026-04-16T07:17:26.6448715Z [command]/usr/bin/git version
+Rust - Detect Changes	Post Run actions/checkout@v4	2026-04-16T07:17:26.6491220Z git version 2.53.0
+Rust - Detect Changes	Post Run actions/checkout@v4	2026-04-16T07:17:26.6534245Z Temporarily overriding HOME='/home/runner/work/_temp/8a70df45-d837-4f16-a430-30310248cc1c' before making global git config changes
+Rust - Detect Changes	Post Run actions/checkout@v4	2026-04-16T07:17:26.6538076Z Adding repository directory to the temporary git global config as a safe directory
+Rust - Detect Changes	Post Run actions/checkout@v4	2026-04-16T07:17:26.6541443Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/web-capture/web-capture
+Rust - Detect Changes	Post Run actions/checkout@v4	2026-04-16T07:17:26.6574295Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+Rust - Detect Changes	Post Run actions/checkout@v4	2026-04-16T07:17:26.6606530Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+Rust - Detect Changes	Post Run actions/checkout@v4	2026-04-16T07:17:26.6822291Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+Rust - Detect Changes	Post Run actions/checkout@v4	2026-04-16T07:17:26.6841643Z http.https://github.com/.extraheader
+Rust - Detect Changes	Post Run actions/checkout@v4	2026-04-16T07:17:26.6927018Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+Rust - Detect Changes	Post Run actions/checkout@v4	2026-04-16T07:17:26.6934956Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+Rust - Detect Changes	Post Run actions/checkout@v4	2026-04-16T07:17:26.7119457Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+Rust - Detect Changes	Post Run actions/checkout@v4	2026-04-16T07:17:26.7152354Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+Rust - Detect Changes	Complete job	﻿2026-04-16T07:17:26.7502648Z Evaluate and set job outputs
+Rust - Detect Changes	Complete job	2026-04-16T07:17:26.7513566Z Set output 'rust-code-changed'
+Rust - Detect Changes	Complete job	2026-04-16T07:17:26.7516186Z Set output 'rust-changed'
+Rust - Detect Changes	Complete job	2026-04-16T07:17:26.7517845Z Set output 'rust-scripts-changed'
+Rust - Detect Changes	Complete job	2026-04-16T07:17:26.7519245Z Set output 'rust-workflow-changed'
+Rust - Detect Changes	Complete job	2026-04-16T07:17:26.7520913Z Set output 'any-rust-code-changed'
+Rust - Detect Changes	Complete job	2026-04-16T07:17:26.7522281Z Set output 'any-code-changed'
+Rust - Detect Changes	Complete job	2026-04-16T07:17:26.7523579Z Set output 'docs-changed'
+Rust - Detect Changes	Complete job	2026-04-16T07:17:26.7525308Z Cleaning up orphan processes
+Rust - Detect Changes	Complete job	2026-04-16T07:17:26.8549515Z ##[warning]Node.js 20 actions are deprecated. The following actions are running on Node.js 20 and may not work as expected: actions/checkout@v4. Actions will be forced to run with Node.js 24 by default starting June 2nd, 2026. Node.js 20 will be removed from the runner on September 16th, 2026. Please check if updated versions of these actions are available that support Node.js 24. To opt into Node.js 24 now, set the FORCE_JAVASCRIPT_ACTIONS_TO_NODE24=true environment variable on the runner or in your workflow file. Once Node.js 24 becomes the default, you can temporarily opt out by setting ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION=true. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/

@@ -727,7 +727,8 @@ args: [
   "node-fetch": "^2.7.0", // HTTP client
   "playwright": "^1.49.0", // Headless browser (Playwright)
   "puppeteer": "^24.8.2", // Headless browser (Puppeteer)
-  "turndown": "^7.1.1" // HTML to Markdown
+  "turndown": "^7.1.1", // HTML to Markdown
+  "turndown-plugin-gfm": "^1.0.2" // GitHub Flavored Markdown
 }
 ```
 
@@ -741,8 +742,7 @@ args: [
   "get-port": "^7.1.0", // Find available port
   "jest": "^29.7.0", // Test framework
   "nock": "^13.5.4", // HTTP mocking
-  "supertest": "^6.3.4", // HTTP assertions
-  "turndown-plugin-gfm": "^1.0.2" // GitHub Flavored Markdown
+  "supertest": "^6.3.4" // HTTP assertions
 }
 ```
 

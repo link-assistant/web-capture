@@ -44,7 +44,8 @@
     "playwright": "^1.49.0",
     "puppeteer": "^24.8.2",
     "puppeteer-core": "^24.40.0",
-    "turndown": "^7.1.1"
+    "turndown": "^7.1.1",
+    "turndown-plugin-gfm": "^1.0.2"
   },
   "devDependencies": {
     "@babel/core": "^7.24.0",
@@ -62,8 +63,7 @@
     "lint-staged": "^16.2.6",
     "nock": "^13.5.4",
     "prettier": "^3.6.2",
-    "supertest": "^6.3.4",
-    "turndown-plugin-gfm": "^1.0.2"
+    "supertest": "^6.3.4"
   },
   "type": "module",
   "keywords": [

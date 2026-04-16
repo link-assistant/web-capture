@@ -1,0 +1,94 @@
+
+> @link-assistant/web-capture@1.7.3 prepare
+> husky || true
+
+.git can't be foundnpm warn gitignore-fallback No .npmignore file found, using .gitignore for file exclusion. Consider creating a .npmignore file to explicitly control published files.
+npm notice
+npm notice 📦  @link-assistant/web-capture@1.7.3
+npm notice Tarball Contents
+npm notice 271B .changeset/config.json
+npm notice 175B .changeset/fix-runtime-gfm-dependency.md
+npm notice 510B .changeset/README.md
+npm notice 390B .jscpd.json
+npm notice 184B .lenv
+npm notice 77B .prettierignore
+npm notice 173B .prettierrc
+npm notice 3.2kB CHANGELOG.md
+npm notice 1.3kB Dockerfile
+npm notice 16.9kB README.md
+npm notice 178B babel.config.cjs
+npm notice 33.3kB bin/web-capture.js
+npm notice 148B docker-compose.yml
+npm notice 3.4kB eslint.config.js
+npm notice 1.5kB examples/js/engine_comparison.js
+npm notice 675B examples/js/html_download.js
+npm notice 1.1kB examples/js/image_download.js
+npm notice 681B examples/js/markdown_download.js
+npm notice 884B examples/js/playwright_example.js
+npm notice 410B examples/python/html_download.py
+npm notice 690B examples/python/image_download.py
+npm notice 416B examples/python/markdown_download.py
+npm notice 838B examples/python/playwright_example.py
+npm notice 481B jest.config.mjs
+npm notice 3.2kB package.json
+npm notice 9.0kB src/animation.js
+npm notice 6.9kB src/archive.js
+npm notice 5.2kB src/batch.js
+npm notice 8.5kB src/browser.js
+npm notice 5.4kB src/docx.js
+npm notice 3.6kB src/extract-images.js
+npm notice 1.1kB src/fetch.js
+npm notice 5.9kB src/figures.js
+npm notice 10.1kB src/gdocs.js
+npm notice 2.5kB src/html.js
+npm notice 3.6kB src/image.js
+npm notice 2.4kB src/index.js
+npm notice 3.6kB src/latex.js
+npm notice 18.4kB src/lib.js
+npm notice 5.2kB src/localize-images.js
+npm notice 696B src/markdown.js
+npm notice 9.0kB src/metadata.js
+npm notice 2.5kB src/pdf.js
+npm notice 5.2kB src/popups.js
+npm notice 7.4kB src/postprocess.js
+npm notice 1.3kB src/retry.js
+npm notice 1.3kB src/stream.js
+npm notice 4.9kB src/themed-image.js
+npm notice 9.3kB src/verify.js
+npm notice 6.5kB tests/e2e/docker.test.js
+npm notice 4.1kB tests/e2e/process.test.js
+npm notice 1.2kB tests/fixtures/habr-articles.js
+npm notice 6.9kB tests/integration/api-endpoints.test.js
+npm notice 4.1kB tests/integration/browser-engines.test.js
+npm notice 10.9kB tests/integration/habr-article.test.js
+npm notice 190B tests/jest.setup.mjs
+npm notice 6.7kB tests/mock/index.test.js
+npm notice 1.1kB tests/unit/animation.test.js
+npm notice 3.4kB tests/unit/batch.test.js
+npm notice 6.2kB tests/unit/browser.test.js
+npm notice 7.1kB tests/unit/cli.test.js
+npm notice 1.6kB tests/unit/convertRelativeUrls.test.js
+npm notice 8.1kB tests/unit/extract-images.test.js
+npm notice 2.3kB tests/unit/figures.test.js
+npm notice 9.3kB tests/unit/gdocs.test.js
+npm notice 2.0kB tests/unit/heading-image.test.js
+npm notice 19.6kB tests/unit/html2md.test.js
+npm notice 4.1kB tests/unit/latex.test.js
+npm notice 2.5kB tests/unit/localize-images.test.js
+npm notice 4.5kB tests/unit/metadata.test.js
+npm notice 1.4kB tests/unit/package-runtime-dependencies.test.js
+npm notice 3.5kB tests/unit/postprocess.test.js
+npm notice 1.5kB tests/unit/publish-verification.test.js
+npm notice 2.9kB tests/unit/retry.test.js
+npm notice 5.3kB tests/unit/verify.test.js
+npm notice Tarball Details
+npm notice name: @link-assistant/web-capture
+npm notice version: 1.7.3
+npm notice filename: link-assistant-web-capture-1.7.3.tgz
+npm notice package size: 79.1 kB
+npm notice unpacked size: 331.3 kB
+npm notice shasum: 1922c813a03a489b758769d398f1034d0480515f
+npm notice integrity: sha512-nRXDOg7JonPG7[...]hVAeVqFDIuseA==
+npm notice total files: 75
+npm notice
+link-assistant-web-capture-1.7.3.tgz
