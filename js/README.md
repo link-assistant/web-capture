@@ -92,11 +92,14 @@ web-capture --serve --port 8080
 ### Google Docs
 
 ```bash
-# Capture public Google Doc as Markdown
-web-capture https://docs.google.com/document/d/DOC_ID/edit
+# Capture the live editor model as Markdown (default --capture browser)
+web-capture https://docs.google.com/document/d/DOC_ID/edit --capture browser
 
-# Capture private Google Doc with API token
-web-capture https://docs.google.com/document/d/DOC_ID/edit --apiToken YOUR_TOKEN
+# Capture via the public export endpoint
+web-capture https://docs.google.com/document/d/DOC_ID/edit --capture api
+
+# Capture via the Google Docs REST API
+web-capture https://docs.google.com/document/d/DOC_ID/edit --capture api --apiToken YOUR_TOKEN
 ```
 
 ## API Endpoints (Server Mode)

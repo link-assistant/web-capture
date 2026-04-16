@@ -1,0 +1,64 @@
+
+> @link-assistant/web-capture@1.7.4 test
+> node --experimental-vm-modules ./node_modules/.bin/jest --runInBand tests/unit/gdocs.test.js
+
+(node:50116) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+PASS tests/unit/gdocs.test.js
+  gdocs
+    isGoogleDocsUrl
+      ✓ returns true for standard Google Docs edit URL (2 ms)
+      ✓ returns true for URL with query parameters (1 ms)
+      ✓ returns true for URL without /edit
+      ✓ returns false for non-Google Docs URL (1 ms)
+      ✓ returns false for Google Sheets URL
+      ✓ returns false for empty string
+      ✓ returns false for null
+      ✓ returns false for undefined
+      ✓ returns false for non-string input
+    extractDocumentId
+      ✓ extracts document ID from standard URL
+      ✓ extracts document ID from URL with query params (1 ms)
+      ✓ extracts document ID with hyphens and underscores
+      ✓ returns null for non-Google Docs URL
+      ✓ returns null for empty string (1 ms)
+      ✓ returns null for null input
+    buildExportUrl
+      ✓ builds HTML export URL
+      ✓ builds Markdown export URL
+      ✓ builds PDF export URL
+      ✓ builds TXT export URL
+      ✓ defaults to html for unknown format
+      ✓ defaults to html when format is omitted
+      ✓ uses the real document ID from test document (1 ms)
+    capture method selection (issue #72)
+      ✓ honors explicit browser capture for Google Docs URLs
+      ✓ uses public export for API capture without token
+      ✓ uses Docs REST API for API capture with token (2 ms)
+    buildEditUrl
+      ✓ builds the fresh Google Docs editor URL
+    buildDocsApiUrl
+      ✓ builds the Google Docs REST API URL
+    parseGoogleDocsModelChunks (issue #72)
+      ✓ includes regular and suggested text from DOCS_modelChunk data (1 ms)
+      ✓ extracts table cells and suggested images from DOCS_modelChunk data (1 ms)
+    renderDocsApiDocument (issue #72)
+      ✓ renders Google Docs REST API paragraphs, tables, and inline images (1 ms)
+    GDOCS_EXPORT_FORMATS
+      ✓ contains all expected formats (1 ms)
+    extractBase64Images
+      ✓ extracts a single PNG data URI image
+      ✓ extracts multiple images with correct numbering and extensions (1 ms)
+      ✓ returns empty array when no data URI images (1 ms)
+      ✓ preserves non-data-URI images (3 ms)
+    image extraction pipeline (issue #53)
+      ✓ extractBase64Images from HTML produces images with data buffers (2 ms)
+      ✓ default markdown mode extracts base64 images to disk (not strip) (6 ms)
+      ✓ keepOriginalLinks strips base64 images
+      ✓ extractBase64ToBuffers produces in-memory buffers for archive (2 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       39 passed, 39 total
+Snapshots:   0 total
+Time:        1.206 s
+Ran all test suites matching /tests\/unit\/gdocs.test.js/i.

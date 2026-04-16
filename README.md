@@ -209,7 +209,7 @@ cargo fmt            # Format code
 - **HTML Rendering**: Fetch and render HTML with JavaScript support via headless browsers
 - **Screenshots**: Capture PNG/JPEG screenshots with theme and viewport control
 - **Archives**: ZIP archives with markdown/HTML + locally downloaded images
-- **Google Docs**: API-based capture of Google Docs documents
+- **Google Docs**: Public export, Google Docs REST API, and editor-model capture
 - **URL Normalization**: Convert relative URLs to absolute
 - **Encoding Detection**: Automatic charset detection and UTF-8 conversion
 

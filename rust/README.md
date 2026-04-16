@@ -99,6 +99,7 @@ web-capture <url> [options]
 | --------------------------- | ----- | ----------------------------------------------------- | --------------------- |
 | `--format`                  | `-f`  | Output format: `markdown`/`md`, `html`, `image`/`png` | `markdown`            |
 | `--output`                  | `-o`  | Output file path. Use `-o -` for stdout               | auto-derived from URL |
+| `--capture`                 |       | Capture method: `browser` or `api`                    | `browser`             |
 | `--data-dir`                |       | Base directory for auto-derived output paths          | `./data/web-capture`  |
 | `--embed-images`            |       | Keep images as inline base64 data URIs                | false                 |
 | `--no-extract-images`       |       | Alias for `--embed-images`                            | false                 |
@@ -128,6 +129,15 @@ web-capture https://example.com -o -
 
 # HTML format
 web-capture https://example.com -f html -o page.html
+
+# Google Docs live editor model
+web-capture https://docs.google.com/document/d/DOC_ID/edit --capture browser
+
+# Google Docs public export endpoint
+web-capture https://docs.google.com/document/d/DOC_ID/edit --capture api
+
+# Google Docs REST API with OAuth token
+web-capture https://docs.google.com/document/d/DOC_ID/edit --capture api --api-token YOUR_TOKEN
 
 # Screenshot
 web-capture https://example.com -f png -o screenshot.png

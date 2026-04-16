@@ -1,0 +1,28 @@
+   Compiling web-capture v0.3.1 (/tmp/gh-issue-solver-1776336600314/rust)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.77s
+     Running tests/integration/mod.rs (target/debug/deps/integration-2667b3154f318f20)
+
+running 20 tests
+test gdocs::test_build_edit_url ... ok
+test gdocs::test_build_docs_api_url ... ok
+test gdocs::test_build_export_url ... ok
+test gdocs::test_capture_method_selection_honors_browser_flag ... ok
+test gdocs::test_extract_base64_images_no_images ... ok
+test gdocs::test_create_archive_zip_empty_images ... ok
+test gdocs::test_extract_bearer_token ... ok
+test gdocs::test_create_archive_zip_produces_valid_zip ... ok
+test gdocs::test_extract_base64_images_single ... ok
+test gdocs::test_extract_base64_images_multiple ... ok
+test gdocs::test_extract_document_id ... ok
+test gdocs::test_extract_base64_images_preserves_non_data_images ... ok
+test gdocs::test_is_google_docs_url_invalid ... ok
+test gdocs::test_parse_model_chunks_includes_suggestions_and_images ... ok
+test gdocs::test_render_docs_api_document_paragraphs_tables_and_images ... ok
+test gdocs::test_is_google_docs_url_valid ... ok
+test gdocs_image_parity::image_count_parity_across_pipeline ... ok
+test gdocs_image_parity::gdocs_style_heading_with_spans_keeps_img ... ok
+test gdocs_image_parity::img_inside_heading_is_kept_in_markdown ... ok
+test gdocs_image_parity::img_inside_all_heading_levels_is_kept ... ok
+
+test result: ok. 20 passed; 0 failed; 0 ignored; 0 measured; 29 filtered out; finished in 0.08s
+

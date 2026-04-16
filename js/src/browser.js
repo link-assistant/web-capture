@@ -172,6 +172,20 @@ function createPageAdapter(rawPage, commander, engineType) {
       await commander.destroy();
       await rawPage.close();
     },
+    async addInitScript(fn) {
+      if (engineType === 'playwright' && rawPage.addInitScript) {
+        await rawPage.addInitScript(fn);
+      } else if (rawPage.evaluateOnNewDocument) {
+        await rawPage.evaluateOnNewDocument(fn);
+      }
+    },
+    async waitForTimeout(ms) {
+      if (rawPage.waitForTimeout) {
+        await rawPage.waitForTimeout(ms);
+      } else {
+        await new Promise((resolve) => setTimeout(resolve, ms));
+      }
+    },
 
     // --- browser-commander v0.8.0+: PDF generation ---
     // Usage: await page.pdf({ pdfOptions: { format: 'A4', printBackground: true } })
@@ -211,6 +225,7 @@ function createPageAdapter(rawPage, commander, engineType) {
 
     // Engine type identifier
     type: engineType,
+    rawPage,
   };
 }
 
