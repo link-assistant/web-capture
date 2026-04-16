@@ -1,5 +1,11 @@
 # @link-assistant/web-capture
 
+## 1.7.6
+
+### Patch Changes
+
+- Support Google Docs capture selection through `--capture browser` editor-model parsing, public export API capture, and authenticated Docs REST API capture.
+
 ## 1.7.5
 
 ### Patch Changes
