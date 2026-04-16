@@ -125,7 +125,7 @@ export function selectGoogleDocsCaptureMethod(capture = 'browser', apiToken) {
  * @returns {Promise<{content: string, format: string, documentId: string, exportUrl: string}>}
  */
 export async function fetchGoogleDoc(url, options = {}) {
-  const { format = 'html', apiToken } = options;
+  const { format = 'html', apiToken, log } = options;
 
   const documentId = extractDocumentId(url);
   if (!documentId) {
@@ -133,6 +133,13 @@ export async function fetchGoogleDoc(url, options = {}) {
   }
 
   const exportUrl = buildExportUrl(documentId, format);
+  log?.debug?.(() => ({
+    event: 'gdocs.public-export.request',
+    documentId,
+    format,
+    exportUrl,
+    hasApiToken: Boolean(apiToken),
+  }));
 
   const headers = {
     'User-Agent': DEFAULT_USER_AGENT,
@@ -148,6 +155,13 @@ export async function fetchGoogleDoc(url, options = {}) {
     headers,
     redirect: 'follow',
   });
+  log?.debug?.(() => ({
+    event: 'gdocs.public-export.response',
+    documentId,
+    status: response.status,
+    ok: response.ok,
+    contentType: response.headers.get('content-type'),
+  }));
 
   if (!response.ok) {
     const statusText = response.statusText || 'Unknown error';
@@ -157,6 +171,11 @@ export async function fetchGoogleDoc(url, options = {}) {
   }
 
   const rawContent = await response.text();
+  log?.debug?.(() => ({
+    event: 'gdocs.public-export.body',
+    documentId,
+    bytes: Buffer.byteLength(rawContent),
+  }));
 
   // Decode HTML entities to unicode for text-based formats
   const content =
@@ -181,7 +200,7 @@ export async function fetchGoogleDoc(url, options = {}) {
  * @returns {Promise<{content: string, markdown: string, html: string, text: string, document: Object, documentId: string, exportUrl: string}>}
  */
 export async function fetchGoogleDocFromDocsApi(url, options = {}) {
-  const { apiToken } = options;
+  const { apiToken, log } = options;
   if (!apiToken) {
     throw new Error('Google Docs REST API capture requires --apiToken');
   }
@@ -192,6 +211,12 @@ export async function fetchGoogleDocFromDocsApi(url, options = {}) {
   }
 
   const apiUrl = buildDocsApiUrl(documentId);
+  log?.debug?.(() => ({
+    event: 'gdocs.docs-api.request',
+    documentId,
+    apiUrl,
+    hasApiToken: Boolean(apiToken),
+  }));
   const response = await fetch(apiUrl, {
     headers: {
       Authorization: `Bearer ${apiToken}`,
@@ -200,6 +225,13 @@ export async function fetchGoogleDocFromDocsApi(url, options = {}) {
     },
     redirect: 'follow',
   });
+  log?.debug?.(() => ({
+    event: 'gdocs.docs-api.response',
+    documentId,
+    status: response.status,
+    ok: response.ok,
+    contentType: response.headers.get('content-type'),
+  }));
 
   if (!response.ok) {
     const statusText = response.statusText || 'Unknown error';
@@ -210,6 +242,16 @@ export async function fetchGoogleDocFromDocsApi(url, options = {}) {
 
   const document = await response.json();
   const rendered = renderDocsApiDocument(document);
+  log?.debug?.(() => ({
+    event: 'gdocs.docs-api.rendered',
+    documentId,
+    title: document.title,
+    bodyElements: document.body?.content?.length || 0,
+    inlineObjects: Object.keys(document.inlineObjects || {}).length,
+    markdownBytes: Buffer.byteLength(rendered.markdown),
+    htmlBytes: Buffer.byteLength(rendered.html),
+    textBytes: Buffer.byteLength(rendered.text),
+  }));
 
   return {
     ...rendered,
@@ -232,15 +274,21 @@ export async function fetchGoogleDocFromDocsApi(url, options = {}) {
  * @returns {Promise<{markdown: string, documentId: string, exportUrl: string}>}
  */
 export async function fetchGoogleDocAsMarkdown(url, options = {}) {
-  const { apiToken } = options;
+  const { apiToken, log } = options;
 
   // Always fetch as HTML first, then convert to Markdown
   const result = await fetchGoogleDoc(url, {
     format: 'html',
     apiToken,
+    log,
   });
 
   const markdown = convertHtmlToMarkdown(result.content, result.exportUrl);
+  log?.debug?.(() => ({
+    event: 'gdocs.public-export.markdown',
+    documentId: result.documentId,
+    markdownBytes: Buffer.byteLength(markdown),
+  }));
 
   return {
     markdown,
@@ -266,6 +314,7 @@ export async function captureGoogleDocWithBrowser(url, options = {}) {
     apiToken,
     waitMs = 8000,
     createBrowser = defaultCreateBrowser,
+    log,
   } = options;
   const documentId = extractDocumentId(url);
   if (!documentId) {
@@ -273,6 +322,14 @@ export async function captureGoogleDocWithBrowser(url, options = {}) {
   }
 
   const editUrl = buildEditUrl(documentId);
+  log?.debug?.(() => ({
+    event: 'gdocs.browser-model.start',
+    documentId,
+    editUrl,
+    engine,
+    waitMs,
+    hasApiToken: Boolean(apiToken),
+  }));
   const browser = await createBrowser(engine);
   let page;
   try {
@@ -289,6 +346,11 @@ export async function captureGoogleDocWithBrowser(url, options = {}) {
       waitUntil: 'domcontentloaded',
       timeout: 60000,
     });
+    log?.debug?.(() => ({
+      event: 'gdocs.browser-model.loaded',
+      documentId,
+      editUrl,
+    }));
     await waitForPage(page, waitMs);
 
     const modelData = await evaluateOnPage(page, () => {
@@ -317,6 +379,16 @@ export async function captureGoogleDocWithBrowser(url, options = {}) {
       modelData.chunks,
       modelData.cidUrlMap
     );
+    log?.debug?.(() => ({
+      event: 'gdocs.browser-model.parsed',
+      documentId,
+      chunks: modelData.chunks?.length || 0,
+      cidUrls: Object.keys(modelData.cidUrlMap || {}).length,
+      blocks: capture.blocks.length,
+      tables: capture.tables.length,
+      images: capture.images.length,
+      textBytes: Buffer.byteLength(capture.text || ''),
+    }));
     if (capture.blocks.length === 0) {
       throw new Error(
         'Google Docs editor page did not expose DOCS_modelChunk data'
@@ -939,16 +1011,23 @@ export function extractBase64Images(html) {
  * @returns {Promise<{documentId: string, exportUrl: string, createArchive: function}>}
  */
 export async function fetchGoogleDocAsArchive(url, options = {}) {
-  const { apiToken } = options;
+  const { apiToken, log } = options;
 
   // Fetch HTML with embedded base64 images
-  const result = await fetchGoogleDoc(url, { format: 'html', apiToken });
+  const result = await fetchGoogleDoc(url, { format: 'html', apiToken, log });
 
   // Extract base64 images from HTML
   const { html: localHtml, images } = extractBase64Images(result.content);
 
   // Convert the localized HTML to Markdown
   const markdown = convertHtmlToMarkdown(localHtml);
+  log?.debug?.(() => ({
+    event: 'gdocs.public-export.archive',
+    documentId: result.documentId,
+    images: images.length,
+    htmlBytes: Buffer.byteLength(localHtml),
+    markdownBytes: Buffer.byteLength(markdown),
+  }));
 
   return {
     documentId: result.documentId,

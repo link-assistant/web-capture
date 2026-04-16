@@ -35,7 +35,7 @@ use std::collections::HashMap;
 use std::hash::BuildHasher;
 use std::io::Write;
 use std::sync::OnceLock;
-use tracing::debug;
+use tracing::{debug, info};
 
 use crate::WebCaptureError;
 
@@ -239,6 +239,13 @@ pub async fn fetch_google_doc(
     })?;
 
     let export_url = build_export_url(&document_id, format);
+    debug!(
+        document_id = %document_id,
+        format = %format,
+        export_url = %export_url,
+        has_api_token = api_token.is_some(),
+        "fetching Google Doc via public export"
+    );
 
     let mut request = reqwest::Client::new()
         .get(&export_url)
@@ -257,6 +264,17 @@ pub async fn fetch_google_doc(
         .send()
         .await
         .map_err(|e| WebCaptureError::FetchError(format!("Failed to fetch Google Doc: {e}")))?;
+    debug!(
+        document_id = %document_id,
+        status = response.status().as_u16(),
+        success = response.status().is_success(),
+        content_type = response
+            .headers()
+            .get(reqwest::header::CONTENT_TYPE)
+            .and_then(|value| value.to_str().ok())
+            .unwrap_or(""),
+        "received Google Docs public export response"
+    );
 
     if !response.status().is_success() {
         return Err(WebCaptureError::FetchError(format!(
@@ -270,6 +288,11 @@ pub async fn fetch_google_doc(
     let raw_content = response.text().await.map_err(|e| {
         WebCaptureError::FetchError(format!("Failed to read Google Doc response: {e}"))
     })?;
+    debug!(
+        document_id = %document_id,
+        bytes = raw_content.len(),
+        "read Google Docs public export body"
+    );
 
     // Decode HTML entities to unicode for text-based formats
     let content = match format {
@@ -306,6 +329,11 @@ pub async fn fetch_google_doc_as_markdown(
 
     let markdown =
         crate::markdown::convert_html_to_markdown(&result.content, Some(&result.export_url))?;
+    debug!(
+        document_id = %result.document_id,
+        bytes = markdown.len(),
+        "rendered Google Docs public export markdown"
+    );
 
     Ok(GDocsResult {
         content: markdown,
@@ -328,6 +356,11 @@ pub async fn fetch_google_doc_from_docs_api(
         WebCaptureError::InvalidUrl(format!("Not a valid Google Docs URL: {url}"))
     })?;
     let api_url = build_docs_api_url(&document_id);
+    debug!(
+        document_id = %document_id,
+        api_url = %api_url,
+        "fetching Google Doc via Docs API"
+    );
 
     let response = reqwest::Client::new()
         .get(&api_url)
@@ -338,6 +371,17 @@ pub async fn fetch_google_doc_from_docs_api(
         .map_err(|e| {
             WebCaptureError::FetchError(format!("Failed to fetch Google Doc via Docs API: {e}"))
         })?;
+    debug!(
+        document_id = %document_id,
+        status = response.status().as_u16(),
+        success = response.status().is_success(),
+        content_type = response
+            .headers()
+            .get(reqwest::header::CONTENT_TYPE)
+            .and_then(|value| value.to_str().ok())
+            .unwrap_or(""),
+        "received Google Docs API response"
+    );
 
     if !response.status().is_success() {
         return Err(WebCaptureError::FetchError(format!(
@@ -355,6 +399,14 @@ pub async fn fetch_google_doc_from_docs_api(
         WebCaptureError::ParseError(format!("Failed to parse Google Docs API response: {e}"))
     })?;
     let rendered = render_docs_api_document(&document);
+    debug!(
+        document_id = %document_id,
+        title = document.get("title").and_then(|value| value.as_str()).unwrap_or(""),
+        markdown_bytes = rendered.markdown.len(),
+        html_bytes = rendered.html.len(),
+        text_bytes = rendered.text.len(),
+        "rendered Google Docs API document"
+    );
 
     Ok(GDocsRenderedResult {
         markdown: rendered.markdown,
@@ -382,6 +434,12 @@ pub async fn fetch_google_doc_from_model(
         WebCaptureError::InvalidUrl(format!("Not a valid Google Docs URL: {url}"))
     })?;
     let edit_url = build_edit_url(&document_id);
+    debug!(
+        document_id = %document_id,
+        edit_url = %edit_url,
+        has_api_token = api_token.is_some(),
+        "fetching Google Doc editor model"
+    );
     let mut request = reqwest::Client::new()
         .get(&edit_url)
         .header(
@@ -397,6 +455,17 @@ pub async fn fetch_google_doc_from_model(
     let response = request.send().await.map_err(|e| {
         WebCaptureError::FetchError(format!("Failed to fetch Google Doc editor: {e}"))
     })?;
+    debug!(
+        document_id = %document_id,
+        status = response.status().as_u16(),
+        success = response.status().is_success(),
+        content_type = response
+            .headers()
+            .get(reqwest::header::CONTENT_TYPE)
+            .and_then(|value| value.to_str().ok())
+            .unwrap_or(""),
+        "received Google Docs editor response"
+    );
 
     if !response.status().is_success() {
         return Err(WebCaptureError::FetchError(format!(
@@ -411,6 +480,12 @@ pub async fn fetch_google_doc_from_model(
         WebCaptureError::FetchError(format!("Failed to read Google Doc editor response: {e}"))
     })?;
     let chunks = extract_model_chunks_from_html(&html);
+    debug!(
+        document_id = %document_id,
+        html_bytes = html.len(),
+        chunks = chunks.len(),
+        "extracted Google Docs editor model chunks"
+    );
     if chunks.is_empty() {
         return Err(WebCaptureError::ParseError(
             "Google Docs editor HTML did not contain DOCS_modelChunk data".to_string(),
@@ -419,6 +494,16 @@ pub async fn fetch_google_doc_from_model(
 
     let cid_urls = extract_cid_urls_from_html(&html);
     let capture = parse_model_chunks(&chunks, &cid_urls);
+    info!(
+        document_id = %document_id,
+        chunks = chunks.len(),
+        cid_urls = cid_urls.len(),
+        blocks = capture.blocks.len(),
+        tables = capture.tables.len(),
+        images = capture.images.len(),
+        text_bytes = capture.text.len(),
+        "parsed Google Docs editor model"
+    );
 
     Ok(GDocsRenderedResult {
         markdown: render_captured_document(&capture, "markdown"),

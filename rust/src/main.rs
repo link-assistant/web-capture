@@ -29,7 +29,7 @@ use std::net::SocketAddr;
 use std::path::PathBuf;
 use tokio::fs;
 use tower_http::trace::TraceLayer;
-use tracing::{error, info};
+use tracing::{debug, error, info};
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 use url::Url;
 
@@ -174,16 +174,21 @@ const fn default_true() -> bool {
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
-    // Initialize tracing
+    let mut args = Args::parse();
+
+    // Initialize tracing after parsing args so --verbose can enable detailed logs.
+    let default_filter = if args.verbose {
+        "web_capture=debug,tower_http=debug"
+    } else {
+        "web_capture=info,tower_http=info"
+    };
     tracing_subscriber::registry()
         .with(
             tracing_subscriber::EnvFilter::try_from_default_env()
-                .unwrap_or_else(|_| "web_capture=info,tower_http=info".into()),
+                .unwrap_or_else(|_| default_filter.into()),
         )
         .with(tracing_subscriber::fmt::layer())
         .init();
-
-    let mut args = Args::parse();
 
     // --no-extract-images is an alias for --embed-images
     if args.no_extract_images {
@@ -526,6 +531,13 @@ async fn capture_url(
     args: &Args,
 ) -> anyhow::Result<()> {
     let absolute_url = normalize_url(url).map_err(|e| anyhow::anyhow!(e))?;
+    debug!(
+        url = %absolute_url,
+        format = %format,
+        capture = %args.capture,
+        has_api_token = args.api_token.is_some(),
+        "starting capture"
+    );
 
     // Google Docs capture honors --capture:
     // - browser: load /edit model data
@@ -539,8 +551,20 @@ async fn capture_url(
             format_lower.as_str(),
             "archive" | "markdown" | "md" | "html" | "txt" | "text"
         );
+        debug!(
+            url = %absolute_url,
+            method = ?method,
+            format = %format_lower,
+            model_format,
+            has_api_token = api_token.is_some(),
+            "selected Google Docs capture method"
+        );
 
         if method == web_capture::gdocs::GDocsCaptureMethod::BrowserModel && !model_format {
+            debug!(
+                format = %format_lower,
+                "Google Docs editor model does not support requested format; using regular browser pipeline"
+            );
             // Screenshot-like formats should use the regular browser path below.
         } else if method == web_capture::gdocs::GDocsCaptureMethod::BrowserModel {
             let rendered =

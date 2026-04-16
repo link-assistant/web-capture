@@ -8,6 +8,23 @@ import fs from 'fs';
 import path from 'path';
 import { URL } from 'node:url';
 import { makeConfig } from 'lino-arguments';
+import makeLog from 'log-lazy';
+
+function makeVerboseLog(enabled) {
+  return makeLog({
+    level: enabled ? 'all' : 'none',
+    log: {
+      fatal: console.error,
+      error: console.error,
+      warn: console.error,
+      info: console.error,
+      debug: console.error,
+      verbose: console.error,
+      trace: console.error,
+      silly: console.error,
+    },
+  });
+}
 
 // Create configuration using lino-arguments pattern
 const config = makeConfig({
@@ -402,7 +419,9 @@ async function captureUrl(url, options) {
     dataDir,
     keepOriginalLinks,
     capture,
+    verbose,
   } = options;
+  const log = makeVerboseLog(verbose);
 
   // Ensure URL is absolute
   let absoluteUrl = url;
@@ -433,6 +452,14 @@ async function captureUrl(url, options) {
   const { stripBase64Images } = await import('../src/extract-images.js');
 
   const normalizedFormat = format.toLowerCase();
+  log.debug(() => ({
+    event: 'capture.start',
+    url: absoluteUrl,
+    format: normalizedFormat,
+    capture,
+    engine,
+    hasApiToken: Boolean(options.apiToken),
+  }));
 
   // Google Docs capture honors --capture:
   // - browser: load /edit and extract DOCS_modelChunk
@@ -450,18 +477,42 @@ async function captureUrl(url, options) {
       'txt',
       'text',
     ]);
+    log.debug(() => ({
+      event: 'gdocs.capture.selected',
+      url: absoluteUrl,
+      method: gdocsMethod,
+      format: normalizedFormat,
+      modelFormat: modelFormats.has(normalizedFormat),
+      hasApiToken: Boolean(apiToken),
+    }));
 
     if (
       gdocsMethod === 'browser-model' &&
       !modelFormats.has(normalizedFormat)
     ) {
+      log.debug(() => ({
+        event: 'gdocs.capture.fallback-browser-pipeline',
+        reason: 'requested format is not supported by editor model renderer',
+        format: normalizedFormat,
+      }));
       // Screenshot/PDF/DOCX formats should use the regular browser pipeline below.
     } else if (gdocsMethod === 'browser-model') {
       try {
         const result = await captureGoogleDocWithBrowser(absoluteUrl, {
           engine,
           apiToken,
+          log,
         });
+        log.debug(() => ({
+          event: 'gdocs.capture.browser-model.rendered',
+          documentId: result.documentId,
+          blocks: result.capture?.blocks?.length || 0,
+          tables: result.capture?.tables?.length || 0,
+          images: result.capture?.images?.length || 0,
+          markdownBytes: Buffer.byteLength(result.markdown || ''),
+          htmlBytes: Buffer.byteLength(result.html || ''),
+          textBytes: Buffer.byteLength(result.text || ''),
+        }));
         if (normalizedFormat === 'archive' || normalizedFormat === 'zip') {
           await writeGoogleDocsArchive({
             archiveResult: { ...result, images: [] },
@@ -502,7 +553,15 @@ async function captureUrl(url, options) {
       try {
         const result = await fetchGoogleDocFromDocsApi(absoluteUrl, {
           apiToken,
+          log,
         });
+        log.debug(() => ({
+          event: 'gdocs.capture.docs-api.rendered',
+          documentId: result.documentId,
+          markdownBytes: Buffer.byteLength(result.markdown || ''),
+          htmlBytes: Buffer.byteLength(result.html || ''),
+          textBytes: Buffer.byteLength(result.text || ''),
+        }));
         if (normalizedFormat === 'archive' || normalizedFormat === 'zip') {
           await writeGoogleDocsArchive({
             archiveResult: { ...result, images: [] },
@@ -557,6 +616,7 @@ async function captureUrl(url, options) {
                   : 'zip';
           const archiveResult = await fetchGoogleDocAsArchive(absoluteUrl, {
             apiToken,
+            log,
           });
           const output =
             explicitOutput === '-'
@@ -610,6 +670,7 @@ async function captureUrl(url, options) {
         ) {
           const result = await fetchGoogleDocAsMarkdown(absoluteUrl, {
             apiToken,
+            log,
           });
           let { markdown } = result;
           const output =
@@ -653,6 +714,7 @@ async function captureUrl(url, options) {
           const result = await fetchGoogleDoc(absoluteUrl, {
             format: gdocsFormat,
             apiToken,
+            log,
           });
           const output =
             explicitOutput === '-'
