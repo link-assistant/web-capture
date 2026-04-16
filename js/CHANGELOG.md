@@ -1,5 +1,11 @@
 # @link-assistant/web-capture
 
+## 1.7.3
+
+### Patch Changes
+
+- 237afeb: Fix the JavaScript CLI so strict argument parsing accepts positional capture URLs while still rejecting unknown options.
+
 ## 1.7.2
 
 ### Patch Changes
