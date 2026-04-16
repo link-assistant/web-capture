@@ -1,0 +1,5 @@
+Found 1 changeset file(s)
+Validating changeset: .changeset/fix-runtime-gfm-dependency.md
+✅ Changeset validation passed
+   Type: patch
+   Description: Move turndown-plugin-gfm into runtime dependencies so published CLI installs include the GFM plugin used by Markdown conversion.

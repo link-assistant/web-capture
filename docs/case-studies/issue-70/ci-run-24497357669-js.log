@@ -1,0 +1,226 @@
+JS - Detect Changes	Set up job	﻿2026-04-16T07:17:22.3162924Z Current runner version: '2.333.1'
+JS - Detect Changes	Set up job	2026-04-16T07:17:22.3188922Z ##[group]Runner Image Provisioner
+JS - Detect Changes	Set up job	2026-04-16T07:17:22.3189792Z Hosted Compute Agent
+JS - Detect Changes	Set up job	2026-04-16T07:17:22.3190453Z Version: 20260213.493
+JS - Detect Changes	Set up job	2026-04-16T07:17:22.3191187Z Commit: 5c115507f6dd24b8de37d8bbe0bb4509d0cc0fa3
+JS - Detect Changes	Set up job	2026-04-16T07:17:22.3191916Z Build Date: 2026-02-13T00:28:41Z
+JS - Detect Changes	Set up job	2026-04-16T07:17:22.3192586Z Worker ID: {e4843a00-fc7e-41bd-967d-87bbf25fd79e}
+JS - Detect Changes	Set up job	2026-04-16T07:17:22.3193299Z Azure Region: eastus
+JS - Detect Changes	Set up job	2026-04-16T07:17:22.3193851Z ##[endgroup]
+JS - Detect Changes	Set up job	2026-04-16T07:17:22.3195319Z ##[group]Operating System
+JS - Detect Changes	Set up job	2026-04-16T07:17:22.3195884Z Ubuntu
+JS - Detect Changes	Set up job	2026-04-16T07:17:22.3196369Z 24.04.4
+JS - Detect Changes	Set up job	2026-04-16T07:17:22.3196877Z LTS
+JS - Detect Changes	Set up job	2026-04-16T07:17:22.3197327Z ##[endgroup]
+JS - Detect Changes	Set up job	2026-04-16T07:17:22.3197870Z ##[group]Runner Image
+JS - Detect Changes	Set up job	2026-04-16T07:17:22.3198363Z Image: ubuntu-24.04
+JS - Detect Changes	Set up job	2026-04-16T07:17:22.3198952Z Version: 20260406.80.1
+JS - Detect Changes	Set up job	2026-04-16T07:17:22.3199913Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20260406.80/images/ubuntu/Ubuntu2404-Readme.md
+JS - Detect Changes	Set up job	2026-04-16T07:17:22.3201731Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20260406.80
+JS - Detect Changes	Set up job	2026-04-16T07:17:22.3202689Z ##[endgroup]
+JS - Detect Changes	Set up job	2026-04-16T07:17:22.3203878Z ##[group]GITHUB_TOKEN Permissions
+JS - Detect Changes	Set up job	2026-04-16T07:17:22.3205993Z Contents: read
+JS - Detect Changes	Set up job	2026-04-16T07:17:22.3206514Z Metadata: read
+JS - Detect Changes	Set up job	2026-04-16T07:17:22.3207116Z Packages: read
+JS - Detect Changes	Set up job	2026-04-16T07:17:22.3207578Z ##[endgroup]
+JS - Detect Changes	Set up job	2026-04-16T07:17:22.3209636Z Secret source: Actions
+JS - Detect Changes	Set up job	2026-04-16T07:17:22.3211106Z Prepare workflow directory
+JS - Detect Changes	Set up job	2026-04-16T07:17:22.3623423Z Prepare all required actions
+JS - Detect Changes	Set up job	2026-04-16T07:17:22.3661325Z Getting action download info
+JS - Detect Changes	Set up job	2026-04-16T07:17:22.6828127Z Download action repository 'actions/checkout@v4' (SHA:34e114876b0b11c390a56381ad16ebd13914f8d5)
+JS - Detect Changes	Set up job	2026-04-16T07:17:22.8918727Z Complete job name: JS - Detect Changes
+JS - Detect Changes	Run actions/checkout@v4	﻿2026-04-16T07:17:22.9597043Z ##[group]Run actions/checkout@v4
+JS - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:22.9597834Z with:
+JS - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:22.9598202Z   fetch-depth: 0
+JS - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:22.9598636Z   repository: link-assistant/web-capture
+JS - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:22.9599353Z   token: ***
+JS - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:22.9599734Z   ssh-strict: true
+JS - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:22.9600119Z   ssh-user: git
+JS - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:22.9600937Z   persist-credentials: true
+JS - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:22.9601692Z   clean: true
+JS - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:22.9602278Z   sparse-checkout-cone-mode: true
+JS - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:22.9602806Z   fetch-tags: false
+JS - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:22.9603198Z   show-progress: true
+JS - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:22.9603602Z   lfs: false
+JS - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:22.9603954Z   submodules: false
+JS - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:22.9604348Z   set-safe-directory: true
+JS - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:22.9605114Z ##[endgroup]
+JS - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:23.0690545Z Syncing repository: link-assistant/web-capture
+JS - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:23.0692904Z ##[group]Getting Git version info
+JS - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:23.0693596Z Working directory is '/home/runner/work/web-capture/web-capture'
+JS - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:23.0694625Z [command]/usr/bin/git version
+JS - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:23.0743369Z git version 2.53.0
+JS - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:23.0767826Z ##[endgroup]
+JS - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:23.0782009Z Temporarily overriding HOME='/home/runner/work/_temp/2d466ce1-4455-4f80-a9ba-f2a954481d0c' before making global git config changes
+JS - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:23.0783443Z Adding repository directory to the temporary git global config as a safe directory
+JS - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:23.0787344Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/web-capture/web-capture
+JS - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:23.0820358Z Deleting the contents of '/home/runner/work/web-capture/web-capture'
+JS - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:23.0824046Z ##[group]Initializing the repository
+JS - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:23.0828049Z [command]/usr/bin/git init /home/runner/work/web-capture/web-capture
+JS - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:23.0892029Z hint: Using 'master' as the name for the initial branch. This default branch name
+JS - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:23.0893514Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+JS - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:23.0894525Z hint: to use in all of your new repositories, which will suppress this warning,
+JS - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:23.0895210Z hint: call:
+JS - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:23.0895565Z hint:
+JS - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:23.0896319Z hint: 	git config --global init.defaultBranch <name>
+JS - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:23.0896898Z hint:
+JS - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:23.0897420Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+JS - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:23.0898364Z hint: 'development'. The just-created branch can be renamed via this command:
+JS - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:23.0899112Z hint:
+JS - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:23.0899472Z hint: 	git branch -m <name>
+JS - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:23.0899896Z hint:
+JS - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:23.0900458Z hint: Disable this message with "git config set advice.defaultBranchName false"
+JS - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:23.0901743Z Initialized empty Git repository in /home/runner/work/web-capture/web-capture/.git/
+JS - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:23.0904509Z [command]/usr/bin/git remote add origin https://github.com/link-assistant/web-capture
+JS - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:23.0935012Z ##[endgroup]
+JS - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:23.0936067Z ##[group]Disabling automatic garbage collection
+JS - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:23.0938988Z [command]/usr/bin/git config --local gc.auto 0
+JS - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:23.0967422Z ##[endgroup]
+JS - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:23.0968401Z ##[group]Setting up auth
+JS - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:23.0974046Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+JS - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:23.1004781Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+JS - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:23.1294930Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+JS - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:23.1325215Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+JS - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:23.1567680Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+JS - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:23.1599181Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+JS - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:23.1834997Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+JS - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:23.1871191Z ##[endgroup]
+JS - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:23.1872037Z ##[group]Fetching the repository
+JS - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:23.1880456Z [command]/usr/bin/git -c protocol.version=2 fetch --prune --no-recurse-submodules origin +refs/heads/*:refs/remotes/origin/* +refs/tags/*:refs/tags/* +eaf4d496aaa668d020c2dcdc5ed249dba68b716a:refs/remotes/pull/71/merge
+JS - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:23.6208679Z From https://github.com/link-assistant/web-capture
+JS - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:23.6210987Z  * [new branch]      issue-1-5017a66c05a8                     -> origin/issue-1-5017a66c05a8
+JS - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:23.6212769Z  * [new branch]      issue-11-2861fe92                        -> origin/issue-11-2861fe92
+JS - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:23.6214464Z  * [new branch]      issue-13-a8f3466f6d79                    -> origin/issue-13-a8f3466f6d79
+JS - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:23.6216291Z  * [new branch]      issue-15-ba41292e60dd                    -> origin/issue-15-ba41292e60dd
+JS - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:23.6218385Z  * [new branch]      issue-17-d61fd69fb1d0                    -> origin/issue-17-d61fd69fb1d0
+JS - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:23.6220460Z  * [new branch]      issue-19-7350892c64e0                    -> origin/issue-19-7350892c64e0
+JS - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:23.6222956Z  * [new branch]      issue-21-ae540dd05ccf                    -> origin/issue-21-ae540dd05ccf
+JS - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:23.6225152Z  * [new branch]      issue-24-000cedc18c0c                    -> origin/issue-24-000cedc18c0c
+JS - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:23.6227349Z  * [new branch]      issue-26-f5bc08d1c062                    -> origin/issue-26-f5bc08d1c062
+JS - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:23.6229574Z  * [new branch]      issue-28-9ae2d8528d6f                    -> origin/issue-28-9ae2d8528d6f
+JS - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:23.6232179Z  * [new branch]      issue-29-1750ff5496be                    -> origin/issue-29-1750ff5496be
+JS - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:23.6234496Z  * [new branch]      issue-3-e1f5cfd3                         -> origin/issue-3-e1f5cfd3
+JS - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:23.6236789Z  * [new branch]      issue-31-e38e38b91777                    -> origin/issue-31-e38e38b91777
+JS - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:23.6239578Z  * [new branch]      issue-33-597c234012bd                    -> origin/issue-33-597c234012bd
+JS - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:23.6242338Z  * [new branch]      issue-36-4868dc6a6cd1                    -> origin/issue-36-4868dc6a6cd1
+JS - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:23.6245117Z  * [new branch]      issue-38-1c6b407f9682                    -> origin/issue-38-1c6b407f9682
+JS - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:23.6247938Z  * [new branch]      issue-40-aea0c7bbe29d                    -> origin/issue-40-aea0c7bbe29d
+JS - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:23.6250953Z  * [new branch]      issue-42-51e981719f34                    -> origin/issue-42-51e981719f34
+JS - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:23.6253697Z  * [new branch]      issue-44-5fc8fd3303bb                    -> origin/issue-44-5fc8fd3303bb
+JS - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:23.6256414Z  * [new branch]      issue-46-74be9b28b867                    -> origin/issue-46-74be9b28b867
+JS - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:23.6259070Z  * [new branch]      issue-48-fa0cc317013f                    -> origin/issue-48-fa0cc317013f
+JS - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:23.6261770Z  * [new branch]      issue-5-37ef445c                         -> origin/issue-5-37ef445c
+JS - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:23.6264284Z  * [new branch]      issue-50-accd5e4cfac0                    -> origin/issue-50-accd5e4cfac0
+JS - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:23.6266893Z  * [new branch]      issue-52-b275657642c1                    -> origin/issue-52-b275657642c1
+JS - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:23.6269450Z  * [new branch]      issue-53-ee04eb2d7520                    -> origin/issue-53-ee04eb2d7520
+JS - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:23.6272227Z  * [new branch]      issue-56-a89df19bbdc2                    -> origin/issue-56-a89df19bbdc2
+JS - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:23.6274774Z  * [new branch]      issue-58-c1217b0e73df                    -> origin/issue-58-c1217b0e73df
+JS - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:23.6277298Z  * [new branch]      issue-60-7c97a8e6f23e                    -> origin/issue-60-7c97a8e6f23e
+JS - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:23.6280419Z  * [new branch]      issue-62-5074090c911d                    -> origin/issue-62-5074090c911d
+JS - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:23.6283023Z  * [new branch]      issue-64-fc240b6b34c4                    -> origin/issue-64-fc240b6b34c4
+JS - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:23.6284780Z  * [new branch]      issue-66-d851400625b3                    -> origin/issue-66-d851400625b3
+JS - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:23.6286685Z  * [new branch]      issue-68-f537a341d162                    -> origin/issue-68-f537a341d162
+JS - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:23.6288370Z  * [new branch]      issue-7-c22ac3d5                         -> origin/issue-7-c22ac3d5
+JS - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:23.6290018Z  * [new branch]      issue-70-46e0722472f6                    -> origin/issue-70-46e0722472f6
+JS - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:23.6291867Z  * [new branch]      issue-8-2bf69acf                         -> origin/issue-8-2bf69acf
+JS - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:23.6293263Z  * [new branch]      main                                     -> origin/main
+JS - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:23.6294508Z  * [new tag]         rust-v0.1.0                              -> rust-v0.1.0
+JS - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:23.6295701Z  * [new tag]         rust-v0.2.0                              -> rust-v0.2.0
+JS - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:23.6296905Z  * [new tag]         rust-v0.2.1                              -> rust-v0.2.1
+JS - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:23.6298113Z  * [new tag]         rust-v0.3.0                              -> rust-v0.3.0
+JS - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:23.6299560Z  * [new tag]         rust-v0.3.1                              -> rust-v0.3.1
+JS - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:23.6301407Z  * [new tag]         v1.1.1                                   -> v1.1.1
+JS - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:23.6302940Z  * [new tag]         v1.1.2                                   -> v1.1.2
+JS - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:23.6304040Z  * [new tag]         v1.1.3                                   -> v1.1.3
+JS - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:23.6305138Z  * [new tag]         v1.2.0                                   -> v1.2.0
+JS - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:23.6306200Z  * [new tag]         v1.3.0                                   -> v1.3.0
+JS - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:23.6307638Z  * [new tag]         v1.7.2                                   -> v1.7.2
+JS - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:23.6308965Z  * [new tag]         v1.7.3                                   -> v1.7.3
+JS - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:23.6310553Z  * [new ref]         eaf4d496aaa668d020c2dcdc5ed249dba68b716a -> pull/71/merge
+JS - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:23.6313774Z ##[endgroup]
+JS - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:23.6314628Z ##[group]Determining the checkout info
+JS - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:23.6315684Z ##[endgroup]
+JS - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:23.6317884Z [command]/usr/bin/git sparse-checkout disable
+JS - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:23.6356877Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+JS - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:23.6383680Z ##[group]Checking out the ref
+JS - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:23.6386878Z [command]/usr/bin/git checkout --progress --force refs/remotes/pull/71/merge
+JS - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:23.6697181Z Note: switching to 'refs/remotes/pull/71/merge'.
+JS - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:23.6698399Z
+JS - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:23.6699215Z You are in 'detached HEAD' state. You can look around, make experimental
+JS - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:23.6701702Z changes and commit them, and you can discard any commits you make in this
+JS - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:23.6703516Z state without impacting any branches by switching back to a branch.
+JS - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:23.6704456Z
+JS - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:23.6704985Z If you want to create a new branch to retain commits you create, you may
+JS - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:23.6706348Z do so (now or later) by using -c with the switch command. Example:
+JS - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:23.6707477Z
+JS - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:23.6707809Z   git switch -c <new-branch-name>
+JS - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:23.6708461Z
+JS - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:23.6708673Z Or undo this operation with:
+JS - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:23.6709128Z
+JS - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:23.6709306Z   git switch -
+JS - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:23.6709586Z
+JS - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:23.6710196Z Turn off this advice by setting config variable advice.detachedHead to false
+JS - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:23.6711399Z
+JS - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:23.6712798Z HEAD is now at eaf4d49 Merge 992b8166f6d41a207e89668af8a7e23f642a1fa1 into 8d1e1ff5dce1e32d0e3fb515aace7a06ae83696e
+JS - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:23.6716305Z ##[endgroup]
+JS - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:23.6749221Z [command]/usr/bin/git log -1 --format=%H
+JS - Detect Changes	Run actions/checkout@v4	2026-04-16T07:17:23.6772276Z eaf4d496aaa668d020c2dcdc5ed249dba68b716a
+JS - Detect Changes	Detect changes	﻿2026-04-16T07:17:23.6989086Z ##[group]Run node scripts/detect-code-changes.mjs
+JS - Detect Changes	Detect changes	2026-04-16T07:17:23.6990188Z [36;1mnode scripts/detect-code-changes.mjs[0m
+JS - Detect Changes	Detect changes	2026-04-16T07:17:23.7016694Z shell: /usr/bin/bash -e {0}
+JS - Detect Changes	Detect changes	2026-04-16T07:17:23.7017314Z env:
+JS - Detect Changes	Detect changes	2026-04-16T07:17:23.7017748Z   GITHUB_EVENT_NAME: pull_request
+JS - Detect Changes	Detect changes	2026-04-16T07:17:23.7018621Z   GITHUB_BASE_SHA: 8d1e1ff5dce1e32d0e3fb515aace7a06ae83696e
+JS - Detect Changes	Detect changes	2026-04-16T07:17:23.7019759Z   GITHUB_HEAD_SHA: 992b8166f6d41a207e89668af8a7e23f642a1fa1
+JS - Detect Changes	Detect changes	2026-04-16T07:17:23.7020928Z ##[endgroup]
+JS - Detect Changes	Detect changes	2026-04-16T07:17:23.7948405Z Detecting file changes for CI/CD...
+JS - Detect Changes	Detect changes	2026-04-16T07:17:23.7949531Z
+JS - Detect Changes	Detect changes	2026-04-16T07:17:23.7998375Z Merge commit detected (pull_request event)
+JS - Detect Changes	Detect changes	2026-04-16T07:17:23.7999561Z Comparing HEAD^2^ to HEAD^2 (per-commit diff of PR head)
+JS - Detect Changes	Detect changes	2026-04-16T07:17:23.8030497Z Changed files:
+JS - Detect Changes	Detect changes	2026-04-16T07:17:23.8031406Z   .gitkeep
+JS - Detect Changes	Detect changes	2026-04-16T07:17:23.8031708Z
+JS - Detect Changes	Detect changes	2026-04-16T07:17:23.8035045Z js-code-changed=false
+JS - Detect Changes	Detect changes	2026-04-16T07:17:23.8036288Z js-changed=false
+JS - Detect Changes	Detect changes	2026-04-16T07:17:23.8037509Z rust-code-changed=false
+JS - Detect Changes	Detect changes	2026-04-16T07:17:23.8038889Z rust-changed=false
+JS - Detect Changes	Detect changes	2026-04-16T07:17:23.8040351Z scripts-changed=false
+JS - Detect Changes	Detect changes	2026-04-16T07:17:23.8041303Z js-scripts-changed=false
+JS - Detect Changes	Detect changes	2026-04-16T07:17:23.8048276Z rust-scripts-changed=false
+JS - Detect Changes	Detect changes	2026-04-16T07:17:23.8049181Z workflow-changed=false
+JS - Detect Changes	Detect changes	2026-04-16T07:17:23.8049756Z js-workflow-changed=false
+JS - Detect Changes	Detect changes	2026-04-16T07:17:23.8050348Z rust-workflow-changed=false
+JS - Detect Changes	Detect changes	2026-04-16T07:17:23.8051191Z docs-changed=false
+JS - Detect Changes	Detect changes	2026-04-16T07:17:23.8051504Z
+JS - Detect Changes	Detect changes	2026-04-16T07:17:23.8051716Z Files considered as code changes:
+JS - Detect Changes	Detect changes	2026-04-16T07:17:23.8052346Z   .gitkeep
+JS - Detect Changes	Detect changes	2026-04-16T07:17:23.8052674Z
+JS - Detect Changes	Detect changes	2026-04-16T07:17:23.8052872Z any-code-changed=false
+JS - Detect Changes	Detect changes	2026-04-16T07:17:23.8053536Z any-js-code-changed=false
+JS - Detect Changes	Detect changes	2026-04-16T07:17:23.8054139Z any-rust-code-changed=false
+JS - Detect Changes	Detect changes	2026-04-16T07:17:23.8054551Z
+JS - Detect Changes	Detect changes	2026-04-16T07:17:23.8054757Z Change detection completed.
+JS - Detect Changes	Post Run actions/checkout@v4	﻿2026-04-16T07:17:23.8275016Z Post job cleanup.
+JS - Detect Changes	Post Run actions/checkout@v4	2026-04-16T07:17:23.9231188Z [command]/usr/bin/git version
+JS - Detect Changes	Post Run actions/checkout@v4	2026-04-16T07:17:23.9275511Z git version 2.53.0
+JS - Detect Changes	Post Run actions/checkout@v4	2026-04-16T07:17:23.9319206Z Temporarily overriding HOME='/home/runner/work/_temp/9f097cd4-81fa-4c39-b6fc-4bdb898aa33b' before making global git config changes
+JS - Detect Changes	Post Run actions/checkout@v4	2026-04-16T07:17:23.9323862Z Adding repository directory to the temporary git global config as a safe directory
+JS - Detect Changes	Post Run actions/checkout@v4	2026-04-16T07:17:23.9326841Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/web-capture/web-capture
+JS - Detect Changes	Post Run actions/checkout@v4	2026-04-16T07:17:23.9360831Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+JS - Detect Changes	Post Run actions/checkout@v4	2026-04-16T07:17:23.9394925Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+JS - Detect Changes	Post Run actions/checkout@v4	2026-04-16T07:17:23.9633452Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+JS - Detect Changes	Post Run actions/checkout@v4	2026-04-16T07:17:23.9655220Z http.https://github.com/.extraheader
+JS - Detect Changes	Post Run actions/checkout@v4	2026-04-16T07:17:23.9667819Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+JS - Detect Changes	Post Run actions/checkout@v4	2026-04-16T07:17:23.9700078Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+JS - Detect Changes	Post Run actions/checkout@v4	2026-04-16T07:17:23.9928319Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+JS - Detect Changes	Post Run actions/checkout@v4	2026-04-16T07:17:23.9960832Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+JS - Detect Changes	Complete job	﻿2026-04-16T07:17:24.0410375Z Evaluate and set job outputs
+JS - Detect Changes	Complete job	2026-04-16T07:17:24.0420043Z Set output 'js-code-changed'
+JS - Detect Changes	Complete job	2026-04-16T07:17:24.0422607Z Set output 'js-changed'
+JS - Detect Changes	Complete job	2026-04-16T07:17:24.0423963Z Set output 'scripts-changed'
+JS - Detect Changes	Complete job	2026-04-16T07:17:24.0425043Z Set output 'js-workflow-changed'
+JS - Detect Changes	Complete job	2026-04-16T07:17:24.0426154Z Set output 'any-js-code-changed'
+JS - Detect Changes	Complete job	2026-04-16T07:17:24.0427394Z Set output 'any-code-changed'
+JS - Detect Changes	Complete job	2026-04-16T07:17:24.0428658Z Set output 'docs-changed'
+JS - Detect Changes	Complete job	2026-04-16T07:17:24.0430203Z Cleaning up orphan processes
+JS - Detect Changes	Complete job	2026-04-16T07:17:24.0867648Z ##[warning]Node.js 20 actions are deprecated. The following actions are running on Node.js 20 and may not work as expected: actions/checkout@v4. Actions will be forced to run with Node.js 24 by default starting June 2nd, 2026. Node.js 20 will be removed from the runner on September 16th, 2026. Please check if updated versions of these actions are available that support Node.js 24. To opt into Node.js 24 now, set the FORCE_JAVASCRIPT_ACTIONS_TO_NODE24=true environment variable on the runner or in your workflow file. Once Node.js 24 becomes the default, you can temporarily opt out by setting ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION=true. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
