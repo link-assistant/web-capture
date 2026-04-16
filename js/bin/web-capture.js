@@ -230,7 +230,7 @@ const config = makeConfig({
         'Capture private Google Doc with API token'
       )
       .epilogue(
-        'API Endpoints (in server mode):\n  GET /html?url=<URL>&engine=<ENGINE>           Get rendered HTML\n  GET /markdown?url=<URL>                       Get Markdown conversion\n  GET /image?url=<URL>&format=png|jpeg&theme=light|dark  Screenshot\n  GET /archive?url=<URL>&localImages=true&documentFormat=markdown|html  ZIP archive\n  GET /pdf?url=<URL>&theme=light|dark           PDF with embedded images\n  GET /docx?url=<URL>                           DOCX with embedded images\n  GET /fetch?url=<URL>                          Proxy fetch\n  GET /stream?url=<URL>                         Streaming proxy\n  GET /gdocs?url=<URL>&format=markdown|html|txt  Google Docs capture'
+        'API Endpoints (in server mode):\n  GET /html?url=<URL>&engine=<ENGINE>           Get rendered HTML\n  GET /markdown?url=<URL>                       Get Markdown conversion\n  GET /image?url=<URL>&format=png|jpeg&theme=light|dark  Screenshot\n  GET /archive?url=<URL>&localImages=true&documentFormat=markdown|html  ZIP archive\n  GET /pdf?url=<URL>&theme=light|dark           PDF with embedded images\n  GET /docx?url=<URL>                           DOCX with embedded images\n  GET /fetch?url=<URL>                          Proxy fetch\n  GET /stream?url=<URL>                         Streaming proxy'
       )
       .strict(),
   lenv: {
@@ -271,7 +271,6 @@ async function startServer(port) {
       console.log(`  GET /docx?url=<URL>       - DOCX with embedded images`);
       console.log(`  GET /fetch?url=<URL>      - Proxy fetch content`);
       console.log(`  GET /stream?url=<URL>     - Stream content`);
-      console.log(`  GET /gdocs?url=<URL>      - Capture Google Docs document`);
       console.log('');
       console.log('Press Ctrl+C to stop the server');
       resolve(server);

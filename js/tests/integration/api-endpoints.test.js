@@ -28,6 +28,17 @@ afterEach(() => {
 });
 
 describe('API Endpoint Tests', () => {
+  describe('unsupported routes', () => {
+    it('does not expose /gdocs as an output-format endpoint', async () => {
+      await request(app)
+        .get('/gdocs')
+        .query({
+          url: 'https://docs.google.com/document/d/test-doc/edit',
+        })
+        .expect(404);
+    });
+  });
+
   describe('GET /image', () => {
     it('rejects invalid format', async () => {
       await request(app)

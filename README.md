@@ -110,21 +110,20 @@ All flags can be controlled via environment variables:
 
 Both implementations expose the same API:
 
-| Endpoint                                         | Description                                               |
-| ------------------------------------------------ | --------------------------------------------------------- |
-| `GET /html?url=<URL>`                            | Get rendered HTML content                                 |
+| Endpoint                                          | Description                                               |
+| ------------------------------------------------- | --------------------------------------------------------- |
+| `GET /html?url=<URL>`                             | Get rendered HTML content                                 |
 | `GET /markdown?url=<URL>`                         | Get Markdown (original links kept, base64 stripped)       |
 | `GET /markdown?url=<URL>&embedImages=true`        | Get Markdown with base64 images inline                    |
 | `GET /markdown?url=<URL>&keepOriginalLinks=false` | Get Markdown with all images stripped                     |
-| `GET /image?url=<URL>`                           | Get PNG screenshot                                        |
-| `GET /archive?url=<URL>`                         | ZIP archive with markdown + images extracted to `images/` |
-| `GET /archive?url=<URL>&keepOriginalLinks=true`  | ZIP archive keeping original remote image URLs            |
-| `GET /archive?url=<URL>&embedImages=true`        | ZIP archive with base64 images inline                     |
-| `GET /pdf?url=<URL>`                             | PDF with embedded images                                  |
-| `GET /docx?url=<URL>`                            | DOCX with embedded images                                 |
-| `GET /fetch?url=<URL>`                           | Proxy fetch content                                       |
-| `GET /stream?url=<URL>`                          | Stream content                                            |
-| `GET /gdocs?url=<URL>`                           | Google Docs capture                                       |
+| `GET /image?url=<URL>`                            | Get PNG screenshot                                        |
+| `GET /archive?url=<URL>`                          | ZIP archive with markdown + images extracted to `images/` |
+| `GET /archive?url=<URL>&keepOriginalLinks=true`   | ZIP archive keeping original remote image URLs            |
+| `GET /archive?url=<URL>&embedImages=true`         | ZIP archive with base64 images inline                     |
+| `GET /pdf?url=<URL>`                              | PDF with embedded images                                  |
+| `GET /docx?url=<URL>`                             | DOCX with embedded images                                 |
+| `GET /fetch?url=<URL>`                            | Proxy fetch content                                       |
+| `GET /stream?url=<URL>`                           | Stream content                                            |
 
 ## Docker
 
