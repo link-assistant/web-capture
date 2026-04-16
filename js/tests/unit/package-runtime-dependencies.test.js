@@ -36,6 +36,9 @@ describe('runtime package dependencies', () => {
       const packageLock = readJson('package-lock.json');
 
       expect(packageLock.packages[''].dependencies).toHaveProperty(packageName);
+      expect(packageLock.packages[''].devDependencies || {}).not.toHaveProperty(
+        packageName
+      );
       expect(packageLock.packages[`node_modules/${packageName}`]).toBeDefined();
       expect(packageLock.packages[`node_modules/${packageName}`].dev).not.toBe(
         true
