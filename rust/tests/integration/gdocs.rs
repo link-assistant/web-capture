@@ -1,6 +1,8 @@
 use web_capture::gdocs::{
-    build_export_url, create_archive_zip, extract_base64_images, extract_bearer_token,
-    extract_document_id, is_google_docs_url, ExtractedImage, GDocsArchiveResult,
+    build_docs_api_url, build_edit_url, build_export_url, create_archive_zip,
+    extract_base64_images, extract_bearer_token, extract_document_id, is_google_docs_url,
+    parse_model_chunks, render_captured_document, render_docs_api_document, select_capture_method,
+    ExtractedImage, GDocsArchiveResult, GDocsCaptureMethod,
 };
 
 #[test]
@@ -54,6 +56,138 @@ fn test_build_export_url() {
         build_export_url("abc123", "invalid"),
         "https://docs.google.com/document/d/abc123/export?format=html"
     );
+}
+
+#[test]
+fn test_capture_method_selection_honors_browser_flag() {
+    assert_eq!(
+        select_capture_method("browser", None).unwrap(),
+        GDocsCaptureMethod::BrowserModel
+    );
+    assert_eq!(
+        select_capture_method("api", None).unwrap(),
+        GDocsCaptureMethod::PublicExport
+    );
+    assert_eq!(
+        select_capture_method("api", Some("token")).unwrap(),
+        GDocsCaptureMethod::DocsApi
+    );
+}
+
+#[test]
+fn test_build_edit_url() {
+    assert_eq!(
+        build_edit_url("abc123"),
+        "https://docs.google.com/document/d/abc123/edit"
+    );
+}
+
+#[test]
+fn test_build_docs_api_url() {
+    assert_eq!(
+        build_docs_api_url("abc123"),
+        "https://docs.googleapis.com/v1/documents/abc123"
+    );
+}
+
+#[test]
+fn test_parse_model_chunks_includes_suggestions_and_images() {
+    let chunks = vec![serde_json::json!({
+        "chunk": [
+            { "ty": "is", "s": "Stable " },
+            { "ty": "iss", "s": "suggested*\n" },
+            { "ty": "ase", "id": "suggested-image", "epm": { "ee_eo": { "i_cid": "cid_12345678901234567890" } } },
+            { "ty": "ste", "id": "suggested-image", "spi": 16 }
+        ]
+    })];
+    let cid_urls = std::collections::HashMap::from([(
+        "cid_12345678901234567890".to_string(),
+        "https://docs.google.com/docs-images-rt/image-id".to_string(),
+    )]);
+
+    let capture = parse_model_chunks(&chunks, &cid_urls);
+    let markdown = render_captured_document(&capture, "markdown");
+
+    assert!(capture.text.contains("Stable suggested"));
+    assert!(markdown.contains("Stable suggested"));
+    assert!(
+        markdown.contains("![suggested image](https://docs.google.com/docs-images-rt/image-id)")
+    );
+}
+
+#[test]
+fn test_render_docs_api_document_paragraphs_tables_and_images() {
+    let api_document = serde_json::json!({
+        "title": "API Doc",
+        "body": {
+            "content": [
+                {
+                    "paragraph": {
+                        "elements": [
+                            { "textRun": { "content": "Intro paragraph\n" } }
+                        ]
+                    }
+                },
+                {
+                    "table": {
+                        "tableRows": [
+                            {
+                                "tableCells": [
+                                    {
+                                        "content": [
+                                            {
+                                                "paragraph": {
+                                                    "elements": [
+                                                        { "textRun": { "content": "Name\n" } }
+                                                    ]
+                                                }
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "content": [
+                                            {
+                                                "paragraph": {
+                                                    "elements": [
+                                                        {
+                                                            "inlineObjectElement": {
+                                                                "inlineObjectId": "image-1"
+                                                            }
+                                                        }
+                                                    ]
+                                                }
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                }
+            ]
+        },
+        "inlineObjects": {
+            "image-1": {
+                "inlineObjectProperties": {
+                    "embeddedObject": {
+                        "title": "Diagram",
+                        "imageProperties": {
+                            "contentUri": "https://example.com/diagram.png"
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    let rendered = render_docs_api_document(&api_document);
+
+    assert!(rendered.markdown.contains("Intro paragraph"));
+    assert!(rendered.markdown.contains("| Name | ![Diagram]"));
+    assert!(rendered.html.contains("<table>"));
+    assert!(rendered
+        .html
+        .contains("src=\"https://example.com/diagram.png\""));
 }
 
 #[test]

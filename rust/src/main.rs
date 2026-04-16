@@ -29,7 +29,7 @@ use std::net::SocketAddr;
 use std::path::PathBuf;
 use tokio::fs;
 use tower_http::trace::TraceLayer;
-use tracing::{error, info};
+use tracing::{debug, error, info};
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 use url::Url;
 
@@ -174,16 +174,21 @@ const fn default_true() -> bool {
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
-    // Initialize tracing
+    let mut args = Args::parse();
+
+    // Initialize tracing after parsing args so --verbose can enable detailed logs.
+    let default_filter = if args.verbose {
+        "web_capture=debug,tower_http=debug"
+    } else {
+        "web_capture=info,tower_http=info"
+    };
     tracing_subscriber::registry()
         .with(
             tracing_subscriber::EnvFilter::try_from_default_env()
-                .unwrap_or_else(|_| "web_capture=info,tower_http=info".into()),
+                .unwrap_or_else(|_| default_filter.into()),
         )
         .with(tracing_subscriber::fmt::layer())
         .init();
-
-    let mut args = Args::parse();
 
     // --no-extract-images is an alias for --embed-images
     if args.no_extract_images {
@@ -526,124 +531,154 @@ async fn capture_url(
     args: &Args,
 ) -> anyhow::Result<()> {
     let absolute_url = normalize_url(url).map_err(|e| anyhow::anyhow!(e))?;
+    debug!(
+        url = %absolute_url,
+        format = %format,
+        capture = %args.capture,
+        has_api_token = args.api_token.is_some(),
+        "starting capture"
+    );
 
-    // Auto-detect Google Docs URLs and use API-based capture
+    // Google Docs capture honors --capture:
+    // - browser: load /edit model data
+    // - api without token: public export endpoint
+    // - api with token: docs.googleapis.com REST API
     if web_capture::gdocs::is_google_docs_url(&absolute_url) {
         let api_token = args.api_token.as_deref();
-        match format.to_lowercase().as_str() {
-            "archive" => {
-                let archive_fmt = args.archive.as_deref().unwrap_or("zip");
-                let ext = match archive_fmt {
-                    "tar.gz" | "gz" => "tar.gz",
-                    "7z" => "7z",
-                    "tar" => "tar",
-                    _ => "zip",
-                };
-                let archive_result =
-                    web_capture::gdocs::fetch_google_doc_as_archive(&absolute_url, api_token)
-                        .await?;
-                let zip_bytes =
-                    web_capture::gdocs::create_archive_zip(&archive_result, !args.no_pretty_html)?;
-                let is_stdout = output.is_some_and(|p| p.as_os_str() == "-");
-                let derived;
-                let effective_output = if is_stdout {
-                    None
-                } else if let Some(path) = output {
-                    Some(path.clone())
-                } else {
-                    derived = derive_output_path(&absolute_url, ext, &args.data_dir);
-                    Some(derived)
-                };
-                if let Some(ref path) = effective_output {
-                    if let Some(parent) = path.parent() {
-                        std::fs::create_dir_all(parent).ok();
-                    }
-                    fs::write(path, &zip_bytes).await?;
-                    eprintln!("Google Doc (archive) saved to: {}", path.display());
-                } else {
-                    use std::io::Write;
-                    std::io::stdout().write_all(&zip_bytes)?;
+        let method = web_capture::gdocs::select_capture_method(&args.capture, api_token)?;
+        let format_lower = format.to_lowercase();
+        let model_format = matches!(
+            format_lower.as_str(),
+            "archive" | "markdown" | "md" | "html" | "txt" | "text"
+        );
+        debug!(
+            url = %absolute_url,
+            method = ?method,
+            format = %format_lower,
+            model_format,
+            has_api_token = api_token.is_some(),
+            "selected Google Docs capture method"
+        );
+
+        if method == web_capture::gdocs::GDocsCaptureMethod::BrowserModel && !model_format {
+            debug!(
+                format = %format_lower,
+                "Google Docs editor model does not support requested format; using regular browser pipeline"
+            );
+            // Screenshot-like formats should use the regular browser path below.
+        } else if method == web_capture::gdocs::GDocsCaptureMethod::BrowserModel {
+            let rendered =
+                web_capture::gdocs::fetch_google_doc_from_model(&absolute_url, api_token).await?;
+            write_rendered_gdoc(
+                &rendered,
+                &format_lower,
+                &absolute_url,
+                output,
+                args,
+                "Google Doc (browser-model)",
+            )
+            .await?;
+            return Ok(());
+        } else if method == web_capture::gdocs::GDocsCaptureMethod::DocsApi {
+            let Some(token) = api_token else {
+                unreachable!("Docs API capture is only selected when a token exists");
+            };
+            let rendered =
+                web_capture::gdocs::fetch_google_doc_from_docs_api(&absolute_url, token).await?;
+            write_rendered_gdoc(
+                &rendered,
+                &format_lower,
+                &absolute_url,
+                output,
+                args,
+                "Google Doc (docs-api)",
+            )
+            .await?;
+            return Ok(());
+        } else {
+            match format_lower.as_str() {
+                "archive" => {
+                    let archive_result =
+                        web_capture::gdocs::fetch_google_doc_as_archive(&absolute_url, api_token)
+                            .await?;
+                    let zip_bytes = web_capture::gdocs::create_archive_zip(
+                        &archive_result,
+                        !args.no_pretty_html,
+                    )?;
+                    write_archive_capture(
+                        &zip_bytes,
+                        &absolute_url,
+                        output,
+                        args.archive.as_deref().unwrap_or("zip"),
+                        &args.data_dir,
+                        "Google Doc (archive)",
+                    )
+                    .await?;
                 }
-            }
-            "markdown" | "md" => {
-                let result =
-                    web_capture::gdocs::fetch_google_doc_as_markdown(&absolute_url, api_token)
-                        .await?;
-                let mut markdown = result.content;
-                let is_stdout = output.is_some_and(|p| p.as_os_str() == "-");
-                let derived;
-                let effective_output = if is_stdout {
-                    None
-                } else if let Some(path) = output {
-                    Some(path.clone())
-                } else {
-                    derived = derive_output_path(&absolute_url, "md", &args.data_dir);
-                    Some(derived)
-                };
-                if let Some(ref path) = effective_output {
-                    if args.embed_images {
-                        // Keep base64 data URIs inline
-                    } else if args.keep_original_links {
-                        let result = web_capture::extract_images::strip_base64_images(&markdown);
-                        if result.stripped > 0 {
-                            markdown = result.markdown;
-                            eprintln!(
-                                "Stripped {} base64 images (keeping original links)",
-                                result.stripped
-                            );
+                "markdown" | "md" => {
+                    let result =
+                        web_capture::gdocs::fetch_google_doc_as_markdown(&absolute_url, api_token)
+                            .await?;
+                    let mut markdown = result.content;
+                    if let Some(path) =
+                        effective_output_path(&absolute_url, "md", output, &args.data_dir)
+                    {
+                        if args.embed_images {
+                            // Keep base64 data URIs inline
+                        } else if args.keep_original_links {
+                            let result =
+                                web_capture::extract_images::strip_base64_images(&markdown);
+                            if result.stripped > 0 {
+                                markdown = result.markdown;
+                                eprintln!(
+                                    "Stripped {} base64 images (keeping original links)",
+                                    result.stripped
+                                );
+                            }
+                        } else {
+                            let output_dir = path.parent().unwrap_or(&path);
+                            let result = web_capture::extract_images::extract_and_save_images(
+                                &markdown,
+                                output_dir,
+                                &args.images_dir,
+                            )?;
+                            if result.extracted > 0 {
+                                markdown = result.markdown;
+                                eprintln!(
+                                    "Extracted {} images to {}/",
+                                    result.extracted, args.images_dir
+                                );
+                            }
                         }
+                        write_text_capture_to_path(&markdown, &path, "Google Doc Markdown").await?;
                     } else {
-                        let output_dir = path.parent().unwrap_or(path);
-                        let result = web_capture::extract_images::extract_and_save_images(
-                            &markdown,
-                            output_dir,
-                            &args.images_dir,
-                        )?;
-                        if result.extracted > 0 {
-                            markdown = result.markdown;
-                            eprintln!(
-                                "Extracted {} images to {}/",
-                                result.extracted, args.images_dir
-                            );
-                        }
+                        print!("{markdown}");
                     }
-                    fs::write(path, &markdown).await?;
-                    eprintln!("Google Doc Markdown saved to: {}", path.display());
-                } else {
-                    print!("{markdown}");
+                }
+                _ => {
+                    let gdocs_format = match format_lower.as_str() {
+                        "png" | "image" | "screenshot" => "html",
+                        other => other,
+                    };
+                    let result = web_capture::gdocs::fetch_google_doc(
+                        &absolute_url,
+                        gdocs_format,
+                        api_token,
+                    )
+                    .await?;
+                    write_text_capture(
+                        &result.content,
+                        &absolute_url,
+                        gdocs_format,
+                        output,
+                        &args.data_dir,
+                        &format!("Google Doc ({gdocs_format})"),
+                    )
+                    .await?;
                 }
             }
-            _ => {
-                let format_lower = format.to_lowercase();
-                let gdocs_format = match format_lower.as_str() {
-                    "png" | "image" | "screenshot" => "html",
-                    other => other,
-                };
-                let result =
-                    web_capture::gdocs::fetch_google_doc(&absolute_url, gdocs_format, api_token)
-                        .await?;
-                let is_stdout = output.is_some_and(|p| p.as_os_str() == "-");
-                let derived;
-                let effective_output = if is_stdout {
-                    None
-                } else if let Some(path) = output {
-                    Some(path.clone())
-                } else {
-                    derived = derive_output_path(&absolute_url, gdocs_format, &args.data_dir);
-                    Some(derived)
-                };
-                if let Some(ref path) = effective_output {
-                    if let Some(parent) = path.parent() {
-                        std::fs::create_dir_all(parent).ok();
-                    }
-                    fs::write(path, &result.content).await?;
-                    eprintln!("Google Doc ({}) saved to: {}", gdocs_format, path.display());
-                } else {
-                    print!("{}", result.content);
-                }
-            }
+            return Ok(());
         }
-        return Ok(());
     }
 
     match format.to_lowercase().as_str() {
@@ -825,6 +860,114 @@ async fn capture_url(
         }
     }
 
+    Ok(())
+}
+
+async fn write_rendered_gdoc(
+    rendered: &web_capture::gdocs::GDocsRenderedResult,
+    format: &str,
+    absolute_url: &str,
+    output: Option<&PathBuf>,
+    args: &Args,
+    label: &str,
+) -> anyhow::Result<()> {
+    if format == "archive" || format == "zip" {
+        let archive = web_capture::gdocs::GDocsArchiveResult {
+            html: rendered.html.clone(),
+            markdown: rendered.markdown.clone(),
+            images: Vec::new(),
+            document_id: rendered.document_id.clone(),
+            export_url: rendered.export_url.clone(),
+        };
+        let zip_bytes = web_capture::gdocs::create_archive_zip(&archive, !args.no_pretty_html)?;
+        write_archive_capture(
+            &zip_bytes,
+            absolute_url,
+            output,
+            args.archive.as_deref().unwrap_or("zip"),
+            &args.data_dir,
+            "Google Doc (archive)",
+        )
+        .await?;
+        return Ok(());
+    }
+
+    let (content, ext) = match format {
+        "html" => (rendered.html.as_str(), "html"),
+        "txt" | "text" => (rendered.text.as_str(), "txt"),
+        _ => (rendered.markdown.as_str(), "md"),
+    };
+    write_text_capture(content, absolute_url, ext, output, &args.data_dir, label).await
+}
+
+fn effective_output_path(
+    absolute_url: &str,
+    ext: &str,
+    output: Option<&PathBuf>,
+    data_dir: &str,
+) -> Option<PathBuf> {
+    if output.is_some_and(|path| path.as_os_str() == "-") {
+        None
+    } else if let Some(path) = output {
+        Some(path.clone())
+    } else {
+        Some(derive_output_path(absolute_url, ext, data_dir))
+    }
+}
+
+async fn write_text_capture(
+    content: &str,
+    absolute_url: &str,
+    ext: &str,
+    output: Option<&PathBuf>,
+    data_dir: &str,
+    label: &str,
+) -> anyhow::Result<()> {
+    if let Some(path) = effective_output_path(absolute_url, ext, output, data_dir) {
+        write_text_capture_to_path(content, &path, label).await?;
+    } else {
+        print!("{content}");
+    }
+    Ok(())
+}
+
+async fn write_text_capture_to_path(
+    content: &str,
+    path: &PathBuf,
+    label: &str,
+) -> anyhow::Result<()> {
+    if let Some(parent) = path.parent() {
+        std::fs::create_dir_all(parent).ok();
+    }
+    fs::write(path, content).await?;
+    eprintln!("{label} saved to: {}", path.display());
+    Ok(())
+}
+
+async fn write_archive_capture(
+    bytes: &[u8],
+    absolute_url: &str,
+    output: Option<&PathBuf>,
+    archive_fmt: &str,
+    data_dir: &str,
+    label: &str,
+) -> anyhow::Result<()> {
+    let ext = match archive_fmt {
+        "tar.gz" | "gz" => "tar.gz",
+        "7z" => "7z",
+        "tar" => "tar",
+        _ => "zip",
+    };
+    if let Some(path) = effective_output_path(absolute_url, ext, output, data_dir) {
+        if let Some(parent) = path.parent() {
+            std::fs::create_dir_all(parent).ok();
+        }
+        fs::write(&path, bytes).await?;
+        eprintln!("{label} saved to: {}", path.display());
+    } else {
+        use std::io::Write;
+        std::io::stdout().write_all(bytes)?;
+    }
     Ok(())
 }
 

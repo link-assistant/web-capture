@@ -8,6 +8,23 @@ import fs from 'fs';
 import path from 'path';
 import { URL } from 'node:url';
 import { makeConfig } from 'lino-arguments';
+import makeLog from 'log-lazy';
+
+function makeVerboseLog(enabled) {
+  return makeLog({
+    level: enabled ? 'all' : 'none',
+    log: {
+      fatal: console.error,
+      error: console.error,
+      warn: console.error,
+      info: console.error,
+      debug: console.error,
+      verbose: console.error,
+      trace: console.error,
+      silly: console.error,
+    },
+  });
+}
 
 // Create configuration using lino-arguments pattern
 const config = makeConfig({
@@ -307,6 +324,82 @@ function deriveOutputPath(absoluteUrl, ext, dataDir) {
   return path.join(dir, `document.${ext}`);
 }
 
+function archiveExtension(archiveFormat) {
+  if (archiveFormat === 'tar.gz' || archiveFormat === 'gz') {
+    return 'tar.gz';
+  }
+  if (archiveFormat === '7z') {
+    return '7z';
+  }
+  if (archiveFormat === 'tar') {
+    return 'tar';
+  }
+  return 'zip';
+}
+
+function writeGoogleDocsTextOutput({
+  content,
+  absoluteUrl,
+  ext,
+  explicitOutput,
+  dataDir,
+  label,
+}) {
+  const output =
+    explicitOutput === '-'
+      ? null
+      : explicitOutput || deriveOutputPath(absoluteUrl, ext, dataDir);
+  if (output) {
+    fs.mkdirSync(path.dirname(output), { recursive: true });
+    fs.writeFileSync(output, content, 'utf-8');
+    console.error(`${label} saved to: ${output}`);
+  } else {
+    process.stdout.write(content);
+  }
+}
+
+async function writeGoogleDocsArchive({
+  archiveResult,
+  absoluteUrl,
+  explicitOutput,
+  dataDir,
+  archiveFormat,
+  prettyHtml,
+}) {
+  const { default: archiver } = await import('archiver');
+  const { prettyPrintHtml } = await import('../src/lib.js');
+  const output =
+    explicitOutput === '-'
+      ? null
+      : explicitOutput ||
+        deriveOutputPath(absoluteUrl, archiveExtension(archiveFormat), dataDir);
+  const archiverFn = archiver.default ? archiver.default : archiver;
+  const archive = archiverFn('zip', { zlib: { level: 9 } });
+  archive.append(archiveResult.markdown, { name: 'document.md' });
+  archive.append(
+    prettyHtml ? prettyPrintHtml(archiveResult.html) : archiveResult.html,
+    { name: 'document.html' }
+  );
+  for (const img of archiveResult.images || []) {
+    archive.append(img.data, { name: `images/${img.filename}` });
+  }
+
+  if (output) {
+    fs.mkdirSync(path.dirname(output), { recursive: true });
+    const outStream = fs.createWriteStream(output);
+    archive.pipe(outStream);
+    await archive.finalize();
+    await new Promise((resolve) => outStream.on('close', resolve));
+    console.error(`Google Doc (archive) saved to: ${output}`);
+  } else {
+    const { PassThrough } = await import('stream');
+    const passthrough = new PassThrough();
+    archive.pipe(passthrough);
+    passthrough.pipe(process.stdout);
+    await archive.finalize();
+  }
+}
+
 async function captureUrl(url, options) {
   const {
     format,
@@ -325,7 +418,10 @@ async function captureUrl(url, options) {
     imagesDir,
     dataDir,
     keepOriginalLinks,
+    capture,
+    verbose,
   } = options;
+  const log = makeVerboseLog(verbose);
 
   // Ensure URL is absolute
   let absoluteUrl = url;
@@ -345,142 +441,299 @@ async function captureUrl(url, options) {
   const { fetchHtml, convertToUtf8, convertRelativeUrls } =
     await import('../src/lib.js');
   const { createBrowser } = await import('../src/browser.js');
-  const { isGoogleDocsUrl, fetchGoogleDoc, fetchGoogleDocAsMarkdown } =
-    await import('../src/gdocs.js');
+  const {
+    isGoogleDocsUrl,
+    fetchGoogleDoc,
+    fetchGoogleDocAsMarkdown,
+    fetchGoogleDocFromDocsApi,
+    captureGoogleDocWithBrowser,
+    selectGoogleDocsCaptureMethod,
+  } = await import('../src/gdocs.js');
   const { stripBase64Images } = await import('../src/extract-images.js');
 
   const normalizedFormat = format.toLowerCase();
+  log.debug(() => ({
+    event: 'capture.start',
+    url: absoluteUrl,
+    format: normalizedFormat,
+    capture,
+    engine,
+    hasApiToken: Boolean(options.apiToken),
+  }));
 
-  // Auto-detect Google Docs URLs and use API-based capture
+  // Google Docs capture honors --capture:
+  // - browser: load /edit and extract DOCS_modelChunk
+  // - api without token: public export endpoint
+  // - api with token: docs.googleapis.com REST API
   if (isGoogleDocsUrl(absoluteUrl)) {
-    try {
-      const apiToken = options.apiToken;
-      const { extractAndSaveImages } = await import('../src/extract-images.js');
-      if (normalizedFormat === 'archive' || normalizedFormat === 'zip') {
-        const { fetchGoogleDocAsArchive } = await import('../src/gdocs.js');
-        const { default: archiver } = await import('archiver');
-        const archiveFormat = options.archiveFormat || 'zip';
-        const ext =
-          archiveFormat === 'tar.gz' || archiveFormat === 'gz'
-            ? 'tar.gz'
-            : archiveFormat === '7z'
-              ? '7z'
-              : archiveFormat === 'tar'
-                ? 'tar'
-                : 'zip';
-        const archiveResult = await fetchGoogleDocAsArchive(absoluteUrl, {
+    const apiToken = options.apiToken;
+    const gdocsMethod = selectGoogleDocsCaptureMethod(capture, apiToken);
+    const modelFormats = new Set([
+      'archive',
+      'zip',
+      'markdown',
+      'md',
+      'html',
+      'txt',
+      'text',
+    ]);
+    log.debug(() => ({
+      event: 'gdocs.capture.selected',
+      url: absoluteUrl,
+      method: gdocsMethod,
+      format: normalizedFormat,
+      modelFormat: modelFormats.has(normalizedFormat),
+      hasApiToken: Boolean(apiToken),
+    }));
+
+    if (
+      gdocsMethod === 'browser-model' &&
+      !modelFormats.has(normalizedFormat)
+    ) {
+      log.debug(() => ({
+        event: 'gdocs.capture.fallback-browser-pipeline',
+        reason: 'requested format is not supported by editor model renderer',
+        format: normalizedFormat,
+      }));
+      // Screenshot/PDF/DOCX formats should use the regular browser pipeline below.
+    } else if (gdocsMethod === 'browser-model') {
+      try {
+        const result = await captureGoogleDocWithBrowser(absoluteUrl, {
+          engine,
           apiToken,
+          log,
         });
-        const output =
-          explicitOutput === '-'
-            ? null
-            : explicitOutput || deriveOutputPath(absoluteUrl, ext, dataDir);
-        if (output) {
-          const outStream = fs.createWriteStream(output);
-          const archive = archiver.default
-            ? archiver.default('zip', { zlib: { level: 9 } })
-            : archiver('zip', { zlib: { level: 9 } });
-          archive.pipe(outStream);
-          const { prettyPrintHtml: ppHtml } = await import('../src/lib.js');
-          archive.append(archiveResult.markdown, { name: 'document.md' });
-          const htmlContent = options.prettyHtml
-            ? ppHtml(archiveResult.html)
-            : archiveResult.html;
-          archive.append(htmlContent, {
-            name: 'document.html',
+        log.debug(() => ({
+          event: 'gdocs.capture.browser-model.rendered',
+          documentId: result.documentId,
+          blocks: result.capture?.blocks?.length || 0,
+          tables: result.capture?.tables?.length || 0,
+          images: result.capture?.images?.length || 0,
+          markdownBytes: Buffer.byteLength(result.markdown || ''),
+          htmlBytes: Buffer.byteLength(result.html || ''),
+          textBytes: Buffer.byteLength(result.text || ''),
+        }));
+        if (normalizedFormat === 'archive' || normalizedFormat === 'zip') {
+          await writeGoogleDocsArchive({
+            archiveResult: { ...result, images: [] },
+            absoluteUrl,
+            explicitOutput,
+            dataDir,
+            archiveFormat: options.archiveFormat || 'zip',
+            prettyHtml: options.prettyHtml,
           });
-          for (const img of archiveResult.images) {
-            archive.append(img.data, { name: `images/${img.filename}` });
-          }
-          await archive.finalize();
-          await new Promise((resolve) => outStream.on('close', resolve));
-          console.error(`Google Doc (archive) saved to: ${output}`);
         } else {
-          const { PassThrough } = await import('stream');
-          const passthrough = new PassThrough();
-          const archiverMod = await import('archiver');
-          const archiverFn =
-            archiverMod.default?.default || archiverMod.default;
-          const archive = archiverFn('zip', { zlib: { level: 9 } });
-          archive.pipe(passthrough);
-          passthrough.pipe(process.stdout);
-          const { prettyPrintHtml: ppHtml2 } = await import('../src/lib.js');
-          archive.append(archiveResult.markdown, { name: 'document.md' });
-          const htmlContent2 = options.prettyHtml
-            ? ppHtml2(archiveResult.html)
-            : archiveResult.html;
-          archive.append(htmlContent2, {
-            name: 'document.html',
+          const rendered =
+            normalizedFormat === 'html'
+              ? result.html
+              : normalizedFormat === 'txt' || normalizedFormat === 'text'
+                ? result.text
+                : result.markdown;
+          const ext =
+            normalizedFormat === 'html'
+              ? 'html'
+              : normalizedFormat === 'txt' || normalizedFormat === 'text'
+                ? 'txt'
+                : 'md';
+          writeGoogleDocsTextOutput({
+            content: rendered,
+            absoluteUrl,
+            ext,
+            explicitOutput,
+            dataDir,
+            label: `Google Doc (${gdocsMethod})`,
           });
-          for (const img of archiveResult.images) {
-            archive.append(img.data, { name: `images/${img.filename}` });
-          }
-          await archive.finalize();
         }
-      } else if (normalizedFormat === 'markdown' || normalizedFormat === 'md') {
-        const result = await fetchGoogleDocAsMarkdown(absoluteUrl, {
-          apiToken,
-        });
-        let { markdown } = result;
-        const output =
-          explicitOutput === '-'
-            ? null
-            : explicitOutput || deriveOutputPath(absoluteUrl, 'md', dataDir);
-        if (output) {
-          if (embedImages) {
-            // Keep base64 data URIs inline
-          } else if (keepOriginalLinks) {
-            const strip = stripBase64Images(markdown);
-            if (strip.stripped > 0) {
-              markdown = strip.markdown;
-              console.error(
-                `Stripped ${strip.stripped} base64 images (keeping original links)`
-              );
-            }
-          } else {
-            const outputDir = path.dirname(output);
-            const extracted = extractAndSaveImages(markdown, outputDir, {
-              imagesDir: options.imagesDir || 'images',
-            });
-            if (extracted.extracted > 0) {
-              markdown = extracted.markdown;
-              console.error(
-                `Extracted ${extracted.extracted} images to ${options.imagesDir || 'images'}/`
-              );
-            }
-          }
-          fs.mkdirSync(path.dirname(output), { recursive: true });
-          fs.writeFileSync(output, markdown, 'utf-8');
-          console.error(`Google Doc Markdown saved to: ${output}`);
-        } else {
-          process.stdout.write(markdown);
-        }
-      } else {
-        const gdocsFormat =
-          normalizedFormat === 'png' || normalizedFormat === 'image'
-            ? 'html'
-            : normalizedFormat;
-        const result = await fetchGoogleDoc(absoluteUrl, {
-          format: gdocsFormat,
-          apiToken,
-        });
-        const output =
-          explicitOutput === '-'
-            ? null
-            : explicitOutput ||
-              deriveOutputPath(absoluteUrl, gdocsFormat, dataDir);
-        if (output) {
-          fs.mkdirSync(path.dirname(output), { recursive: true });
-          fs.writeFileSync(output, result.content, 'utf-8');
-          console.error(`Google Doc (${gdocsFormat}) saved to: ${output}`);
-        } else {
-          process.stdout.write(result.content);
-        }
+        return;
+      } catch (err) {
+        console.error(`Error capturing Google Doc: ${err.message}`);
+        process.exit(1);
       }
-      return;
-    } catch (err) {
-      console.error(`Error capturing Google Doc: ${err.message}`);
-      process.exit(1);
+    } else if (gdocsMethod === 'docs-api') {
+      try {
+        const result = await fetchGoogleDocFromDocsApi(absoluteUrl, {
+          apiToken,
+          log,
+        });
+        log.debug(() => ({
+          event: 'gdocs.capture.docs-api.rendered',
+          documentId: result.documentId,
+          markdownBytes: Buffer.byteLength(result.markdown || ''),
+          htmlBytes: Buffer.byteLength(result.html || ''),
+          textBytes: Buffer.byteLength(result.text || ''),
+        }));
+        if (normalizedFormat === 'archive' || normalizedFormat === 'zip') {
+          await writeGoogleDocsArchive({
+            archiveResult: { ...result, images: [] },
+            absoluteUrl,
+            explicitOutput,
+            dataDir,
+            archiveFormat: options.archiveFormat || 'zip',
+            prettyHtml: options.prettyHtml,
+          });
+        } else {
+          const rendered =
+            normalizedFormat === 'html'
+              ? result.html
+              : normalizedFormat === 'txt' || normalizedFormat === 'text'
+                ? result.text
+                : result.markdown;
+          const ext =
+            normalizedFormat === 'html'
+              ? 'html'
+              : normalizedFormat === 'txt' || normalizedFormat === 'text'
+                ? 'txt'
+                : 'md';
+          writeGoogleDocsTextOutput({
+            content: rendered,
+            absoluteUrl,
+            ext,
+            explicitOutput,
+            dataDir,
+            label: `Google Doc (${gdocsMethod})`,
+          });
+        }
+        return;
+      } catch (err) {
+        console.error(`Error capturing Google Doc: ${err.message}`);
+        process.exit(1);
+      }
+    } else {
+      try {
+        const { extractAndSaveImages } =
+          await import('../src/extract-images.js');
+        if (normalizedFormat === 'archive' || normalizedFormat === 'zip') {
+          const { fetchGoogleDocAsArchive } = await import('../src/gdocs.js');
+          const { default: archiver } = await import('archiver');
+          const archiveFormat = options.archiveFormat || 'zip';
+          const ext =
+            archiveFormat === 'tar.gz' || archiveFormat === 'gz'
+              ? 'tar.gz'
+              : archiveFormat === '7z'
+                ? '7z'
+                : archiveFormat === 'tar'
+                  ? 'tar'
+                  : 'zip';
+          const archiveResult = await fetchGoogleDocAsArchive(absoluteUrl, {
+            apiToken,
+            log,
+          });
+          const output =
+            explicitOutput === '-'
+              ? null
+              : explicitOutput || deriveOutputPath(absoluteUrl, ext, dataDir);
+          if (output) {
+            const outStream = fs.createWriteStream(output);
+            const archive = archiver.default
+              ? archiver.default('zip', { zlib: { level: 9 } })
+              : archiver('zip', { zlib: { level: 9 } });
+            archive.pipe(outStream);
+            const { prettyPrintHtml: ppHtml } = await import('../src/lib.js');
+            archive.append(archiveResult.markdown, { name: 'document.md' });
+            const htmlContent = options.prettyHtml
+              ? ppHtml(archiveResult.html)
+              : archiveResult.html;
+            archive.append(htmlContent, {
+              name: 'document.html',
+            });
+            for (const img of archiveResult.images) {
+              archive.append(img.data, { name: `images/${img.filename}` });
+            }
+            await archive.finalize();
+            await new Promise((resolve) => outStream.on('close', resolve));
+            console.error(`Google Doc (archive) saved to: ${output}`);
+          } else {
+            const { PassThrough } = await import('stream');
+            const passthrough = new PassThrough();
+            const archiverMod = await import('archiver');
+            const archiverFn =
+              archiverMod.default?.default || archiverMod.default;
+            const archive = archiverFn('zip', { zlib: { level: 9 } });
+            archive.pipe(passthrough);
+            passthrough.pipe(process.stdout);
+            const { prettyPrintHtml: ppHtml2 } = await import('../src/lib.js');
+            archive.append(archiveResult.markdown, { name: 'document.md' });
+            const htmlContent2 = options.prettyHtml
+              ? ppHtml2(archiveResult.html)
+              : archiveResult.html;
+            archive.append(htmlContent2, {
+              name: 'document.html',
+            });
+            for (const img of archiveResult.images) {
+              archive.append(img.data, { name: `images/${img.filename}` });
+            }
+            await archive.finalize();
+          }
+        } else if (
+          normalizedFormat === 'markdown' ||
+          normalizedFormat === 'md'
+        ) {
+          const result = await fetchGoogleDocAsMarkdown(absoluteUrl, {
+            apiToken,
+            log,
+          });
+          let { markdown } = result;
+          const output =
+            explicitOutput === '-'
+              ? null
+              : explicitOutput || deriveOutputPath(absoluteUrl, 'md', dataDir);
+          if (output) {
+            if (embedImages) {
+              // Keep base64 data URIs inline
+            } else if (keepOriginalLinks) {
+              const strip = stripBase64Images(markdown);
+              if (strip.stripped > 0) {
+                markdown = strip.markdown;
+                console.error(
+                  `Stripped ${strip.stripped} base64 images (keeping original links)`
+                );
+              }
+            } else {
+              const outputDir = path.dirname(output);
+              const extracted = extractAndSaveImages(markdown, outputDir, {
+                imagesDir: options.imagesDir || 'images',
+              });
+              if (extracted.extracted > 0) {
+                markdown = extracted.markdown;
+                console.error(
+                  `Extracted ${extracted.extracted} images to ${options.imagesDir || 'images'}/`
+                );
+              }
+            }
+            fs.mkdirSync(path.dirname(output), { recursive: true });
+            fs.writeFileSync(output, markdown, 'utf-8');
+            console.error(`Google Doc Markdown saved to: ${output}`);
+          } else {
+            process.stdout.write(markdown);
+          }
+        } else {
+          const gdocsFormat =
+            normalizedFormat === 'png' || normalizedFormat === 'image'
+              ? 'html'
+              : normalizedFormat;
+          const result = await fetchGoogleDoc(absoluteUrl, {
+            format: gdocsFormat,
+            apiToken,
+            log,
+          });
+          const output =
+            explicitOutput === '-'
+              ? null
+              : explicitOutput ||
+                deriveOutputPath(absoluteUrl, gdocsFormat, dataDir);
+          if (output) {
+            fs.mkdirSync(path.dirname(output), { recursive: true });
+            fs.writeFileSync(output, result.content, 'utf-8');
+            console.error(`Google Doc (${gdocsFormat}) saved to: ${output}`);
+          } else {
+            process.stdout.write(result.content);
+          }
+        }
+        return;
+      } catch (err) {
+        console.error(`Error capturing Google Doc: ${err.message}`);
+        process.exit(1);
+      }
     }
   }
 
@@ -893,6 +1146,7 @@ async function main() {
       archiveFormat: config.archiveFormat,
       keepOriginalLinks: config.keepOriginalLinks,
       prettyHtml: !config.noPrettyHtml,
+      capture: config.capture,
     });
   } else {
     // No arguments - show error

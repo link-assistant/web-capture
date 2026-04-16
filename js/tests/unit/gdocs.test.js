@@ -3,7 +3,13 @@ import {
   isGoogleDocsUrl,
   extractDocumentId,
   buildExportUrl,
+  buildEditUrl,
+  buildDocsApiUrl,
   extractBase64Images,
+  parseGoogleDocsModelChunks,
+  renderGoogleDocsCapture,
+  renderDocsApiDocument,
+  selectGoogleDocsCaptureMethod,
   GDOCS_EXPORT_FORMATS,
 } from '../../src/gdocs.js';
 import {
@@ -146,6 +152,161 @@ describe('gdocs', () => {
       expect(buildExportUrl(docId, 'html')).toBe(
         `https://docs.google.com/document/d/${docId}/export?format=html`
       );
+    });
+  });
+
+  describe('capture method selection (issue #72)', () => {
+    it('honors explicit browser capture for Google Docs URLs', () => {
+      expect(selectGoogleDocsCaptureMethod('browser')).toBe('browser-model');
+    });
+
+    it('uses public export for API capture without token', () => {
+      expect(selectGoogleDocsCaptureMethod('api')).toBe('public-export');
+    });
+
+    it('uses Docs REST API for API capture with token', () => {
+      expect(selectGoogleDocsCaptureMethod('api', 'token-123')).toBe(
+        'docs-api'
+      );
+    });
+  });
+
+  describe('buildEditUrl', () => {
+    it('builds the fresh Google Docs editor URL', () => {
+      expect(buildEditUrl('abc123')).toBe(
+        'https://docs.google.com/document/d/abc123/edit'
+      );
+    });
+  });
+
+  describe('buildDocsApiUrl', () => {
+    it('builds the Google Docs REST API URL', () => {
+      expect(buildDocsApiUrl('abc123')).toBe(
+        'https://docs.googleapis.com/v1/documents/abc123'
+      );
+    });
+  });
+
+  describe('parseGoogleDocsModelChunks (issue #72)', () => {
+    it('includes regular and suggested text from DOCS_modelChunk data', () => {
+      const capture = parseGoogleDocsModelChunks([
+        {
+          chunk: [
+            { ty: 'is', s: 'Stable ' },
+            { ty: 'iss', s: 'suggested\n' },
+          ],
+        },
+      ]);
+
+      expect(capture.text).toContain('Stable suggested');
+      expect(renderGoogleDocsCapture(capture, 'markdown')).toContain(
+        'Stable suggested'
+      );
+    });
+
+    it('extracts table cells and suggested images from DOCS_modelChunk data', () => {
+      const chunks = [
+        {
+          chunk: [
+            { ty: 'is', s: String.fromCharCode(0x10) },
+            { ty: 'is', s: String.fromCharCode(0x12) },
+            { ty: 'is', s: String.fromCharCode(0x1c) },
+            { ty: 'is', s: 'Cell A' },
+            { ty: 'is', s: String.fromCharCode(0x1c) },
+            { ty: 'is', s: '*' },
+            { ty: 'is', s: '\n' },
+            { ty: 'is', s: String.fromCharCode(0x11) },
+            {
+              ty: 'ase',
+              id: 'suggested-image',
+              epm: { ee_eo: { i_cid: 'cid_12345678901234567890' } },
+            },
+            { ty: 'ste', id: 'suggested-image', spi: 10 },
+          ],
+        },
+      ];
+      const capture = parseGoogleDocsModelChunks(chunks, {
+        cid_12345678901234567890:
+          'https://docs.google.com/docs-images-rt/image-id',
+      });
+      const markdown = renderGoogleDocsCapture(capture, 'markdown');
+
+      expect(capture.tables).toHaveLength(1);
+      expect(capture.tables[0].rows[0].cells).toHaveLength(2);
+      expect(markdown).toContain('Cell A');
+      expect(markdown).toContain(
+        '![suggested image](https://docs.google.com/docs-images-rt/image-id)'
+      );
+    });
+  });
+
+  describe('renderDocsApiDocument (issue #72)', () => {
+    it('renders Google Docs REST API paragraphs, tables, and inline images', () => {
+      const apiDocument = {
+        title: 'API Doc',
+        body: {
+          content: [
+            {
+              paragraph: {
+                elements: [{ textRun: { content: 'Intro paragraph\n' } }],
+              },
+            },
+            {
+              table: {
+                tableRows: [
+                  {
+                    tableCells: [
+                      {
+                        content: [
+                          {
+                            paragraph: {
+                              elements: [{ textRun: { content: 'Name\n' } }],
+                            },
+                          },
+                        ],
+                      },
+                      {
+                        content: [
+                          {
+                            paragraph: {
+                              elements: [
+                                {
+                                  inlineObjectElement: {
+                                    inlineObjectId: 'image-1',
+                                  },
+                                },
+                              ],
+                            },
+                          },
+                        ],
+                      },
+                    ],
+                  },
+                ],
+              },
+            },
+          ],
+        },
+        inlineObjects: {
+          'image-1': {
+            inlineObjectProperties: {
+              embeddedObject: {
+                title: 'Diagram',
+                imageProperties: {
+                  contentUri: 'https://example.com/diagram.png',
+                },
+              },
+            },
+          },
+        },
+      };
+
+      const rendered = renderDocsApiDocument(apiDocument);
+
+      expect(rendered.markdown).toContain('Intro paragraph');
+      expect(rendered.markdown).toContain('| Name | ![Diagram]');
+      expect(rendered.html).toContain('<table>');
+      expect(rendered.html).toContain('src="https://example.com/diagram.png"');
     });
   });
 
