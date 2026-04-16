@@ -16,6 +16,12 @@ const config = makeConfig({
       .usage(
         'web-capture - Capture web pages as HTML, Markdown, or PNG\n\nUsage:\n  web-capture --serve [--port <port>]       Start as API server\n  web-capture <url> [options]               Capture a URL to file/stdout'
       )
+      .command('$0 [url]', 'Capture a URL or start the API server', (yargs) =>
+        yargs.positional('url', {
+          type: 'string',
+          description: 'URL to capture',
+        })
+      )
       .option('serve', {
         alias: 's',
         type: 'boolean',
@@ -77,6 +83,7 @@ const config = makeConfig({
       .option('output', {
         alias: 'o',
         type: 'string',
+        nargs: 1,
         description:
           'Output file path (default: stdout for text, auto-generated for images)',
       })
@@ -231,6 +238,19 @@ const config = makeConfig({
     path: '.lenv',
   },
 });
+
+function getUrlArgument() {
+  if (typeof config.url === 'string' && config.url.length > 0) {
+    return config.url;
+  }
+
+  const separatorIndex = process.argv.indexOf('--');
+  if (separatorIndex !== -1 && separatorIndex < process.argv.length - 1) {
+    return process.argv[separatorIndex + 1];
+  }
+
+  return null;
+}
 
 async function startServer(port) {
   // Import the Express app
@@ -824,8 +844,7 @@ async function captureUrl(url, options) {
 }
 
 async function main() {
-  // Get positional arguments (non-option arguments)
-  const url = config._ && config._.length > 0 ? config._[0] : null;
+  const url = getUrlArgument();
 
   if (config.serve) {
     // Server mode
