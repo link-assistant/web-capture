@@ -1,3 +1,4 @@
-    Blocking waiting for file lock on build directory
-    Checking web-capture v0.3.1 (/tmp/gh-issue-solver-1776336600314/rust)
-    Finished `dev` profile [unoptimized + debuginfo] target(s) in 2.42s
+    Blocking waiting for file lock on package cache
+    Blocking waiting for file lock on package cache
+    Blocking waiting for file lock on package cache
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 1.39s

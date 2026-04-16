@@ -1,5 +1,5 @@
 
-> @link-assistant/web-capture@1.7.4 format:check
+> @link-assistant/web-capture@1.7.5 format:check
 > prettier --check .
 
 Checking formatting...
