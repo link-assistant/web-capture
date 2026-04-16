@@ -6,8 +6,7 @@
 
 import fetch from 'node-fetch';
 import he from 'he';
-import archiver from 'archiver';
-import { convertHtmlToMarkdown, prettyPrintHtml } from './lib.js';
+import { convertHtmlToMarkdown } from './lib.js';
 
 const GDOCS_URL_PATTERN = /docs\.google\.com\/document\/d\/([a-zA-Z0-9_-]+)/;
 
@@ -222,114 +221,4 @@ export async function fetchGoogleDocAsArchive(url, options = {}) {
     markdown,
     images,
   };
-}
-
-/**
- * Express handler for the /gdocs API endpoint.
- *
- * Query parameters:
- * - url (required): Google Docs URL
- * - format (optional): Export format (html, markdown, md, txt, pdf, docx)
- * - apiToken (optional): API token for private documents
- *
- * The API token can also be provided via:
- * - Authorization header: Bearer <token>
- * - X-Api-Token header: <token>
- *
- * @param {import('express').Request} req
- * @param {import('express').Response} res
- */
-export async function gdocsHandler(req, res) {
-  const url = req.query.url;
-  if (!url) {
-    return res.status(400).send('Missing `url` parameter');
-  }
-
-  if (!isGoogleDocsUrl(url)) {
-    return res.status(400).send('URL is not a Google Docs document URL');
-  }
-
-  // Resolve API token from query, headers, or environment
-  const apiToken =
-    req.query.apiToken ||
-    extractBearerToken(req.headers.authorization) ||
-    req.headers['x-api-token'] ||
-    undefined;
-
-  const format = (req.query.format || 'markdown').toLowerCase();
-
-  try {
-    if (format === 'archive' || format === 'zip') {
-      return await sendGDocsArchive(res, url, apiToken);
-    }
-
-    if (format === 'markdown' || format === 'md') {
-      const result = await fetchGoogleDocAsMarkdown(url, { apiToken });
-      return res.type('text/markdown').send(result.markdown);
-    }
-
-    return await sendGDocsExport(res, url, format, apiToken);
-  } catch (err) {
-    console.error('Google Docs capture error:', err.message);
-    return res.status(500).send(`Error capturing Google Doc: ${err.message}`);
-  }
-}
-
-async function sendGDocsArchive(res, url, apiToken) {
-  const archiveResult = await fetchGoogleDocAsArchive(url, { apiToken });
-
-  res.set('Content-Type', 'application/zip');
-  res.set(
-    'Content-Disposition',
-    `attachment; filename="gdoc-${archiveResult.documentId}.zip"`
-  );
-
-  const archive = archiver('zip', { zlib: { level: 9 } });
-  archive.pipe(res);
-  archive.append(archiveResult.markdown, { name: 'document.md' });
-  archive.append(prettyPrintHtml(archiveResult.html), {
-    name: 'document.html',
-  });
-  for (const img of archiveResult.images) {
-    archive.append(img.data, { name: `images/${img.filename}` });
-  }
-  await archive.finalize();
-}
-
-const FORMAT_CONTENT_TYPES = {
-  html: 'text/html',
-  txt: 'text/plain',
-  pdf: 'application/pdf',
-  docx: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-};
-
-const FORMAT_DISPOSITIONS = {
-  pdf: 'inline; filename="document.pdf"',
-  docx: 'inline; filename="document.docx"',
-};
-
-async function sendGDocsExport(res, url, format, apiToken) {
-  const result = await fetchGoogleDoc(url, { format, apiToken });
-  const contentType = FORMAT_CONTENT_TYPES[format] || 'text/html';
-  const disposition = FORMAT_DISPOSITIONS[format];
-
-  res.type(contentType);
-  if (disposition) {
-    res.set('Content-Disposition', disposition);
-  }
-  return res.send(result.content);
-}
-
-/**
- * Extract Bearer token from Authorization header value.
- *
- * @param {string|undefined} authHeader - Authorization header value
- * @returns {string|undefined} Token or undefined
- */
-function extractBearerToken(authHeader) {
-  if (!authHeader || typeof authHeader !== 'string') {
-    return undefined;
-  }
-  const match = authHeader.match(/^Bearer\s+(.+)$/i);
-  return match ? match[1] : undefined;
 }
