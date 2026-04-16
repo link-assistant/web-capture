@@ -1,5 +1,11 @@
 # @link-assistant/web-capture
 
+## 1.7.4
+
+### Patch Changes
+
+- 494da4e: Move turndown-plugin-gfm into runtime dependencies so published CLI installs include the GFM plugin used by Markdown conversion.
+
 ## 1.7.3
 
 ### Patch Changes
