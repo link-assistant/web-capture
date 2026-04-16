@@ -1,5 +1,11 @@
 # @link-assistant/web-capture
 
+## 1.7.5
+
+### Patch Changes
+
+- dfaf007: Remove the unsupported `/gdocs` HTTP API route from the JavaScript and Rust server surfaces while keeping Google Docs URL capture through normal output formats.
+
 ## 1.7.4
 
 ### Patch Changes
