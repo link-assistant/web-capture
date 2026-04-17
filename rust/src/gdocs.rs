@@ -41,6 +41,31 @@ use crate::WebCaptureError;
 
 const GDOCS_EXPORT_BASE: &str = "https://docs.google.com/document/d";
 const GDOCS_API_BASE: &str = "https://docs.googleapis.com/v1/documents";
+const GDOCS_MODEL_INIT_SCRIPT: &str = r"
+(() => {
+  const chunks = [];
+  Object.defineProperty(window, '__webCaptureDocsModelChunks', {
+    value: chunks,
+    configurable: true
+  });
+  let latest;
+  Object.defineProperty(window, 'DOCS_modelChunk', {
+    set(value) {
+      try {
+        chunks.push(JSON.parse(JSON.stringify(value)));
+      } catch (_) {
+        chunks.push(value);
+      }
+      latest = value;
+    },
+    get() {
+      return latest;
+    },
+    configurable: true
+  });
+})();
+";
+const GDOCS_MODEL_EVAL_SCRIPT: &str = "window.__webCaptureDocsModelChunks || []";
 
 fn gdocs_url_pattern() -> &'static Regex {
     static PATTERN: OnceLock<Regex> = OnceLock::new();
@@ -419,9 +444,8 @@ pub async fn fetch_google_doc_from_docs_api(
 
 /// Fetch and render the model data embedded in the Google Docs `/edit` route.
 ///
-/// The Rust browser automation crate currently exposes a placeholder browser,
-/// so this path fetches the editor HTML and parses embedded `DOCS_modelChunk`
-/// data when available.
+/// This path launches headless Chromium, intercepts `DOCS_modelChunk` before
+/// page scripts run, and parses the editor model data after the page settles.
 ///
 /// # Errors
 ///
@@ -438,51 +462,34 @@ pub async fn fetch_google_doc_from_model(
         document_id = %document_id,
         edit_url = %edit_url,
         has_api_token = api_token.is_some(),
-        "fetching Google Doc editor model"
+        "capturing Google Doc editor model in browser"
     );
-    let mut request = reqwest::Client::new()
-        .get(&edit_url)
-        .header(
-            "User-Agent",
-            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-        )
-        .header("Accept-Language", "en-US,en;q=0.9");
-
-    if let Some(token) = api_token {
-        request = request.header("Authorization", format!("Bearer {token}"));
+    if api_token.is_some() {
+        debug!(
+            document_id = %document_id,
+            "Google Docs browser capture uses the browser session; bearer token is only used by API capture"
+        );
     }
 
-    let response = request.send().await.map_err(|e| {
-        WebCaptureError::FetchError(format!("Failed to fetch Google Doc editor: {e}"))
-    })?;
-    debug!(
-        document_id = %document_id,
-        status = response.status().as_u16(),
-        success = response.status().is_success(),
-        content_type = response
-            .headers()
-            .get(reqwest::header::CONTENT_TYPE)
-            .and_then(|value| value.to_str().ok())
-            .unwrap_or(""),
-        "received Google Docs editor response"
-    );
-
-    if !response.status().is_success() {
-        return Err(WebCaptureError::FetchError(format!(
-            "Failed to fetch Google Doc editor ({} {}): {}",
-            response.status().as_u16(),
-            response.status().canonical_reason().unwrap_or("Unknown"),
-            edit_url
-        )));
+    let rendered = crate::browser::render_html_with_scripts(
+        &edit_url,
+        Some(GDOCS_MODEL_INIT_SCRIPT),
+        Some(GDOCS_MODEL_EVAL_SCRIPT),
+        crate::browser::BrowserCaptureOptions::google_docs(),
+    )
+    .await?;
+    let mut chunks = rendered
+        .evaluation
+        .as_ref()
+        .and_then(Value::as_array)
+        .cloned()
+        .unwrap_or_default();
+    if chunks.is_empty() {
+        chunks = extract_model_chunks_from_html(&rendered.html);
     }
-
-    let html = response.text().await.map_err(|e| {
-        WebCaptureError::FetchError(format!("Failed to read Google Doc editor response: {e}"))
-    })?;
-    let chunks = extract_model_chunks_from_html(&html);
     debug!(
         document_id = %document_id,
-        html_bytes = html.len(),
+        html_bytes = rendered.html.len(),
         chunks = chunks.len(),
         "extracted Google Docs editor model chunks"
     );
@@ -492,7 +499,7 @@ pub async fn fetch_google_doc_from_model(
         ));
     }
 
-    let cid_urls = extract_cid_urls_from_html(&html);
+    let cid_urls = extract_cid_urls_from_html(&rendered.html);
     let capture = parse_model_chunks(&chunks, &cid_urls);
     info!(
         document_id = %document_id,
