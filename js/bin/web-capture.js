@@ -446,7 +446,7 @@ async function captureUrl(url, options) {
     fetchGoogleDoc,
     fetchGoogleDocAsMarkdown,
     fetchGoogleDocFromDocsApi,
-    captureGoogleDocWithBrowser,
+    captureGoogleDocWithBrowserOrFallback,
     selectGoogleDocsCaptureMethod,
   } = await import('../src/gdocs.js');
   const { stripBase64Images } = await import('../src/extract-images.js');
@@ -498,24 +498,38 @@ async function captureUrl(url, options) {
       // Screenshot/PDF/DOCX formats should use the regular browser pipeline below.
     } else if (gdocsMethod === 'browser-model') {
       try {
-        const result = await captureGoogleDocWithBrowser(absoluteUrl, {
-          engine,
-          apiToken,
-          log,
-        });
+        const result = await captureGoogleDocWithBrowserOrFallback(
+          absoluteUrl,
+          {
+            engine,
+            apiToken,
+            format: normalizedFormat,
+            log,
+            onFallback: (err) => {
+              console.error(
+                `Warning: Google Docs browser capture could not read editor content (${err.message}); falling back to Google Docs export API.`
+              );
+            },
+          }
+        );
+        const resultMethod = result.fallback ? result.method : gdocsMethod;
+        const resultCapture = result.capture || {};
         log.debug(() => ({
-          event: 'gdocs.capture.browser-model.rendered',
+          event: result.fallback
+            ? 'gdocs.capture.browser-model.fallback-rendered'
+            : 'gdocs.capture.browser-model.rendered',
           documentId: result.documentId,
-          blocks: result.capture?.blocks?.length || 0,
-          tables: result.capture?.tables?.length || 0,
-          images: result.capture?.images?.length || 0,
+          method: resultMethod,
+          blocks: resultCapture.blocks?.length || 0,
+          tables: resultCapture.tables?.length || 0,
+          images: resultCapture.images?.length || result.images?.length || 0,
           markdownBytes: Buffer.byteLength(result.markdown || ''),
           htmlBytes: Buffer.byteLength(result.html || ''),
           textBytes: Buffer.byteLength(result.text || ''),
         }));
         if (normalizedFormat === 'archive' || normalizedFormat === 'zip') {
           await writeGoogleDocsArchive({
-            archiveResult: { ...result, images: [] },
+            archiveResult: result.fallback ? result : { ...result, images: [] },
             absoluteUrl,
             explicitOutput,
             dataDir,
@@ -525,10 +539,10 @@ async function captureUrl(url, options) {
         } else {
           const rendered =
             normalizedFormat === 'html'
-              ? result.html
+              ? result.html || result.content
               : normalizedFormat === 'txt' || normalizedFormat === 'text'
-                ? result.text
-                : result.markdown;
+                ? result.text || result.content
+                : result.markdown || result.content;
           const ext =
             normalizedFormat === 'html'
               ? 'html'
@@ -541,7 +555,7 @@ async function captureUrl(url, options) {
             ext,
             explicitOutput,
             dataDir,
-            label: `Google Doc (${gdocsMethod})`,
+            label: `Google Doc (${resultMethod})`,
           });
         }
         return;

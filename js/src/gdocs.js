@@ -18,6 +18,7 @@ const GDOCS_EXPORT_BASE = 'https://docs.google.com/document/d';
 const GDOCS_API_BASE = 'https://docs.googleapis.com/v1/documents';
 const DEFAULT_USER_AGENT =
   'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
+const GDOCS_BROWSER_MODEL_UNAVAILABLE = 'GDOCS_BROWSER_MODEL_UNAVAILABLE';
 
 /**
  * Supported Google Docs export formats.
@@ -298,6 +299,123 @@ export async function fetchGoogleDocAsMarkdown(url, options = {}) {
 }
 
 /**
+ * Fetch a Google Doc through the public export pipeline for a requested output
+ * format. This is used as the lossless fallback when browser-model capture
+ * cannot read DOCS_modelChunk data from the editor page.
+ *
+ * @param {string} url - Google Docs URL
+ * @param {Object} [options] - Options
+ * @param {string} [options.format='markdown'] - Requested CLI output format
+ * @param {string} [options.apiToken] - API token for private documents
+ * @param {Object} [options.log] - Optional logger
+ * @returns {Promise<Object>} Export result normalized for CLI rendering
+ */
+export async function fetchGoogleDocByExportFormat(url, options = {}) {
+  const { format = 'markdown', apiToken, log } = options;
+  const normalized = (format || 'markdown').toLowerCase();
+
+  if (normalized === 'archive' || normalized === 'zip') {
+    const archiveResult = await fetchGoogleDocAsArchive(url, { apiToken, log });
+    return {
+      ...archiveResult,
+      content: archiveResult.markdown,
+      sourceFormat: 'archive',
+    };
+  }
+
+  if (normalized === 'markdown' || normalized === 'md') {
+    const result = await fetchGoogleDocAsMarkdown(url, { apiToken, log });
+    return {
+      ...result,
+      content: result.markdown,
+      sourceFormat: 'markdown',
+    };
+  }
+
+  if (normalized === 'html') {
+    const result = await fetchGoogleDoc(url, {
+      format: 'html',
+      apiToken,
+      log,
+    });
+    return {
+      ...result,
+      html: result.content,
+      sourceFormat: 'html',
+    };
+  }
+
+  if (normalized === 'txt' || normalized === 'text') {
+    const result = await fetchGoogleDoc(url, {
+      format: 'txt',
+      apiToken,
+      log,
+    });
+    return {
+      ...result,
+      text: result.content,
+      sourceFormat: 'txt',
+    };
+  }
+
+  throw new Error(
+    `Unsupported Google Docs export fallback format "${format}".`
+  );
+}
+
+/**
+ * Capture a Google Doc through the browser model, falling back to public export
+ * when the editor does not expose model chunks.
+ *
+ * @param {string} url - Google Docs URL
+ * @param {Object} [options] - Capture options
+ * @param {string} [options.format='markdown'] - Requested output format
+ * @param {boolean} [options.fallback=true] - Whether to use export fallback
+ * @param {Function} [options.onFallback] - Called with browser error
+ * @returns {Promise<Object>} Browser-model or public-export result
+ */
+export async function captureGoogleDocWithBrowserOrFallback(url, options = {}) {
+  const {
+    format = 'markdown',
+    fallback = true,
+    onFallback,
+    ...browserOptions
+  } = options;
+
+  try {
+    const result = await captureGoogleDocWithBrowser(url, browserOptions);
+    return {
+      ...result,
+      method: 'browser-model',
+      fallback: false,
+    };
+  } catch (err) {
+    if (!fallback || !isGoogleDocsBrowserModelUnavailableError(err)) {
+      throw err;
+    }
+
+    onFallback?.(err);
+    browserOptions.log?.warn?.(() => ({
+      event: 'gdocs.browser-model.fallback-public-export',
+      reason: err.message,
+      format,
+    }));
+
+    const result = await fetchGoogleDocByExportFormat(url, {
+      format,
+      apiToken: browserOptions.apiToken,
+      log: browserOptions.log,
+    });
+    return {
+      ...result,
+      method: 'public-export',
+      fallback: true,
+      browserError: err.message,
+    };
+  }
+}
+
+/**
  * Capture a Google Doc from the editor page model (`DOCS_modelChunk`).
  *
  * @param {string} url - Google Docs URL
@@ -390,7 +508,7 @@ export async function captureGoogleDocWithBrowser(url, options = {}) {
       textBytes: Buffer.byteLength(capture.text || ''),
     }));
     if (capture.blocks.length === 0) {
-      throw new Error(
+      throw googleDocsBrowserModelUnavailableError(
         'Google Docs editor page did not expose DOCS_modelChunk data'
       );
     }
@@ -408,6 +526,25 @@ export async function captureGoogleDocWithBrowser(url, options = {}) {
     }
     await browser.close();
   }
+}
+
+/**
+ * Check whether an error means Google Docs browser-model data was unavailable.
+ *
+ * @param {Error} err - Error to classify
+ * @returns {boolean} True if export fallback is appropriate
+ */
+export function isGoogleDocsBrowserModelUnavailableError(err) {
+  return (
+    err?.code === GDOCS_BROWSER_MODEL_UNAVAILABLE ||
+    String(err?.message || '').includes('did not expose DOCS_modelChunk data')
+  );
+}
+
+function googleDocsBrowserModelUnavailableError(message) {
+  const err = new Error(message);
+  err.code = GDOCS_BROWSER_MODEL_UNAVAILABLE;
+  return err;
 }
 
 async function installDocsModelCapture(page) {
