@@ -1,8 +1,10 @@
 // Unit tests for CLI argument parsing and functionality
 import { spawn } from 'child_process';
 import http from 'node:http';
+import { mkdtempSync, rmSync, writeFileSync } from 'fs';
 import { fileURLToPath } from 'url';
-import { dirname, resolve } from 'path';
+import { dirname, join, resolve } from 'path';
+import packageJson from '../../package.json' with { type: 'json' };
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -107,6 +109,26 @@ describe('CLI', () => {
       expect(result.code).toBe(0);
       // yargs outputs just the version number
       expect(result.stdout).toMatch(/\d+\.\d+\.\d+/);
+    });
+
+    test('shows web-capture version when run from another npm project', async () => {
+      const callerProjectDir = mkdtempSync(join(process.cwd(), 'caller-'));
+      writeFileSync(
+        join(callerProjectDir, 'package.json'),
+        JSON.stringify({
+          name: 'caller-project',
+          version: '1.0.0',
+        })
+      );
+
+      try {
+        const result = await runCli(['--version'], { cwd: callerProjectDir });
+
+        expect(result.code).toBe(0);
+        expect(result.stdout.trim()).toBe(packageJson.version);
+      } finally {
+        rmSync(callerProjectDir, { recursive: true, force: true });
+      }
     });
   });
 
