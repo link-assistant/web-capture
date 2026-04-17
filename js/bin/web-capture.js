@@ -138,6 +138,18 @@ const config = makeConfig({
           'Detect and correct code block languages (default: true). Use --no-detect-code-language to disable.',
         default: getenv('WEB_CAPTURE_DETECT_CODE_LANGUAGE', true),
       })
+      .option('contentSelector', {
+        type: 'string',
+        description:
+          'CSS selector used to scope markdown conversion while preserving full-page metadata extraction.',
+        default: getenv('WEB_CAPTURE_CONTENT_SELECTOR', undefined),
+      })
+      .option('bodySelector', {
+        type: 'string',
+        description:
+          'CSS selector for article body markdown; prepends the selected article title when available.',
+        default: getenv('WEB_CAPTURE_BODY_SELECTOR', undefined),
+      })
       .option('embedImages', {
         type: 'boolean',
         description:
@@ -956,6 +968,8 @@ async function captureUrl(url, options) {
         extractMetadata: options.extractMetadata,
         postProcess: options.postProcess,
         detectCodeLanguage: options.detectCodeLanguage,
+        contentSelector: options.contentSelector,
+        bodySelector: options.bodySelector,
       });
       let markdown = result.markdown;
 

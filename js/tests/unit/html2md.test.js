@@ -1,4 +1,7 @@
-import { convertHtmlToMarkdown } from '../../src/lib.js';
+import {
+  convertHtmlToMarkdown,
+  convertHtmlToMarkdownEnhanced,
+} from '../../src/lib.js';
 
 describe('convertHtmlToMarkdown', () => {
   it('removes empty links and anchor headings', () => {
@@ -606,5 +609,47 @@ describe('convertHtmlToMarkdown', () => {
     expect(md).toMatch(
       /\|\s*description\s*\|\s*string\s*\|\s*no\s*\|\s*order description\s*\|/
     );
+  });
+});
+
+describe('convertHtmlToMarkdownEnhanced content selectors', () => {
+  it('scopes Habr-shaped article markdown while keeping full-page metadata', () => {
+    const html = `
+      <html>
+        <head><meta name="keywords" content="links, theory"></head>
+        <body>
+          <nav><a href="/en/feed">Habr</a><a href="/en/search">Search</a></nav>
+          <a href="/en/sandbox/start/">Write a publication</a>
+          <article>
+            <header>
+              <h1>The Links Theory 0.0.2</h1>
+              <a class="tm-user-info__username" href="/users/links">links</a>
+              <time datetime="2026-04-01T00:00:00Z">April 1</time>
+            </header>
+            <div class="article-formatted-body">
+              <p>Last April 1st, as you might have guessed, the project shipped.</p>
+            </div>
+          </article>
+        </body>
+      </html>
+    `;
+
+    const result = convertHtmlToMarkdownEnhanced(
+      html,
+      'https://habr.com/en/articles/895896/',
+      {
+        contentSelector: 'article',
+        bodySelector: '.article-formatted-body',
+      }
+    );
+
+    expect(result.markdown.trim()).toMatch(/^# The Links Theory 0\.0\.2/);
+    expect(result.markdown).toContain('Last April 1st');
+    expect(result.markdown).toContain('**Author:** [links]');
+    expect(result.markdown).not.toContain('Habr');
+    expect(result.markdown).not.toContain('Search');
+    expect(result.markdown).not.toContain('Write a publication');
+    expect(result.metadata.author).toBe('links');
+    expect(result.metadata.tags).toEqual(['links', 'theory']);
   });
 });
