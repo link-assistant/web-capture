@@ -194,9 +194,7 @@ pub fn convert_to_utf8(html: &str) -> String {
 #[must_use]
 pub fn has_javascript(html: &str) -> bool {
     let pattern = r"<script[^>]*>[\s\S]*?</script>|<script[^>]*/\s*>|javascript:";
-    Regex::new(pattern)
-        .map(|re| re.is_match(html))
-        .unwrap_or(false)
+    Regex::new(pattern).is_ok_and(|re| re.is_match(html))
 }
 
 /// Check if content is valid HTML
@@ -211,9 +209,7 @@ pub fn has_javascript(html: &str) -> bool {
 #[must_use]
 pub fn is_html(html: &str) -> bool {
     let pattern = r"<html[^>]*>[\s\S]*?</html>";
-    Regex::new(pattern)
-        .map(|re| re.is_match(html))
-        .unwrap_or(false)
+    Regex::new(pattern).is_ok_and(|re| re.is_match(html))
 }
 
 /// Decode HTML entities to unicode characters.

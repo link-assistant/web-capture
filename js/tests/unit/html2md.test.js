@@ -1,4 +1,7 @@
-import { convertHtmlToMarkdown } from '../../src/lib.js';
+import {
+  convertHtmlToMarkdown,
+  convertHtmlToMarkdownEnhanced,
+} from '../../src/lib.js';
 
 describe('convertHtmlToMarkdown', () => {
   it('removes empty links and anchor headings', () => {
@@ -606,5 +609,46 @@ describe('convertHtmlToMarkdown', () => {
     expect(md).toMatch(
       /\|\s*description\s*\|\s*string\s*\|\s*no\s*\|\s*order description\s*\|/
     );
+  });
+});
+
+describe('convertHtmlToMarkdownEnhanced Habr compatibility', () => {
+  it('preserves article code line breaks and extracts formulas from a Habr fixture', () => {
+    const html = `
+      <article>
+        <h1>The Links Theory 0.0.2</h1>
+        <div class="article-formatted-body">
+          <p>A formula <img class="formula" source="\\mathbf{L}: L \\to L^2" alt="formula"> remains inline.</p>
+          <figure>
+            <img src="https://habrastorage.org/r/w1560/getpro/habr/upload_files/abc.png" alt="Figure 1">
+            <figcaption>Figure 1. Link multiplication.</figcaption>
+          </figure>
+          <pre><code>L = { 1 , 2 }
+L x L = {
+  (1, 1),
+  (1, 2),
+}</code></pre>
+        </div>
+      </article>
+    `;
+
+    const { markdown } = convertHtmlToMarkdownEnhanced(
+      html,
+      'https://habr.com/en/articles/895896/',
+      { preserveCodeWhitespace: true }
+    );
+
+    expect(markdown).toContain('$\\\\mathbf{L}: L \\\\to L^2$');
+    expect(markdown).toContain(
+      '![Figure 1](https://habrastorage.org/r/w1560/getpro/habr/upload_files/abc.png)'
+    );
+    expect(markdown).toContain(`\`\`\`
+L = { 1 , 2 }
+L x L = {
+  (1, 1),
+  (1, 2),
+}
+\`\`\``);
+    expect(markdown).not.toContain('L = { 1 , 2 }L x L');
   });
 });

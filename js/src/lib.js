@@ -312,6 +312,7 @@ export function convertRelativeUrls(html, baseUrl) {
  * @param {boolean} [options.extractMetadata=true] - Extract article metadata
  * @param {boolean} [options.postProcess=true] - Apply post-processing pipeline
  * @param {boolean} [options.detectCodeLanguage=true] - Detect/correct code languages
+ * @param {boolean} [options.preserveCodeWhitespace=false] - Keep original whitespace inside code blocks
  * @returns {Object} Result with { markdown, metadata }
  */
 export function convertHtmlToMarkdownEnhanced(html, baseUrl, options = {}) {
@@ -320,6 +321,7 @@ export function convertHtmlToMarkdownEnhanced(html, baseUrl, options = {}) {
     extractMetadata: shouldExtractMetadata = true,
     postProcess = true,
     detectCodeLanguage = true,
+    preserveCodeWhitespace = false,
   } = options;
 
   // Ensure all URLs are absolute before Markdown conversion
@@ -422,7 +424,7 @@ export function convertHtmlToMarkdownEnhanced(html, baseUrl, options = {}) {
   // Handle code language detection/correction
   if (detectCodeLanguage) {
     $('pre code').each(function () {
-      const codeText = $(this).text().trim();
+      const codeText = $(this).text();
       const language =
         $(this)
           .attr('class')
@@ -441,6 +443,12 @@ export function convertHtmlToMarkdownEnhanced(html, baseUrl, options = {}) {
       ) {
         $(this).removeClass(`language-${language}`).addClass('language-coq');
       }
+    });
+  }
+
+  if (preserveCodeWhitespace) {
+    $('pre code').each(function () {
+      $(this).text($(this).text().replace(/\r\n?/g, '\n'));
     });
   }
 
