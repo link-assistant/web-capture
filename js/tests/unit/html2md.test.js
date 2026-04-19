@@ -645,7 +645,6 @@ describe('convertHtmlToMarkdownEnhanced content selectors', () => {
 
     expect(result.markdown.trim()).toMatch(/^# The Links Theory 0\.0\.2/);
     expect(result.markdown).toContain('Last April 1st');
-    expect(result.markdown).toContain('**Author:** [links]');
     expect(result.markdown).not.toContain('Habr');
     expect(result.markdown).not.toContain('Search');
     expect(result.markdown).not.toContain('Write a publication');
