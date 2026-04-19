@@ -1,5 +1,11 @@
 # @link-assistant/web-capture
 
+## 1.7.7
+
+### Patch Changes
+
+- 9034d01: Add Habr archive-compatible markdown controls for figure-numbered image localization and preserved code block whitespace.
+
 ## 1.7.6
 
 ### Patch Changes

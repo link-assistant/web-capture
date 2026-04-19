@@ -1,6 +1,6 @@
 {
   "name": "@link-assistant/web-capture",
-  "version": "1.7.6",
+  "version": "1.7.7",
   "description": "CLI and microservice to render web pages as HTML, Markdown, or PNG",
   "main": "src/index.js",
   "bin": {
