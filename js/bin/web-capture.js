@@ -527,8 +527,25 @@ async function captureUrl(url, options) {
           textBytes: Buffer.byteLength(result.text || ''),
         }));
         if (normalizedFormat === 'archive' || normalizedFormat === 'zip') {
+          const { localizeGoogleDocsModelImages } = await import(
+            '../src/gdocs.js'
+          );
+          const localized = await localizeGoogleDocsModelImages(result, {
+            log,
+          });
+          log.debug(() => ({
+            event: 'gdocs.capture.browser-model.archive.localized',
+            images: localized.images.length,
+            markdownBytes: Buffer.byteLength(localized.markdown),
+            htmlBytes: Buffer.byteLength(localized.html),
+          }));
           await writeGoogleDocsArchive({
-            archiveResult: { ...result, images: [] },
+            archiveResult: {
+              ...result,
+              markdown: localized.markdown,
+              html: localized.html,
+              images: localized.images,
+            },
             absoluteUrl,
             explicitOutput,
             dataDir,
