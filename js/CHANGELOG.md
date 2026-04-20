@@ -1,5 +1,12 @@
 # @link-assistant/web-capture
 
+## 1.7.8
+
+### Patch Changes
+
+- e951b65: Fix JavaScript CLI version output when run from another npm project.
+- aa4888d: Add content selector options for article-only Markdown capture while preserving full-page metadata extraction.
+
 ## 1.7.7
 
 ### Patch Changes
