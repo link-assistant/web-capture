@@ -47,9 +47,11 @@ file. See the *Validation* section below for the manifest.
    (`rust api`, `js api`, `js browser`) demonstrating the remaining gaps that
    the existing implementation does not yet close. It also attaches the
    authoring DOCX and images as a reproducible archive.
-7. **Now (this PR)** — Case study, reference data and automated regression
-   tests are added so future changes to Google Docs capture can be validated
-   against the public document instead of relying on local reproductions.
+7. **2026-04-20 (this PR update)** — The public document was loaded in a real
+   browser, the live `DOCS_modelChunk` shape was captured, and both JS and Rust
+   browser-model capture paths were updated to render the public document's
+   headings, inline formatting, links, blockquotes, lists, horizontal rules and
+   named images from editor model data.
 
 ## Requirements (extracted verbatim from issue #90)
 
@@ -124,14 +126,16 @@ The fourteen categories the fixture exercises (matching the issue table):
   The API needs OAuth (`documents.readonly` scope), so it is only usable when
   `--apiToken` is provided.
   Reference: <https://developers.google.com/workspace/docs/api/reference/rest/v1/documents/get>.
-- **`DOCS_modelChunk`**. The Google Docs editor bootstraps by calling
-  `DOCS_modelChunk.push(...)` with serialized runs of the `kix` model. Each
-  run carries its own text but the *style spans* live in sibling chunks
-  keyed by `ty: "ss_r"` / `ty: "ss_s"` etc. A chunk parser that only reads
-  `ty: "is"` / `ty: "iss"` — which is what the current implementation does —
-  captures text but drops the style spans, which matches the empirical
-  result in `reference/captured-js-browser.md`. Community write-ups that
-  document the chunk shape: <https://gist.github.com/mowings/80aaccdd9b4aaa8a67a5ea0a3a33c75c>,
+- **`DOCS_modelChunk`**. The Google Docs editor bootstraps by assigning a
+  serialized `DOCS_modelChunk = {"chunk":[...]}` object for this public
+  document. The capture hook must also wrap array `push(...)` because Google
+  Docs has used that shape in other editor boots. The live issue document
+  exposes one large `ty: "is"` text run plus hundreds of sibling `ty: "as"`
+  records for paragraph, text, link, list, table and horizontal-rule metadata.
+  A chunk parser that only reads `ty: "is"` / `ty: "iss"` captures text but
+  drops style spans, which matches the empirical result in
+  `reference/captured-js-browser.md`. Community write-ups that document the
+  chunk shape: <https://gist.github.com/mowings/80aaccdd9b4aaa8a67a5ea0a3a33c75c>,
   <https://issuetracker.google.com/issues/36756087> (Google-acknowledged
   absence of a public editor-side export API).
 - **Existing libraries that solve similar problems**.
@@ -179,29 +183,26 @@ The root cause is not a bug in the CLI but the combination of (a) Google
 Drive's HTML-export fidelity policy and (b) the generic HTML-to-markdown
 converter having no Drive-specific rules.
 
-### Canvas renderer drops everything on the `/edit` page (R1 / R8)
+### Canvas renderer needs editor-model capture (R1 / R8)
 
 When the editor is loaded the DOM only contains a `<canvas>` element;
-Puppeteer's `page.content()` would return no meaningful text. PR #75 solved
-the "no text" problem by installing an `init` script that intercepts
-`DOCS_modelChunk` assignments. However:
+Puppeteer's `page.content()` would return no meaningful text. The fix is to
+capture the editor model before rendering rather than scraping the canvas.
 
-- `parseGoogleDocsModelChunks` only inspects `ty: "is"` and `ty: "iss"` items,
-  which are the raw text runs. Style metadata (`ty: "ss_r"`, `ty: "s_sl"`,
-  `ty: "spacers_r"`) is not inspected, so bold/italic spans are invisible to
-  the parser. This matches the observed output in
-  `reference/captured-js-browser.md` where every span is plain text.
-- Images that live in a chunk are recognised via `ty: "ae"`/`ase`, but the
-  suggested-edit image handling assumes one image per CID. A document with
-  four different embedded PNGs exposes only the first CID mapping; the
-  remaining images collapse to `*` (see the "Blue/Red/Green/Yellow" image
-  sections in the captured-js-browser output).
-- The Rust implementation calls this same parser but fetches `/edit`
-  over plain HTTP (`fetch_google_doc_from_model`). Google serves a
-  different, stripped response to non-browser user agents that does not
-  contain the `DOCS_modelChunk` assignments, so the Rust path errors with
-  *"Google Docs editor HTML did not contain DOCS_modelChunk data"*. This is
-  the *silent fallback* behaviour that R8 asks us to remove.
+- JS now installs a non-configurable `DOCS_modelChunk` accessor before page
+  scripts run, captures direct assignments, wraps array `push(...)`, and falls
+  back to the final `window.DOCS_modelChunk` only when no chunks were already
+  captured. This avoids duplicate chunks and handles both bootstrap shapes.
+- The JS and Rust model parsers now consume `ty: "as"` style records for text
+  styling, links, headings, lists, blockquotes and horizontal rules. Image
+  anchors are treated as one-based positions and alt text is read from
+  `epm.ee_eo.eo_ad`.
+- The live model uses UTF-16 code-unit positions. JS string indexing already
+  matches that convention; Rust now maps UTF-16 model positions to Rust char
+  positions before applying styles, paragraph metadata or image anchors.
+- Rust no longer fetches `/edit` as plain HTTP for browser-model capture. It
+  launches Chrome/Chromium in headless mode with `--dump-dom`, then extracts
+  `DOCS_modelChunk` and image CID mappings from the real browser-rendered DOM.
 
 ### Google Docs URL variations (R4)
 
@@ -217,69 +218,46 @@ Rust code uses `tracing::{debug, info}`. What was missing was *a reproducible
 document* to point the verbose output at. That is solved by committing the
 public test document URL and reference outputs alongside this case study.
 
-## Solution plan
+## Solution implemented
 
-Requirements R6, R7, R9 are about the case study artefact itself and are
-solved by this pull request. The remaining requirements form a backlog:
-
-- **R3 (primary deliverable of this PR).** Wire the public test document into
-  the JS and Rust test suites:
-  - JS: a new Jest integration test (`tests/integration/gdocs-public-doc.test.js`)
-    gated behind `GDOCS_INTEGRATION=true` that matches the `habr-article`
-    pattern. It covers the URL-variation suite, document-ID extraction,
-    capture-method selection, `--capture api` round-trip against the public
-    document, and a fixture-driven feature checklist that inspects the
-    captured markdown for every section's headline text. The test is *not*
-    run by default so ordinary PR CI remains hermetic; `js.yml` will pick it
-    up behind a dedicated step mirroring `HABR_INTEGRATION`.
-  - Rust: a matching live test (`tests/integration/gdocs_public_doc.rs`) gated
-    behind `GDOCS_INTEGRATION=1` that exercises `fetch_google_doc_as_markdown`
-    against the same public document and verifies every section appears.
-  - Both tests load the reference markdown from this case study directory so
-    any future change that drops an entire section is caught immediately.
-- **R4.** Unit-level URL-variation coverage is added for both CLIs against
-  the public document ID so the regex and extraction logic remains locked
-  down. No code change is needed today because all variants already pass.
-- **R1 / R2.** Improving the model-chunk style parser and the export-HTML to
-  markdown converter are follow-up bodies of work that the new tests now
-  unblock. The recommended next steps (too invasive for this PR) are:
-  1. Extend `parseGoogleDocsModelChunks` to consume `ty: "ss_*"` style runs
-     and emit `bold`/`italic`/`strikethrough` spans; render them as
-     `**`/`*`/`~~` in Markdown and `<strong>`/`<em>`/`<del>` in HTML.
-  2. Add heading detection from the paragraph-style chunk (`ps_hd`).
-  3. Teach the HTML-to-markdown pipeline to recognise Google Drive's
-     inline-style spans (`font-weight:700`, `text-decoration:line-through`)
-     and its redirected `https://www.google.com/url?q=` links. The Rust
-     `html` / `markdown` modules already have a post-processor to plug
-     these rules into.
-- **R8.** Make both CLIs refuse to silently fall back when `--capture browser`
-  is requested:
-  - JS: already launches a real browser through `browser-commander`. Add an
-    explicit error when no binary is discoverable instead of whatever
-    `launchBrowser` raises. Surface the error through the CLI entry point.
-  - Rust: the `browser.rs` implementation is a plain HTTP fetch
-    (see lines 59-68). It should either be replaced with a genuine
-    `chromiumoxide`/`browser-commander` call or fail fast when `--capture
-    browser` is requested. Until then the new Rust integration test gates
-    itself behind `GDOCS_INTEGRATION=1` and skips the browser path.
-- **R10.** No upstream issue is warranted yet. The remaining defects are
-  inside our own HTML-to-markdown pipeline and editor-model parser; we do
-  not have evidence of bugs in Drive, the Docs API, browser-commander or
-  Turndown that would justify an external report. Once R1/R2 are tackled
-  we can open an upstream issue against `browser-commander` if the chunk
-  interception requires API changes, and against `turndown` for Drive-
-  specific HTML quirks, each with a reproducible example.
+- **R1 / R8.** `--capture browser` now performs real browser-model capture in
+  both CLIs. JS uses `browser-commander`/Playwright-Puppeteer page injection;
+  Rust launches a real Chrome/Chromium process and parses the DOM produced by
+  `--dump-dom`. The browser path no longer relies on public-export fallback.
+- **R3 / R4 / R5.** JS and Rust integration suites cover the public document,
+  every documented URL variation, capture-method selection, reference fixture
+  integrity, and live public-doc capture. The live browser tests assert
+  headings, inline formatting, links, blockquotes, horizontal rules and the
+  four named images from `DOCS_modelChunk` output.
+- **R6 / R7 / R9.** The issue/PR metadata, reference material, root-cause notes,
+  experiment script and validation logs are preserved under this case-study
+  directory so the investigation can be repeated.
+- **R2.** The public-export `--capture api` path still has Drive
+  HTML-to-Markdown limitations around inline CSS styles and escaped ordered
+  headings. The live API tests intentionally guard section/content
+  preservation; full export-HTML formatting parity remains separate from the
+  browser-model fix.
+- **R10.** No upstream issue is warranted from this investigation. The root
+  causes were in local browser capture, model parsing and Rust browser
+  execution rather than Google Docs, browser-commander or Turndown defects.
 
 ## Validation
 
-- `js-gdocs-issue90.log` — Jest output for the new integration suite run in
-  "skip live" mode. Confirms the URL-variation and feature-checklist tests
-  pass without needing network access, and confirms the live block is
-  gated by `GDOCS_INTEGRATION=true`.
-- `rust-gdocs-issue90.log` — `cargo test --test integration gdocs::` run
-  showing the newly added URL-variation cases for the public document ID
-  pass locally.
-
-If any of these logs do not yet exist, the PR was opened before validation
-completed and the failure should be investigated immediately — see the PR
-description for the live status.
+- `logs/gdocs-model-debug.log` and `logs/gdocs-model-debug.json` — Playwright
+  browser run against the public `/edit` URL proving that the real editor page
+  exposes `DOCS_modelChunk` and four Docs image CID mappings.
+- `logs/gdocs-style-ranges.txt` — summary of the live model style ranges and
+  one-based positions used to drive the parser changes.
+- `logs/js-gdocs-unit-after.log` — offline Jest gdocs parser/integration suite.
+- `logs/js-gdocs-live-after.log` — `GDOCS_INTEGRATION=1` Jest run against the
+  public Google Doc, including browser-model capture.
+- `logs/js-test-after.log` — broader JS test suite excluding the Docker-only
+  test file.
+- `logs/rust-gdocs-unit-after.log` — Rust gdocs parser suite including the
+  UTF-16 position regression test.
+- `logs/rust-gdocs-live-after.log` — `GDOCS_INTEGRATION=1` Rust live test run
+  against the public Google Doc, including browser-model capture.
+- `logs/rust-test-after.log` — full Rust `cargo test --all-features --verbose`
+  run.
+- `logs/js-lint-after.log`, `logs/js-format-after.log`, `logs/rust-clippy-after.log`
+  and `logs/rust-fmt-after.log` — local quality gates run before pushing.

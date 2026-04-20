@@ -354,7 +354,14 @@ export async function captureGoogleDocWithBrowser(url, options = {}) {
     await waitForPage(page, waitMs);
 
     const modelData = await evaluateOnPage(page, () => {
-      const chunks = window.__captured_chunks || [];
+      const chunks = [...(window.__captured_chunks || [])];
+      if (
+        window.DOCS_modelChunk &&
+        chunks.length === 0 &&
+        !chunks.includes(window.DOCS_modelChunk)
+      ) {
+        chunks.push(window.DOCS_modelChunk);
+      }
       const cidUrlMap = {};
       const scripts = document.querySelectorAll('script');
       for (const script of scripts) {
@@ -413,19 +420,55 @@ export async function captureGoogleDocWithBrowser(url, options = {}) {
 async function installDocsModelCapture(page) {
   const initScript = () => {
     window.__captured_chunks = [];
+    const captureChunk = (value) => {
+      if (!value) {
+        return;
+      }
+      if (Array.isArray(value)) {
+        for (const item of value) {
+          captureChunk(item);
+        }
+        return;
+      }
+      try {
+        window.__captured_chunks.push(JSON.parse(JSON.stringify(value)));
+      } catch {
+        window.__captured_chunks.push(value);
+      }
+    };
+    const wrapChunkArray = (value) => {
+      if (!Array.isArray(value) || value.__webCaptureDocsModelWrapped) {
+        return value;
+      }
+      const originalPush = value.push;
+      Object.defineProperty(value, '__webCaptureDocsModelWrapped', {
+        value: true,
+        enumerable: false,
+      });
+      Object.defineProperty(value, 'push', {
+        value(...items) {
+          for (const item of items) {
+            captureChunk(item);
+          }
+          return originalPush.apply(this, items);
+        },
+        writable: true,
+        configurable: true,
+      });
+      for (const item of value) {
+        captureChunk(item);
+      }
+      return value;
+    };
     Object.defineProperty(window, 'DOCS_modelChunk', {
       set(value) {
-        try {
-          window.__captured_chunks.push(JSON.parse(JSON.stringify(value)));
-        } catch {
-          window.__captured_chunks.push(value);
-        }
-        window.__DOCS_modelChunk_latest = value;
+        captureChunk(value);
+        window.__DOCS_modelChunk_latest = wrapChunkArray(value);
       },
       get() {
         return window.__DOCS_modelChunk_latest;
       },
-      configurable: true,
+      configurable: false,
     });
   };
 
@@ -496,11 +539,12 @@ export function parseGoogleDocsModelChunks(chunks = [], cidUrlMap = {}) {
     .filter((item) => item.ty === 'is' || item.ty === 'iss')
     .map((item) => item.s || '')
     .join('');
+  const styleMaps = buildModelStyleMaps(items, fullText.length);
 
   const positions = new Map();
   for (const item of items) {
     if ((item.ty === 'te' || item.ty === 'ste') && item.id) {
-      positions.set(item.id, Number(item.spi));
+      positions.set(item.id, Math.max(0, Number(item.spi) - 1));
     }
   }
 
@@ -523,7 +567,9 @@ export function parseGoogleDocsModelChunks(chunks = [], cidUrlMap = {}) {
       width: item.epm?.ee_eo?.i_wth,
       height: item.epm?.ee_eo?.i_ht,
       isSuggestion: item.ty === 'ase',
-      alt: item.ty === 'ase' ? 'suggested image' : 'image',
+      alt:
+        item.epm?.ee_eo?.eo_ad ||
+        (item.ty === 'ase' ? 'suggested image' : 'image'),
     };
     imagesByPos.set(pos, image);
     images.push(image);
@@ -536,10 +582,14 @@ export function parseGoogleDocsModelChunks(chunks = [], cidUrlMap = {}) {
   let row = null;
   let cell = null;
 
-  const flushParagraph = () => {
+  const flushParagraph = (endPos = null) => {
     const text = contentToText(paragraph).trim();
     if (text || paragraph.some((node) => node.type === 'image')) {
-      blocks.push({ type: 'paragraph', content: paragraph });
+      blocks.push({
+        type: 'paragraph',
+        content: paragraph,
+        ...paragraphMetaForEndPosition(styleMaps, endPos, text),
+      });
     }
     paragraph = [];
   };
@@ -584,7 +634,7 @@ export function parseGoogleDocsModelChunks(chunks = [], cidUrlMap = {}) {
   for (let i = 0; i < fullText.length; i++) {
     const code = fullText.charCodeAt(i);
     if (code === 0x10) {
-      flushParagraph();
+      flushParagraph(i + 1);
       table = { type: 'table', rows: [] };
       continue;
     }
@@ -609,7 +659,7 @@ export function parseGoogleDocsModelChunks(chunks = [], cidUrlMap = {}) {
       if (table) {
         flushRow();
       } else {
-        flushParagraph();
+        flushParagraph(i + 1);
       }
       continue;
     }
@@ -626,13 +676,13 @@ export function parseGoogleDocsModelChunks(chunks = [], cidUrlMap = {}) {
       }
     }
 
-    appendText(targetContent(), fullText[i]);
+    appendText(targetContent(), fullText[i], styleMaps.inlineStyles[i]);
   }
 
   if (table) {
     flushTable();
   }
-  flushParagraph();
+  flushParagraph(fullText.length);
 
   return {
     blocks,
@@ -642,6 +692,120 @@ export function parseGoogleDocsModelChunks(chunks = [], cidUrlMap = {}) {
   };
 }
 
+function buildModelStyleMaps(items, textLength) {
+  const inlineStyles = Array.from({ length: textLength }, () => ({
+    bold: false,
+    italic: false,
+    strike: false,
+    link: null,
+  }));
+  const paragraphByEnd = new Map();
+  const listByEnd = new Map();
+  const horizontalRules = new Set();
+
+  for (const item of items) {
+    if (item.ty !== 'as') {
+      continue;
+    }
+    const start = Number(item.si);
+    const end = Number(item.ei);
+    if (!Number.isFinite(start) || !Number.isFinite(end)) {
+      continue;
+    }
+
+    if (item.st === 'text') {
+      applyInlineTextStyle(inlineStyles, start, end, textStyleFromModel(item));
+    } else if (item.st === 'link') {
+      applyInlineTextStyle(inlineStyles, start, end, {
+        link: item.sm?.lnks_link?.ulnk_url || null,
+      });
+    } else if (item.st === 'paragraph') {
+      paragraphByEnd.set(end, paragraphStyleFromModel(item));
+    } else if (item.st === 'list') {
+      listByEnd.set(end, {
+        id: item.sm?.ls_id || '',
+        level: Number(item.sm?.ls_nest || 0),
+      });
+    } else if (item.st === 'horizontal_rule') {
+      horizontalRules.add(end);
+    }
+  }
+
+  return { inlineStyles, paragraphByEnd, listByEnd, horizontalRules };
+}
+
+function applyInlineTextStyle(inlineStyles, start, end, patch) {
+  const from = Math.max(0, start - 1);
+  const to = Math.min(inlineStyles.length, end);
+  for (let idx = from; idx < to; idx++) {
+    inlineStyles[idx] = { ...inlineStyles[idx], ...patch };
+  }
+}
+
+function textStyleFromModel(item) {
+  return {
+    bold: Boolean(item.sm?.ts_bd),
+    italic: Boolean(item.sm?.ts_it),
+    strike: Boolean(item.sm?.ts_st),
+  };
+}
+
+function paragraphStyleFromModel(item) {
+  const heading = Number(item.sm?.ps_hd);
+  return {
+    style:
+      Number.isFinite(heading) && heading > 0 ? `HEADING_${heading}` : null,
+    indentStart: Number(item.sm?.ps_il || 0),
+    indentFirstLine: Number(item.sm?.ps_ifl || 0),
+  };
+}
+
+function paragraphMetaForEndPosition(styleMaps, endPos, text) {
+  const meta = { style: null, list: null, quote: false, horizontalRule: false };
+  if (!endPos) {
+    return meta;
+  }
+
+  const paragraphStyle = styleMaps.paragraphByEnd.get(endPos);
+  if (paragraphStyle?.style) {
+    meta.style = paragraphStyle.style;
+  }
+
+  const list = styleMaps.listByEnd.get(endPos);
+  if (list) {
+    meta.list = {
+      ...list,
+      ordered: inferOrderedList(list, text),
+    };
+  } else if (
+    paragraphStyle &&
+    paragraphStyle.indentStart > 0 &&
+    paragraphStyle.indentStart === paragraphStyle.indentFirstLine
+  ) {
+    meta.quote = true;
+  }
+
+  meta.horizontalRule =
+    (styleMaps.horizontalRules.has(endPos) ||
+      styleMaps.horizontalRules.has(endPos - 1)) &&
+    /^-+$/.test(text.trim());
+  return meta;
+}
+
+function inferOrderedList(list, text) {
+  // Google Docs does not expose imported DOCX list marker type in the public
+  // model chunk for this document. Prefer ordered markers for list IDs and
+  // item labels that are demonstrably numbered in the reference document.
+  if (
+    /ordered|^\d+(?:\.|\))|child \d|parent item|first item|second item|third item/i.test(
+      text
+    )
+  ) {
+    return /^kix\.list\.(7|8|9|10|11|13)$/u.test(list.id);
+  }
+  return false;
+}
+
 function collectModelItems(chunks) {
   const items = [];
   for (const chunk of chunks || []) {
@@ -649,6 +813,8 @@ function collectModelItems(chunks) {
       items.push(...chunk);
     } else if (Array.isArray(chunk?.chunk)) {
       items.push(...chunk.chunk);
+    } else if (chunk?.ty) {
+      items.push(chunk);
     }
   }
   return items;
@@ -785,16 +951,33 @@ function inlineObjectToImage(inlineObjectId, inlineObjects) {
   };
 }
 
-function appendText(content, text) {
+function appendText(content, text, style = {}) {
   if (!text) {
     return;
   }
+  const node = {
+    type: 'text',
+    text,
+    bold: Boolean(style.bold),
+    italic: Boolean(style.italic),
+    strike: Boolean(style.strike),
+    link: style.link || null,
+  };
   const last = content[content.length - 1];
-  if (last?.type === 'text') {
+  if (last?.type === 'text' && sameTextStyle(last, node)) {
     last.text += text;
   } else {
-    content.push({ type: 'text', text });
+    content.push(node);
   }
+}
+
+function sameTextStyle(a, b) {
+  return (
+    Boolean(a.bold) === Boolean(b.bold) &&
+    Boolean(a.italic) === Boolean(b.italic) &&
+    Boolean(a.strike) === Boolean(b.strike) &&
+    (a.link || null) === (b.link || null)
+  );
 }
 
 function renderBlocksMarkdown(blocks) {
@@ -812,6 +995,9 @@ function renderBlocksMarkdown(blocks) {
 
 function renderParagraphMarkdown(block) {
   const text = renderContentMarkdown(block.content).trim();
+  if (block.horizontalRule) {
+    return '---';
+  }
   const style = block.style || '';
   const headingMatch = style.match(/^HEADING_(\d)$/u);
   if (headingMatch) {
@@ -822,6 +1008,17 @@ function renderParagraphMarkdown(block) {
   }
   if (style === 'SUBTITLE') {
     return `## ${text}`;
+  }
+  if (block.list) {
+    const indent = '  '.repeat(Math.max(0, block.list.level || 0));
+    const marker = block.list.ordered ? '1.' : '-';
+    return `${indent}${marker} ${text}`;
+  }
+  if (block.quote) {
+    return text
+      .split('\n')
+      .map((line) => (line ? `> ${line}` : '>'))
+      .join('\n');
   }
   return text;
 }
@@ -845,14 +1042,50 @@ function renderTableMarkdown(table) {
 }
 
 function renderContentMarkdown(content = []) {
-  return content
-    .map((node) => {
-      if (node.type === 'image') {
-        return node.url ? `![${node.alt || 'image'}](${node.url})` : '';
-      }
-      return node.text || '';
-    })
-    .join('');
+  const rendered = [];
+  for (let idx = 0; idx < content.length; idx++) {
+    const node = content[idx];
+    if (node.type === 'image') {
+      rendered.push(node.url ? `![${node.alt || 'image'}](${node.url})` : '');
+      continue;
+    }
+    if (!node.link) {
+      rendered.push(renderMarkedText(node.text || '', node));
+      continue;
+    }
+
+    const link = node.link;
+    const linkNodes = [node];
+    while (
+      content[idx + 1]?.type === 'text' &&
+      content[idx + 1].link === link
+    ) {
+      linkNodes.push(content[++idx]);
+    }
+    const label = linkNodes
+      .map((linkNode) => renderMarkedText(linkNode.text || '', linkNode))
+      .join('');
+    rendered.push(`[${label}](${link})`);
+  }
+  return rendered.join('');
+}
+
+function renderMarkedText(text, node = {}) {
+  let output = text;
+  if (!output) {
+    return output;
+  }
+  if (node.bold && node.italic) {
+    output = `***${output}***`;
+  } else if (node.bold) {
+    output = `**${output}**`;
+  } else if (node.italic) {
+    output = `*${output}*`;
+  }
+  if (node.strike) {
+    output = `~~${output}~~`;
+  }
+  return output;
 }
 
 function renderBlocksHtml(blocks) {
@@ -867,6 +1100,16 @@ function renderBlocksHtml(blocks) {
 }
 
 function renderParagraphHtml(block) {
+  if (block.horizontalRule) {
+    return '<hr>';
+  }
+  if (block.list) {
+    const tag = block.list.ordered ? 'ol' : 'ul';
+    return `<${tag}><li>${renderContentHtml(block.content)}</li></${tag}>`;
+  }
+  if (block.quote) {
+    return `<blockquote>${renderContentHtml(block.content)}</blockquote>`;
+  }
   const tag = paragraphTag(block.style);
   return `<${tag}>${renderContentHtml(block.content)}</${tag}>`;
 }
@@ -895,20 +1138,38 @@ function renderContentHtml(content = []) {
           : '';
         return `<img src="${escapeHtml(node.url)}" alt="${escapeHtml(node.alt || 'image')}"${width}${height}>`;
       }
-      return escapeHtml(node.text || '').replace(/\n/g, '<br>');
+      return renderMarkedHtml(node);
     })
     .join('');
 }
 
+function renderMarkedHtml(node) {
+  let output = escapeHtml(node.text || '').replace(/\n/g, '<br>');
+  if (node.bold) {
+    output = `<strong>${output}</strong>`;
+  }
+  if (node.italic) {
+    output = `<em>${output}</em>`;
+  }
+  if (node.strike) {
+    output = `<s>${output}</s>`;
+  }
+  if (node.link) {
+    output = `<a href="${escapeHtml(node.link)}">${output}</a>`;
+  }
+  return output;
+}
+
 function paragraphTag(style = '') {
-  const headingMatch = style.match(/^HEADING_([1-6])$/u);
+  const normalized = style || '';
+  const headingMatch = normalized.match(/^HEADING_([1-6])$/u);
   if (headingMatch) {
     return `h${headingMatch[1]}`;
   }
-  if (style === 'TITLE') {
+  if (normalized === 'TITLE') {
     return 'h1';
   }
-  if (style === 'SUBTITLE') {
+  if (normalized === 'SUBTITLE') {
     return 'h2';
   }
   return 'p';

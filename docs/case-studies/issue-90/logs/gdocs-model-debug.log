@@ -1,0 +1,32 @@
+{
+  "location": "https://docs.google.com/document/d/1f5zI2xOFpKa90v0GjamO_t7lqSdzMlaM/edit#bookmark=id.em10n11a9c5x",
+  "title": "markdown-test-document.docx - Google Docs",
+  "capturedLength": 1,
+  "latestIsArray": false,
+  "latestLength": null,
+  "firstChunkPreview": "{\"chunk\":[{\"ty\":\"is\",\"ibi\":1,\"s\":\"Markdown Feature Test Document\\nThis document tests Markdown features that survive round-trip conversion through DOCX and Google Docs. Each section demonstrates a specific feature.\\n-\\n1. Headings\\nThe lines above and below demonstrate heading levels H1 through H6.\\nHeading level 3\\nHeading level 4\\nHeading level 5\\nHeading level 6\\n-\\n2. Inline Formatting\\nThis section tests inline text styling:\\nThis text is bold — two asterisks on each side\\nThis text is italic — one asterisk on each side\\nThis text is bold and italic — three asterisks on each side\\nThis text has strikethrough — two tildes on each side\\n-\\n3. Paragraphs\\nThis is the first paragraph. It contains multiple sentences to demonstrate normal paragraph text flow.\\nThis is the second paragraph. It is separate from the first one.\\n-\\n4. Blockquotes\\nThis section tests blockquotes:\\nThis is a single-level blockquote. It represents quoted text from another source.\\nThis is a multi-paragraph blockquote.\\nThis is the second paragraph inside the same blockquote.\\n-\\n5. Unordered Lists\\nThis section tests bullet lists:\\nFirst item\\nSecond item\\nThird item\\nNested unordered list:\\nParent item 1\\nChild item 1a\\nChild item 1b\\nGrandchild item 1b-i\\nGrandchild item 1b-ii\\nChild item 1c\\nParent item 2\\nParent item 3\\n-\\n6. Ordered Lists\\nThis section tests numbered lists:\\nFirst item\\nSecond item\\nThird item\\nNested ordered list:\\nParent item 1\\nChild item 1.1\\nChild item 1.2\\nGrandchild item 1.2.1\\nGrandchild item 1.2.2\\nChild item 1.3\\nParent item 2\\nParent item 3\\n-\\n7. Mixed Lists\\nThis section tests ordered and unordered lists combined:\\nFirst ordered item\\nUnordered child A\\nUnordered child B\\nSecond ordered item\\nOrdered child 2.1\\nOrdered child 2.2\\nThird ordered item\\n-\\n8. Tables\\nSimple table\\n\\u0010\\u0012\\u001cFeature\\n\\u001cSupported\\n\\u001cNotes\\n\\u0012\\u001cBold\\n\\u001cYes\\n\\u001cUsing double asterisks\\n\\u0012\\u001cItalic\\n\\u001cYes\\n\\u001cUsing single asterisks\\n\\u001",
+  "scriptCount": 38,
+  "scriptsWithModel": [
+    {
+      "index": 32,
+      "length": 180,
+      "hasModelChunk": true,
+      "hasPush": false,
+      "preview": "DOCS_warmStartDocumentLoader.startLoad( 1.0 ,'4ClTno87JeR1Hg', 45.0 , 20.0 ,[45,\"\"], null , 1.0 ); var DOCS_modelChunkLoadStart; var DOCS_modelChunkParseStart; var DOCS_modelChunk;"
+    },
+    {
+      "index": 33,
+      "length": 49,
+      "hasModelChunk": true,
+      "hasPush": false,
+      "preview": "DOCS_modelChunkParseStart = new Date().getTime();"
+    },
+    {
+      "index": 34,
+      "length": 198368,
+      "hasModelChunk": true,
+      "hasPush": false,
+      "preview": "DOCS_modelChunk = {\"chunk\":[{\"ty\":\"is\",\"ibi\":1,\"s\":\"Markdown Feature Test Document\\nThis document tests Markdown features that survive round-trip conversion through DOCX and Google Docs. Each section demonstrates a specific feature.\\n-\\n1. Headings\\nThe lines above and below demonstrate heading levels H1 through H6.\\nHeading level 3\\nHeading level 4\\nHeading level 5\\nHeading level 6\\n-\\n2. Inline Formatting\\nThis section tests inline text styling:\\nThis text is bold — two asterisks on each side\\nThis text is italic — one asterisk on each side\\nThis text is bold and italic — three asterisks on each side\\nThis text has strikethrough — two tildes on each side\\n-\\n3. Paragraphs\\nThis is the first paragraph. It contains multiple sentences to demonstrate normal paragraph text flow.\\nThis is the second paragraph. It is separate from the first one.\\n-\\n4. Blockquotes\\nThis section tests blockquotes:\\nThis is a single-level blockquote. It represents quoted text from another source.\\nThis is a m"
+    }
+  ]
+}

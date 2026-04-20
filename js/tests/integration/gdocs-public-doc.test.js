@@ -27,6 +27,7 @@ import {
   buildDocsApiUrl,
   selectGoogleDocsCaptureMethod,
   fetchGoogleDocAsMarkdown,
+  captureGoogleDocWithBrowser,
 } from '../../src/gdocs.js';
 import { retry } from '../../src/retry.js';
 
@@ -191,6 +192,12 @@ describe('Google Docs public test document (issue #90)', () => {
         baseDelay: 2000,
       });
 
+    const captureBrowserWithRetry = (url) =>
+      retry(() => captureGoogleDocWithBrowser(url, { waitMs: 3000 }), {
+        retries: 2,
+        baseDelay: 2000,
+      });
+
     it('fetches the public document via --capture api and returns markdown', async () => {
       const { markdown, documentId, exportUrl } = await fetchWithRetry(
         PUBLIC_TEST_DOCUMENT.canonicalUrl
@@ -213,5 +220,28 @@ describe('Google Docs public test document (issue #90)', () => {
         expect(documentId).toBe(PUBLIC_TEST_DOCUMENT.id);
       }
     );
+
+    it('captures the public document via --capture browser and renders DOCS_modelChunk markdown', async () => {
+      const { markdown, documentId, exportUrl, capture } =
+        await captureBrowserWithRetry(PUBLIC_TEST_DOCUMENT.canonicalUrl);
+
+      expect(documentId).toBe(PUBLIC_TEST_DOCUMENT.id);
+      expect(exportUrl).toBe(buildEditUrl(PUBLIC_TEST_DOCUMENT.id));
+      expect(capture.blocks.length).toBeGreaterThan(20);
+      expect(capture.images.length).toBeGreaterThanOrEqual(4);
+      expect(markdown.length).toBeGreaterThan(2500);
+      expect(markdown).toContain('# Markdown Feature Test Document');
+      expect(markdown).toContain('## 1. Headings');
+      expect(markdown).toContain('**This text is bold**');
+      expect(markdown).toContain('*This text is italic*');
+      expect(markdown).toContain('~~This text has strikethrough~~');
+      expect(markdown).toContain('> This is a single-level blockquote');
+      expect(markdown).toContain('[Regular link](https://example.com)');
+      expect(markdown).toContain('![Blue rectangle](');
+      expect(markdown).toContain('![Red rectangle](');
+      expect(markdown).toContain('![Green square](');
+      expect(markdown).toContain('![Yellow square](');
+      expect(markdown).toContain('---');
+    });
   });
 });

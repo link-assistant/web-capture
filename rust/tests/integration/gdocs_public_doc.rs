@@ -16,8 +16,9 @@ use std::fs;
 use std::path::PathBuf;
 
 use web_capture::gdocs::{
-    build_docs_api_url, build_edit_url, build_export_url, extract_document_id, is_google_docs_url,
-    select_capture_method, GDocsCaptureMethod,
+    build_docs_api_url, build_edit_url, build_export_url, extract_document_id,
+    fetch_google_doc_from_model, is_google_docs_url, select_capture_method, GDocsCaptureMethod,
+    GDocsRenderedResult,
 };
 
 const PUBLIC_DOCUMENT_ID: &str = "1f5zI2xOFpKa90v0GjamO_t7lqSdzMlaM";
@@ -187,6 +188,27 @@ async fn fetch_with_retry(url: &str) -> web_capture::Result<web_capture::gdocs::
     Err(last_err.expect("retry loop should record the last error"))
 }
 
+async fn fetch_browser_model_with_retry(url: &str) -> web_capture::Result<GDocsRenderedResult> {
+    let mut last_err: Option<web_capture::WebCaptureError> = None;
+    let mut delay_ms = 2000u64;
+    for attempt in 0..3 {
+        match fetch_google_doc_from_model(url, None).await {
+            Ok(result) => return Ok(result),
+            Err(err) => {
+                eprintln!(
+                    "gdocs browser-model capture attempt {} failed: {err} (retrying in {}ms)",
+                    attempt + 1,
+                    delay_ms
+                );
+                last_err = Some(err);
+                tokio::time::sleep(std::time::Duration::from_millis(delay_ms)).await;
+                delay_ms *= 2;
+            }
+        }
+    }
+    Err(last_err.expect("retry loop should record the last error"))
+}
+
 #[tokio::test]
 async fn live_capture_of_public_document_preserves_every_section() {
     if !live_enabled() {
@@ -224,4 +246,40 @@ async fn live_capture_of_public_document_preserves_every_section() {
             "captured markdown is missing section `{section}`"
         );
     }
+}
+
+#[tokio::test]
+async fn live_browser_model_capture_of_public_document_preserves_markdown_features() {
+    if !live_enabled() {
+        eprintln!(
+            "Skipping live Google Docs browser-model capture test; set GDOCS_INTEGRATION=1 to enable."
+        );
+        return;
+    }
+
+    let url = format!("https://docs.google.com/document/d/{PUBLIC_DOCUMENT_ID}/edit");
+    let result = fetch_browser_model_with_retry(&url)
+        .await
+        .expect("public document should be capturable from the editor model");
+
+    assert_eq!(result.document_id, PUBLIC_DOCUMENT_ID);
+    assert_eq!(result.export_url, build_edit_url(PUBLIC_DOCUMENT_ID));
+    assert!(
+        result.markdown.len() > 2500,
+        "captured browser-model markdown unexpectedly short: {} bytes",
+        result.markdown.len()
+    );
+    assert!(result.markdown.contains("# Markdown Feature Test Document"));
+    assert!(result.markdown.contains("## 1. Headings"));
+    assert!(result.markdown.contains("**This text is bold**"));
+    assert!(result.markdown.contains("*This text is italic*"));
+    assert!(result.markdown.contains("~~This text has strikethrough~~"));
+    assert!(result
+        .markdown
+        .contains("> This is a single-level blockquote"));
+    assert!(result
+        .markdown
+        .contains("[Regular link](https://example.com)"));
+    assert!(result.markdown.contains("![Blue rectangle]("));
+    assert!(result.markdown.contains("---"));
 }

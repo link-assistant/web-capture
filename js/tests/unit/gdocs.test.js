@@ -204,6 +204,17 @@ describe('gdocs', () => {
       );
     });
 
+    it('accepts individual DOCS_modelChunk items captured from push calls', () => {
+      const capture = parseGoogleDocsModelChunks([
+        { ty: 'is', s: 'Pushed item\n' },
+      ]);
+
+      expect(capture.text).toContain('Pushed item');
+      expect(renderGoogleDocsCapture(capture, 'markdown')).toContain(
+        'Pushed item'
+      );
+    });
+
     it('extracts table cells and suggested images from DOCS_modelChunk data', () => {
       const chunks = [
         {
@@ -221,7 +232,7 @@ describe('gdocs', () => {
               id: 'suggested-image',
               epm: { ee_eo: { i_cid: 'cid_12345678901234567890' } },
             },
-            { ty: 'ste', id: 'suggested-image', spi: 10 },
+            { ty: 'ste', id: 'suggested-image', spi: 11 },
           ],
         },
       ];
@@ -236,6 +247,113 @@ describe('gdocs', () => {
       expect(markdown).toContain('Cell A');
       expect(markdown).toContain(
         '![suggested image](https://docs.google.com/docs-images-rt/image-id)'
+      );
+    });
+
+    it('renders model style records for headings, inline formatting, links, lists, blockquotes, rules, and images', () => {
+      const text = [
+        'Title',
+        'This is bold, italic, strike, and link',
+        '-',
+        'Item',
+        'Quote',
+        '*',
+        '',
+      ].join('\n');
+      const startOf = (needle) => text.indexOf(needle) + 1;
+      const endOf = (needle) => startOf(needle) + needle.length - 1;
+      const lineEnd = (needle) => text.indexOf('\n', text.indexOf(needle)) + 1;
+      const chunks = [
+        {
+          chunk: [
+            { ty: 'is', s: text },
+            {
+              ty: 'as',
+              st: 'paragraph',
+              si: lineEnd('Title'),
+              ei: lineEnd('Title'),
+              sm: { ps_hd: 1 },
+            },
+            {
+              ty: 'as',
+              st: 'text',
+              si: startOf('bold'),
+              ei: endOf('bold'),
+              sm: { ts_bd: true },
+            },
+            {
+              ty: 'as',
+              st: 'text',
+              si: startOf('italic'),
+              ei: endOf('italic'),
+              sm: { ts_it: true },
+            },
+            {
+              ty: 'as',
+              st: 'text',
+              si: startOf('strike'),
+              ei: endOf('strike'),
+              sm: { ts_st: true },
+            },
+            {
+              ty: 'as',
+              st: 'link',
+              si: startOf('link'),
+              ei: endOf('link'),
+              sm: { lnks_link: { ulnk_url: 'https://example.com' } },
+            },
+            {
+              ty: 'as',
+              st: 'horizontal_rule',
+              si: startOf('-'),
+              ei: startOf('-'),
+              sm: {},
+            },
+            {
+              ty: 'as',
+              st: 'list',
+              si: lineEnd('Item'),
+              ei: lineEnd('Item'),
+              sm: { ls_id: 'kix.list.3' },
+            },
+            {
+              ty: 'as',
+              st: 'paragraph',
+              si: lineEnd('Quote'),
+              ei: lineEnd('Quote'),
+              sm: { ps_il: 24, ps_ifl: 24 },
+            },
+            {
+              ty: 'ae',
+              et: 'inline',
+              id: 'image-1',
+              epm: {
+                ee_eo: {
+                  i_cid: 'cid_12345678901234567890',
+                  eo_ad: 'Blue rectangle',
+                },
+              },
+            },
+            { ty: 'te', id: 'image-1', spi: startOf('*') },
+          ],
+        },
+      ];
+
+      const capture = parseGoogleDocsModelChunks(chunks, {
+        cid_12345678901234567890:
+          'https://docs.google.com/docs-images-rt/image-id',
+      });
+      const markdown = renderGoogleDocsCapture(capture, 'markdown');
+
+      expect(markdown).toContain('# Title');
+      expect(markdown).toContain(
+        'This is **bold**, *italic*, ~~strike~~, and [link](https://example.com)'
+      );
+      expect(markdown).toContain('---');
+      expect(markdown).toContain('- Item');
+      expect(markdown).toContain('> Quote');
+      expect(markdown).toContain(
+        '![Blue rectangle](https://docs.google.com/docs-images-rt/image-id)'
       );
     });
   });
