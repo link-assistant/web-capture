@@ -13,8 +13,18 @@ import { convertHtmlToMarkdown } from './lib.js';
 import { createBrowser as defaultCreateBrowser } from './browser.js';
 import { preprocessGoogleDocsExportHtml } from './gdocs-preprocess.js';
 import { localizeGoogleDocsModelImages } from './gdocs-images.js';
+import {
+  googleDocsBrowserModelUnavailableError,
+  isGoogleDocsBrowserModelUnavailableError,
+  fetchGoogleDocByExportFormat as fetchGoogleDocByExportFormatImpl,
+  captureGoogleDocWithBrowserOrFallback as captureGoogleDocWithBrowserOrFallbackImpl,
+} from './gdocs-fallback.js';
 
-export { preprocessGoogleDocsExportHtml, localizeGoogleDocsModelImages };
+export {
+  preprocessGoogleDocsExportHtml,
+  localizeGoogleDocsModelImages,
+  isGoogleDocsBrowserModelUnavailableError,
+};
 
 const GDOCS_URL_PATTERN = /docs\.google\.com\/document\/d\/([a-zA-Z0-9_-]+)/;
 
@@ -309,6 +319,43 @@ export async function fetchGoogleDocAsMarkdown(url, options = {}) {
 }
 
 /**
+ * Fetch a Google Doc through the public export pipeline for a requested output
+ * format. Thin wrapper over the fallback module that injects sibling fetchers.
+ *
+ * @param {string} url - Google Docs URL
+ * @param {Object} [options] - Options
+ * @returns {Promise<Object>} Export result normalized for CLI rendering
+ */
+export function fetchGoogleDocByExportFormat(url, options = {}) {
+  return fetchGoogleDocByExportFormatImpl(
+    { fetchGoogleDoc, fetchGoogleDocAsMarkdown, fetchGoogleDocAsArchive },
+    url,
+    options
+  );
+}
+
+/**
+ * Capture a Google Doc through the browser model, falling back to public export
+ * when the editor does not expose model chunks. Thin wrapper.
+ *
+ * @param {string} url - Google Docs URL
+ * @param {Object} [options] - Capture options
+ * @returns {Promise<Object>} Browser-model or public-export result
+ */
+export function captureGoogleDocWithBrowserOrFallback(url, options = {}) {
+  return captureGoogleDocWithBrowserOrFallbackImpl(
+    {
+      captureGoogleDocWithBrowser,
+      fetchGoogleDoc,
+      fetchGoogleDocAsMarkdown,
+      fetchGoogleDocAsArchive,
+    },
+    url,
+    options
+  );
+}
+
+/**
  * Capture a Google Doc from the editor page model (`DOCS_modelChunk`).
  *
  * @param {string} url - Google Docs URL
@@ -409,7 +456,7 @@ export async function captureGoogleDocWithBrowser(url, options = {}) {
       textBytes: Buffer.byteLength(capture.text || ''),
     }));
     if (capture.blocks.length === 0) {
-      throw new Error(
+      throw googleDocsBrowserModelUnavailableError(
         'Google Docs editor page did not expose DOCS_modelChunk data'
       );
     }

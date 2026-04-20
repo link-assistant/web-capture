@@ -6,6 +6,8 @@ import {
   buildEditUrl,
   buildDocsApiUrl,
   extractBase64Images,
+  captureGoogleDocWithBrowserOrFallback,
+  isGoogleDocsBrowserModelUnavailableError,
   parseGoogleDocsModelChunks,
   renderGoogleDocsCapture,
   renderDocsApiDocument,
@@ -22,6 +24,7 @@ import {
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
+import nock from 'nock';
 
 jest.setTimeout(30000);
 
@@ -539,6 +542,49 @@ describe('gdocs', () => {
     });
   });
 
+  describe('captureGoogleDocWithBrowserOrFallback (issue #81)', () => {
+    afterEach(() => {
+      nock.cleanAll();
+    });
+
+    it('falls back to public export archive when the editor exposes no model chunks', async () => {
+      const tinyPng =
+        'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg==';
+      nock('https://docs.google.com')
+        .get('/document/d/fallback-doc/export')
+        .query({ format: 'html' })
+        .reply(
+          200,
+          `<html><body><h1>Fallback Doc</h1><p>Complete text</p><img src="data:image/png;base64,${tinyPng}" alt="diagram"></body></html>`,
+          { 'content-type': 'text/html; charset=utf-8' }
+        );
+
+      const fallbackErrors = [];
+      const result = await captureGoogleDocWithBrowserOrFallback(
+        'https://docs.google.com/document/d/fallback-doc/edit',
+        {
+          format: 'archive',
+          waitMs: 0,
+          createBrowser: async () =>
+            fakeBrowserReturningModel({ chunks: [], cidUrlMap: {} }),
+          onFallback: (err) => fallbackErrors.push(err),
+        }
+      );
+
+      expect(result.method).toBe('public-export');
+      expect(result.fallback).toBe(true);
+      expect(result.markdown).toContain('Fallback Doc');
+      expect(result.markdown).toContain('Complete text');
+      expect(result.images).toHaveLength(1);
+      expect(result.html).toContain('images/image-01.png');
+      expect(fallbackErrors).toHaveLength(1);
+      expect(isGoogleDocsBrowserModelUnavailableError(fallbackErrors[0])).toBe(
+        true
+      );
+      expect(nock.isDone()).toBe(true);
+    });
+  });
+
   describe('GDOCS_EXPORT_FORMATS', () => {
     it('contains all expected formats', () => {
       expect(GDOCS_EXPORT_FORMATS).toEqual({
@@ -806,3 +852,23 @@ describe('gdocs', () => {
     });
   });
 });
+
+function fakeBrowserReturningModel(modelData) {
+  return {
+    async newPage() {
+      return {
+        async addInitScript() {},
+        async setUserAgent() {},
+        async setExtraHTTPHeaders() {},
+        async setViewport() {},
+        async goto() {},
+        async waitForTimeout() {},
+        async evaluate() {
+          return modelData;
+        },
+        async close() {},
+      };
+    },
+    async close() {},
+  };
+}
