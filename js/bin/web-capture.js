@@ -9,6 +9,7 @@ import path from 'path';
 import { URL } from 'node:url';
 import { makeConfig } from 'lino-arguments';
 import makeLog from 'log-lazy';
+import packageJson from '../package.json' with { type: 'json' };
 
 function makeVerboseLog(enabled) {
   return makeLog({
@@ -225,7 +226,7 @@ const config = makeConfig({
       })
       .help('help')
       .alias('help', 'h')
-      .version()
+      .version(packageJson.version)
       .alias('version', 'v')
       .example('web-capture --serve', 'Start API server on port 3000')
       .example(
