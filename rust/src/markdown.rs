@@ -61,6 +61,16 @@ pub fn convert_html_to_markdown(html: &str, base_url: Option<&str>) -> Result<St
     Ok(cleaned_markdown)
 }
 
+#[must_use]
+pub fn select_html(html: &str, selector_str: &str) -> Option<String> {
+    let selector = Selector::parse(selector_str).ok()?;
+    let document = Html::parse_document(html);
+    document
+        .select(&selector)
+        .next()
+        .map(|element| element.html())
+}
+
 /// Clean HTML content before Markdown conversion
 ///
 /// Removes scripts, styles, and other elements that shouldn't be in Markdown.

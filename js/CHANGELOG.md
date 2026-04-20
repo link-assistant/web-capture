@@ -1,5 +1,49 @@
 # @link-assistant/web-capture
 
+## 1.7.10
+
+### Patch Changes
+
+- fcc031f: Fix remaining Google Docs capture gaps from issue #92 in both the JS and
+  Rust CLIs:
+  - Browser capture now keeps multi-column table rows intact, renders
+    ordered lists with sequential `1. 2. 3.` numbering, and joins same-list
+    items with a single newline so tight-list markdown matches the source
+    document.
+  - Archive mode downloads `docs-images-rt/...` image URLs into the
+    archive's `images/` directory and rewrites markdown/html references so
+    exports are self-contained.
+  - API mode (`--capture api`) runs the export HTML through a shared
+    preprocessor that hoists inline bold / italic / strikethrough spans to
+    semantic tags, strips Google Docs' heading-numbering spans and empty
+    anchor wrappers, unwraps `google.com/url?q=` redirects, and normalizes
+    non-breaking spaces.
+
+## 1.7.9
+
+### Patch Changes
+
+- cee7590: Add a live Google Docs integration test that captures the public markdown
+  round-trip reference document
+  (https://docs.google.com/document/d/1f5zI2xOFpKa90v0GjamO_t7lqSdzMlaM/edit)
+  and verifies every documented URL variation, capture-method selection path,
+  and feature-section heading. The test is gated behind `GDOCS_INTEGRATION=true`
+  and is wired into CI so regressions in the `--capture api` HTML-to-Markdown
+  pipeline surface against a real Google Doc. Addresses issue #90.
+
+## 1.7.8
+
+### Patch Changes
+
+- e951b65: Fix JavaScript CLI version output when run from another npm project.
+- aa4888d: Add content selector options for article-only Markdown capture while preserving full-page metadata extraction.
+
+## 1.7.7
+
+### Patch Changes
+
+- 9034d01: Add Habr archive-compatible markdown controls for figure-numbered image localization and preserved code block whitespace.
+
 ## 1.7.6
 
 ### Patch Changes

@@ -1,22 +1,19 @@
-//! Browser automation module.
+//! Browser automation module
 //!
-//! This module provides headless browser operations for rendering pages and
-//! capturing screenshots. For simpler HTTP fetching without JavaScript
-//! rendering, see the HTML module.
+//! This module provides headless browser operations for rendering pages
+//! and capturing screenshots. Note: Full browser automation requires
+//! browser-commander, which depends on having Chrome installed.
+//!
+//! For simpler HTTP fetching without JavaScript rendering, see the html module.
 
 use crate::{Result, WebCaptureError};
-use chromiumoxide::browser::{Browser as ChromiumBrowser, BrowserConfig};
-use chromiumoxide::page::ScreenshotParams;
-use futures::StreamExt;
-use serde_json::Value;
-use std::future::Future;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
+use std::sync::atomic::{AtomicU64, Ordering};
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
-use tracing::{debug, info, warn};
+use tokio::process::Command;
+use tracing::info;
 
-const DEFAULT_BROWSER_WAIT_MS: u64 = 1_000;
-const DEFAULT_BROWSER_TIMEOUT_MS: u64 = 30_000;
-const DEFAULT_GDOCS_BROWSER_WAIT_MS: u64 = 8_000;
+static USER_DATA_DIR_COUNTER: AtomicU64 = AtomicU64::new(0);
 
 /// Browser engine type
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
@@ -24,67 +21,6 @@ pub enum BrowserEngine {
     /// Chromiumoxide engine (default)
     #[default]
     Chromiumoxide,
-}
-
-/// Options used when rendering a page through Chromium.
-#[derive(Debug, Clone)]
-pub(crate) struct BrowserCaptureOptions {
-    /// Extra time to wait after the browser reports initial navigation loaded.
-    pub wait_after_load: Duration,
-    /// Whether screenshots should include the full scrollable page.
-    pub full_page: bool,
-    /// Chromium launch timeout.
-    pub launch_timeout: Duration,
-    /// Chromium request timeout.
-    pub request_timeout: Duration,
-}
-
-impl Default for BrowserCaptureOptions {
-    fn default() -> Self {
-        Self {
-            wait_after_load: duration_from_env_ms(
-                "WEB_CAPTURE_BROWSER_WAIT_MS",
-                DEFAULT_BROWSER_WAIT_MS,
-            ),
-            full_page: true,
-            launch_timeout: duration_from_env_ms(
-                "WEB_CAPTURE_BROWSER_LAUNCH_TIMEOUT_MS",
-                DEFAULT_BROWSER_TIMEOUT_MS,
-            ),
-            request_timeout: duration_from_env_ms(
-                "WEB_CAPTURE_BROWSER_REQUEST_TIMEOUT_MS",
-                DEFAULT_BROWSER_TIMEOUT_MS,
-            ),
-        }
-    }
-}
-
-impl BrowserCaptureOptions {
-    /// Options tuned for Google Docs editor-model capture.
-    pub(crate) fn google_docs() -> Self {
-        Self {
-            wait_after_load: duration_from_env_ms(
-                "WEB_CAPTURE_GDOCS_BROWSER_WAIT_MS",
-                DEFAULT_GDOCS_BROWSER_WAIT_MS,
-            ),
-            ..Self::default()
-        }
-    }
-}
-
-/// HTML and optional JavaScript evaluation result from a browser-rendered page.
-#[derive(Debug, Clone)]
-pub(crate) struct BrowserRenderResult {
-    /// Browser-rendered HTML.
-    pub html: String,
-    /// Optional value returned by an evaluation script after navigation.
-    pub evaluation: Option<Value>,
-}
-
-struct RunningBrowser {
-    browser: ChromiumBrowser,
-    handler: tokio::task::JoinHandle<()>,
-    user_data_dir: PathBuf,
 }
 
 impl std::fmt::Display for BrowserEngine {
@@ -127,42 +63,130 @@ impl std::str::FromStr for BrowserEngine {
 ///
 /// Returns an error if browser operations fail
 pub async fn render_html(url: &str) -> Result<String> {
-    info!("Rendering HTML with headless Chromium for URL: {}", url);
-    let result =
-        render_html_with_scripts(url, None, None, BrowserCaptureOptions::default()).await?;
-    info!(
-        "Successfully rendered HTML with headless Chromium ({} bytes)",
-        result.html.len()
-    );
-    Ok(result.html)
+    info!("Rendering HTML for URL: {}", url);
+
+    let chrome = find_chrome_executable().ok_or_else(|| {
+        WebCaptureError::BrowserError(
+            "Chrome/Chromium executable was not found. Set WEB_CAPTURE_CHROME, CHROME_PATH, or GOOGLE_CHROME_BIN.".to_string(),
+        )
+    })?;
+    let user_data_dir = temporary_user_data_dir();
+    std::fs::create_dir_all(&user_data_dir)?;
+
+    let output = tokio::time::timeout(
+        Duration::from_secs(60),
+        Command::new(&chrome)
+            .arg("--headless=new")
+            .arg("--disable-gpu")
+            .arg("--disable-extensions")
+            .arg("--disable-dev-shm-usage")
+            .arg("--no-sandbox")
+            .arg("--dump-dom")
+            .arg(format!("--user-data-dir={}", user_data_dir.display()))
+            .arg(url)
+            .output(),
+    )
+    .await
+    .map_err(|_| {
+        WebCaptureError::BrowserError(format!(
+            "Timed out waiting for headless Chrome to render {url}"
+        ))
+    })?
+    .map_err(|e| WebCaptureError::BrowserError(format!("Failed to launch Chrome: {e}")))?;
+
+    let _ = std::fs::remove_dir_all(&user_data_dir);
+
+    if !output.status.success() {
+        return Err(WebCaptureError::BrowserError(format!(
+            "Headless Chrome failed with status {}: {}",
+            output.status,
+            String::from_utf8_lossy(&output.stderr)
+        )));
+    }
+
+    let html = String::from_utf8(output.stdout)
+        .map_err(|e| WebCaptureError::BrowserError(format!("Chrome output was not UTF-8: {e}")))?;
+
+    info!("Successfully rendered HTML ({} bytes)", html.len());
+    Ok(html)
 }
 
-/// Render HTML with optional scripts installed before and after navigation.
-pub(crate) async fn render_html_with_scripts(
-    url: &str,
-    init_script: Option<&str>,
-    evaluation_script: Option<&str>,
-    options: BrowserCaptureOptions,
-) -> Result<BrowserRenderResult> {
-    let mut running = launch_chromium(&options).await?;
-    let result = render_with_running_browser(
-        &running.browser,
-        url,
-        init_script,
-        evaluation_script,
-        &options,
-    )
-    .await;
-    shutdown_chromium(&mut running).await;
-    result
+fn find_chrome_executable() -> Option<PathBuf> {
+    for env_var in [
+        "WEB_CAPTURE_CHROME",
+        "CHROME_PATH",
+        "GOOGLE_CHROME_BIN",
+        "CHROMIUM_PATH",
+    ] {
+        if let Ok(path) = std::env::var(env_var) {
+            let candidate = PathBuf::from(path);
+            if candidate.exists() {
+                return Some(candidate);
+            }
+        }
+    }
+
+    for name in [
+        "google-chrome",
+        "google-chrome-stable",
+        "chromium",
+        "chromium-browser",
+        "chrome",
+    ] {
+        if let Some(path) = find_on_path(name) {
+            return Some(path);
+        }
+    }
+
+    for path in [
+        "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+        "/Applications/Chromium.app/Contents/MacOS/Chromium",
+        r"C:\Program Files\Google\Chrome\Application\chrome.exe",
+        r"C:\Program Files (x86)\Google\Chrome\Application\chrome.exe",
+        r"C:\Program Files\Chromium\Application\chrome.exe",
+    ] {
+        let candidate = PathBuf::from(path);
+        if candidate.exists() {
+            return Some(candidate);
+        }
+    }
+
+    None
+}
+
+fn find_on_path(name: &str) -> Option<PathBuf> {
+    let paths = std::env::var_os("PATH")?;
+    for dir in std::env::split_paths(&paths) {
+        let candidate = dir.join(name);
+        if candidate.exists() {
+            return Some(candidate);
+        }
+        #[cfg(windows)]
+        {
+            let candidate = dir.join(format!("{name}.exe"));
+            if candidate.exists() {
+                return Some(candidate);
+            }
+        }
+    }
+    None
+}
+
+fn temporary_user_data_dir() -> PathBuf {
+    let nonce = SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .map_or(0, |duration| duration.as_nanos());
+    let seq = USER_DATA_DIR_COUNTER.fetch_add(1, Ordering::Relaxed);
+    std::env::temp_dir().join(format!(
+        "web-capture-chrome-{}-{nonce}-{seq}",
+        std::process::id()
+    ))
 }
 
 /// Capture a PNG screenshot of a URL
 ///
-/// This function uses browser-commander to launch a headless browser,
-/// navigate to the URL, and capture a screenshot.
-///
-/// Note: This requires Chrome/Chromium to be installed on the system.
+/// This function launches headless Chrome/Chromium, navigates to the URL,
+/// and captures a full-page PNG screenshot.
 ///
 /// # Arguments
 ///
@@ -174,242 +198,83 @@ pub(crate) async fn render_html_with_scripts(
 ///
 /// # Errors
 ///
-/// Returns an error if browser operations fail
+/// Returns an error if Chrome/Chromium is unavailable or screenshot capture fails.
 pub async fn capture_screenshot(url: &str) -> Result<Vec<u8>> {
-    info!(
-        "Capturing screenshot with headless Chromium for URL: {}",
-        url
-    );
-    let options = BrowserCaptureOptions::default();
-    let mut running = launch_chromium(&options).await?;
-    let result = capture_screenshot_with_running_browser(&running.browser, url, &options).await;
-    shutdown_chromium(&mut running).await;
-    result
-}
+    info!("Capturing screenshot for URL: {}", url);
 
-async fn render_with_running_browser(
-    browser: &ChromiumBrowser,
-    url: &str,
-    init_script: Option<&str>,
-    evaluation_script: Option<&str>,
-    options: &BrowserCaptureOptions,
-) -> Result<BrowserRenderResult> {
-    let page = with_browser_timeout(
-        options.request_timeout,
-        "Failed to create browser page",
-        browser.new_page("about:blank"),
-    )
-    .await?;
-
-    if let Some(script) = init_script {
-        with_browser_timeout(
-            options.request_timeout,
-            "Failed to install browser init script",
-            page.evaluate_on_new_document(script),
+    let chrome = find_chrome_executable().ok_or_else(|| {
+        WebCaptureError::ScreenshotError(
+            "Chrome/Chromium executable was not found. Set WEB_CAPTURE_CHROME, CHROME_PATH, or GOOGLE_CHROME_BIN.".to_string(),
         )
-        .await?;
-    }
+    })?;
 
-    with_browser_timeout(
-        options.request_timeout,
-        "Failed to navigate browser page",
-        page.goto(url),
-    )
-    .await?;
-    wait_after_load(options).await;
-
-    let evaluation = if let Some(script) = evaluation_script {
-        let result = with_browser_timeout(
-            options.request_timeout,
-            "Failed to evaluate script in browser page",
-            page.evaluate(script),
-        )
-        .await?;
-        Some(result.into_value::<Value>().map_err(|error| {
-            WebCaptureError::BrowserError(format!(
-                "Failed to decode browser evaluation result: {error}"
-            ))
-        })?)
-    } else {
-        None
-    };
-
-    let html = with_browser_timeout(
-        options.request_timeout,
-        "Failed to read browser-rendered HTML",
-        page.content(),
-    )
-    .await?;
-    if let Err(error) = with_browser_timeout(
-        options.request_timeout,
-        "Failed to close browser page",
-        page.close(),
-    )
-    .await
-    {
-        debug!("Failed to close browser page after HTML render: {}", error);
-    }
-
-    Ok(BrowserRenderResult { html, evaluation })
-}
-
-async fn capture_screenshot_with_running_browser(
-    browser: &ChromiumBrowser,
-    url: &str,
-    options: &BrowserCaptureOptions,
-) -> Result<Vec<u8>> {
-    let page = with_browser_timeout(
-        options.request_timeout,
-        "Failed to create browser page",
-        browser.new_page(url),
-    )
-    .await?;
-    wait_after_load(options).await;
-
-    let screenshot = with_browser_timeout(
-        options.request_timeout,
-        "Failed to capture browser screenshot",
-        page.screenshot(
-            ScreenshotParams::builder()
-                .full_page(options.full_page)
-                .build(),
-        ),
-    )
-    .await
-    .map_err(|error| WebCaptureError::ScreenshotError(error.to_string()))?;
-    if let Err(error) = with_browser_timeout(
-        options.request_timeout,
-        "Failed to close browser page",
-        page.close(),
-    )
-    .await
-    {
-        debug!("Failed to close browser page after screenshot: {}", error);
-    }
-
-    Ok(screenshot)
-}
-
-async fn launch_chromium(options: &BrowserCaptureOptions) -> Result<RunningBrowser> {
     let user_data_dir = temporary_user_data_dir();
-    std::fs::create_dir_all(&user_data_dir).map_err(WebCaptureError::IoError)?;
+    std::fs::create_dir_all(&user_data_dir).map_err(|e| {
+        WebCaptureError::ScreenshotError(format!("Failed to create temp user data dir: {e}"))
+    })?;
 
-    // browser-commander 0.9 exposes the shared Chromium automation arguments,
-    // while page access is still handled through the underlying Chromiumoxide API.
-    let mut chrome_args = browser_commander::LaunchOptions::chromiumoxide()
-        .headless(true)
-        .all_chrome_args();
-    chrome_args.extend([
-        "--disable-dev-shm-usage".to_string(),
-        "--disable-gpu".to_string(),
-    ]);
+    let screenshot_path = temporary_screenshot_path();
+    let screenshot_arg = format!("--screenshot={}", screenshot_path.display());
 
-    let mut config = BrowserConfig::builder()
-        .no_sandbox()
-        .user_data_dir(&user_data_dir)
-        .launch_timeout(options.launch_timeout)
-        .request_timeout(options.request_timeout)
-        .args(chrome_args);
-
-    if let Some(executable) = chrome_executable_from_env() {
-        config = config.chrome_executable(executable);
-    }
-
-    let (browser, mut handler) = ChromiumBrowser::launch(config.build().map_err(|error| {
-        WebCaptureError::BrowserError(format!("Failed to configure Chromium browser: {error}"))
-    })?)
+    let output = tokio::time::timeout(
+        Duration::from_secs(60),
+        Command::new(&chrome)
+            .arg("--headless=new")
+            .arg("--disable-gpu")
+            .arg("--disable-extensions")
+            .arg("--disable-dev-shm-usage")
+            .arg("--no-sandbox")
+            .arg("--hide-scrollbars")
+            .arg("--window-size=1280,800")
+            .arg(&screenshot_arg)
+            .arg(format!("--user-data-dir={}", user_data_dir.display()))
+            .arg(url)
+            .output(),
+    )
     .await
-    .map_err(|error| browser_error("Failed to launch Chromium browser", error))?;
+    .map_err(|_| {
+        WebCaptureError::ScreenshotError(format!(
+            "Timed out waiting for headless Chrome to capture {url}"
+        ))
+    })?
+    .map_err(|e| WebCaptureError::ScreenshotError(format!("Failed to launch Chrome: {e}")))?;
 
-    let handler = tokio::task::spawn(async move {
-        while let Some(event) = handler.next().await {
-            if let Err(error) = event {
-                debug!("Chromium handler received recoverable error: {}", error);
-            }
-        }
-    });
+    let _ = std::fs::remove_dir_all(&user_data_dir);
 
-    info!("Launched headless Chromium through browser-commander configuration");
-    Ok(RunningBrowser {
-        browser,
-        handler,
-        user_data_dir,
-    })
+    if !output.status.success() {
+        let _ = std::fs::remove_file(&screenshot_path);
+        return Err(WebCaptureError::ScreenshotError(format!(
+            "Headless Chrome failed with status {}: {}",
+            output.status,
+            String::from_utf8_lossy(&output.stderr)
+        )));
+    }
+
+    let bytes = read_screenshot_bytes(&screenshot_path)?;
+    let _ = std::fs::remove_file(&screenshot_path);
+
+    if bytes.len() < 8 || &bytes[..8] != b"\x89PNG\r\n\x1a\n" {
+        return Err(WebCaptureError::ScreenshotError(
+            "Chrome screenshot output was not a valid PNG".to_string(),
+        ));
+    }
+
+    info!("Successfully captured screenshot ({} bytes)", bytes.len());
+    Ok(bytes)
 }
 
-async fn shutdown_chromium(running: &mut RunningBrowser) {
-    match tokio::time::timeout(Duration::from_secs(5), running.browser.close()).await {
-        Ok(Ok(_)) => {}
-        Ok(Err(error)) => debug!("Failed to close Chromium browser: {}", error),
-        Err(_) => warn!("Timed out closing Chromium browser"),
-    }
-    match tokio::time::timeout(Duration::from_secs(5), running.browser.wait()).await {
-        Ok(Ok(_)) => {}
-        Ok(Err(error)) => debug!("Failed to wait for Chromium browser process: {}", error),
-        Err(_) => warn!("Timed out waiting for Chromium browser process"),
-    }
-    running.handler.abort();
-    if let Err(error) = (&mut running.handler).await {
-        if !error.is_cancelled() {
-            debug!("Chromium handler task failed: {}", error);
-        }
-    }
-    if let Err(error) = std::fs::remove_dir_all(&running.user_data_dir) {
-        debug!(
-            "Failed to remove Chromium user data dir {}: {}",
-            running.user_data_dir.display(),
-            error
-        );
-    }
-}
-
-async fn wait_after_load(options: &BrowserCaptureOptions) {
-    if options.wait_after_load.is_zero() {
-        return;
-    }
-    debug!(
-        wait_ms = options.wait_after_load.as_millis(),
-        "waiting after browser navigation for dynamic page work"
-    );
-    tokio::time::sleep(options.wait_after_load).await;
-}
-
-fn temporary_user_data_dir() -> PathBuf {
+fn temporary_screenshot_path() -> PathBuf {
     let nonce = SystemTime::now()
         .duration_since(UNIX_EPOCH)
         .map_or(0, |duration| duration.as_nanos());
     std::env::temp_dir().join(format!(
-        "web-capture-chromium-{}-{nonce}",
+        "web-capture-screenshot-{}-{nonce}.png",
         std::process::id()
     ))
 }
 
-fn chrome_executable_from_env() -> Option<PathBuf> {
-    std::env::var_os("WEB_CAPTURE_CHROME_PATH").map(PathBuf::from)
-}
-
-fn duration_from_env_ms(name: &str, default_ms: u64) -> Duration {
-    std::env::var(name)
-        .ok()
-        .and_then(|value| value.parse::<u64>().ok())
-        .map_or_else(|| Duration::from_millis(default_ms), Duration::from_millis)
-}
-
-async fn with_browser_timeout<T, E, F>(duration: Duration, context: &str, future: F) -> Result<T>
-where
-    E: std::fmt::Display,
-    F: Future<Output = std::result::Result<T, E>>,
-{
-    match tokio::time::timeout(duration, future).await {
-        Ok(Ok(value)) => Ok(value),
-        Ok(Err(error)) => Err(browser_error(context, error)),
-        Err(_) => Err(WebCaptureError::BrowserError(format!(
-            "{context} timed out after {} ms",
-            duration.as_millis()
-        ))),
-    }
-}
-
-fn browser_error(context: &str, error: impl std::fmt::Display) -> WebCaptureError {
-    WebCaptureError::BrowserError(format!("{context}: {error}"))
+fn read_screenshot_bytes(path: &Path) -> Result<Vec<u8>> {
+    std::fs::read(path).map_err(|e| {
+        WebCaptureError::ScreenshotError(format!("Failed to read screenshot file: {e}"))
+    })
 }

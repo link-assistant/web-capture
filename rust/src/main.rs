@@ -34,8 +34,8 @@ use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 use url::Url;
 
 use web_capture::{
-    capture_screenshot, convert_html_to_markdown, convert_html_to_markdown_enhanced,
-    convert_relative_urls, convert_to_utf8, fetch_html, html, render_html, EnhancedOptions,
+    capture_screenshot, convert_html_to_markdown_enhanced, convert_relative_urls, convert_to_utf8,
+    fetch_html, html, render_html, EnhancedOptions,
 };
 
 /// CLI arguments
@@ -86,6 +86,14 @@ struct Args {
     /// Use --no-detect-code-language to disable.
     #[arg(long, default_value_t = true, env = "WEB_CAPTURE_DETECT_CODE_LANGUAGE")]
     detect_code_language: bool,
+
+    /// CSS selector used to scope markdown conversion while preserving full-page metadata extraction.
+    #[arg(long, env = "WEB_CAPTURE_CONTENT_SELECTOR")]
+    content_selector: Option<String>,
+
+    /// CSS selector for article body markdown; prepends the selected article title when available.
+    #[arg(long, env = "WEB_CAPTURE_BODY_SELECTOR")]
+    body_selector: Option<String>,
 
     /// Keep images as inline base64 data URIs instead of extracting to files (default: false).
     /// Use --embed-images to keep base64 inline.
@@ -166,6 +174,10 @@ struct MarkdownQuery {
     embed_images: bool,
     #[serde(default = "default_true", rename = "keepOriginalLinks")]
     keep_original_links: bool,
+    #[serde(default, rename = "contentSelector")]
+    content_selector: Option<String>,
+    #[serde(default, rename = "bodySelector")]
+    body_selector: Option<String>,
 }
 
 const fn default_true() -> bool {
@@ -332,8 +344,13 @@ async fn markdown_handler(Query(params): Query<MarkdownQuery>) -> Response {
         }
     };
 
-    let mut markdown = match convert_html_to_markdown(&html, Some(&url)) {
-        Ok(md) => md,
+    let options = EnhancedOptions {
+        content_selector: params.content_selector,
+        body_selector: params.body_selector,
+        ..EnhancedOptions::default()
+    };
+    let mut markdown = match convert_html_to_markdown_enhanced(&html, Some(&url), &options) {
+        Ok(result) => result.markdown,
         Err(e) => {
             error!("Failed to convert to Markdown: {}", e);
             return (
@@ -697,6 +714,8 @@ async fn capture_url(
                 extract_metadata: args.extract_metadata,
                 post_process: args.post_process,
                 detect_code_language: args.detect_code_language,
+                content_selector: args.content_selector.clone(),
+                body_selector: args.body_selector.clone(),
             };
             let enhanced = convert_html_to_markdown_enhanced(&html, Some(&absolute_url), &options)?;
             let markdown = enhanced.markdown;
@@ -754,6 +773,8 @@ async fn capture_url(
                 extract_metadata: args.extract_metadata,
                 post_process: args.post_process,
                 detect_code_language: args.detect_code_language,
+                content_selector: args.content_selector.clone(),
+                body_selector: args.body_selector.clone(),
             };
             let result = convert_html_to_markdown_enhanced(&html, Some(&absolute_url), &options)?;
             let mut markdown = result.markdown;

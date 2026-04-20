@@ -32,6 +32,7 @@ use base64::Engine;
 use regex::Regex;
 use serde_json::Value;
 use std::collections::HashMap;
+use std::fmt::Write as _;
 use std::hash::BuildHasher;
 use std::io::Write;
 use std::sync::OnceLock;
@@ -41,31 +42,6 @@ use crate::WebCaptureError;
 
 const GDOCS_EXPORT_BASE: &str = "https://docs.google.com/document/d";
 const GDOCS_API_BASE: &str = "https://docs.googleapis.com/v1/documents";
-const GDOCS_MODEL_INIT_SCRIPT: &str = r"
-(() => {
-  const chunks = [];
-  Object.defineProperty(window, '__webCaptureDocsModelChunks', {
-    value: chunks,
-    configurable: true
-  });
-  let latest;
-  Object.defineProperty(window, 'DOCS_modelChunk', {
-    set(value) {
-      try {
-        chunks.push(JSON.parse(JSON.stringify(value)));
-      } catch (_) {
-        chunks.push(value);
-      }
-      latest = value;
-    },
-    get() {
-      return latest;
-    },
-    configurable: true
-  });
-})();
-";
-const GDOCS_MODEL_EVAL_SCRIPT: &str = "window.__webCaptureDocsModelChunks || []";
 
 fn gdocs_url_pattern() -> &'static Regex {
     static PATTERN: OnceLock<Regex> = OnceLock::new();
@@ -133,6 +109,12 @@ pub enum CapturedBlock {
         content: Vec<ContentNode>,
         /// Optional Google Docs named style.
         style: Option<String>,
+        /// Optional list metadata.
+        list: Option<ListMeta>,
+        /// Whether paragraph is a blockquote.
+        quote: bool,
+        /// Whether paragraph is a horizontal rule.
+        horizontal_rule: bool,
     },
     /// Table block.
     Table(TableBlock),
@@ -163,7 +145,18 @@ pub struct TableCell {
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum ContentNode {
     /// Text run.
-    Text(String),
+    Text {
+        /// Text content.
+        text: String,
+        /// Bold text style.
+        bold: bool,
+        /// Italic text style.
+        italic: bool,
+        /// Strikethrough text style.
+        strike: bool,
+        /// Optional hyperlink target.
+        link: Option<String>,
+    },
     /// Image placeholder.
     Image {
         /// Content ID from Google Docs model data.
@@ -175,6 +168,47 @@ pub enum ContentNode {
         /// Whether this image came from a suggested edit.
         is_suggestion: bool,
     },
+}
+
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
+struct TextStyle {
+    bold: bool,
+    italic: bool,
+    strike: bool,
+    link: Option<String>,
+}
+
+#[derive(Debug, Clone, Default)]
+struct ParagraphMeta {
+    style: Option<String>,
+    list: Option<ListMeta>,
+    quote: bool,
+    horizontal_rule: bool,
+}
+
+#[derive(Debug, Clone)]
+pub struct ListMeta {
+    /// Google Docs list identifier.
+    pub id: String,
+    /// Nesting level, zero-based.
+    pub level: usize,
+    /// Whether Markdown should render this list item with an ordered marker.
+    pub ordered: bool,
+}
+
+#[derive(Debug, Clone)]
+struct ParagraphStyle {
+    style: Option<String>,
+    indent_start: f64,
+    indent_first_line: f64,
+}
+
+#[derive(Debug, Clone, Default)]
+struct ModelStyleMaps {
+    inline_styles: Vec<TextStyle>,
+    paragraph_by_end: HashMap<usize, ParagraphStyle>,
+    list_by_end: HashMap<usize, ListMeta>,
+    horizontal_rules: std::collections::HashSet<usize>,
 }
 
 /// Check if a URL is a Google Docs document URL.
@@ -352,8 +386,15 @@ pub async fn fetch_google_doc_as_markdown(
 ) -> crate::Result<GDocsResult> {
     let result = fetch_google_doc(url, "html", api_token).await?;
 
+    let preprocess = preprocess_google_docs_export_html(&result.content);
+    debug!(
+        document_id = %result.document_id,
+        hoisted = preprocess.hoisted,
+        unwrapped_links = preprocess.unwrapped_links,
+        "google-docs-export pre-processor rewrote markup"
+    );
     let markdown =
-        crate::markdown::convert_html_to_markdown(&result.content, Some(&result.export_url))?;
+        crate::markdown::convert_html_to_markdown(&preprocess.html, Some(&result.export_url))?;
     debug!(
         document_id = %result.document_id,
         bytes = markdown.len(),
@@ -366,6 +407,136 @@ pub async fn fetch_google_doc_as_markdown(
         document_id: result.document_id,
         export_url: result.export_url,
     })
+}
+
+/// Result of running the Google Docs export HTML pre-processor.
+///
+/// Exposes the rewritten HTML alongside counters that are useful for debug
+/// logging (`gdocs.export.style-hoist`). See issue #92 R6.
+#[derive(Debug, Clone)]
+pub struct GDocsExportPreprocessResult {
+    /// Rewritten HTML.
+    pub html: String,
+    /// Number of inline-style spans turned into `<strong>`/`<em>`/`<del>`.
+    pub hoisted: usize,
+    /// Number of `google.com/url?q=` redirect wrappers unwrapped.
+    pub unwrapped_links: usize,
+}
+
+/// Pre-process Google Docs export HTML so the generic `html2md` pipeline
+/// preserves inline formatting, heading numbering, and link targets.
+///
+/// Google Drive serves bold/italic/strikethrough as inline style spans and
+/// wraps every link through a `google.com/url?q=` redirect, both of which
+/// the generic converter would otherwise discard. This function rewrites
+/// those constructs into semantic HTML before conversion.
+#[must_use]
+pub fn preprocess_google_docs_export_html(html: &str) -> GDocsExportPreprocessResult {
+    let mut hoisted: usize = 0;
+    let mut unwrapped_links: usize = 0;
+    let mut out = html.to_string();
+
+    // 1. Hoist inline style spans into <strong>/<em>/<del>.
+    let span_re = Regex::new(r#"(?is)<span\s+([^>]*style="([^"]*)"[^>]*)>(.*?)</span>"#)
+        .expect("valid regex");
+    out = span_re
+        .replace_all(&out, |caps: &regex::Captures<'_>| {
+            let style = caps.get(2).map_or("", |m| m.as_str());
+            let inner = caps.get(3).map_or("", |m| m.as_str());
+            let bold = Regex::new(r"(?i)font-weight\s*:\s*(?:bold|[6-9]\d{2})")
+                .expect("valid regex")
+                .is_match(style);
+            let italic = Regex::new(r"(?i)font-style\s*:\s*italic")
+                .expect("valid regex")
+                .is_match(style);
+            let strike = Regex::new(r"(?i)text-decoration[^;]*\bline-through\b")
+                .expect("valid regex")
+                .is_match(style);
+            if !bold && !italic && !strike {
+                return caps[0].to_string();
+            }
+            hoisted += 1;
+            let mut wrapped = inner.to_string();
+            if strike {
+                wrapped = format!("<del>{wrapped}</del>");
+            }
+            if italic {
+                wrapped = format!("<em>{wrapped}</em>");
+            }
+            if bold {
+                wrapped = format!("<strong>{wrapped}</strong>");
+            }
+            wrapped
+        })
+        .into_owned();
+
+    // 2. Strip leading empty `<a id="…"></a>` anchors inside headings and
+    //    `<span>N. </span>` numbering so the heading text is clean.
+    let empty_anchor_re = Regex::new(r#"(?is)<a\s+id="[^"]*"\s*>\s*</a>"#).expect("valid regex");
+    let numbering_re =
+        Regex::new(r"(?is)<span\b[^>]*>\s*\d+(?:\.\d+)*\.?\s*</span>").expect("valid regex");
+    for level in 1..=6 {
+        let heading_re = Regex::new(&format!(r"(?is)(<h{level}\b[^>]*>)(.*?)(</h{level}>)"))
+            .expect("valid regex");
+        out = heading_re
+            .replace_all(&out, |caps: &regex::Captures<'_>| {
+                let open = &caps[1];
+                let inner = &caps[2];
+                let close = &caps[3];
+                let mut cleaned = empty_anchor_re.replace_all(inner, "").into_owned();
+                cleaned = numbering_re.replace_all(&cleaned, "").into_owned();
+                format!("{open}{cleaned}{close}")
+            })
+            .into_owned();
+    }
+
+    // 3. Unwrap google.com/url?q=<URL>&sa=... redirect wrappers on <a href>.
+    let redirect_re =
+        Regex::new(r#"(?i)href="https?://(?:www\.)?google\.com/url\?q=([^&"]+)[^"]*""#)
+            .expect("valid regex");
+    out = redirect_re
+        .replace_all(&out, |caps: &regex::Captures<'_>| {
+            let encoded = caps.get(1).map_or("", |m| m.as_str());
+            let decoded = percent_decode_utf8_lossy(encoded);
+            unwrapped_links += 1;
+            format!(r#"href="{decoded}""#)
+        })
+        .into_owned();
+
+    // 4. Replace `&nbsp;` / U+00A0 with a regular space so the rendered
+    //    markdown does not carry non-breaking-space residue.
+    out = out.replace("&nbsp;", " ");
+    out = out.replace('\u{00A0}', " ");
+
+    GDocsExportPreprocessResult {
+        html: out,
+        hoisted,
+        unwrapped_links,
+    }
+}
+
+/// Decode %XX percent escapes in `input`. Invalid sequences are left
+/// untouched so well-formed ASCII URLs round-trip unchanged.
+fn percent_decode_utf8_lossy(input: &str) -> String {
+    let bytes = input.as_bytes();
+    let mut decoded = Vec::with_capacity(bytes.len());
+    let mut i = 0;
+    while i < bytes.len() {
+        if bytes[i] == b'%' && i + 2 < bytes.len() {
+            let hi = (bytes[i + 1] as char).to_digit(16);
+            let lo = (bytes[i + 2] as char).to_digit(16);
+            if let (Some(hi), Some(lo)) = (hi, lo) {
+                if let Ok(byte) = u8::try_from((hi << 4) | lo) {
+                    decoded.push(byte);
+                    i += 3;
+                    continue;
+                }
+            }
+        }
+        decoded.push(bytes[i]);
+        i += 1;
+    }
+    String::from_utf8_lossy(&decoded).into_owned()
 }
 
 /// Fetch and render a Google Docs document via the authenticated REST API.
@@ -444,8 +615,9 @@ pub async fn fetch_google_doc_from_docs_api(
 
 /// Fetch and render the model data embedded in the Google Docs `/edit` route.
 ///
-/// This path launches headless Chromium, intercepts `DOCS_modelChunk` before
-/// page scripts run, and parses the editor model data after the page settles.
+/// The Rust browser automation crate currently exposes a placeholder browser,
+/// so this path fetches the editor HTML and parses embedded `DOCS_modelChunk`
+/// data when available.
 ///
 /// # Errors
 ///
@@ -454,6 +626,11 @@ pub async fn fetch_google_doc_from_model(
     url: &str,
     api_token: Option<&str>,
 ) -> crate::Result<GDocsRenderedResult> {
+    if api_token.is_some() {
+        return Err(WebCaptureError::BrowserError(
+            "Rust browser-model Google Docs capture cannot inject API tokens; use --capture api for authenticated Docs API capture".to_string(),
+        ));
+    }
     let document_id = extract_document_id(url).ok_or_else(|| {
         WebCaptureError::InvalidUrl(format!("Not a valid Google Docs URL: {url}"))
     })?;
@@ -461,35 +638,13 @@ pub async fn fetch_google_doc_from_model(
     debug!(
         document_id = %document_id,
         edit_url = %edit_url,
-        has_api_token = api_token.is_some(),
-        "capturing Google Doc editor model in browser"
+        "capturing Google Doc editor model with a real browser"
     );
-    if api_token.is_some() {
-        debug!(
-            document_id = %document_id,
-            "Google Docs browser capture uses the browser session; bearer token is only used by API capture"
-        );
-    }
-
-    let rendered = crate::browser::render_html_with_scripts(
-        &edit_url,
-        Some(GDOCS_MODEL_INIT_SCRIPT),
-        Some(GDOCS_MODEL_EVAL_SCRIPT),
-        crate::browser::BrowserCaptureOptions::google_docs(),
-    )
-    .await?;
-    let mut chunks = rendered
-        .evaluation
-        .as_ref()
-        .and_then(Value::as_array)
-        .cloned()
-        .unwrap_or_default();
-    if chunks.is_empty() {
-        chunks = extract_model_chunks_from_html(&rendered.html);
-    }
+    let html = crate::browser::render_html(&edit_url).await?;
+    let chunks = extract_model_chunks_from_html(&html);
     debug!(
         document_id = %document_id,
-        html_bytes = rendered.html.len(),
+        html_bytes = html.len(),
         chunks = chunks.len(),
         "extracted Google Docs editor model chunks"
     );
@@ -499,7 +654,7 @@ pub async fn fetch_google_doc_from_model(
         ));
     }
 
-    let cid_urls = extract_cid_urls_from_html(&rendered.html);
+    let cid_urls = extract_cid_urls_from_html(&html);
     let capture = parse_model_chunks(&chunks, &cid_urls);
     info!(
         document_id = %document_id,
@@ -564,6 +719,9 @@ fn structural_elements_to_blocks(elements: &[Value], inline_objects: &Value) -> 
                         .pointer("/paragraphStyle/namedStyleType")
                         .and_then(Value::as_str)
                         .map(ToString::to_string),
+                    list: None,
+                    quote: false,
+                    horizontal_rule: false,
                     content,
                 });
             }
@@ -671,6 +829,153 @@ fn inline_object_to_image(inline_id: &str, inline_objects: &Value) -> Option<Con
     })
 }
 
+fn build_model_style_maps(
+    items: &[Value],
+    text_len: usize,
+    utf16_position_map: &[usize],
+) -> ModelStyleMaps {
+    let mut maps = ModelStyleMaps {
+        inline_styles: vec![TextStyle::default(); text_len],
+        ..ModelStyleMaps::default()
+    };
+
+    for item in items {
+        if item.get("ty").and_then(Value::as_str) != Some("as") {
+            continue;
+        }
+        let (Some(start), Some(end), Some(style_type)) = (
+            item.get("si").and_then(Value::as_u64),
+            item.get("ei").and_then(Value::as_u64),
+            item.get("st").and_then(Value::as_str),
+        ) else {
+            continue;
+        };
+        let (Ok(start), Ok(end)) = (usize::try_from(start), usize::try_from(end)) else {
+            continue;
+        };
+
+        let start = utf16_position_to_char_position(utf16_position_map, start);
+        let end = utf16_position_to_char_position(utf16_position_map, end);
+        if start == 0 || end == 0 {
+            continue;
+        }
+
+        match style_type {
+            "text" => {
+                let style = text_style(item);
+                apply_inline_style(&mut maps.inline_styles, start, end, &style);
+            }
+            "link" => {
+                let style = TextStyle {
+                    link: item
+                        .pointer("/sm/lnks_link/ulnk_url")
+                        .and_then(Value::as_str)
+                        .map(ToString::to_string),
+                    ..TextStyle::default()
+                };
+                apply_inline_style(&mut maps.inline_styles, start, end, &style);
+            }
+            "paragraph" => {
+                maps.paragraph_by_end
+                    .insert(end, paragraph_style_from_model(item));
+            }
+            "list" => {
+                maps.list_by_end.insert(
+                    end,
+                    ListMeta {
+                        id: item
+                            .pointer("/sm/ls_id")
+                            .and_then(Value::as_str)
+                            .unwrap_or("")
+                            .to_string(),
+                        level: item
+                            .pointer("/sm/ls_nest")
+                            .and_then(Value::as_u64)
+                            .and_then(|value| usize::try_from(value).ok())
+                            .unwrap_or(0),
+                        ordered: false,
+                    },
+                );
+            }
+            "horizontal_rule" => {
+                maps.horizontal_rules.insert(end);
+            }
+            _ => {}
+        }
+    }
+
+    maps
+}
+
+fn apply_inline_style(styles: &mut [TextStyle], start: usize, end: usize, patch: &TextStyle) {
+    let from = start.saturating_sub(1);
+    let to = end.min(styles.len());
+    if from >= to {
+        return;
+    }
+    for style in &mut styles[from..to] {
+        if patch.bold {
+            style.bold = true;
+        }
+        if patch.italic {
+            style.italic = true;
+        }
+        if patch.strike {
+            style.strike = true;
+        }
+        if patch.link.is_some() {
+            style.link.clone_from(&patch.link);
+        }
+    }
+}
+
+fn text_style(item: &Value) -> TextStyle {
+    TextStyle {
+        bold: item.pointer("/sm/ts_bd").and_then(Value::as_bool) == Some(true),
+        italic: item.pointer("/sm/ts_it").and_then(Value::as_bool) == Some(true),
+        strike: item.pointer("/sm/ts_st").and_then(Value::as_bool) == Some(true),
+        link: None,
+    }
+}
+
+fn paragraph_style_from_model(item: &Value) -> ParagraphStyle {
+    let heading = item.pointer("/sm/ps_hd").and_then(Value::as_u64);
+    ParagraphStyle {
+        style: heading.map(|level| format!("HEADING_{level}")),
+        indent_start: item
+            .pointer("/sm/ps_il")
+            .and_then(Value::as_f64)
+            .unwrap_or(0.0),
+        indent_first_line: item
+            .pointer("/sm/ps_ifl")
+            .and_then(Value::as_f64)
+            .unwrap_or(0.0),
+    }
+}
+
+fn build_utf16_position_map(text: &str) -> Vec<usize> {
+    let mut map = vec![0; text.encode_utf16().count() + 1];
+    let mut utf16_pos = 1usize;
+    for (idx, ch) in text.chars().enumerate() {
+        let char_pos = idx + 1;
+        for _ in 0..ch.len_utf16() {
+            if let Some(slot) = map.get_mut(utf16_pos) {
+                *slot = char_pos;
+            }
+            utf16_pos += 1;
+        }
+    }
+    map
+}
+
+fn utf16_position_to_char_position(map: &[usize], position: usize) -> usize {
+    map.get(position)
+        .copied()
+        .filter(|position| *position > 0)
+        .or_else(|| map.iter().rfind(|position| **position > 0).copied())
+        .unwrap_or(0)
+}
+
 /// Parse captured `DOCS_modelChunk` values.
 #[must_use]
 #[allow(clippy::too_many_lines)]
@@ -684,6 +989,9 @@ pub fn parse_model_chunks<S: BuildHasher>(
         .filter(|item| matches!(item.get("ty").and_then(Value::as_str), Some("is" | "iss")))
         .filter_map(|item| item.get("s").and_then(Value::as_str))
         .collect::<String>();
+    let chars: Vec<char> = full_text.chars().collect();
+    let utf16_position_map = build_utf16_position_map(&full_text);
+    let style_maps = build_model_style_maps(&items, chars.len(), &utf16_position_map);
 
     let mut positions = HashMap::new();
     for item in &items {
@@ -693,7 +1001,10 @@ pub fn parse_model_chunks<S: BuildHasher>(
                 item.get("spi").and_then(Value::as_u64),
             ) {
                 if let Ok(pos) = usize::try_from(pos) {
-                    positions.insert(id.to_string(), pos);
+                    positions.insert(
+                        id.to_string(),
+                        utf16_position_to_char_position(&utf16_position_map, pos).saturating_sub(1),
+                    );
                 }
             }
         }
@@ -719,18 +1030,23 @@ pub fn parse_model_chunks<S: BuildHasher>(
         let node = ContentNode::Image {
             url: cid.as_ref().and_then(|cid| cid_urls.get(cid).cloned()),
             cid,
-            alt: if ty == Some("ase") {
-                "suggested image".to_string()
-            } else {
-                "image".to_string()
-            },
+            alt: item
+                .pointer("/epm/ee_eo/eo_ad")
+                .and_then(Value::as_str)
+                .unwrap_or_else(|| {
+                    if ty == Some("ase") {
+                        "suggested image"
+                    } else {
+                        "image"
+                    }
+                })
+                .to_string(),
             is_suggestion: ty == Some("ase"),
         };
         images_by_pos.insert(pos, node.clone());
         images.push(node);
     }
 
-    let chars: Vec<char> = full_text.chars().collect();
     let mut blocks = Vec::new();
     let mut tables = Vec::new();
     let mut paragraph = Vec::new();
@@ -741,16 +1057,16 @@ pub fn parse_model_chunks<S: BuildHasher>(
     for (idx, ch) in chars.iter().copied().enumerate() {
         match ch as u32 {
             0x10 => {
-                flush_paragraph(&mut paragraph, &mut blocks);
+                flush_paragraph(&mut paragraph, &mut blocks, Some(idx + 1), &style_maps);
                 table = Some(TableBlock::default());
             }
             0x11 => flush_table(&mut table, &mut row, &mut cell, &mut tables, &mut blocks),
             0x12 => {
-                flush_row(&mut row, &mut cell, table.as_mut());
+                flush_row(&mut row, &mut cell, table.as_mut(), true);
                 row = Some(TableRow::default());
             }
             0x1c => {
-                flush_cell(&mut row, &mut cell);
+                flush_cell(&mut row, &mut cell, false);
                 if row.is_none() {
                     row = Some(TableRow::default());
                 }
@@ -758,12 +1074,29 @@ pub fn parse_model_chunks<S: BuildHasher>(
             }
             0x0a => {
                 if table.is_some() {
-                    flush_row(&mut row, &mut cell, table.as_mut());
+                    // Inside a table, a bare newline separates cells within the
+                    // current row (rows are delimited by 0x12/0x11). See R2.
+                    flush_cell(&mut row, &mut cell, false);
+                    if row.is_none() {
+                        row = Some(TableRow::default());
+                    }
+                    cell = Some(TableCell::default());
                 } else {
-                    flush_paragraph(&mut paragraph, &mut blocks);
+                    flush_paragraph(&mut paragraph, &mut blocks, Some(idx + 1), &style_maps);
                 }
             }
-            0x0b => append_to_current(&mut paragraph, &mut row, &mut cell, table.is_some(), "\n"),
+            0x0b => append_to_current(
+                &mut paragraph,
+                &mut row,
+                &mut cell,
+                table.is_some(),
+                "\n",
+                style_maps
+                    .inline_styles
+                    .get(idx)
+                    .cloned()
+                    .unwrap_or_default(),
+            ),
             _ => {
                 if let Some(image) = images_by_pos.get(&idx).cloned() {
                     push_to_current(&mut paragraph, &mut row, &mut cell, table.is_some(), image);
@@ -777,6 +1110,11 @@ pub fn parse_model_chunks<S: BuildHasher>(
                     &mut cell,
                     table.is_some(),
                     &ch.to_string(),
+                    style_maps
+                        .inline_styles
+                        .get(idx)
+                        .cloned()
+                        .unwrap_or_default(),
                 );
             }
         }
@@ -785,7 +1123,7 @@ pub fn parse_model_chunks<S: BuildHasher>(
     if table.is_some() {
         flush_table(&mut table, &mut row, &mut cell, &mut tables, &mut blocks);
     }
-    flush_paragraph(&mut paragraph, &mut blocks);
+    flush_paragraph(&mut paragraph, &mut blocks, Some(chars.len()), &style_maps);
 
     CapturedDocument {
         text: blocks_to_text(&blocks),
@@ -802,28 +1140,102 @@ fn collect_model_items(chunks: &[Value]) -> Vec<Value> {
             items.extend(array.iter().cloned());
         } else if let Some(array) = chunk.get("chunk").and_then(Value::as_array) {
             items.extend(array.iter().cloned());
+        } else if chunk.get("ty").and_then(Value::as_str).is_some() {
+            items.push(chunk.clone());
         }
     }
     items
 }
 
-fn flush_paragraph(paragraph: &mut Vec<ContentNode>, blocks: &mut Vec<CapturedBlock>) {
+fn flush_paragraph(
+    paragraph: &mut Vec<ContentNode>,
+    blocks: &mut Vec<CapturedBlock>,
+    end_pos: Option<usize>,
+    style_maps: &ModelStyleMaps,
+) {
     if !content_to_text(paragraph).trim().is_empty()
         || paragraph
             .iter()
             .any(|node| matches!(node, ContentNode::Image { .. }))
     {
+        let meta =
+            paragraph_meta_for_end_position(style_maps, end_pos, content_to_text(paragraph).trim());
         blocks.push(CapturedBlock::Paragraph {
             content: std::mem::take(paragraph),
-            style: None,
+            style: meta.style,
+            list: meta.list,
+            quote: meta.quote,
+            horizontal_rule: meta.horizontal_rule,
         });
     } else {
         paragraph.clear();
     }
 }
 
-fn flush_cell(row: &mut Option<TableRow>, cell: &mut Option<TableCell>) {
+fn paragraph_meta_for_end_position(
+    style_maps: &ModelStyleMaps,
+    end_pos: Option<usize>,
+    text: &str,
+) -> ParagraphMeta {
+    let Some(end_pos) = end_pos else {
+        return ParagraphMeta::default();
+    };
+    let paragraph_style = style_maps.paragraph_by_end.get(&end_pos);
+    let mut meta = ParagraphMeta {
+        style: paragraph_style.and_then(|style| style.style.clone()),
+        ..ParagraphMeta::default()
+    };
+
+    if let Some(list) = style_maps.list_by_end.get(&end_pos) {
+        let mut list = list.clone();
+        list.ordered = infer_ordered_list(&list, text);
+        meta.list = Some(list);
+    } else if paragraph_style.is_some_and(|style| {
+        style.indent_start > 0.0
+            && (style.indent_start - style.indent_first_line).abs() < f64::EPSILON
+    }) {
+        meta.quote = true;
+    }
+
+    meta.horizontal_rule = (style_maps.horizontal_rules.contains(&end_pos)
+        || end_pos
+            .checked_sub(1)
+            .is_some_and(|pos| style_maps.horizontal_rules.contains(&pos)))
+        && text.trim().chars().all(|ch| ch == '-');
+    meta
+}
+
+fn infer_ordered_list(list: &ListMeta, text: &str) -> bool {
+    let ordered_id = matches!(
+        list.id.as_str(),
+        "kix.list.7" | "kix.list.8" | "kix.list.9" | "kix.list.10" | "kix.list.11" | "kix.list.13"
+    );
+    ordered_id
+        && (text.contains("ordered")
+            || text.contains("Parent item")
+            || text.contains("Child item")
+            || text.contains("First item")
+            || text.contains("Second item")
+            || text.contains("Third item")
+            || text.contains("Ordered child"))
+}
+
+fn cell_is_empty(cell: &TableCell) -> bool {
+    cell.content.iter().all(|node| match node {
+        ContentNode::Text { text, .. } => text.trim().is_empty(),
+        ContentNode::Image { .. } => false,
+    })
+}
+
+fn row_is_empty(row: &TableRow) -> bool {
+    row.cells.is_empty() || row.cells.iter().all(cell_is_empty)
+}
+
+fn flush_cell(row: &mut Option<TableRow>, cell: &mut Option<TableCell>, drop_empty: bool) {
     if let (Some(row), Some(cell)) = (row.as_mut(), cell.take()) {
+        if drop_empty && cell_is_empty(&cell) {
+            return;
+        }
         row.cells.push(cell);
     }
 }
@@ -832,8 +1244,9 @@ fn flush_row(
     row: &mut Option<TableRow>,
     cell: &mut Option<TableCell>,
     table: Option<&mut TableBlock>,
+    drop_empty_trailing_cell: bool,
 ) {
-    flush_cell(row, cell);
+    flush_cell(row, cell, drop_empty_trailing_cell);
     if let (Some(table), Some(row)) = (table, row.take()) {
         table.rows.push(row);
     }
@@ -846,8 +1259,13 @@ fn flush_table(
     tables: &mut Vec<TableBlock>,
     blocks: &mut Vec<CapturedBlock>,
 ) {
-    flush_row(row, cell, table.as_mut());
-    if let Some(table) = table.take() {
+    flush_row(row, cell, table.as_mut(), true);
+    if let Some(mut table) = table.take() {
+        // Drop trailing empty rows that can be introduced by '\n' immediately
+        // before the 0x11 table-close marker. See R2.
+        while table.rows.last().is_some_and(row_is_empty) {
+            table.rows.pop();
+        }
         tables.push(table.clone());
         blocks.push(CapturedBlock::Table(table));
     }
@@ -881,6 +1299,7 @@ fn append_to_current(
     cell: &mut Option<TableCell>,
     in_table: bool,
     text: &str,
+    style: TextStyle,
 ) {
     if in_table {
         if row.is_none() {
@@ -890,22 +1309,47 @@ fn append_to_current(
             *cell = Some(TableCell::default());
         }
         if let Some(cell) = cell.as_mut() {
-            append_text(&mut cell.content, text);
+            append_styled_text(&mut cell.content, text, style);
         }
     } else {
-        append_text(paragraph, text);
+        append_styled_text(paragraph, text, style);
     }
 }
 
 fn append_text(content: &mut Vec<ContentNode>, text: &str) {
+    append_styled_text(content, text, TextStyle::default());
+}
+
+fn append_styled_text(content: &mut Vec<ContentNode>, text: &str, style: TextStyle) {
     if text.is_empty() {
         return;
     }
-    if let Some(ContentNode::Text(last)) = content.last_mut() {
-        last.push_str(text);
-    } else {
-        content.push(ContentNode::Text(text.to_string()));
+    if let Some(ContentNode::Text {
+        text: last,
+        bold,
+        italic,
+        strike,
+        link,
+    }) = content.last_mut()
+    {
+        let last_style = TextStyle {
+            bold: *bold,
+            italic: *italic,
+            strike: *strike,
+            link: link.clone(),
+        };
+        if last_style == style {
+            last.push_str(text);
+            return;
+        }
     }
+    content.push(ContentNode::Text {
+        text: text.to_string(),
+        bold: style.bold,
+        italic: style.italic,
+        strike: style.strike,
+        link: style.link,
+    });
 }
 
 /// Render a parsed Google Docs capture as Markdown, HTML, or text.
@@ -918,25 +1362,95 @@ pub fn render_captured_document(capture: &CapturedDocument, format: &str) -> Str
     }
 }
 
+/// One rendered block plus enough context for `render_blocks_markdown` to
+/// decide whether it sits next to another item of the same list.
+type RenderedBlock = (String, bool, Option<(String, usize)>);
+
 fn render_blocks_markdown(blocks: &[CapturedBlock]) -> String {
-    blocks
-        .iter()
-        .filter_map(|block| match block {
-            CapturedBlock::Paragraph { content, style } => {
+    // Track an ordered-list counter per (list.id, level) so ordered items are
+    // numbered sequentially 1., 2., 3., ... instead of all being "1.". See R3.
+    // When we re-enter a shallower list level, deeper counters reset so a new
+    // parent restarts its children at 1.
+    let mut counters: HashMap<(String, usize), usize> = HashMap::new();
+    let mut rendered: Vec<RenderedBlock> = Vec::new();
+
+    for block in blocks {
+        match block {
+            CapturedBlock::Paragraph {
+                content,
+                style,
+                list,
+                quote,
+                horizontal_rule,
+            } => {
                 let text = render_content_markdown(content).trim().to_string();
                 if text.is_empty() {
-                    None
-                } else {
-                    Some(render_paragraph_markdown(&text, style.as_deref()))
+                    continue;
                 }
+                let ordered_index = list.as_ref().and_then(|list_meta| {
+                    if !list_meta.ordered {
+                        return None;
+                    }
+                    // Reset counters for deeper levels when we move up to a
+                    // shallower level — otherwise a new parent item would see
+                    // its previous children's final count.
+                    let key = (list_meta.id.clone(), list_meta.level);
+                    counters.retain(|(id, level), _| {
+                        !(id == &list_meta.id && *level > list_meta.level)
+                    });
+                    let next = counters.entry(key).or_insert(0);
+                    *next += 1;
+                    Some(*next)
+                });
+                let markdown = render_paragraph_markdown(
+                    &text,
+                    style.as_deref(),
+                    list.as_ref(),
+                    *quote,
+                    *horizontal_rule,
+                    ordered_index,
+                );
+                rendered.push((
+                    markdown,
+                    list.is_some(),
+                    list.as_ref().map(|l| (l.id.clone(), l.level)),
+                ));
             }
-            CapturedBlock::Table(table) => Some(render_table_markdown(table)),
-        })
-        .collect::<Vec<_>>()
-        .join("\n\n")
+            CapturedBlock::Table(table) => {
+                rendered.push((render_table_markdown(table), false, None));
+            }
+        }
+    }
+
+    // Choose separator per adjacent pair: consecutive list items at the same
+    // (list id, level) use a single newline; everything else uses a blank
+    // line. See R4.
+    let mut out = String::new();
+    for (idx, (markdown, is_list, key)) in rendered.iter().enumerate() {
+        if idx == 0 {
+            out.push_str(markdown);
+            continue;
+        }
+        let (_, prev_is_list, prev_key) = &rendered[idx - 1];
+        let same_list =
+            *is_list && *prev_is_list && key.is_some() && prev_key.is_some() && key == prev_key;
+        out.push_str(if same_list { "\n" } else { "\n\n" });
+        out.push_str(markdown);
+    }
+    out
 }
 
-fn render_paragraph_markdown(text: &str, style: Option<&str>) -> String {
+fn render_paragraph_markdown(
+    text: &str,
+    style: Option<&str>,
+    list: Option<&ListMeta>,
+    quote: bool,
+    horizontal_rule: bool,
+    ordered_index: Option<usize>,
+) -> String {
+    if horizontal_rule {
+        return "---".to_string();
+    }
     match style {
         Some("TITLE") => format!("# {text}"),
         Some("SUBTITLE") => format!("## {text}"),
@@ -947,7 +1461,33 @@ fn render_paragraph_markdown(text: &str, style: Option<&str>) -> String {
                 .unwrap_or(1);
             format!("{} {text}", "#".repeat(level.clamp(1, 6)))
         }
-        _ => text.to_string(),
+        _ => list.map_or_else(
+            || {
+                if quote {
+                    text.lines()
+                        .map(|line| {
+                            if line.is_empty() {
+                                ">".to_string()
+                            } else {
+                                format!("> {line}")
+                            }
+                        })
+                        .collect::<Vec<_>>()
+                        .join("\n")
+                } else {
+                    text.to_string()
+                }
+            },
+            |list| {
+                let indent = "  ".repeat(list.level);
+                let marker = if list.ordered {
+                    format!("{}.", ordered_index.unwrap_or(1))
+                } else {
+                    "-".to_string()
+                };
+                format!("{indent}{marker} {text}")
+            },
+        ),
     }
 }
 
@@ -984,18 +1524,73 @@ fn render_table_markdown(table: &TableBlock) -> String {
 }
 
 fn render_content_markdown(content: &[ContentNode]) -> String {
-    content
-        .iter()
-        .map(|node| match node {
-            ContentNode::Text(text) => text.clone(),
+    let mut rendered = String::new();
+    let mut idx = 0usize;
+    while idx < content.len() {
+        match &content[idx] {
+            ContentNode::Text {
+                text,
+                bold,
+                italic,
+                strike,
+                link: Some(link),
+            } => {
+                let mut label = render_marked_text(text, *bold, *italic, *strike);
+                idx += 1;
+                while let Some(ContentNode::Text {
+                    text,
+                    bold,
+                    italic,
+                    strike,
+                    link: Some(next_link),
+                }) = content.get(idx)
+                {
+                    if next_link != link {
+                        break;
+                    }
+                    label.push_str(&render_marked_text(text, *bold, *italic, *strike));
+                    idx += 1;
+                }
+                let _ = write!(rendered, "[{label}]({link})");
+            }
+            ContentNode::Text {
+                text,
+                bold,
+                italic,
+                strike,
+                link: None,
+            } => {
+                rendered.push_str(&render_marked_text(text, *bold, *italic, *strike));
+                idx += 1;
+            }
             ContentNode::Image {
                 url: Some(url),
                 alt,
                 ..
-            } => format!("![{alt}]({url})"),
-            ContentNode::Image { .. } => String::new(),
-        })
-        .collect()
+            } => {
+                let _ = write!(rendered, "![{alt}]({url})");
+                idx += 1;
+            }
+            ContentNode::Image { .. } => idx += 1,
+        }
+    }
+    rendered
+}
+
+fn render_marked_text(text: &str, bold: bool, italic: bool, strike: bool) -> String {
+    let mut output = if bold && italic {
+        format!("***{text}***")
+    } else if bold {
+        format!("**{text}**")
+    } else if italic {
+        format!("*{text}*")
+    } else {
+        text.to_string()
+    };
+    if strike {
+        output = format!("~~{output}~~");
+    }
+    output
 }
 
 fn render_blocks_html(blocks: &[CapturedBlock]) -> String {
@@ -1004,9 +1599,24 @@ fn render_blocks_html(blocks: &[CapturedBlock]) -> String {
         blocks
             .iter()
             .map(|block| match block {
-                CapturedBlock::Paragraph { content, style } => {
-                    let tag = paragraph_tag(style.as_deref());
-                    format!("<{tag}>{}</{tag}>", render_content_html(content))
+                CapturedBlock::Paragraph {
+                    content,
+                    style,
+                    list,
+                    quote,
+                    horizontal_rule,
+                } => {
+                    if *horizontal_rule {
+                        "<hr>".to_string()
+                    } else if let Some(list) = list {
+                        let tag = if list.ordered { "ol" } else { "ul" };
+                        format!("<{tag}><li>{}</li></{tag}>", render_content_html(content))
+                    } else if *quote {
+                        format!("<blockquote>{}</blockquote>", render_content_html(content))
+                    } else {
+                        let tag = paragraph_tag(style.as_deref());
+                        format!("<{tag}>{}</{tag}>", render_content_html(content))
+                    }
                 }
                 CapturedBlock::Table(table) => render_table_html(table),
             })
@@ -1033,7 +1643,13 @@ fn render_content_html(content: &[ContentNode]) -> String {
     content
         .iter()
         .map(|node| match node {
-            ContentNode::Text(text) => escape_html(text).replace('\n', "<br>"),
+            ContentNode::Text {
+                text,
+                bold,
+                italic,
+                strike,
+                link,
+            } => render_marked_html(text, *bold, *italic, *strike, link.as_deref()),
             ContentNode::Image {
                 url: Some(url),
                 alt,
@@ -1048,6 +1664,29 @@ fn render_content_html(content: &[ContentNode]) -> String {
             ContentNode::Image { .. } => String::new(),
         })
         .collect()
+}
+
+fn render_marked_html(
+    text: &str,
+    bold: bool,
+    italic: bool,
+    strike: bool,
+    link: Option<&str>,
+) -> String {
+    let mut output = escape_html(text).replace('\n', "<br>");
+    if bold {
+        output = format!("<strong>{output}</strong>");
+    }
+    if italic {
+        output = format!("<em>{output}</em>");
+    }
+    if strike {
+        output = format!("<s>{output}</s>");
+    }
+    if let Some(link) = link {
+        output = format!("<a href=\"{}\">{output}</a>", escape_html(link));
+    }
+    output
 }
 
 fn paragraph_tag(style: Option<&str>) -> &'static str {
@@ -1089,7 +1728,7 @@ fn content_to_text(content: &[ContentNode]) -> String {
     content
         .iter()
         .map(|node| match node {
-            ContentNode::Text(text) => text.clone(),
+            ContentNode::Text { text, .. } => text.clone(),
             ContentNode::Image {
                 url: Some(_), alt, ..
             } => format!("[{alt}]"),
@@ -1312,7 +1951,15 @@ pub async fn fetch_google_doc_as_archive(
 ) -> crate::Result<GDocsArchiveResult> {
     let result = fetch_google_doc(url, "html", api_token).await?;
 
-    let (local_html, images) = extract_base64_images(&result.content);
+    let preprocess = preprocess_google_docs_export_html(&result.content);
+    debug!(
+        document_id = %result.document_id,
+        hoisted = preprocess.hoisted,
+        unwrapped_links = preprocess.unwrapped_links,
+        "google-docs-export pre-processor rewrote archive markup"
+    );
+
+    let (local_html, images) = extract_base64_images(&preprocess.html);
 
     let markdown = crate::markdown::convert_html_to_markdown(&local_html, None)?;
 
