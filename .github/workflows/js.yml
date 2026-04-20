@@ -254,6 +254,9 @@ jobs:
         if: steps.release_check.outputs.should_release == 'true' && steps.release_check.outputs.needs_auto_bump == 'true'
         id: auto_bump
         working-directory: .
+        # Uses scripts/safe-git-push.mjs for fetch+rebase+retry so concurrent
+        # pushes from the Rust release workflow don't cause non-fast-forward
+        # rejections. See docs/case-studies/issue-94.
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
@@ -263,7 +266,7 @@ jobs:
           git add -A
           NEW_VERSION=$(node -p "require('./js/package.json').version")
           git commit -m "chore(js): auto-bump to ${NEW_VERSION} for unreleased changes"
-          git push origin main
+          node scripts/safe-git-push.mjs --branch main
           echo "version=${NEW_VERSION}" >> $GITHUB_OUTPUT
           echo "Auto-bumped to ${NEW_VERSION}"
 
