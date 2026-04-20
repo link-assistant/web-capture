@@ -480,6 +480,129 @@ fn test_create_archive_zip_produces_valid_zip() {
 }
 
 #[test]
+fn test_parse_model_chunks_multi_column_table_r2() {
+    // Inside a table, a bare '\n' separates cells within the current row.
+    // Rows are delimited by 0x12 (and the table itself by 0x10/0x11). This
+    // mirrors the JS R2 fix so tables keep all columns instead of collapsing
+    // to one column per row.
+    let text = format!(
+        "{open}{new_row}A\nB\nC\n{new_row}D\nE\nF\n{close}",
+        open = '\u{10}',
+        close = '\u{11}',
+        new_row = '\u{12}',
+    );
+    let chunks = vec![serde_json::json!({
+        "chunk": [
+            { "ty": "is", "s": text }
+        ]
+    })];
+    let cid_urls = std::collections::HashMap::<String, String>::new();
+
+    let capture = parse_model_chunks(&chunks, &cid_urls);
+
+    assert_eq!(capture.tables.len(), 1);
+    let table = &capture.tables[0];
+    assert_eq!(table.rows.len(), 2);
+    assert_eq!(table.rows[0].cells.len(), 3);
+    assert_eq!(table.rows[1].cells.len(), 3);
+
+    let markdown = render_captured_document(&capture, "markdown");
+    assert!(markdown.contains("| A | B | C |"), "markdown was: {markdown}");
+    assert!(markdown.contains("| D | E | F |"), "markdown was: {markdown}");
+}
+
+#[test]
+fn test_render_ordered_list_sequential_numbering_r3() {
+    let text = "First item\nSecond item\nThird item\n";
+    let line_end = |needle: &str| {
+        let start = text.find(needle).expect("needle should exist");
+        start + text[start..].find('\n').expect("line should end") + 1
+    };
+    let chunks = vec![serde_json::json!({
+        "chunk": [
+            { "ty": "is", "s": text },
+            {
+                "ty": "as",
+                "st": "list",
+                "si": line_end("First item"),
+                "ei": line_end("First item"),
+                "sm": { "ls_id": "kix.list.7" }
+            },
+            {
+                "ty": "as",
+                "st": "list",
+                "si": line_end("Second item"),
+                "ei": line_end("Second item"),
+                "sm": { "ls_id": "kix.list.7" }
+            },
+            {
+                "ty": "as",
+                "st": "list",
+                "si": line_end("Third item"),
+                "ei": line_end("Third item"),
+                "sm": { "ls_id": "kix.list.7" }
+            }
+        ]
+    })];
+    let cid_urls = std::collections::HashMap::<String, String>::new();
+
+    let capture = parse_model_chunks(&chunks, &cid_urls);
+    let markdown = render_captured_document(&capture, "markdown");
+
+    assert!(markdown.contains("1. First item"), "markdown was: {markdown}");
+    assert!(markdown.contains("2. Second item"), "markdown was: {markdown}");
+    assert!(markdown.contains("3. Third item"), "markdown was: {markdown}");
+}
+
+#[test]
+fn test_render_list_items_joined_with_single_newline_r4() {
+    let text = "Alpha\nBeta\nGamma\n";
+    let line_end = |needle: &str| {
+        let start = text.find(needle).expect("needle should exist");
+        start + text[start..].find('\n').expect("line should end") + 1
+    };
+    let chunks = vec![serde_json::json!({
+        "chunk": [
+            { "ty": "is", "s": text },
+            {
+                "ty": "as",
+                "st": "list",
+                "si": line_end("Alpha"),
+                "ei": line_end("Alpha"),
+                "sm": { "ls_id": "kix.list.1" }
+            },
+            {
+                "ty": "as",
+                "st": "list",
+                "si": line_end("Beta"),
+                "ei": line_end("Beta"),
+                "sm": { "ls_id": "kix.list.1" }
+            },
+            {
+                "ty": "as",
+                "st": "list",
+                "si": line_end("Gamma"),
+                "ei": line_end("Gamma"),
+                "sm": { "ls_id": "kix.list.1" }
+            }
+        ]
+    })];
+    let cid_urls = std::collections::HashMap::<String, String>::new();
+
+    let capture = parse_model_chunks(&chunks, &cid_urls);
+    let markdown = render_captured_document(&capture, "markdown");
+
+    assert!(
+        markdown.contains("- Alpha\n- Beta\n- Gamma"),
+        "list items should be joined with a single newline; markdown was: {markdown}"
+    );
+    assert!(
+        !markdown.contains("- Alpha\n\n- Beta"),
+        "list items should not have a blank line between them; markdown was: {markdown}"
+    );
+}
+
+#[test]
 fn test_create_archive_zip_empty_images() {
     let archive = GDocsArchiveResult {
         html: "<html><body>No images</body></html>".to_string(),

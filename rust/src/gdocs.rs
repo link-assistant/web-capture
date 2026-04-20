@@ -925,11 +925,11 @@ pub fn parse_model_chunks<S: BuildHasher>(
             }
             0x11 => flush_table(&mut table, &mut row, &mut cell, &mut tables, &mut blocks),
             0x12 => {
-                flush_row(&mut row, &mut cell, table.as_mut());
+                flush_row(&mut row, &mut cell, table.as_mut(), true);
                 row = Some(TableRow::default());
             }
             0x1c => {
-                flush_cell(&mut row, &mut cell);
+                flush_cell(&mut row, &mut cell, false);
                 if row.is_none() {
                     row = Some(TableRow::default());
                 }
@@ -937,7 +937,13 @@ pub fn parse_model_chunks<S: BuildHasher>(
             }
             0x0a => {
                 if table.is_some() {
-                    flush_row(&mut row, &mut cell, table.as_mut());
+                    // Inside a table, a bare newline separates cells within the
+                    // current row (rows are delimited by 0x12/0x11). See R2.
+                    flush_cell(&mut row, &mut cell, false);
+                    if row.is_none() {
+                        row = Some(TableRow::default());
+                    }
+                    cell = Some(TableCell::default());
                 } else {
                     flush_paragraph(&mut paragraph, &mut blocks, Some(idx + 1), &style_maps);
                 }
@@ -1077,8 +1083,22 @@ fn infer_ordered_list(list: &ListMeta, text: &str) -> bool {
             || text.contains("Ordered child"))
 }
 
-fn flush_cell(row: &mut Option<TableRow>, cell: &mut Option<TableCell>) {
+fn cell_is_empty(cell: &TableCell) -> bool {
+    cell.content.iter().all(|node| match node {
+        ContentNode::Text { text, .. } => text.trim().is_empty(),
+        ContentNode::Image { .. } => false,
+    })
+}
+
+fn row_is_empty(row: &TableRow) -> bool {
+    row.cells.is_empty() || row.cells.iter().all(cell_is_empty)
+}
+
+fn flush_cell(row: &mut Option<TableRow>, cell: &mut Option<TableCell>, drop_empty: bool) {
     if let (Some(row), Some(cell)) = (row.as_mut(), cell.take()) {
+        if drop_empty && cell_is_empty(&cell) {
+            return;
+        }
         row.cells.push(cell);
     }
 }
@@ -1087,8 +1107,9 @@ fn flush_row(
     row: &mut Option<TableRow>,
     cell: &mut Option<TableCell>,
     table: Option<&mut TableBlock>,
+    drop_empty_trailing_cell: bool,
 ) {
-    flush_cell(row, cell);
+    flush_cell(row, cell, drop_empty_trailing_cell);
     if let (Some(table), Some(row)) = (table, row.take()) {
         table.rows.push(row);
     }
@@ -1101,8 +1122,13 @@ fn flush_table(
     tables: &mut Vec<TableBlock>,
     blocks: &mut Vec<CapturedBlock>,
 ) {
-    flush_row(row, cell, table.as_mut());
-    if let Some(table) = table.take() {
+    flush_row(row, cell, table.as_mut(), true);
+    if let Some(mut table) = table.take() {
+        // Drop trailing empty rows that can be introduced by '\n' immediately
+        // before the 0x11 table-close marker. See R2.
+        while table.rows.last().is_some_and(row_is_empty) {
+            table.rows.pop();
+        }
         tables.push(table.clone());
         blocks.push(CapturedBlock::Table(table));
     }
@@ -1200,9 +1226,15 @@ pub fn render_captured_document(capture: &CapturedDocument, format: &str) -> Str
 }
 
 fn render_blocks_markdown(blocks: &[CapturedBlock]) -> String {
-    blocks
-        .iter()
-        .filter_map(|block| match block {
+    // Track an ordered-list counter per (list.id, level) so ordered items are
+    // numbered sequentially 1., 2., 3., ... instead of all being "1.". See R3.
+    // When we re-enter a shallower list level, deeper counters reset so a new
+    // parent restarts its children at 1.
+    let mut counters: HashMap<(String, usize), usize> = HashMap::new();
+    let mut rendered: Vec<(String, bool, Option<(String, usize)>)> = Vec::new();
+
+    for block in blocks {
+        match block {
             CapturedBlock::Paragraph {
                 content,
                 style,
@@ -1212,21 +1244,62 @@ fn render_blocks_markdown(blocks: &[CapturedBlock]) -> String {
             } => {
                 let text = render_content_markdown(content).trim().to_string();
                 if text.is_empty() {
-                    None
-                } else {
-                    Some(render_paragraph_markdown(
-                        &text,
-                        style.as_deref(),
-                        list.as_ref(),
-                        *quote,
-                        *horizontal_rule,
-                    ))
+                    continue;
                 }
+                let ordered_index = list.as_ref().and_then(|list_meta| {
+                    if !list_meta.ordered {
+                        return None;
+                    }
+                    // Reset counters for deeper levels when we move up to a
+                    // shallower level — otherwise a new parent item would see
+                    // its previous children's final count.
+                    let key = (list_meta.id.clone(), list_meta.level);
+                    counters.retain(|(id, level), _| {
+                        !(id == &list_meta.id && *level > list_meta.level)
+                    });
+                    let next = counters.entry(key).or_insert(0);
+                    *next += 1;
+                    Some(*next)
+                });
+                let markdown = render_paragraph_markdown(
+                    &text,
+                    style.as_deref(),
+                    list.as_ref(),
+                    *quote,
+                    *horizontal_rule,
+                    ordered_index,
+                );
+                rendered.push((
+                    markdown,
+                    list.is_some(),
+                    list.as_ref().map(|l| (l.id.clone(), l.level)),
+                ));
             }
-            CapturedBlock::Table(table) => Some(render_table_markdown(table)),
-        })
-        .collect::<Vec<_>>()
-        .join("\n\n")
+            CapturedBlock::Table(table) => {
+                rendered.push((render_table_markdown(table), false, None));
+            }
+        }
+    }
+
+    // Choose separator per adjacent pair: consecutive list items at the same
+    // (list id, level) use a single newline; everything else uses a blank
+    // line. See R4.
+    let mut out = String::new();
+    for (idx, (markdown, is_list, key)) in rendered.iter().enumerate() {
+        if idx == 0 {
+            out.push_str(markdown);
+            continue;
+        }
+        let (_, prev_is_list, prev_key) = &rendered[idx - 1];
+        let same_list = *is_list
+            && *prev_is_list
+            && key.is_some()
+            && prev_key.is_some()
+            && key == prev_key;
+        out.push_str(if same_list { "\n" } else { "\n\n" });
+        out.push_str(markdown);
+    }
+    out
 }
 
 fn render_paragraph_markdown(
@@ -1235,6 +1308,7 @@ fn render_paragraph_markdown(
     list: Option<&ListMeta>,
     quote: bool,
     horizontal_rule: bool,
+    ordered_index: Option<usize>,
 ) -> String {
     if horizontal_rule {
         return "---".to_string();
@@ -1268,7 +1342,11 @@ fn render_paragraph_markdown(
             },
             |list| {
                 let indent = "  ".repeat(list.level);
-                let marker = if list.ordered { "1." } else { "-" };
+                let marker = if list.ordered {
+                    format!("{}.", ordered_index.unwrap_or(1))
+                } else {
+                    "-".to_string()
+                };
                 format!("{indent}{marker} {text}")
             },
         ),
