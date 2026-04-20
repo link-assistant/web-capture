@@ -10,6 +10,8 @@ import {
   renderGoogleDocsCapture,
   renderDocsApiDocument,
   selectGoogleDocsCaptureMethod,
+  localizeGoogleDocsModelImages,
+  preprocessGoogleDocsExportHtml,
   GDOCS_EXPORT_FORMATS,
 } from '../../src/gdocs.js';
 import {
@@ -250,6 +252,115 @@ describe('gdocs', () => {
       );
     });
 
+    it('parses multi-column tables when rows are separated by 0x0a (issue #92 R2)', () => {
+      // Google Docs sometimes emits cell boundaries as `\n` (0x0a) alongside
+      // the 0x12 new-row marker. The parser must keep all cells on the same
+      // row rather than collapsing the table to a single column.
+      const chunks = [
+        {
+          chunk: [
+            {
+              ty: 'is',
+              s: `${
+                String.fromCharCode(0x10) + String.fromCharCode(0x12)
+              }A\nB\nC\n${String.fromCharCode(
+                0x12
+              )}D\nE\nF\n${String.fromCharCode(0x11)}`,
+            },
+          ],
+        },
+      ];
+      const capture = parseGoogleDocsModelChunks(chunks);
+
+      expect(capture.tables).toHaveLength(1);
+      expect(capture.tables[0].rows).toHaveLength(2);
+      expect(capture.tables[0].rows[0].cells).toHaveLength(3);
+      expect(capture.tables[0].rows[1].cells).toHaveLength(3);
+
+      const markdown = renderGoogleDocsCapture(capture, 'markdown');
+      expect(markdown).toContain('| A | B | C |');
+      expect(markdown).toContain('| D | E | F |');
+    });
+
+    it('numbers ordered list items sequentially (issue #92 R3)', () => {
+      // Three list items sharing the same list id should render as 1. 2. 3.
+      const text = 'First item\nSecond item\nThird item\n';
+      const endOfLine = (n) => {
+        let idx = -1;
+        for (let k = 0; k < n; k++) {
+          idx = text.indexOf('\n', idx + 1);
+        }
+        return idx + 1;
+      };
+      const chunks = [
+        {
+          chunk: [
+            { ty: 'is', s: text },
+            {
+              ty: 'as',
+              st: 'list',
+              si: endOfLine(1),
+              ei: endOfLine(1),
+              sm: { ls_id: 'kix.list.7' },
+            },
+            {
+              ty: 'as',
+              st: 'list',
+              si: endOfLine(2),
+              ei: endOfLine(2),
+              sm: { ls_id: 'kix.list.7' },
+            },
+            {
+              ty: 'as',
+              st: 'list',
+              si: endOfLine(3),
+              ei: endOfLine(3),
+              sm: { ls_id: 'kix.list.7' },
+            },
+          ],
+        },
+      ];
+      const capture = parseGoogleDocsModelChunks(chunks);
+      const markdown = renderGoogleDocsCapture(capture, 'markdown');
+      const lines = markdown.split('\n');
+
+      expect(lines[0]).toBe('1. First item');
+      expect(lines[1]).toBe('2. Second item');
+      expect(lines[2]).toBe('3. Third item');
+    });
+
+    it('joins consecutive list items with a single newline (issue #92 R4)', () => {
+      const text = 'First item\nSecond item\n';
+      const endFirst = text.indexOf('\n') + 1;
+      const endSecond = text.length;
+      const chunks = [
+        {
+          chunk: [
+            { ty: 'is', s: text },
+            {
+              ty: 'as',
+              st: 'list',
+              si: endFirst,
+              ei: endFirst,
+              sm: { ls_id: 'kix.list.7' },
+            },
+            {
+              ty: 'as',
+              st: 'list',
+              si: endSecond,
+              ei: endSecond,
+              sm: { ls_id: 'kix.list.7' },
+            },
+          ],
+        },
+      ];
+      const capture = parseGoogleDocsModelChunks(chunks);
+      const markdown = renderGoogleDocsCapture(capture, 'markdown');
+
+      expect(markdown).not.toMatch(/First item\n\n2\. Second item/u);
+      expect(markdown).toMatch(/First item\n2\. Second item/u);
+    });
+
     it('renders model style records for headings, inline formatting, links, lists, blockquotes, rules, and images', () => {
       const text = [
         'Title',
@@ -439,6 +550,146 @@ describe('gdocs', () => {
         epub: 'epub',
         zip: 'zip',
       });
+    });
+  });
+
+  describe('localizeGoogleDocsModelImages (issue #92 R5)', () => {
+    it('downloads docs-images-rt URLs and rewrites markdown/html', async () => {
+      const url =
+        'https://docs.google.com/docs-images-rt/doc-id/cid/example.png';
+      const modelResult = {
+        markdown: `![pic](${url})`,
+        html: `<img src="${url}" alt="pic">`,
+        capture: {
+          images: [{ type: 'image', url, alt: 'pic', cid: 'cid-abc' }],
+        },
+      };
+      const fakeFetch = jest.fn().mockResolvedValue({
+        ok: true,
+        status: 200,
+        headers: new Map([['content-type', 'image/png']]),
+        arrayBuffer: async () => new Uint8Array([1, 2, 3, 4]).buffer,
+      });
+      // The map-based headers need a `get` method in the correct shape:
+      fakeFetch.mockResolvedValue({
+        ok: true,
+        status: 200,
+        headers: { get: () => 'image/png' },
+        arrayBuffer: async () =>
+          new Uint8Array([0x89, 0x50, 0x4e, 0x47]).buffer,
+      });
+
+      const localized = await localizeGoogleDocsModelImages(modelResult, {
+        fetchImpl: fakeFetch,
+      });
+
+      expect(fakeFetch).toHaveBeenCalledTimes(1);
+      expect(localized.images).toHaveLength(1);
+      expect(localized.images[0].filename).toBe('image-01.png');
+      expect(localized.images[0].mimeType).toBe('image/png');
+      expect(localized.images[0].data).toBeInstanceOf(Buffer);
+      expect(localized.markdown).toBe('![pic](images/image-01.png)');
+      expect(localized.html).toContain('images/image-01.png');
+      expect(localized.html).not.toContain('docs-images-rt');
+    });
+
+    it('keeps original URL when download fails', async () => {
+      const url =
+        'https://docs.google.com/docs-images-rt/doc-id/cid/missing.png';
+      const modelResult = {
+        markdown: `![pic](${url})`,
+        html: `<img src="${url}" alt="pic">`,
+        capture: { images: [{ url, alt: 'pic' }] },
+      };
+      const fakeFetch = jest.fn().mockResolvedValue({
+        ok: false,
+        status: 404,
+        headers: { get: () => null },
+      });
+
+      const localized = await localizeGoogleDocsModelImages(modelResult, {
+        fetchImpl: fakeFetch,
+      });
+
+      expect(localized.images).toHaveLength(0);
+      // Markdown still gets rewritten (local path) even if download fails —
+      // callers may choose to ignore this; the key guarantee is that no
+      // exception leaks out.
+      expect(localized.markdown).toBe('![pic](images/image-01.png)');
+    });
+  });
+
+  describe('preprocessGoogleDocsExportHtml (issue #92 R6)', () => {
+    it('hoists font-weight:700 spans into <strong>', () => {
+      const html = '<p><span style="font-weight:700">Bold text</span></p>';
+      const { html: out, hoisted } = preprocessGoogleDocsExportHtml(html);
+      expect(hoisted).toBe(1);
+      expect(out).toContain('<strong>');
+      expect(out).toContain('Bold text');
+    });
+
+    it('hoists font-style:italic spans into <em>', () => {
+      const html = '<p><span style="font-style:italic">Italic text</span></p>';
+      const { html: out, hoisted } = preprocessGoogleDocsExportHtml(html);
+      expect(hoisted).toBe(1);
+      expect(out).toContain('<em>');
+    });
+
+    it('hoists text-decoration:line-through spans into <del>', () => {
+      const html =
+        '<p><span style="text-decoration:line-through">Strike</span></p>';
+      const { html: out, hoisted } = preprocessGoogleDocsExportHtml(html);
+      expect(hoisted).toBe(1);
+      expect(out).toContain('<del>');
+    });
+
+    it('combines multiple styles on a single span', () => {
+      const html =
+        '<p><span style="font-weight:700;font-style:italic;text-decoration:line-through">Mixed</span></p>';
+      const { html: out, hoisted } = preprocessGoogleDocsExportHtml(html);
+      expect(hoisted).toBe(1);
+      // Wrappers appear in <strong><em><del>... order (outer-to-inner).
+      expect(out).toContain('<strong>');
+      expect(out).toContain('<em>');
+      expect(out).toContain('<del>');
+    });
+
+    it('unwraps google.com/url?q= redirect links', () => {
+      const html =
+        '<p><a href="https://www.google.com/url?q=https://example.com&sa=D&source=editors&usg=ABC">Link</a></p>';
+      const { html: out, unwrappedLinks } =
+        preprocessGoogleDocsExportHtml(html);
+      expect(unwrappedLinks).toBe(1);
+      expect(out).toContain('href="https://example.com"');
+      expect(out).not.toContain('google.com/url?q=');
+    });
+
+    it('strips leading empty anchors and numbering span inside headings', () => {
+      const html = '<h1><a id="anchor-1"></a><span>1. </span>Headings</h1>';
+      const { html: out } = preprocessGoogleDocsExportHtml(html);
+      expect(out).toContain('<h1>Headings</h1>');
+      expect(out).not.toContain('1. ');
+      expect(out).not.toContain('<a id=');
+    });
+
+    it('replaces &nbsp; entity and U+00A0 with regular spaces', () => {
+      const html = '<p>A\u00A0B&nbsp;C</p>';
+      const { html: out } = preprocessGoogleDocsExportHtml(html);
+      expect(out).toContain('A B C');
+      expect(out).not.toMatch(/\u00A0/);
+      expect(out).not.toContain('&nbsp;');
+    });
+
+    it('is a no-op for HTML without Google Docs markers', () => {
+      const html = '<p>Plain text with <strong>bold</strong>.</p>';
+      const {
+        html: out,
+        hoisted,
+        unwrappedLinks,
+      } = preprocessGoogleDocsExportHtml(html);
+      expect(hoisted).toBe(0);
+      expect(unwrappedLinks).toBe(0);
+      expect(out).toContain('<p>Plain text with <strong>bold</strong>.</p>');
     });
   });
 

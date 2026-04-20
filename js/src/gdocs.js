@@ -11,6 +11,10 @@ import fetch from 'node-fetch';
 import he from 'he';
 import { convertHtmlToMarkdown } from './lib.js';
 import { createBrowser as defaultCreateBrowser } from './browser.js';
+import { preprocessGoogleDocsExportHtml } from './gdocs-preprocess.js';
+import { localizeGoogleDocsModelImages } from './gdocs-images.js';
+
+export { preprocessGoogleDocsExportHtml, localizeGoogleDocsModelImages };
 
 const GDOCS_URL_PATTERN = /docs\.google\.com\/document\/d\/([a-zA-Z0-9_-]+)/;
 
@@ -283,7 +287,14 @@ export async function fetchGoogleDocAsMarkdown(url, options = {}) {
     log,
   });
 
-  const markdown = convertHtmlToMarkdown(result.content, result.exportUrl);
+  const preprocessed = preprocessGoogleDocsExportHtml(result.content);
+  log?.debug?.(() => ({
+    event: 'gdocs.export.style-hoist',
+    documentId: result.documentId,
+    hoisted: preprocessed.hoisted,
+    unwrappedLinks: preprocessed.unwrappedLinks,
+  }));
+  const markdown = convertHtmlToMarkdown(preprocessed.html, result.exportUrl);
   log?.debug?.(() => ({
     event: 'gdocs.public-export.markdown',
     documentId: result.documentId,
@@ -384,7 +395,8 @@ export async function captureGoogleDocWithBrowser(url, options = {}) {
 
     const capture = parseGoogleDocsModelChunks(
       modelData.chunks,
-      modelData.cidUrlMap
+      modelData.cidUrlMap,
+      { log }
     );
     log?.debug?.(() => ({
       event: 'gdocs.browser-model.parsed',
@@ -531,9 +543,16 @@ export function extractCidUrlMapFromHtml(html) {
  *
  * @param {Array} chunks - Captured DOCS_modelChunk values
  * @param {Object<string,string>} [cidUrlMap={}] - CID-to-docs-images-rt URL map
+ * @param {Object} [options] - Parse options
+ * @param {Object} [options.log] - Optional verbose logger
  * @returns {{blocks: Array, tables: Array, images: Array, text: string}}
  */
-export function parseGoogleDocsModelChunks(chunks = [], cidUrlMap = {}) {
+export function parseGoogleDocsModelChunks(
+  chunks = [],
+  cidUrlMap = {},
+  options = {}
+) {
+  const { log } = options;
   const items = collectModelItems(chunks);
   const fullText = items
     .filter((item) => item.ty === 'is' || item.ty === 'iss')
@@ -581,6 +600,16 @@ export function parseGoogleDocsModelChunks(chunks = [], cidUrlMap = {}) {
   let table = null;
   let row = null;
   let cell = null;
+  const tableHistograms = [];
+  let currentHistogram = null;
+
+  const bumpHistogram = (code) => {
+    if (!currentHistogram) {
+      return;
+    }
+    const key = `0x${code.toString(16).padStart(2, '0')}`;
+    currentHistogram[key] = (currentHistogram[key] || 0) + 1;
+  };
 
   const flushParagraph = (endPos = null) => {
     const text = contentToText(paragraph).trim();
@@ -594,15 +623,18 @@ export function parseGoogleDocsModelChunks(chunks = [], cidUrlMap = {}) {
     paragraph = [];
   };
 
-  const flushCell = () => {
+  const flushCell = ({ dropEmpty = false } = {}) => {
     if (cell && row) {
-      row.cells.push(cell);
+      const isEmpty = cell.content.length === 0;
+      if (!dropEmpty || !isEmpty) {
+        row.cells.push(cell);
+      }
     }
     cell = null;
   };
 
-  const flushRow = () => {
-    flushCell();
+  const flushRow = ({ dropEmptyTrailingCell = false } = {}) => {
+    flushCell({ dropEmpty: dropEmptyTrailingCell });
     if (row && table) {
       table.rows.push(row);
     }
@@ -610,11 +642,23 @@ export function parseGoogleDocsModelChunks(chunks = [], cidUrlMap = {}) {
   };
 
   const flushTable = () => {
-    flushRow();
+    flushRow({ dropEmptyTrailingCell: true });
     if (table) {
+      // Drop trailing empty rows that Google Docs sometimes emits after the
+      // last cell content (from `\n` just before the `0x11` close marker).
+      while (
+        table.rows.length > 1 &&
+        table.rows[table.rows.length - 1].cells.length === 0
+      ) {
+        table.rows.pop();
+      }
       tables.push(table);
       blocks.push(table);
     }
+    if (currentHistogram) {
+      tableHistograms.push(currentHistogram);
+    }
+    currentHistogram = null;
     table = null;
   };
 
@@ -636,18 +680,29 @@ export function parseGoogleDocsModelChunks(chunks = [], cidUrlMap = {}) {
     if (code === 0x10) {
       flushParagraph(i + 1);
       table = { type: 'table', rows: [] };
+      currentHistogram = {
+        '0x0a': 0,
+        '0x0b': 0,
+        '0x10': 1,
+        '0x11': 0,
+        '0x12': 0,
+        '0x1c': 0,
+      };
       continue;
     }
     if (code === 0x11) {
+      bumpHistogram(code);
       flushTable();
       continue;
     }
     if (code === 0x12) {
-      flushRow();
+      bumpHistogram(code);
+      flushRow({ dropEmptyTrailingCell: true });
       row = { cells: [] };
       continue;
     }
     if (code === 0x1c) {
+      bumpHistogram(code);
       flushCell();
       if (!row) {
         row = { cells: [] };
@@ -656,14 +711,24 @@ export function parseGoogleDocsModelChunks(chunks = [], cidUrlMap = {}) {
       continue;
     }
     if (code === 0x0a) {
+      bumpHistogram(code);
       if (table) {
-        flushRow();
+        // Inside a Google Docs table, `\n` (0x0a) separates CELLS, not rows.
+        // Row boundaries are communicated via the explicit `0x12` marker and
+        // the closing `0x11` marker. Earlier versions collapsed multi-column
+        // tables to one column because they flushed the row on `\n`.
+        flushCell();
+        if (!row) {
+          row = { cells: [] };
+        }
+        cell = { content: [] };
       } else {
         flushParagraph(i + 1);
       }
       continue;
     }
     if (code === 0x0b) {
+      bumpHistogram(code);
       appendText(targetContent(), '\n');
       continue;
     }
@@ -683,6 +748,19 @@ export function parseGoogleDocsModelChunks(chunks = [], cidUrlMap = {}) {
     flushTable();
   }
   flushParagraph(fullText.length);
+
+  if (log?.debug && tableHistograms.length > 0) {
+    for (let t = 0; t < tableHistograms.length; t++) {
+      const tbl = tables[t];
+      log.debug(() => ({
+        event: 'gdocs.table.histogram',
+        tableIndex: t,
+        rows: tbl?.rows.length || 0,
+        columns: Math.max(...(tbl?.rows || []).map((r) => r.cells.length), 0),
+        controls: tableHistograms[t],
+      }));
+    }
+  }
 
   return {
     blocks,
@@ -981,19 +1059,56 @@ function sameTextStyle(a, b) {
 }
 
 function renderBlocksMarkdown(blocks) {
-  return blocks
-    .map((block) => {
-      if (block.type === 'table') {
-        return renderTableMarkdown(block);
+  const counters = new Map();
+  const rendered = blocks.map((block) => {
+    if (block.type === 'table') {
+      counters.clear();
+      return { text: renderTableMarkdown(block), list: null };
+    }
+    const counterKey = block.list
+      ? `${block.list.id || ''}\u0000${block.list.level || 0}`
+      : null;
+    if (block.list) {
+      // Reset deeper siblings when we re-enter a shallower level so
+      // nested lists restart from 1 on each new parent.
+      for (const key of [...counters.keys()]) {
+        const level = Number(key.split('\u0000')[1]);
+        if (level > (block.list.level || 0)) {
+          counters.delete(key);
+        }
       }
-      return renderParagraphMarkdown(block);
-    })
-    .filter(Boolean)
-    .join('\n\n')
-    .trimEnd();
+      const next = (counters.get(counterKey) || 0) + 1;
+      counters.set(counterKey, next);
+      return {
+        text: renderParagraphMarkdown(block, { orderedIndex: next }),
+        list: block.list,
+      };
+    }
+    counters.clear();
+    return { text: renderParagraphMarkdown(block), list: null };
+  });
+
+  const joined = [];
+  for (let i = 0; i < rendered.length; i++) {
+    const cur = rendered[i];
+    if (!cur.text) {
+      continue;
+    }
+    if (joined.length > 0) {
+      const prev = rendered
+        .slice(0, i)
+        .reverse()
+        .find((entry) => entry.text);
+      const sameList =
+        cur.list && prev?.list && (cur.list.id || '') === (prev.list.id || '');
+      joined.push(sameList ? '\n' : '\n\n');
+    }
+    joined.push(cur.text);
+  }
+  return joined.join('').replace(/\s+$/u, '');
 }
 
-function renderParagraphMarkdown(block) {
+function renderParagraphMarkdown(block, context = {}) {
   const text = renderContentMarkdown(block.content).trim();
   if (block.horizontalRule) {
     return '---';
@@ -1011,7 +1126,8 @@ function renderParagraphMarkdown(block) {
   }
   if (block.list) {
     const indent = '  '.repeat(Math.max(0, block.list.level || 0));
-    const marker = block.list.ordered ? '1.' : '-';
+    const orderedIndex = Math.max(1, Number(context.orderedIndex) || 1);
+    const marker = block.list.ordered ? `${orderedIndex}.` : '-';
     return `${indent}${marker} ${text}`;
   }
   if (block.quote) {
@@ -1277,8 +1393,16 @@ export async function fetchGoogleDocAsArchive(url, options = {}) {
   // Fetch HTML with embedded base64 images
   const result = await fetchGoogleDoc(url, { format: 'html', apiToken, log });
 
+  const preprocessed = preprocessGoogleDocsExportHtml(result.content);
+  log?.debug?.(() => ({
+    event: 'gdocs.export.style-hoist',
+    documentId: result.documentId,
+    hoisted: preprocessed.hoisted,
+    unwrappedLinks: preprocessed.unwrappedLinks,
+  }));
+
   // Extract base64 images from HTML
-  const { html: localHtml, images } = extractBase64Images(result.content);
+  const { html: localHtml, images } = extractBase64Images(preprocessed.html);
 
   // Convert the localized HTML to Markdown
   const markdown = convertHtmlToMarkdown(localHtml);

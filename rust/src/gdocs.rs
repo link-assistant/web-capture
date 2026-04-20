@@ -386,8 +386,15 @@ pub async fn fetch_google_doc_as_markdown(
 ) -> crate::Result<GDocsResult> {
     let result = fetch_google_doc(url, "html", api_token).await?;
 
+    let preprocess = preprocess_google_docs_export_html(&result.content);
+    debug!(
+        document_id = %result.document_id,
+        hoisted = preprocess.hoisted,
+        unwrapped_links = preprocess.unwrapped_links,
+        "google-docs-export pre-processor rewrote markup"
+    );
     let markdown =
-        crate::markdown::convert_html_to_markdown(&result.content, Some(&result.export_url))?;
+        crate::markdown::convert_html_to_markdown(&preprocess.html, Some(&result.export_url))?;
     debug!(
         document_id = %result.document_id,
         bytes = markdown.len(),
@@ -400,6 +407,136 @@ pub async fn fetch_google_doc_as_markdown(
         document_id: result.document_id,
         export_url: result.export_url,
     })
+}
+
+/// Result of running the Google Docs export HTML pre-processor.
+///
+/// Exposes the rewritten HTML alongside counters that are useful for debug
+/// logging (`gdocs.export.style-hoist`). See issue #92 R6.
+#[derive(Debug, Clone)]
+pub struct GDocsExportPreprocessResult {
+    /// Rewritten HTML.
+    pub html: String,
+    /// Number of inline-style spans turned into `<strong>`/`<em>`/`<del>`.
+    pub hoisted: usize,
+    /// Number of `google.com/url?q=` redirect wrappers unwrapped.
+    pub unwrapped_links: usize,
+}
+
+/// Pre-process Google Docs export HTML so the generic `html2md` pipeline
+/// preserves inline formatting, heading numbering, and link targets.
+///
+/// Google Drive serves bold/italic/strikethrough as inline style spans and
+/// wraps every link through a `google.com/url?q=` redirect, both of which
+/// the generic converter would otherwise discard. This function rewrites
+/// those constructs into semantic HTML before conversion.
+#[must_use]
+pub fn preprocess_google_docs_export_html(html: &str) -> GDocsExportPreprocessResult {
+    let mut hoisted: usize = 0;
+    let mut unwrapped_links: usize = 0;
+    let mut out = html.to_string();
+
+    // 1. Hoist inline style spans into <strong>/<em>/<del>.
+    let span_re = Regex::new(r#"(?is)<span\s+([^>]*style="([^"]*)"[^>]*)>(.*?)</span>"#)
+        .expect("valid regex");
+    out = span_re
+        .replace_all(&out, |caps: &regex::Captures<'_>| {
+            let style = caps.get(2).map_or("", |m| m.as_str());
+            let inner = caps.get(3).map_or("", |m| m.as_str());
+            let bold = Regex::new(r"(?i)font-weight\s*:\s*(?:bold|[6-9]\d{2})")
+                .expect("valid regex")
+                .is_match(style);
+            let italic = Regex::new(r"(?i)font-style\s*:\s*italic")
+                .expect("valid regex")
+                .is_match(style);
+            let strike = Regex::new(r"(?i)text-decoration[^;]*\bline-through\b")
+                .expect("valid regex")
+                .is_match(style);
+            if !bold && !italic && !strike {
+                return caps[0].to_string();
+            }
+            hoisted += 1;
+            let mut wrapped = inner.to_string();
+            if strike {
+                wrapped = format!("<del>{wrapped}</del>");
+            }
+            if italic {
+                wrapped = format!("<em>{wrapped}</em>");
+            }
+            if bold {
+                wrapped = format!("<strong>{wrapped}</strong>");
+            }
+            wrapped
+        })
+        .into_owned();
+
+    // 2. Strip leading empty `<a id="…"></a>` anchors inside headings and
+    //    `<span>N. </span>` numbering so the heading text is clean.
+    let empty_anchor_re = Regex::new(r#"(?is)<a\s+id="[^"]*"\s*>\s*</a>"#).expect("valid regex");
+    let numbering_re =
+        Regex::new(r"(?is)<span\b[^>]*>\s*\d+(?:\.\d+)*\.?\s*</span>").expect("valid regex");
+    for level in 1..=6 {
+        let heading_re = Regex::new(&format!(r"(?is)(<h{level}\b[^>]*>)(.*?)(</h{level}>)"))
+            .expect("valid regex");
+        out = heading_re
+            .replace_all(&out, |caps: &regex::Captures<'_>| {
+                let open = &caps[1];
+                let inner = &caps[2];
+                let close = &caps[3];
+                let mut cleaned = empty_anchor_re.replace_all(inner, "").into_owned();
+                cleaned = numbering_re.replace_all(&cleaned, "").into_owned();
+                format!("{open}{cleaned}{close}")
+            })
+            .into_owned();
+    }
+
+    // 3. Unwrap google.com/url?q=<URL>&sa=... redirect wrappers on <a href>.
+    let redirect_re =
+        Regex::new(r#"(?i)href="https?://(?:www\.)?google\.com/url\?q=([^&"]+)[^"]*""#)
+            .expect("valid regex");
+    out = redirect_re
+        .replace_all(&out, |caps: &regex::Captures<'_>| {
+            let encoded = caps.get(1).map_or("", |m| m.as_str());
+            let decoded = percent_decode_utf8_lossy(encoded);
+            unwrapped_links += 1;
+            format!(r#"href="{decoded}""#)
+        })
+        .into_owned();
+
+    // 4. Replace `&nbsp;` / U+00A0 with a regular space so the rendered
+    //    markdown does not carry non-breaking-space residue.
+    out = out.replace("&nbsp;", " ");
+    out = out.replace('\u{00A0}', " ");
+
+    GDocsExportPreprocessResult {
+        html: out,
+        hoisted,
+        unwrapped_links,
+    }
+}
+
+/// Decode %XX percent escapes in `input`. Invalid sequences are left
+/// untouched so well-formed ASCII URLs round-trip unchanged.
+fn percent_decode_utf8_lossy(input: &str) -> String {
+    let bytes = input.as_bytes();
+    let mut decoded = Vec::with_capacity(bytes.len());
+    let mut i = 0;
+    while i < bytes.len() {
+        if bytes[i] == b'%' && i + 2 < bytes.len() {
+            let hi = (bytes[i + 1] as char).to_digit(16);
+            let lo = (bytes[i + 2] as char).to_digit(16);
+            if let (Some(hi), Some(lo)) = (hi, lo) {
+                if let Ok(byte) = u8::try_from((hi << 4) | lo) {
+                    decoded.push(byte);
+                    i += 3;
+                    continue;
+                }
+            }
+        }
+        decoded.push(bytes[i]);
+        i += 1;
+    }
+    String::from_utf8_lossy(&decoded).into_owned()
 }
 
 /// Fetch and render a Google Docs document via the authenticated REST API.
@@ -925,11 +1062,11 @@ pub fn parse_model_chunks<S: BuildHasher>(
             }
             0x11 => flush_table(&mut table, &mut row, &mut cell, &mut tables, &mut blocks),
             0x12 => {
-                flush_row(&mut row, &mut cell, table.as_mut());
+                flush_row(&mut row, &mut cell, table.as_mut(), true);
                 row = Some(TableRow::default());
             }
             0x1c => {
-                flush_cell(&mut row, &mut cell);
+                flush_cell(&mut row, &mut cell, false);
                 if row.is_none() {
                     row = Some(TableRow::default());
                 }
@@ -937,7 +1074,13 @@ pub fn parse_model_chunks<S: BuildHasher>(
             }
             0x0a => {
                 if table.is_some() {
-                    flush_row(&mut row, &mut cell, table.as_mut());
+                    // Inside a table, a bare newline separates cells within the
+                    // current row (rows are delimited by 0x12/0x11). See R2.
+                    flush_cell(&mut row, &mut cell, false);
+                    if row.is_none() {
+                        row = Some(TableRow::default());
+                    }
+                    cell = Some(TableCell::default());
                 } else {
                     flush_paragraph(&mut paragraph, &mut blocks, Some(idx + 1), &style_maps);
                 }
@@ -1077,8 +1220,22 @@ fn infer_ordered_list(list: &ListMeta, text: &str) -> bool {
             || text.contains("Ordered child"))
 }
 
-fn flush_cell(row: &mut Option<TableRow>, cell: &mut Option<TableCell>) {
+fn cell_is_empty(cell: &TableCell) -> bool {
+    cell.content.iter().all(|node| match node {
+        ContentNode::Text { text, .. } => text.trim().is_empty(),
+        ContentNode::Image { .. } => false,
+    })
+}
+
+fn row_is_empty(row: &TableRow) -> bool {
+    row.cells.is_empty() || row.cells.iter().all(cell_is_empty)
+}
+
+fn flush_cell(row: &mut Option<TableRow>, cell: &mut Option<TableCell>, drop_empty: bool) {
     if let (Some(row), Some(cell)) = (row.as_mut(), cell.take()) {
+        if drop_empty && cell_is_empty(&cell) {
+            return;
+        }
         row.cells.push(cell);
     }
 }
@@ -1087,8 +1244,9 @@ fn flush_row(
     row: &mut Option<TableRow>,
     cell: &mut Option<TableCell>,
     table: Option<&mut TableBlock>,
+    drop_empty_trailing_cell: bool,
 ) {
-    flush_cell(row, cell);
+    flush_cell(row, cell, drop_empty_trailing_cell);
     if let (Some(table), Some(row)) = (table, row.take()) {
         table.rows.push(row);
     }
@@ -1101,8 +1259,13 @@ fn flush_table(
     tables: &mut Vec<TableBlock>,
     blocks: &mut Vec<CapturedBlock>,
 ) {
-    flush_row(row, cell, table.as_mut());
-    if let Some(table) = table.take() {
+    flush_row(row, cell, table.as_mut(), true);
+    if let Some(mut table) = table.take() {
+        // Drop trailing empty rows that can be introduced by '\n' immediately
+        // before the 0x11 table-close marker. See R2.
+        while table.rows.last().is_some_and(row_is_empty) {
+            table.rows.pop();
+        }
         tables.push(table.clone());
         blocks.push(CapturedBlock::Table(table));
     }
@@ -1199,10 +1362,20 @@ pub fn render_captured_document(capture: &CapturedDocument, format: &str) -> Str
     }
 }
 
+/// One rendered block plus enough context for `render_blocks_markdown` to
+/// decide whether it sits next to another item of the same list.
+type RenderedBlock = (String, bool, Option<(String, usize)>);
+
 fn render_blocks_markdown(blocks: &[CapturedBlock]) -> String {
-    blocks
-        .iter()
-        .filter_map(|block| match block {
+    // Track an ordered-list counter per (list.id, level) so ordered items are
+    // numbered sequentially 1., 2., 3., ... instead of all being "1.". See R3.
+    // When we re-enter a shallower list level, deeper counters reset so a new
+    // parent restarts its children at 1.
+    let mut counters: HashMap<(String, usize), usize> = HashMap::new();
+    let mut rendered: Vec<RenderedBlock> = Vec::new();
+
+    for block in blocks {
+        match block {
             CapturedBlock::Paragraph {
                 content,
                 style,
@@ -1212,21 +1385,59 @@ fn render_blocks_markdown(blocks: &[CapturedBlock]) -> String {
             } => {
                 let text = render_content_markdown(content).trim().to_string();
                 if text.is_empty() {
-                    None
-                } else {
-                    Some(render_paragraph_markdown(
-                        &text,
-                        style.as_deref(),
-                        list.as_ref(),
-                        *quote,
-                        *horizontal_rule,
-                    ))
+                    continue;
                 }
+                let ordered_index = list.as_ref().and_then(|list_meta| {
+                    if !list_meta.ordered {
+                        return None;
+                    }
+                    // Reset counters for deeper levels when we move up to a
+                    // shallower level — otherwise a new parent item would see
+                    // its previous children's final count.
+                    let key = (list_meta.id.clone(), list_meta.level);
+                    counters.retain(|(id, level), _| {
+                        !(id == &list_meta.id && *level > list_meta.level)
+                    });
+                    let next = counters.entry(key).or_insert(0);
+                    *next += 1;
+                    Some(*next)
+                });
+                let markdown = render_paragraph_markdown(
+                    &text,
+                    style.as_deref(),
+                    list.as_ref(),
+                    *quote,
+                    *horizontal_rule,
+                    ordered_index,
+                );
+                rendered.push((
+                    markdown,
+                    list.is_some(),
+                    list.as_ref().map(|l| (l.id.clone(), l.level)),
+                ));
             }
-            CapturedBlock::Table(table) => Some(render_table_markdown(table)),
-        })
-        .collect::<Vec<_>>()
-        .join("\n\n")
+            CapturedBlock::Table(table) => {
+                rendered.push((render_table_markdown(table), false, None));
+            }
+        }
+    }
+
+    // Choose separator per adjacent pair: consecutive list items at the same
+    // (list id, level) use a single newline; everything else uses a blank
+    // line. See R4.
+    let mut out = String::new();
+    for (idx, (markdown, is_list, key)) in rendered.iter().enumerate() {
+        if idx == 0 {
+            out.push_str(markdown);
+            continue;
+        }
+        let (_, prev_is_list, prev_key) = &rendered[idx - 1];
+        let same_list =
+            *is_list && *prev_is_list && key.is_some() && prev_key.is_some() && key == prev_key;
+        out.push_str(if same_list { "\n" } else { "\n\n" });
+        out.push_str(markdown);
+    }
+    out
 }
 
 fn render_paragraph_markdown(
@@ -1235,6 +1446,7 @@ fn render_paragraph_markdown(
     list: Option<&ListMeta>,
     quote: bool,
     horizontal_rule: bool,
+    ordered_index: Option<usize>,
 ) -> String {
     if horizontal_rule {
         return "---".to_string();
@@ -1268,7 +1480,11 @@ fn render_paragraph_markdown(
             },
             |list| {
                 let indent = "  ".repeat(list.level);
-                let marker = if list.ordered { "1." } else { "-" };
+                let marker = if list.ordered {
+                    format!("{}.", ordered_index.unwrap_or(1))
+                } else {
+                    "-".to_string()
+                };
                 format!("{indent}{marker} {text}")
             },
         ),
@@ -1735,7 +1951,15 @@ pub async fn fetch_google_doc_as_archive(
 ) -> crate::Result<GDocsArchiveResult> {
     let result = fetch_google_doc(url, "html", api_token).await?;
 
-    let (local_html, images) = extract_base64_images(&result.content);
+    let preprocess = preprocess_google_docs_export_html(&result.content);
+    debug!(
+        document_id = %result.document_id,
+        hoisted = preprocess.hoisted,
+        unwrapped_links = preprocess.unwrapped_links,
+        "google-docs-export pre-processor rewrote archive markup"
+    );
+
+    let (local_html, images) = extract_base64_images(&preprocess.html);
 
     let markdown = crate::markdown::convert_html_to_markdown(&local_html, None)?;
 

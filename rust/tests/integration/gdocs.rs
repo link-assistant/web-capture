@@ -1,8 +1,9 @@
 use web_capture::gdocs::{
     build_docs_api_url, build_edit_url, build_export_url, create_archive_zip,
     extract_base64_images, extract_bearer_token, extract_document_id, is_google_docs_url,
-    parse_model_chunks, render_captured_document, render_docs_api_document, select_capture_method,
-    ExtractedImage, GDocsArchiveResult, GDocsCaptureMethod,
+    parse_model_chunks, preprocess_google_docs_export_html, render_captured_document,
+    render_docs_api_document, select_capture_method, ExtractedImage, GDocsArchiveResult,
+    GDocsCaptureMethod,
 };
 
 #[test]
@@ -477,6 +478,215 @@ fn test_create_archive_zip_produces_valid_zip() {
     assert!(found_md, "ZIP must contain document.md");
     assert!(found_html, "ZIP must contain document.html");
     assert!(found_image, "ZIP must contain images/image-01.png");
+}
+
+#[test]
+fn test_parse_model_chunks_multi_column_table_r2() {
+    // Inside a table, a bare '\n' separates cells within the current row.
+    // Rows are delimited by 0x12 (and the table itself by 0x10/0x11). This
+    // mirrors the JS R2 fix so tables keep all columns instead of collapsing
+    // to one column per row.
+    let text = format!(
+        "{open}{new_row}A\nB\nC\n{new_row}D\nE\nF\n{close}",
+        open = '\u{10}',
+        close = '\u{11}',
+        new_row = '\u{12}',
+    );
+    let chunks = vec![serde_json::json!({
+        "chunk": [
+            { "ty": "is", "s": text }
+        ]
+    })];
+    let cid_urls = std::collections::HashMap::<String, String>::new();
+
+    let capture = parse_model_chunks(&chunks, &cid_urls);
+
+    assert_eq!(capture.tables.len(), 1);
+    let table = &capture.tables[0];
+    assert_eq!(table.rows.len(), 2);
+    assert_eq!(table.rows[0].cells.len(), 3);
+    assert_eq!(table.rows[1].cells.len(), 3);
+
+    let markdown = render_captured_document(&capture, "markdown");
+    assert!(
+        markdown.contains("| A | B | C |"),
+        "markdown was: {markdown}"
+    );
+    assert!(
+        markdown.contains("| D | E | F |"),
+        "markdown was: {markdown}"
+    );
+}
+
+#[test]
+fn test_render_ordered_list_sequential_numbering_r3() {
+    let text = "First item\nSecond item\nThird item\n";
+    let line_end = |needle: &str| {
+        let start = text.find(needle).expect("needle should exist");
+        start + text[start..].find('\n').expect("line should end") + 1
+    };
+    let chunks = vec![serde_json::json!({
+        "chunk": [
+            { "ty": "is", "s": text },
+            {
+                "ty": "as",
+                "st": "list",
+                "si": line_end("First item"),
+                "ei": line_end("First item"),
+                "sm": { "ls_id": "kix.list.7" }
+            },
+            {
+                "ty": "as",
+                "st": "list",
+                "si": line_end("Second item"),
+                "ei": line_end("Second item"),
+                "sm": { "ls_id": "kix.list.7" }
+            },
+            {
+                "ty": "as",
+                "st": "list",
+                "si": line_end("Third item"),
+                "ei": line_end("Third item"),
+                "sm": { "ls_id": "kix.list.7" }
+            }
+        ]
+    })];
+    let cid_urls = std::collections::HashMap::<String, String>::new();
+
+    let capture = parse_model_chunks(&chunks, &cid_urls);
+    let markdown = render_captured_document(&capture, "markdown");
+
+    assert!(
+        markdown.contains("1. First item"),
+        "markdown was: {markdown}"
+    );
+    assert!(
+        markdown.contains("2. Second item"),
+        "markdown was: {markdown}"
+    );
+    assert!(
+        markdown.contains("3. Third item"),
+        "markdown was: {markdown}"
+    );
+}
+
+#[test]
+fn test_render_list_items_joined_with_single_newline_r4() {
+    let text = "Alpha\nBeta\nGamma\n";
+    let line_end = |needle: &str| {
+        let start = text.find(needle).expect("needle should exist");
+        start + text[start..].find('\n').expect("line should end") + 1
+    };
+    let chunks = vec![serde_json::json!({
+        "chunk": [
+            { "ty": "is", "s": text },
+            {
+                "ty": "as",
+                "st": "list",
+                "si": line_end("Alpha"),
+                "ei": line_end("Alpha"),
+                "sm": { "ls_id": "kix.list.1" }
+            },
+            {
+                "ty": "as",
+                "st": "list",
+                "si": line_end("Beta"),
+                "ei": line_end("Beta"),
+                "sm": { "ls_id": "kix.list.1" }
+            },
+            {
+                "ty": "as",
+                "st": "list",
+                "si": line_end("Gamma"),
+                "ei": line_end("Gamma"),
+                "sm": { "ls_id": "kix.list.1" }
+            }
+        ]
+    })];
+    let cid_urls = std::collections::HashMap::<String, String>::new();
+
+    let capture = parse_model_chunks(&chunks, &cid_urls);
+    let markdown = render_captured_document(&capture, "markdown");
+
+    assert!(
+        markdown.contains("- Alpha\n- Beta\n- Gamma"),
+        "list items should be joined with a single newline; markdown was: {markdown}"
+    );
+    assert!(
+        !markdown.contains("- Alpha\n\n- Beta"),
+        "list items should not have a blank line between them; markdown was: {markdown}"
+    );
+}
+
+#[test]
+fn test_preprocess_exports_hoists_font_weight_r6() {
+    let html = r#"<p><span style="font-weight:700">Bold text</span></p>"#;
+    let out = preprocess_google_docs_export_html(html);
+    assert_eq!(out.hoisted, 1);
+    assert!(out.html.contains("<strong>"));
+    assert!(out.html.contains("Bold text"));
+}
+
+#[test]
+fn test_preprocess_exports_hoists_font_style_italic_r6() {
+    let html = r#"<p><span style="font-style:italic">Italic</span></p>"#;
+    let out = preprocess_google_docs_export_html(html);
+    assert_eq!(out.hoisted, 1);
+    assert!(out.html.contains("<em>"));
+}
+
+#[test]
+fn test_preprocess_exports_hoists_strikethrough_r6() {
+    let html = r#"<p><span style="text-decoration:line-through">Strike</span></p>"#;
+    let out = preprocess_google_docs_export_html(html);
+    assert_eq!(out.hoisted, 1);
+    assert!(out.html.contains("<del>"));
+}
+
+#[test]
+fn test_preprocess_exports_unwraps_redirect_links_r6() {
+    let html = r#"<a href="https://www.google.com/url?q=https://example.com&sa=D&source=editors">Link</a>"#;
+    let out = preprocess_google_docs_export_html(html);
+    assert_eq!(out.unwrapped_links, 1);
+    assert!(
+        out.html.contains(r#"href="https://example.com""#),
+        "html was: {}",
+        out.html
+    );
+    assert!(!out.html.contains("google.com/url?q="));
+}
+
+#[test]
+fn test_preprocess_exports_strips_heading_numbering_r6() {
+    let html = r#"<h1><a id="h.abc"></a><span>1. </span>Headings</h1>"#;
+    let out = preprocess_google_docs_export_html(html);
+    assert!(
+        out.html.contains("<h1>") && out.html.contains("Headings</h1>"),
+        "html was: {}",
+        out.html
+    );
+    assert!(!out.html.contains("1. "));
+    assert!(!out.html.contains(r#"<a id="h.abc""#));
+}
+
+#[test]
+fn test_preprocess_exports_replaces_nbsp_r6() {
+    let html = "<p>A&nbsp;B\u{00A0}C</p>";
+    let out = preprocess_google_docs_export_html(html);
+    assert!(out.html.contains("A B"));
+    assert!(!out.html.contains("&nbsp;"));
+    assert!(!out.html.contains('\u{00A0}'));
+}
+
+#[test]
+fn test_preprocess_exports_noop_for_regular_html_r6() {
+    let html = "<p>Plain text with <strong>bold</strong>.</p>";
+    let out = preprocess_google_docs_export_html(html);
+    assert_eq!(out.hoisted, 0);
+    assert_eq!(out.unwrapped_links, 0);
+    assert!(out
+        .html
+        .contains("<p>Plain text with <strong>bold</strong>.</p>"));
 }
 
 #[test]
