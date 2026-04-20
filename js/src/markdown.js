@@ -1,4 +1,4 @@
-import { fetchHtml, convertHtmlToMarkdown } from './lib.js';
+import { fetchHtml, convertHtmlToMarkdownEnhanced } from './lib.js';
 import { stripBase64Images } from './extract-images.js';
 
 export async function markdownHandler(req, res) {
@@ -9,7 +9,10 @@ export async function markdownHandler(req, res) {
   const embedImages = req.query.embedImages === 'true';
   try {
     const html = await fetchHtml(url);
-    let markdown = convertHtmlToMarkdown(html, url);
+    let { markdown } = convertHtmlToMarkdownEnhanced(html, url, {
+      contentSelector: req.query.contentSelector,
+      bodySelector: req.query.bodySelector,
+    });
     if (!embedImages) {
       const strip = stripBase64Images(markdown);
       markdown = strip.markdown;

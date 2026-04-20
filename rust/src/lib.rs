@@ -205,6 +205,10 @@ pub struct EnhancedOptions {
     pub post_process: bool,
     /// Detect and correct code block languages.
     pub detect_code_language: bool,
+    /// CSS selector used to scope Markdown conversion.
+    pub content_selector: Option<String>,
+    /// CSS selector for article body Markdown; prepends the selected article title when available.
+    pub body_selector: Option<String>,
 }
 
 impl Default for EnhancedOptions {
@@ -214,6 +218,8 @@ impl Default for EnhancedOptions {
             extract_metadata: true,
             post_process: true,
             detect_code_language: true,
+            content_selector: None,
+            body_selector: None,
         }
     }
 }
@@ -248,8 +254,26 @@ pub fn convert_html_to_markdown_enhanced(
     base_url: Option<&str>,
     options: &EnhancedOptions,
 ) -> Result<EnhancedMarkdownResult> {
+    let conversion_html = if let Some(body_selector) = options.body_selector.as_deref() {
+        let body_html = markdown::select_html(html, body_selector);
+        let title_selector = options
+            .content_selector
+            .as_deref()
+            .map_or_else(|| "h1".to_string(), |selector| format!("{selector} h1, h1"));
+        let title_html = markdown::select_html(html, &title_selector);
+        match (title_html, body_html) {
+            (Some(title), Some(body)) => format!("{title}\n{body}"),
+            (None, Some(body)) => body,
+            _ => html.to_string(),
+        }
+    } else if let Some(content_selector) = options.content_selector.as_deref() {
+        markdown::select_html(html, content_selector).unwrap_or_else(|| html.to_string())
+    } else {
+        html.to_string()
+    };
+
     // Start with basic markdown conversion
-    let mut md = markdown::convert_html_to_markdown(html, base_url)?;
+    let mut md = markdown::convert_html_to_markdown(&conversion_html, base_url)?;
 
     // Extract metadata if requested
     let extracted_metadata = if options.extract_metadata {

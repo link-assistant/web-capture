@@ -171,6 +171,14 @@ export function convertHtmlToMarkdown(html, baseUrl) {
   return he.decode(turndown.turndown($.html())).replace(/\u00A0/g, '&nbsp;');
 }
 
+function selectedHtml($, selector) {
+  if (!selector) {
+    return null;
+  }
+  const $selected = $(selector).first();
+  return $selected.length ? $.html($selected) : null;
+}
+
 // Convert relative URLs to absolute URLs in HTML content
 export function convertRelativeUrls(html, baseUrl) {
   const base = new URL(baseUrl);
@@ -313,6 +321,8 @@ export function convertRelativeUrls(html, baseUrl) {
  * @param {boolean} [options.postProcess=true] - Apply post-processing pipeline
  * @param {boolean} [options.detectCodeLanguage=true] - Detect/correct code languages
  * @param {boolean} [options.preserveCodeWhitespace=false] - Keep original whitespace inside code blocks
+ * @param {string} [options.contentSelector] - CSS selector to scope Markdown conversion
+ * @param {string} [options.bodySelector] - CSS selector appended after the selected article title
  * @returns {Object} Result with { markdown, metadata }
  */
 export function convertHtmlToMarkdownEnhanced(html, baseUrl, options = {}) {
@@ -322,6 +332,8 @@ export function convertHtmlToMarkdownEnhanced(html, baseUrl, options = {}) {
     postProcess = true,
     detectCodeLanguage = true,
     preserveCodeWhitespace = false,
+    contentSelector,
+    bodySelector,
   } = options;
 
   // Ensure all URLs are absolute before Markdown conversion
@@ -329,12 +341,22 @@ export function convertHtmlToMarkdownEnhanced(html, baseUrl, options = {}) {
     html = convertRelativeUrls(html, baseUrl);
   }
 
-  const $ = cheerio.load(html);
+  let $ = cheerio.load(html);
 
   // Extract metadata before cleaning
   let metadata = null;
   if (shouldExtractMetadata) {
     metadata = extractMetadata($);
+  }
+
+  const bodyHtml = selectedHtml($, bodySelector);
+  const contentHtml = selectedHtml($, contentSelector);
+  if (bodyHtml || contentHtml) {
+    const titleSelector = contentSelector ? `${contentSelector} h1, h1` : 'h1';
+    const titleHtml = bodyHtml ? selectedHtml($, titleSelector) : null;
+    $ = cheerio.load(
+      [titleHtml, bodyHtml || contentHtml].filter(Boolean).join('\n')
+    );
   }
 
   // Remove unwanted elements
