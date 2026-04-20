@@ -9,6 +9,7 @@ import path from 'path';
 import { URL } from 'node:url';
 import { makeConfig } from 'lino-arguments';
 import makeLog from 'log-lazy';
+import packageJson from '../package.json' with { type: 'json' };
 
 function makeVerboseLog(enabled) {
   return makeLog({
@@ -138,6 +139,18 @@ const config = makeConfig({
           'Detect and correct code block languages (default: true). Use --no-detect-code-language to disable.',
         default: getenv('WEB_CAPTURE_DETECT_CODE_LANGUAGE', true),
       })
+      .option('contentSelector', {
+        type: 'string',
+        description:
+          'CSS selector used to scope markdown conversion while preserving full-page metadata extraction.',
+        default: getenv('WEB_CAPTURE_CONTENT_SELECTOR', undefined),
+      })
+      .option('bodySelector', {
+        type: 'string',
+        description:
+          'CSS selector for article body markdown; prepends the selected article title when available.',
+        default: getenv('WEB_CAPTURE_BODY_SELECTOR', undefined),
+      })
       .option('embedImages', {
         type: 'boolean',
         description:
@@ -213,7 +226,7 @@ const config = makeConfig({
       })
       .help('help')
       .alias('help', 'h')
-      .version()
+      .version(packageJson.version)
       .alias('version', 'v')
       .example('web-capture --serve', 'Start API server on port 3000')
       .example(
@@ -528,8 +541,30 @@ async function captureUrl(url, options) {
           textBytes: Buffer.byteLength(result.text || ''),
         }));
         if (normalizedFormat === 'archive' || normalizedFormat === 'zip') {
+          let archiveResult;
+          if (result.fallback) {
+            archiveResult = result;
+          } else {
+            const { localizeGoogleDocsModelImages } =
+              await import('../src/gdocs.js');
+            const localized = await localizeGoogleDocsModelImages(result, {
+              log,
+            });
+            log.debug(() => ({
+              event: 'gdocs.capture.browser-model.archive.localized',
+              images: localized.images.length,
+              markdownBytes: Buffer.byteLength(localized.markdown),
+              htmlBytes: Buffer.byteLength(localized.html),
+            }));
+            archiveResult = {
+              ...result,
+              markdown: localized.markdown,
+              html: localized.html,
+              images: localized.images,
+            };
+          }
           await writeGoogleDocsArchive({
-            archiveResult: result.fallback ? result : { ...result, images: [] },
+            archiveResult,
             absoluteUrl,
             explicitOutput,
             dataDir,
@@ -970,6 +1005,8 @@ async function captureUrl(url, options) {
         extractMetadata: options.extractMetadata,
         postProcess: options.postProcess,
         detectCodeLanguage: options.detectCodeLanguage,
+        contentSelector: options.contentSelector,
+        bodySelector: options.bodySelector,
       });
       let markdown = result.markdown;
 

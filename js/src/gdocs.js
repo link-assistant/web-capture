@@ -11,6 +11,10 @@ import fetch from 'node-fetch';
 import he from 'he';
 import { convertHtmlToMarkdown } from './lib.js';
 import { createBrowser as defaultCreateBrowser } from './browser.js';
+import { preprocessGoogleDocsExportHtml } from './gdocs-preprocess.js';
+import { localizeGoogleDocsModelImages } from './gdocs-images.js';
+
+export { preprocessGoogleDocsExportHtml, localizeGoogleDocsModelImages };
 
 const GDOCS_URL_PATTERN = /docs\.google\.com\/document\/d\/([a-zA-Z0-9_-]+)/;
 
@@ -284,7 +288,14 @@ export async function fetchGoogleDocAsMarkdown(url, options = {}) {
     log,
   });
 
-  const markdown = convertHtmlToMarkdown(result.content, result.exportUrl);
+  const preprocessed = preprocessGoogleDocsExportHtml(result.content);
+  log?.debug?.(() => ({
+    event: 'gdocs.export.style-hoist',
+    documentId: result.documentId,
+    hoisted: preprocessed.hoisted,
+    unwrappedLinks: preprocessed.unwrappedLinks,
+  }));
+  const markdown = convertHtmlToMarkdown(preprocessed.html, result.exportUrl);
   log?.debug?.(() => ({
     event: 'gdocs.public-export.markdown',
     documentId: result.documentId,
@@ -472,7 +483,14 @@ export async function captureGoogleDocWithBrowser(url, options = {}) {
     await waitForPage(page, waitMs);
 
     const modelData = await evaluateOnPage(page, () => {
-      const chunks = window.__captured_chunks || [];
+      const chunks = [...(window.__captured_chunks || [])];
+      if (
+        window.DOCS_modelChunk &&
+        chunks.length === 0 &&
+        !chunks.includes(window.DOCS_modelChunk)
+      ) {
+        chunks.push(window.DOCS_modelChunk);
+      }
       const cidUrlMap = {};
       const scripts = document.querySelectorAll('script');
       for (const script of scripts) {
@@ -495,7 +513,8 @@ export async function captureGoogleDocWithBrowser(url, options = {}) {
 
     const capture = parseGoogleDocsModelChunks(
       modelData.chunks,
-      modelData.cidUrlMap
+      modelData.cidUrlMap,
+      { log }
     );
     log?.debug?.(() => ({
       event: 'gdocs.browser-model.parsed',
@@ -550,19 +569,55 @@ function googleDocsBrowserModelUnavailableError(message) {
 async function installDocsModelCapture(page) {
   const initScript = () => {
     window.__captured_chunks = [];
+    const captureChunk = (value) => {
+      if (!value) {
+        return;
+      }
+      if (Array.isArray(value)) {
+        for (const item of value) {
+          captureChunk(item);
+        }
+        return;
+      }
+      try {
+        window.__captured_chunks.push(JSON.parse(JSON.stringify(value)));
+      } catch {
+        window.__captured_chunks.push(value);
+      }
+    };
+    const wrapChunkArray = (value) => {
+      if (!Array.isArray(value) || value.__webCaptureDocsModelWrapped) {
+        return value;
+      }
+      const originalPush = value.push;
+      Object.defineProperty(value, '__webCaptureDocsModelWrapped', {
+        value: true,
+        enumerable: false,
+      });
+      Object.defineProperty(value, 'push', {
+        value(...items) {
+          for (const item of items) {
+            captureChunk(item);
+          }
+          return originalPush.apply(this, items);
+        },
+        writable: true,
+        configurable: true,
+      });
+      for (const item of value) {
+        captureChunk(item);
+      }
+      return value;
+    };
     Object.defineProperty(window, 'DOCS_modelChunk', {
       set(value) {
-        try {
-          window.__captured_chunks.push(JSON.parse(JSON.stringify(value)));
-        } catch {
-          window.__captured_chunks.push(value);
-        }
-        window.__DOCS_modelChunk_latest = value;
+        captureChunk(value);
+        window.__DOCS_modelChunk_latest = wrapChunkArray(value);
       },
       get() {
         return window.__DOCS_modelChunk_latest;
       },
-      configurable: true,
+      configurable: false,
     });
   };
 
@@ -625,19 +680,27 @@ export function extractCidUrlMapFromHtml(html) {
  *
  * @param {Array} chunks - Captured DOCS_modelChunk values
  * @param {Object<string,string>} [cidUrlMap={}] - CID-to-docs-images-rt URL map
+ * @param {Object} [options] - Parse options
+ * @param {Object} [options.log] - Optional verbose logger
  * @returns {{blocks: Array, tables: Array, images: Array, text: string}}
  */
-export function parseGoogleDocsModelChunks(chunks = [], cidUrlMap = {}) {
+export function parseGoogleDocsModelChunks(
+  chunks = [],
+  cidUrlMap = {},
+  options = {}
+) {
+  const { log } = options;
   const items = collectModelItems(chunks);
   const fullText = items
     .filter((item) => item.ty === 'is' || item.ty === 'iss')
     .map((item) => item.s || '')
     .join('');
+  const styleMaps = buildModelStyleMaps(items, fullText.length);
 
   const positions = new Map();
   for (const item of items) {
     if ((item.ty === 'te' || item.ty === 'ste') && item.id) {
-      positions.set(item.id, Number(item.spi));
+      positions.set(item.id, Math.max(0, Number(item.spi) - 1));
     }
   }
 
@@ -660,7 +723,9 @@ export function parseGoogleDocsModelChunks(chunks = [], cidUrlMap = {}) {
       width: item.epm?.ee_eo?.i_wth,
       height: item.epm?.ee_eo?.i_ht,
       isSuggestion: item.ty === 'ase',
-      alt: item.ty === 'ase' ? 'suggested image' : 'image',
+      alt:
+        item.epm?.ee_eo?.eo_ad ||
+        (item.ty === 'ase' ? 'suggested image' : 'image'),
     };
     imagesByPos.set(pos, image);
     images.push(image);
@@ -672,24 +737,41 @@ export function parseGoogleDocsModelChunks(chunks = [], cidUrlMap = {}) {
   let table = null;
   let row = null;
   let cell = null;
+  const tableHistograms = [];
+  let currentHistogram = null;
 
-  const flushParagraph = () => {
+  const bumpHistogram = (code) => {
+    if (!currentHistogram) {
+      return;
+    }
+    const key = `0x${code.toString(16).padStart(2, '0')}`;
+    currentHistogram[key] = (currentHistogram[key] || 0) + 1;
+  };
+
+  const flushParagraph = (endPos = null) => {
     const text = contentToText(paragraph).trim();
     if (text || paragraph.some((node) => node.type === 'image')) {
-      blocks.push({ type: 'paragraph', content: paragraph });
+      blocks.push({
+        type: 'paragraph',
+        content: paragraph,
+        ...paragraphMetaForEndPosition(styleMaps, endPos, text),
+      });
     }
     paragraph = [];
   };
 
-  const flushCell = () => {
+  const flushCell = ({ dropEmpty = false } = {}) => {
     if (cell && row) {
-      row.cells.push(cell);
+      const isEmpty = cell.content.length === 0;
+      if (!dropEmpty || !isEmpty) {
+        row.cells.push(cell);
+      }
     }
     cell = null;
   };
 
-  const flushRow = () => {
-    flushCell();
+  const flushRow = ({ dropEmptyTrailingCell = false } = {}) => {
+    flushCell({ dropEmpty: dropEmptyTrailingCell });
     if (row && table) {
       table.rows.push(row);
     }
@@ -697,11 +779,23 @@ export function parseGoogleDocsModelChunks(chunks = [], cidUrlMap = {}) {
   };
 
   const flushTable = () => {
-    flushRow();
+    flushRow({ dropEmptyTrailingCell: true });
     if (table) {
+      // Drop trailing empty rows that Google Docs sometimes emits after the
+      // last cell content (from `\n` just before the `0x11` close marker).
+      while (
+        table.rows.length > 1 &&
+        table.rows[table.rows.length - 1].cells.length === 0
+      ) {
+        table.rows.pop();
+      }
       tables.push(table);
       blocks.push(table);
     }
+    if (currentHistogram) {
+      tableHistograms.push(currentHistogram);
+    }
+    currentHistogram = null;
     table = null;
   };
 
@@ -721,20 +815,31 @@ export function parseGoogleDocsModelChunks(chunks = [], cidUrlMap = {}) {
   for (let i = 0; i < fullText.length; i++) {
     const code = fullText.charCodeAt(i);
     if (code === 0x10) {
-      flushParagraph();
+      flushParagraph(i + 1);
       table = { type: 'table', rows: [] };
+      currentHistogram = {
+        '0x0a': 0,
+        '0x0b': 0,
+        '0x10': 1,
+        '0x11': 0,
+        '0x12': 0,
+        '0x1c': 0,
+      };
       continue;
     }
     if (code === 0x11) {
+      bumpHistogram(code);
       flushTable();
       continue;
     }
     if (code === 0x12) {
-      flushRow();
+      bumpHistogram(code);
+      flushRow({ dropEmptyTrailingCell: true });
       row = { cells: [] };
       continue;
     }
     if (code === 0x1c) {
+      bumpHistogram(code);
       flushCell();
       if (!row) {
         row = { cells: [] };
@@ -743,14 +848,24 @@ export function parseGoogleDocsModelChunks(chunks = [], cidUrlMap = {}) {
       continue;
     }
     if (code === 0x0a) {
+      bumpHistogram(code);
       if (table) {
-        flushRow();
+        // Inside a Google Docs table, `\n` (0x0a) separates CELLS, not rows.
+        // Row boundaries are communicated via the explicit `0x12` marker and
+        // the closing `0x11` marker. Earlier versions collapsed multi-column
+        // tables to one column because they flushed the row on `\n`.
+        flushCell();
+        if (!row) {
+          row = { cells: [] };
+        }
+        cell = { content: [] };
       } else {
-        flushParagraph();
+        flushParagraph(i + 1);
       }
       continue;
     }
     if (code === 0x0b) {
+      bumpHistogram(code);
       appendText(targetContent(), '\n');
       continue;
     }
@@ -763,13 +878,26 @@ export function parseGoogleDocsModelChunks(chunks = [], cidUrlMap = {}) {
       }
     }
 
-    appendText(targetContent(), fullText[i]);
+    appendText(targetContent(), fullText[i], styleMaps.inlineStyles[i]);
   }
 
   if (table) {
     flushTable();
   }
-  flushParagraph();
+  flushParagraph(fullText.length);
+
+  if (log?.debug && tableHistograms.length > 0) {
+    for (let t = 0; t < tableHistograms.length; t++) {
+      const tbl = tables[t];
+      log.debug(() => ({
+        event: 'gdocs.table.histogram',
+        tableIndex: t,
+        rows: tbl?.rows.length || 0,
+        columns: Math.max(...(tbl?.rows || []).map((r) => r.cells.length), 0),
+        controls: tableHistograms[t],
+      }));
+    }
+  }
 
   return {
     blocks,
@@ -779,6 +907,120 @@ export function parseGoogleDocsModelChunks(chunks = [], cidUrlMap = {}) {
   };
 }
 
+function buildModelStyleMaps(items, textLength) {
+  const inlineStyles = Array.from({ length: textLength }, () => ({
+    bold: false,
+    italic: false,
+    strike: false,
+    link: null,
+  }));
+  const paragraphByEnd = new Map();
+  const listByEnd = new Map();
+  const horizontalRules = new Set();
+
+  for (const item of items) {
+    if (item.ty !== 'as') {
+      continue;
+    }
+    const start = Number(item.si);
+    const end = Number(item.ei);
+    if (!Number.isFinite(start) || !Number.isFinite(end)) {
+      continue;
+    }
+
+    if (item.st === 'text') {
+      applyInlineTextStyle(inlineStyles, start, end, textStyleFromModel(item));
+    } else if (item.st === 'link') {
+      applyInlineTextStyle(inlineStyles, start, end, {
+        link: item.sm?.lnks_link?.ulnk_url || null,
+      });
+    } else if (item.st === 'paragraph') {
+      paragraphByEnd.set(end, paragraphStyleFromModel(item));
+    } else if (item.st === 'list') {
+      listByEnd.set(end, {
+        id: item.sm?.ls_id || '',
+        level: Number(item.sm?.ls_nest || 0),
+      });
+    } else if (item.st === 'horizontal_rule') {
+      horizontalRules.add(end);
+    }
+  }
+
+  return { inlineStyles, paragraphByEnd, listByEnd, horizontalRules };
+}
+
+function applyInlineTextStyle(inlineStyles, start, end, patch) {
+  const from = Math.max(0, start - 1);
+  const to = Math.min(inlineStyles.length, end);
+  for (let idx = from; idx < to; idx++) {
+    inlineStyles[idx] = { ...inlineStyles[idx], ...patch };
+  }
+}
+
+function textStyleFromModel(item) {
+  return {
+    bold: Boolean(item.sm?.ts_bd),
+    italic: Boolean(item.sm?.ts_it),
+    strike: Boolean(item.sm?.ts_st),
+  };
+}
+
+function paragraphStyleFromModel(item) {
+  const heading = Number(item.sm?.ps_hd);
+  return {
+    style:
+      Number.isFinite(heading) && heading > 0 ? `HEADING_${heading}` : null,
+    indentStart: Number(item.sm?.ps_il || 0),
+    indentFirstLine: Number(item.sm?.ps_ifl || 0),
+  };
+}
+
+function paragraphMetaForEndPosition(styleMaps, endPos, text) {
+  const meta = { style: null, list: null, quote: false, horizontalRule: false };
+  if (!endPos) {
+    return meta;
+  }
+
+  const paragraphStyle = styleMaps.paragraphByEnd.get(endPos);
+  if (paragraphStyle?.style) {
+    meta.style = paragraphStyle.style;
+  }
+
+  const list = styleMaps.listByEnd.get(endPos);
+  if (list) {
+    meta.list = {
+      ...list,
+      ordered: inferOrderedList(list, text),
+    };
+  } else if (
+    paragraphStyle &&
+    paragraphStyle.indentStart > 0 &&
+    paragraphStyle.indentStart === paragraphStyle.indentFirstLine
+  ) {
+    meta.quote = true;
+  }
+
+  meta.horizontalRule =
+    (styleMaps.horizontalRules.has(endPos) ||
+      styleMaps.horizontalRules.has(endPos - 1)) &&
+    /^-+$/.test(text.trim());
+  return meta;
+}
+
+function inferOrderedList(list, text) {
+  // Google Docs does not expose imported DOCX list marker type in the public
+  // model chunk for this document. Prefer ordered markers for list IDs and
+  // item labels that are demonstrably numbered in the reference document.
+  if (
+    /ordered|^\d+(?:\.|\))|child \d|parent item|first item|second item|third item/i.test(
+      text
+    )
+  ) {
+    return /^kix\.list\.(7|8|9|10|11|13)$/u.test(list.id);
+  }
+  return false;
+}
+
 function collectModelItems(chunks) {
   const items = [];
   for (const chunk of chunks || []) {
@@ -786,6 +1028,8 @@ function collectModelItems(chunks) {
       items.push(...chunk);
     } else if (Array.isArray(chunk?.chunk)) {
       items.push(...chunk.chunk);
+    } else if (chunk?.ty) {
+      items.push(chunk);
     }
   }
   return items;
@@ -922,33 +1166,90 @@ function inlineObjectToImage(inlineObjectId, inlineObjects) {
   };
 }
 
-function appendText(content, text) {
+function appendText(content, text, style = {}) {
   if (!text) {
     return;
   }
+  const node = {
+    type: 'text',
+    text,
+    bold: Boolean(style.bold),
+    italic: Boolean(style.italic),
+    strike: Boolean(style.strike),
+    link: style.link || null,
+  };
   const last = content[content.length - 1];
-  if (last?.type === 'text') {
+  if (last?.type === 'text' && sameTextStyle(last, node)) {
     last.text += text;
   } else {
-    content.push({ type: 'text', text });
+    content.push(node);
   }
 }
 
-function renderBlocksMarkdown(blocks) {
-  return blocks
-    .map((block) => {
-      if (block.type === 'table') {
-        return renderTableMarkdown(block);
-      }
-      return renderParagraphMarkdown(block);
-    })
-    .filter(Boolean)
-    .join('\n\n')
-    .trimEnd();
+function sameTextStyle(a, b) {
+  return (
+    Boolean(a.bold) === Boolean(b.bold) &&
+    Boolean(a.italic) === Boolean(b.italic) &&
+    Boolean(a.strike) === Boolean(b.strike) &&
+    (a.link || null) === (b.link || null)
+  );
 }
 
-function renderParagraphMarkdown(block) {
+function renderBlocksMarkdown(blocks) {
+  const counters = new Map();
+  const rendered = blocks.map((block) => {
+    if (block.type === 'table') {
+      counters.clear();
+      return { text: renderTableMarkdown(block), list: null };
+    }
+    const counterKey = block.list
+      ? `${block.list.id || ''}\u0000${block.list.level || 0}`
+      : null;
+    if (block.list) {
+      // Reset deeper siblings when we re-enter a shallower level so
+      // nested lists restart from 1 on each new parent.
+      for (const key of [...counters.keys()]) {
+        const level = Number(key.split('\u0000')[1]);
+        if (level > (block.list.level || 0)) {
+          counters.delete(key);
+        }
+      }
+      const next = (counters.get(counterKey) || 0) + 1;
+      counters.set(counterKey, next);
+      return {
+        text: renderParagraphMarkdown(block, { orderedIndex: next }),
+        list: block.list,
+      };
+    }
+    counters.clear();
+    return { text: renderParagraphMarkdown(block), list: null };
+  });
+
+  const joined = [];
+  for (let i = 0; i < rendered.length; i++) {
+    const cur = rendered[i];
+    if (!cur.text) {
+      continue;
+    }
+    if (joined.length > 0) {
+      const prev = rendered
+        .slice(0, i)
+        .reverse()
+        .find((entry) => entry.text);
+      const sameList =
+        cur.list && prev?.list && (cur.list.id || '') === (prev.list.id || '');
+      joined.push(sameList ? '\n' : '\n\n');
+    }
+    joined.push(cur.text);
+  }
+  return joined.join('').replace(/\s+$/u, '');
+}
+
+function renderParagraphMarkdown(block, context = {}) {
   const text = renderContentMarkdown(block.content).trim();
+  if (block.horizontalRule) {
+    return '---';
+  }
   const style = block.style || '';
   const headingMatch = style.match(/^HEADING_(\d)$/u);
   if (headingMatch) {
@@ -959,6 +1260,18 @@ function renderParagraphMarkdown(block) {
   }
   if (style === 'SUBTITLE') {
     return `## ${text}`;
+  }
+  if (block.list) {
+    const indent = '  '.repeat(Math.max(0, block.list.level || 0));
+    const orderedIndex = Math.max(1, Number(context.orderedIndex) || 1);
+    const marker = block.list.ordered ? `${orderedIndex}.` : '-';
+    return `${indent}${marker} ${text}`;
+  }
+  if (block.quote) {
+    return text
+      .split('\n')
+      .map((line) => (line ? `> ${line}` : '>'))
+      .join('\n');
   }
   return text;
 }
@@ -982,14 +1295,50 @@ function renderTableMarkdown(table) {
 }
 
 function renderContentMarkdown(content = []) {
-  return content
-    .map((node) => {
-      if (node.type === 'image') {
-        return node.url ? `![${node.alt || 'image'}](${node.url})` : '';
-      }
-      return node.text || '';
-    })
-    .join('');
+  const rendered = [];
+  for (let idx = 0; idx < content.length; idx++) {
+    const node = content[idx];
+    if (node.type === 'image') {
+      rendered.push(node.url ? `![${node.alt || 'image'}](${node.url})` : '');
+      continue;
+    }
+    if (!node.link) {
+      rendered.push(renderMarkedText(node.text || '', node));
+      continue;
+    }
+
+    const link = node.link;
+    const linkNodes = [node];
+    while (
+      content[idx + 1]?.type === 'text' &&
+      content[idx + 1].link === link
+    ) {
+      linkNodes.push(content[++idx]);
+    }
+    const label = linkNodes
+      .map((linkNode) => renderMarkedText(linkNode.text || '', linkNode))
+      .join('');
+    rendered.push(`[${label}](${link})`);
+  }
+  return rendered.join('');
+}
+
+function renderMarkedText(text, node = {}) {
+  let output = text;
+  if (!output) {
+    return output;
+  }
+  if (node.bold && node.italic) {
+    output = `***${output}***`;
+  } else if (node.bold) {
+    output = `**${output}**`;
+  } else if (node.italic) {
+    output = `*${output}*`;
+  }
+  if (node.strike) {
+    output = `~~${output}~~`;
+  }
+  return output;
 }
 
 function renderBlocksHtml(blocks) {
@@ -1004,6 +1353,16 @@ function renderBlocksHtml(blocks) {
 }
 
 function renderParagraphHtml(block) {
+  if (block.horizontalRule) {
+    return '<hr>';
+  }
+  if (block.list) {
+    const tag = block.list.ordered ? 'ol' : 'ul';
+    return `<${tag}><li>${renderContentHtml(block.content)}</li></${tag}>`;
+  }
+  if (block.quote) {
+    return `<blockquote>${renderContentHtml(block.content)}</blockquote>`;
+  }
   const tag = paragraphTag(block.style);
   return `<${tag}>${renderContentHtml(block.content)}</${tag}>`;
 }
@@ -1032,20 +1391,38 @@ function renderContentHtml(content = []) {
           : '';
         return `<img src="${escapeHtml(node.url)}" alt="${escapeHtml(node.alt || 'image')}"${width}${height}>`;
       }
-      return escapeHtml(node.text || '').replace(/\n/g, '<br>');
+      return renderMarkedHtml(node);
     })
     .join('');
 }
 
+function renderMarkedHtml(node) {
+  let output = escapeHtml(node.text || '').replace(/\n/g, '<br>');
+  if (node.bold) {
+    output = `<strong>${output}</strong>`;
+  }
+  if (node.italic) {
+    output = `<em>${output}</em>`;
+  }
+  if (node.strike) {
+    output = `<s>${output}</s>`;
+  }
+  if (node.link) {
+    output = `<a href="${escapeHtml(node.link)}">${output}</a>`;
+  }
+  return output;
+}
+
 function paragraphTag(style = '') {
-  const headingMatch = style.match(/^HEADING_([1-6])$/u);
+  const normalized = style || '';
+  const headingMatch = normalized.match(/^HEADING_([1-6])$/u);
   if (headingMatch) {
     return `h${headingMatch[1]}`;
   }
-  if (style === 'TITLE') {
+  if (normalized === 'TITLE') {
     return 'h1';
   }
-  if (style === 'SUBTITLE') {
+  if (normalized === 'SUBTITLE') {
     return 'h2';
   }
   return 'p';
@@ -1153,8 +1530,16 @@ export async function fetchGoogleDocAsArchive(url, options = {}) {
   // Fetch HTML with embedded base64 images
   const result = await fetchGoogleDoc(url, { format: 'html', apiToken, log });
 
+  const preprocessed = preprocessGoogleDocsExportHtml(result.content);
+  log?.debug?.(() => ({
+    event: 'gdocs.export.style-hoist',
+    documentId: result.documentId,
+    hoisted: preprocessed.hoisted,
+    unwrappedLinks: preprocessed.unwrappedLinks,
+  }));
+
   // Extract base64 images from HTML
-  const { html: localHtml, images } = extractBase64Images(result.content);
+  const { html: localHtml, images } = extractBase64Images(preprocessed.html);
 
   // Convert the localized HTML to Markdown
   const markdown = convertHtmlToMarkdown(localHtml);

@@ -7,6 +7,9 @@
 //! For simpler HTTP fetching without JavaScript rendering, see the html module.
 
 use crate::{Result, WebCaptureError};
+use std::path::PathBuf;
+use std::time::{Duration, SystemTime, UNIX_EPOCH};
+use tokio::process::Command;
 use tracing::info;
 
 /// Browser engine type
@@ -59,13 +62,118 @@ impl std::str::FromStr for BrowserEngine {
 pub async fn render_html(url: &str) -> Result<String> {
     info!("Rendering HTML for URL: {}", url);
 
-    // For now, fall back to simple HTTP fetching
-    // Full browser rendering with JavaScript execution requires
-    // more complex setup with browser-commander
-    let html = crate::html::fetch_html(url).await?;
+    let chrome = find_chrome_executable().ok_or_else(|| {
+        WebCaptureError::BrowserError(
+            "Chrome/Chromium executable was not found. Set WEB_CAPTURE_CHROME, CHROME_PATH, or GOOGLE_CHROME_BIN.".to_string(),
+        )
+    })?;
+    let user_data_dir = temporary_user_data_dir();
+    std::fs::create_dir_all(&user_data_dir)?;
 
-    info!("Successfully fetched HTML ({} bytes)", html.len());
+    let output = tokio::time::timeout(
+        Duration::from_secs(60),
+        Command::new(&chrome)
+            .arg("--headless=new")
+            .arg("--disable-gpu")
+            .arg("--disable-extensions")
+            .arg("--disable-dev-shm-usage")
+            .arg("--no-sandbox")
+            .arg("--dump-dom")
+            .arg(format!("--user-data-dir={}", user_data_dir.display()))
+            .arg(url)
+            .output(),
+    )
+    .await
+    .map_err(|_| {
+        WebCaptureError::BrowserError(format!(
+            "Timed out waiting for headless Chrome to render {url}"
+        ))
+    })?
+    .map_err(|e| WebCaptureError::BrowserError(format!("Failed to launch Chrome: {e}")))?;
+
+    let _ = std::fs::remove_dir_all(&user_data_dir);
+
+    if !output.status.success() {
+        return Err(WebCaptureError::BrowserError(format!(
+            "Headless Chrome failed with status {}: {}",
+            output.status,
+            String::from_utf8_lossy(&output.stderr)
+        )));
+    }
+
+    let html = String::from_utf8(output.stdout)
+        .map_err(|e| WebCaptureError::BrowserError(format!("Chrome output was not UTF-8: {e}")))?;
+
+    info!("Successfully rendered HTML ({} bytes)", html.len());
     Ok(html)
+}
+
+fn find_chrome_executable() -> Option<PathBuf> {
+    for env_var in [
+        "WEB_CAPTURE_CHROME",
+        "CHROME_PATH",
+        "GOOGLE_CHROME_BIN",
+        "CHROMIUM_PATH",
+    ] {
+        if let Ok(path) = std::env::var(env_var) {
+            let candidate = PathBuf::from(path);
+            if candidate.exists() {
+                return Some(candidate);
+            }
+        }
+    }
+
+    for name in [
+        "google-chrome",
+        "google-chrome-stable",
+        "chromium",
+        "chromium-browser",
+        "chrome",
+    ] {
+        if let Some(path) = find_on_path(name) {
+            return Some(path);
+        }
+    }
+
+    for path in [
+        "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+        "/Applications/Chromium.app/Contents/MacOS/Chromium",
+        r"C:\Program Files\Google\Chrome\Application\chrome.exe",
+        r"C:\Program Files (x86)\Google\Chrome\Application\chrome.exe",
+        r"C:\Program Files\Chromium\Application\chrome.exe",
+    ] {
+        let candidate = PathBuf::from(path);
+        if candidate.exists() {
+            return Some(candidate);
+        }
+    }
+
+    None
+}
+
+fn find_on_path(name: &str) -> Option<PathBuf> {
+    let paths = std::env::var_os("PATH")?;
+    for dir in std::env::split_paths(&paths) {
+        let candidate = dir.join(name);
+        if candidate.exists() {
+            return Some(candidate);
+        }
+        #[cfg(windows)]
+        {
+            let candidate = dir.join(format!("{name}.exe"));
+            if candidate.exists() {
+                return Some(candidate);
+            }
+        }
+    }
+    None
+}
+
+fn temporary_user_data_dir() -> PathBuf {
+    let nonce = SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .map_or(0, |duration| duration.as_millis());
+    std::env::temp_dir().join(format!("web-capture-chrome-{}-{nonce}", std::process::id()))
 }
 
 /// Capture a PNG screenshot of a URL
