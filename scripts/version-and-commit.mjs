@@ -227,8 +227,10 @@ async function main() {
       const escapedMessage = commitMessage.replace(/"/g, '\\"');
       await $`git commit -m "${escapedMessage}"`;
 
-      // Push directly to main
-      await $`git push origin main`;
+      // Push directly to main with fetch+rebase+retry so concurrent
+      // workflows (e.g. Rust release) pushing at the same time don't cause
+      // a non-fast-forward rejection. See docs/case-studies/issue-94.
+      await $`node ../scripts/safe-git-push.mjs --branch main`;
 
       console.log("\u2705 Version bump committed and pushed to main");
       setOutput("version_committed", "true");
