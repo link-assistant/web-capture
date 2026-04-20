@@ -11,6 +11,7 @@ import {
   renderDocsApiDocument,
   selectGoogleDocsCaptureMethod,
   localizeGoogleDocsModelImages,
+  preprocessGoogleDocsExportHtml,
   GDOCS_EXPORT_FORMATS,
 } from '../../src/gdocs.js';
 import {
@@ -260,13 +261,11 @@ describe('gdocs', () => {
           chunk: [
             {
               ty: 'is',
-              s:
-                String.fromCharCode(0x10) +
-                String.fromCharCode(0x12) +
-                'A\nB\nC\n' +
-                String.fromCharCode(0x12) +
-                'D\nE\nF\n' +
-                String.fromCharCode(0x11),
+              s: `${
+                String.fromCharCode(0x10) + String.fromCharCode(0x12)
+              }A\nB\nC\n${String.fromCharCode(
+                0x12
+              )}D\nE\nF\n${String.fromCharCode(0x11)}`,
             },
           ],
         },
@@ -562,9 +561,7 @@ describe('gdocs', () => {
         markdown: `![pic](${url})`,
         html: `<img src="${url}" alt="pic">`,
         capture: {
-          images: [
-            { type: 'image', url, alt: 'pic', cid: 'cid-abc' },
-          ],
+          images: [{ type: 'image', url, alt: 'pic', cid: 'cid-abc' }],
         },
       };
       const fakeFetch = jest.fn().mockResolvedValue({
@@ -578,8 +575,8 @@ describe('gdocs', () => {
         ok: true,
         status: 200,
         headers: { get: () => 'image/png' },
-        arrayBuffer: async () => new Uint8Array([0x89, 0x50, 0x4e, 0x47])
-          .buffer,
+        arrayBuffer: async () =>
+          new Uint8Array([0x89, 0x50, 0x4e, 0x47]).buffer,
       });
 
       const localized = await localizeGoogleDocsModelImages(modelResult, {
@@ -604,9 +601,11 @@ describe('gdocs', () => {
         html: `<img src="${url}" alt="pic">`,
         capture: { images: [{ url, alt: 'pic' }] },
       };
-      const fakeFetch = jest
-        .fn()
-        .mockResolvedValue({ ok: false, status: 404, headers: { get: () => null } });
+      const fakeFetch = jest.fn().mockResolvedValue({
+        ok: false,
+        status: 404,
+        headers: { get: () => null },
+      });
 
       const localized = await localizeGoogleDocsModelImages(modelResult, {
         fetchImpl: fakeFetch,
@@ -617,6 +616,80 @@ describe('gdocs', () => {
       // callers may choose to ignore this; the key guarantee is that no
       // exception leaks out.
       expect(localized.markdown).toBe('![pic](images/image-01.png)');
+    });
+  });
+
+  describe('preprocessGoogleDocsExportHtml (issue #92 R6)', () => {
+    it('hoists font-weight:700 spans into <strong>', () => {
+      const html = '<p><span style="font-weight:700">Bold text</span></p>';
+      const { html: out, hoisted } = preprocessGoogleDocsExportHtml(html);
+      expect(hoisted).toBe(1);
+      expect(out).toContain('<strong>');
+      expect(out).toContain('Bold text');
+    });
+
+    it('hoists font-style:italic spans into <em>', () => {
+      const html = '<p><span style="font-style:italic">Italic text</span></p>';
+      const { html: out, hoisted } = preprocessGoogleDocsExportHtml(html);
+      expect(hoisted).toBe(1);
+      expect(out).toContain('<em>');
+    });
+
+    it('hoists text-decoration:line-through spans into <del>', () => {
+      const html =
+        '<p><span style="text-decoration:line-through">Strike</span></p>';
+      const { html: out, hoisted } = preprocessGoogleDocsExportHtml(html);
+      expect(hoisted).toBe(1);
+      expect(out).toContain('<del>');
+    });
+
+    it('combines multiple styles on a single span', () => {
+      const html =
+        '<p><span style="font-weight:700;font-style:italic;text-decoration:line-through">Mixed</span></p>';
+      const { html: out, hoisted } = preprocessGoogleDocsExportHtml(html);
+      expect(hoisted).toBe(1);
+      // Wrappers appear in <strong><em><del>... order (outer-to-inner).
+      expect(out).toContain('<strong>');
+      expect(out).toContain('<em>');
+      expect(out).toContain('<del>');
+    });
+
+    it('unwraps google.com/url?q= redirect links', () => {
+      const html =
+        '<p><a href="https://www.google.com/url?q=https://example.com&sa=D&source=editors&usg=ABC">Link</a></p>';
+      const { html: out, unwrappedLinks } =
+        preprocessGoogleDocsExportHtml(html);
+      expect(unwrappedLinks).toBe(1);
+      expect(out).toContain('href="https://example.com"');
+      expect(out).not.toContain('google.com/url?q=');
+    });
+
+    it('strips leading empty anchors and numbering span inside headings', () => {
+      const html = '<h1><a id="anchor-1"></a><span>1. </span>Headings</h1>';
+      const { html: out } = preprocessGoogleDocsExportHtml(html);
+      expect(out).toContain('<h1>Headings</h1>');
+      expect(out).not.toContain('1. ');
+      expect(out).not.toContain('<a id=');
+    });
+
+    it('replaces &nbsp; entity and U+00A0 with regular spaces', () => {
+      const html = '<p>A\u00A0B&nbsp;C</p>';
+      const { html: out } = preprocessGoogleDocsExportHtml(html);
+      expect(out).toContain('A B C');
+      expect(out).not.toMatch(/\u00A0/);
+      expect(out).not.toContain('&nbsp;');
+    });
+
+    it('is a no-op for HTML without Google Docs markers', () => {
+      const html = '<p>Plain text with <strong>bold</strong>.</p>';
+      const {
+        html: out,
+        hoisted,
+        unwrappedLinks,
+      } = preprocessGoogleDocsExportHtml(html);
+      expect(hoisted).toBe(0);
+      expect(unwrappedLinks).toBe(0);
+      expect(out).toContain('<p>Plain text with <strong>bold</strong>.</p>');
     });
   });
 

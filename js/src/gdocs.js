@@ -11,6 +11,10 @@ import fetch from 'node-fetch';
 import he from 'he';
 import { convertHtmlToMarkdown } from './lib.js';
 import { createBrowser as defaultCreateBrowser } from './browser.js';
+import { preprocessGoogleDocsExportHtml } from './gdocs-preprocess.js';
+import { localizeGoogleDocsModelImages } from './gdocs-images.js';
+
+export { preprocessGoogleDocsExportHtml, localizeGoogleDocsModelImages };
 
 const GDOCS_URL_PATTERN = /docs\.google\.com\/document\/d\/([a-zA-Z0-9_-]+)/;
 
@@ -283,7 +287,14 @@ export async function fetchGoogleDocAsMarkdown(url, options = {}) {
     log,
   });
 
-  const markdown = convertHtmlToMarkdown(result.content, result.exportUrl);
+  const preprocessed = preprocessGoogleDocsExportHtml(result.content);
+  log?.debug?.(() => ({
+    event: 'gdocs.export.style-hoist',
+    documentId: result.documentId,
+    hoisted: preprocessed.hoisted,
+    unwrappedLinks: preprocessed.unwrappedLinks,
+  }));
+  const markdown = convertHtmlToMarkdown(preprocessed.html, result.exportUrl);
   log?.debug?.(() => ({
     event: 'gdocs.public-export.markdown',
     documentId: result.documentId,
@@ -1089,9 +1100,7 @@ function renderBlocksMarkdown(blocks) {
         .reverse()
         .find((entry) => entry.text);
       const sameList =
-        cur.list &&
-        prev?.list &&
-        (cur.list.id || '') === (prev.list.id || '');
+        cur.list && prev?.list && (cur.list.id || '') === (prev.list.id || '');
       joined.push(sameList ? '\n' : '\n\n');
     }
     joined.push(cur.text);
@@ -1365,122 +1374,6 @@ export function extractBase64Images(html) {
 }
 
 /**
- * Download the `docs-images-rt` URLs captured from an editor-model capture.
- *
- * Produces `{ filename, data, mimeType }` entries compatible with
- * `writeGoogleDocsArchive` and rewrites the markdown/html to reference the
- * local `images/<filename>` paths.
- *
- * @param {{markdown: string, html: string, capture: Object}} modelResult - Result from captureGoogleDocWithBrowser
- * @param {Object} [options] - Options
- * @param {typeof fetch} [options.fetchImpl=fetch] - Injected fetch (for tests)
- * @param {Object} [options.log] - Verbose logger
- * @returns {Promise<{markdown: string, html: string, images: Array<{filename: string, data: Buffer, mimeType: string}>}>}
- */
-export async function localizeGoogleDocsModelImages(modelResult, options = {}) {
-  const { fetchImpl = fetch, log } = options;
-  const images = [];
-  const seen = new Map(); // url -> filename
-  let nextIndex = 1;
-
-  const resolveFilename = (url, existingAlt) => {
-    if (seen.has(url)) {
-      return seen.get(url);
-    }
-    const ext = getExtensionFromImageUrl(url);
-    const filename = `image-${String(nextIndex).padStart(2, '0')}${ext}`;
-    nextIndex++;
-    seen.set(url, filename);
-    log?.debug?.(() => ({
-      event: 'gdocs.archive.image.scheduled',
-      url,
-      filename,
-      alt: existingAlt || null,
-    }));
-    return filename;
-  };
-
-  const candidates = (modelResult?.capture?.images || []).filter((img) => img?.url);
-  for (const img of candidates) {
-    const filename = resolveFilename(img.url, img.alt);
-    try {
-      const response = await fetchImpl(img.url, {
-        headers: {
-          'User-Agent': DEFAULT_USER_AGENT,
-          Accept: 'image/*,*/*;q=0.8',
-        },
-        redirect: 'follow',
-      });
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`);
-      }
-      const arrayBuffer = await response.arrayBuffer();
-      const data = Buffer.from(arrayBuffer);
-      const mimeType =
-        response.headers?.get?.('content-type') ||
-        mimeTypeForExtension(filename);
-      images.push({ filename, data, mimeType });
-      log?.debug?.(() => ({
-        event: 'gdocs.archive.image.downloaded',
-        url: img.url,
-        filename,
-        bytes: data.length,
-        mimeType,
-      }));
-    } catch (err) {
-      log?.debug?.(() => ({
-        event: 'gdocs.archive.image.failed',
-        url: img.url,
-        filename,
-        error: err?.message || String(err),
-      }));
-    }
-  }
-
-  let markdown = modelResult?.markdown || '';
-  let html = modelResult?.html || '';
-  for (const [url, filename] of seen.entries()) {
-    const localPath = `images/${filename}`;
-    markdown = markdown.split(url).join(localPath);
-    html = html.split(url).join(localPath);
-  }
-
-  return { markdown, html, images };
-}
-
-function getExtensionFromImageUrl(url) {
-  try {
-    const u = new URL(url);
-    const match = u.pathname.match(/\.(png|jpe?g|gif|webp|svg)$/iu);
-    if (match) {
-      const ext = match[1].toLowerCase();
-      return ext === 'jpeg' ? '.jpg' : `.${ext}`;
-    }
-  } catch {
-    // fall through
-  }
-  return '.png';
-}
-
-function mimeTypeForExtension(filename) {
-  const dot = filename.lastIndexOf('.');
-  const ext = dot >= 0 ? filename.slice(dot + 1).toLowerCase() : 'png';
-  switch (ext) {
-    case 'jpg':
-    case 'jpeg':
-      return 'image/jpeg';
-    case 'gif':
-      return 'image/gif';
-    case 'webp':
-      return 'image/webp';
-    case 'svg':
-      return 'image/svg+xml';
-    default:
-      return 'image/png';
-  }
-}
-
-/**
  * Fetch a Google Docs document as a ZIP archive with images.
  *
  * Fetches the document as HTML, extracts embedded base64 images,
@@ -1500,8 +1393,16 @@ export async function fetchGoogleDocAsArchive(url, options = {}) {
   // Fetch HTML with embedded base64 images
   const result = await fetchGoogleDoc(url, { format: 'html', apiToken, log });
 
+  const preprocessed = preprocessGoogleDocsExportHtml(result.content);
+  log?.debug?.(() => ({
+    event: 'gdocs.export.style-hoist',
+    documentId: result.documentId,
+    hoisted: preprocessed.hoisted,
+    unwrappedLinks: preprocessed.unwrappedLinks,
+  }));
+
   // Extract base64 images from HTML
-  const { html: localHtml, images } = extractBase64Images(result.content);
+  const { html: localHtml, images } = extractBase64Images(preprocessed.html);
 
   // Convert the localized HTML to Markdown
   const markdown = convertHtmlToMarkdown(localHtml);
