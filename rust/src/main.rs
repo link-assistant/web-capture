@@ -708,7 +708,7 @@ async fn capture_url(
                 _ => "zip",
             };
 
-            let html = fetch_html(&absolute_url).await?;
+            let html = capture_html_content(&absolute_url, args).await?;
             let options = EnhancedOptions {
                 extract_latex: args.extract_latex,
                 extract_metadata: args.extract_metadata,
@@ -765,7 +765,7 @@ async fn capture_url(
             }
         }
         "markdown" | "md" => {
-            let html = fetch_html(&absolute_url).await?;
+            let html = capture_html_content(&absolute_url, args).await?;
 
             // Enhanced conversion is now the default
             let options = EnhancedOptions {
@@ -847,17 +847,9 @@ async fn capture_url(
             }
         }
         _ => {
-            let html_content = fetch_html(&absolute_url).await?;
-            let needs_render = !html::is_html(&html_content) || html::has_javascript(&html_content);
-
-            let result = if needs_render {
-                let rendered = render_html(&absolute_url).await?;
-                let utf8_html = convert_to_utf8(&rendered);
-                convert_relative_urls(&utf8_html, &absolute_url)
-            } else {
-                let utf8_html = convert_to_utf8(&html_content);
-                convert_relative_urls(&utf8_html, &absolute_url)
-            };
+            let html_content = capture_html_content(&absolute_url, args).await?;
+            let utf8_html = convert_to_utf8(&html_content);
+            let result = convert_relative_urls(&utf8_html, &absolute_url);
 
             let is_stdout = output.is_some_and(|p| p.as_os_str() == "-");
             let derived;
@@ -882,6 +874,24 @@ async fn capture_url(
     }
 
     Ok(())
+}
+
+async fn capture_html_content(absolute_url: &str, args: &Args) -> anyhow::Result<String> {
+    if capture_uses_browser(&args.capture)? {
+        Ok(render_html(absolute_url).await?)
+    } else {
+        Ok(fetch_html(absolute_url).await?)
+    }
+}
+
+fn capture_uses_browser(capture: &str) -> anyhow::Result<bool> {
+    match capture.to_lowercase().as_str() {
+        "browser" => Ok(true),
+        "api" => Ok(false),
+        other => Err(anyhow::anyhow!(
+            "Unsupported capture method \"{other}\". Use \"browser\" or \"api\"."
+        )),
+    }
 }
 
 async fn write_rendered_gdoc(

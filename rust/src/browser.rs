@@ -7,10 +7,13 @@
 //! For simpler HTTP fetching without JavaScript rendering, see the html module.
 
 use crate::{Result, WebCaptureError};
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
+use std::sync::atomic::{AtomicU64, Ordering};
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 use tokio::process::Command;
 use tracing::info;
+
+static USER_DATA_DIR_COUNTER: AtomicU64 = AtomicU64::new(0);
 
 /// Browser engine type
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
@@ -172,16 +175,18 @@ fn find_on_path(name: &str) -> Option<PathBuf> {
 fn temporary_user_data_dir() -> PathBuf {
     let nonce = SystemTime::now()
         .duration_since(UNIX_EPOCH)
-        .map_or(0, |duration| duration.as_millis());
-    std::env::temp_dir().join(format!("web-capture-chrome-{}-{nonce}", std::process::id()))
+        .map_or(0, |duration| duration.as_nanos());
+    let seq = USER_DATA_DIR_COUNTER.fetch_add(1, Ordering::Relaxed);
+    std::env::temp_dir().join(format!(
+        "web-capture-chrome-{}-{nonce}-{seq}",
+        std::process::id()
+    ))
 }
 
 /// Capture a PNG screenshot of a URL
 ///
-/// This function uses browser-commander to launch a headless browser,
-/// navigate to the URL, and capture a screenshot.
-///
-/// Note: This requires Chrome/Chromium to be installed on the system.
+/// This function launches headless Chrome/Chromium, navigates to the URL,
+/// and captures a full-page PNG screenshot.
 ///
 /// # Arguments
 ///
@@ -193,14 +198,83 @@ fn temporary_user_data_dir() -> PathBuf {
 ///
 /// # Errors
 ///
-/// Returns an error if browser operations fail
-#[allow(clippy::unused_async)] // Will be async when browser-commander is fully integrated
+/// Returns an error if Chrome/Chromium is unavailable or screenshot capture fails.
 pub async fn capture_screenshot(url: &str) -> Result<Vec<u8>> {
     info!("Capturing screenshot for URL: {}", url);
 
-    // Screenshot capture requires full browser automation
-    // For now, return an error indicating this feature needs browser setup
-    Err(WebCaptureError::ScreenshotError(
-        "Screenshot capture requires Chrome/Chromium. Install it and enable browser-commander features.".to_string()
+    let chrome = find_chrome_executable().ok_or_else(|| {
+        WebCaptureError::ScreenshotError(
+            "Chrome/Chromium executable was not found. Set WEB_CAPTURE_CHROME, CHROME_PATH, or GOOGLE_CHROME_BIN.".to_string(),
+        )
+    })?;
+
+    let user_data_dir = temporary_user_data_dir();
+    std::fs::create_dir_all(&user_data_dir).map_err(|e| {
+        WebCaptureError::ScreenshotError(format!("Failed to create temp user data dir: {e}"))
+    })?;
+
+    let screenshot_path = temporary_screenshot_path();
+    let screenshot_arg = format!("--screenshot={}", screenshot_path.display());
+
+    let output = tokio::time::timeout(
+        Duration::from_secs(60),
+        Command::new(&chrome)
+            .arg("--headless=new")
+            .arg("--disable-gpu")
+            .arg("--disable-extensions")
+            .arg("--disable-dev-shm-usage")
+            .arg("--no-sandbox")
+            .arg("--hide-scrollbars")
+            .arg("--window-size=1280,800")
+            .arg(&screenshot_arg)
+            .arg(format!("--user-data-dir={}", user_data_dir.display()))
+            .arg(url)
+            .output(),
+    )
+    .await
+    .map_err(|_| {
+        WebCaptureError::ScreenshotError(format!(
+            "Timed out waiting for headless Chrome to capture {url}"
+        ))
+    })?
+    .map_err(|e| WebCaptureError::ScreenshotError(format!("Failed to launch Chrome: {e}")))?;
+
+    let _ = std::fs::remove_dir_all(&user_data_dir);
+
+    if !output.status.success() {
+        let _ = std::fs::remove_file(&screenshot_path);
+        return Err(WebCaptureError::ScreenshotError(format!(
+            "Headless Chrome failed with status {}: {}",
+            output.status,
+            String::from_utf8_lossy(&output.stderr)
+        )));
+    }
+
+    let bytes = read_screenshot_bytes(&screenshot_path)?;
+    let _ = std::fs::remove_file(&screenshot_path);
+
+    if bytes.len() < 8 || &bytes[..8] != b"\x89PNG\r\n\x1a\n" {
+        return Err(WebCaptureError::ScreenshotError(
+            "Chrome screenshot output was not a valid PNG".to_string(),
+        ));
+    }
+
+    info!("Successfully captured screenshot ({} bytes)", bytes.len());
+    Ok(bytes)
+}
+
+fn temporary_screenshot_path() -> PathBuf {
+    let nonce = SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .map_or(0, |duration| duration.as_nanos());
+    std::env::temp_dir().join(format!(
+        "web-capture-screenshot-{}-{nonce}.png",
+        std::process::id()
     ))
+}
+
+fn read_screenshot_bytes(path: &Path) -> Result<Vec<u8>> {
+    std::fs::read(path).map_err(|e| {
+        WebCaptureError::ScreenshotError(format!("Failed to read screenshot file: {e}"))
+    })
 }
