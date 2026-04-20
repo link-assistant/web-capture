@@ -1,4 +1,8 @@
-use web_capture::markdown::{clean_markdown, convert_html_to_markdown};
+use web_capture::{
+    convert_html_to_markdown_enhanced,
+    markdown::{clean_markdown, convert_html_to_markdown},
+    EnhancedOptions,
+};
 
 #[test]
 fn test_convert_html_to_markdown_basic() {
@@ -58,4 +62,84 @@ fn test_clean_markdown_adds_trailing_newline() {
     let markdown = "Content";
     let result = clean_markdown(markdown);
     assert!(result.ends_with('\n'));
+}
+
+#[test]
+fn test_enhanced_markdown_extracts_habr_formula_images() {
+    let html = r#"
+        <article>
+            <p>Everything is <img class="formula inline" source="100\%" alt="100\%"> serious.</p>
+            <blockquote><p><img class="formula inline" source="\forall x, P(x)" alt="formula"></p></blockquote>
+        </article>
+    "#;
+
+    let result = convert_html_to_markdown_enhanced(
+        html,
+        None,
+        &EnhancedOptions {
+            extract_metadata: false,
+            post_process: false,
+            detect_code_language: false,
+            ..EnhancedOptions::default()
+        },
+    )
+    .unwrap();
+
+    assert!(
+        result.markdown.contains(r"Everything is $100\%$ serious."),
+        "markdown was:\n{}",
+        result.markdown
+    );
+    assert!(
+        result.markdown.contains(r"$\forall x, P(x)$"),
+        "markdown was:\n{}",
+        result.markdown
+    );
+    assert!(!result.markdown.contains("<img"));
+    assert!(!result.markdown.contains("formula inline"));
+}
+
+#[test]
+fn test_enhanced_markdown_can_disable_latex_extraction() {
+    let html = r#"<p><img class="formula inline" source="x^2" alt="x squared"></p>"#;
+
+    let result = convert_html_to_markdown_enhanced(
+        html,
+        None,
+        &EnhancedOptions {
+            extract_latex: false,
+            extract_metadata: false,
+            post_process: false,
+            detect_code_language: false,
+            content_selector: None,
+            body_selector: None,
+        },
+    )
+    .unwrap();
+
+    assert!(!result.markdown.contains("$x^2$"));
+}
+
+#[test]
+fn test_enhanced_markdown_corrects_coq_code_language() {
+    let html = r#"
+        <pre><code class="language-matlab">Require Import Coq.Init.Logic.
+Theorem example : True.
+Proof.
+Qed.</code></pre>
+    "#;
+
+    let result = convert_html_to_markdown_enhanced(
+        html,
+        None,
+        &EnhancedOptions {
+            extract_metadata: false,
+            post_process: false,
+            ..EnhancedOptions::default()
+        },
+    )
+    .unwrap();
+
+    assert!(result.markdown.contains("Require Import Coq.Init.Logic."));
+    assert!(!result.markdown.contains("matlab"));
 }
