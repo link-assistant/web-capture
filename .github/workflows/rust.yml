@@ -168,6 +168,13 @@ jobs:
       - name: Run doc tests
         run: cargo test --doc --verbose
 
+      - name: Run Google Docs public-document live integration tests (issue #90)
+        working-directory: rust
+        env:
+          GDOCS_INTEGRATION: '1'
+        run: cargo test --test integration gdocs_public_doc::live -- --nocapture
+        timeout-minutes: 10
+
   # Build check - only runs when Rust code changes
   build:
     name: Rust - Build

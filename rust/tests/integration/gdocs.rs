@@ -97,7 +97,7 @@ fn test_parse_model_chunks_includes_suggestions_and_images() {
             { "ty": "is", "s": "Stable " },
             { "ty": "iss", "s": "suggested*\n" },
             { "ty": "ase", "id": "suggested-image", "epm": { "ee_eo": { "i_cid": "cid_12345678901234567890" } } },
-            { "ty": "ste", "id": "suggested-image", "spi": 16 }
+            { "ty": "ste", "id": "suggested-image", "spi": 17 }
         ]
     })];
     let cid_urls = std::collections::HashMap::from([(
@@ -113,6 +113,171 @@ fn test_parse_model_chunks_includes_suggestions_and_images() {
     assert!(
         markdown.contains("![suggested image](https://docs.google.com/docs-images-rt/image-id)")
     );
+}
+
+#[test]
+fn test_parse_model_chunks_accepts_individual_model_items() {
+    let chunks = vec![serde_json::json!({ "ty": "is", "s": "Pushed item\n" })];
+    let cid_urls = std::collections::HashMap::<String, String>::new();
+
+    let capture = parse_model_chunks(&chunks, &cid_urls);
+    let markdown = render_captured_document(&capture, "markdown");
+
+    assert!(capture.text.contains("Pushed item"));
+    assert!(markdown.contains("Pushed item"));
+}
+
+#[test]
+#[allow(clippy::too_many_lines)]
+fn test_parse_model_chunks_renders_style_records() {
+    let text = [
+        "Title",
+        "This is bold, italic, strike, and link",
+        "-",
+        "Item",
+        "Quote",
+        "*",
+        "",
+    ]
+    .join("\n");
+    let start_of = |needle: &str| text.find(needle).expect("needle should exist") + 1;
+    let end_of = |needle: &str| start_of(needle) + needle.len() - 1;
+    let line_end = |needle: &str| {
+        let start = text.find(needle).expect("needle should exist");
+        start + text[start..].find('\n').expect("line should end") + 1
+    };
+    let chunks = vec![serde_json::json!({
+        "chunk": [
+            { "ty": "is", "s": text },
+            {
+                "ty": "as",
+                "st": "paragraph",
+                "si": line_end("Title"),
+                "ei": line_end("Title"),
+                "sm": { "ps_hd": 1 }
+            },
+            {
+                "ty": "as",
+                "st": "text",
+                "si": start_of("bold"),
+                "ei": end_of("bold"),
+                "sm": { "ts_bd": true }
+            },
+            {
+                "ty": "as",
+                "st": "text",
+                "si": start_of("italic"),
+                "ei": end_of("italic"),
+                "sm": { "ts_it": true }
+            },
+            {
+                "ty": "as",
+                "st": "text",
+                "si": start_of("strike"),
+                "ei": end_of("strike"),
+                "sm": { "ts_st": true }
+            },
+            {
+                "ty": "as",
+                "st": "link",
+                "si": start_of("link"),
+                "ei": end_of("link"),
+                "sm": { "lnks_link": { "ulnk_url": "https://example.com" } }
+            },
+            {
+                "ty": "as",
+                "st": "horizontal_rule",
+                "si": start_of("-"),
+                "ei": start_of("-"),
+                "sm": {}
+            },
+            {
+                "ty": "as",
+                "st": "list",
+                "si": line_end("Item"),
+                "ei": line_end("Item"),
+                "sm": { "ls_id": "kix.list.3" }
+            },
+            {
+                "ty": "as",
+                "st": "paragraph",
+                "si": line_end("Quote"),
+                "ei": line_end("Quote"),
+                "sm": { "ps_il": 24, "ps_ifl": 24 }
+            },
+            {
+                "ty": "ae",
+                "et": "inline",
+                "id": "image-1",
+                "epm": {
+                    "ee_eo": {
+                        "i_cid": "cid_12345678901234567890",
+                        "eo_ad": "Blue rectangle"
+                    }
+                }
+            },
+            { "ty": "te", "id": "image-1", "spi": start_of("*") }
+        ]
+    })];
+    let cid_urls = std::collections::HashMap::from([(
+        "cid_12345678901234567890".to_string(),
+        "https://docs.google.com/docs-images-rt/image-id".to_string(),
+    )]);
+
+    let capture = parse_model_chunks(&chunks, &cid_urls);
+    let markdown = render_captured_document(&capture, "markdown");
+
+    assert!(markdown.contains("# Title"));
+    assert!(markdown
+        .contains("This is **bold**, *italic*, ~~strike~~, and [link](https://example.com)"));
+    assert!(markdown.contains("---"));
+    assert!(markdown.contains("- Item"));
+    assert!(markdown.contains("> Quote"));
+    assert!(markdown.contains("![Blue rectangle](https://docs.google.com/docs-images-rt/image-id)"));
+}
+
+#[test]
+fn test_parse_model_chunks_translates_utf16_positions() {
+    let text = "😀 bold*\n";
+    let start_of = |needle: &str| {
+        let byte_idx = text.find(needle).expect("needle should exist");
+        text[..byte_idx].encode_utf16().count() + 1
+    };
+    let end_of = |needle: &str| start_of(needle) + needle.encode_utf16().count() - 1;
+    let chunks = vec![serde_json::json!({
+        "chunk": [
+            { "ty": "is", "s": text },
+            {
+                "ty": "as",
+                "st": "text",
+                "si": start_of("bold"),
+                "ei": end_of("bold"),
+                "sm": { "ts_bd": true }
+            },
+            {
+                "ty": "ae",
+                "et": "inline",
+                "id": "image-1",
+                "epm": {
+                    "ee_eo": {
+                        "i_cid": "cid_12345678901234567890",
+                        "eo_ad": "Blue rectangle"
+                    }
+                }
+            },
+            { "ty": "te", "id": "image-1", "spi": start_of("*") }
+        ]
+    })];
+    let cid_urls = std::collections::HashMap::from([(
+        "cid_12345678901234567890".to_string(),
+        "https://docs.google.com/docs-images-rt/image-id".to_string(),
+    )]);
+
+    let capture = parse_model_chunks(&chunks, &cid_urls);
+    let markdown = render_captured_document(&capture, "markdown");
+
+    assert!(markdown
+        .contains("😀 **bold**![Blue rectangle](https://docs.google.com/docs-images-rt/image-id)"));
 }
 
 #[test]

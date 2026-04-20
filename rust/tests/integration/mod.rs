@@ -4,4 +4,5 @@ mod browser;
 mod figures;
 mod gdocs;
 mod gdocs_image_parity;
+mod gdocs_public_doc;
 mod themed_image;
