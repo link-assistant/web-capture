@@ -78,7 +78,7 @@ try {
   // (Previously caused apostrophes like "didn't" to appear as "didn'''" in releases)
   const payload = JSON.stringify({
     tag_name: tag,
-    name: `JS v${version}`,
+    name: `[JavaScript] v${version}`,
     body: releaseNotes,
   });
 
