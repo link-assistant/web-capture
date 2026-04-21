@@ -525,6 +525,37 @@ describe('gdocs', () => {
       );
     });
 
+    it('keeps styled same-target link segments in one link label (issue #96)', () => {
+      const text = 'Link with bold text\n';
+      const startOf = (needle) => text.indexOf(needle) + 1;
+      const endOf = (needle) => startOf(needle) + needle.length - 1;
+      const chunks = [
+        {
+          chunk: [
+            { ty: 'is', s: text },
+            {
+              ty: 'as',
+              st: 'link',
+              si: 1,
+              ei: text.length - 1,
+              sm: { lnks_link: { ulnk_url: 'https://example.com' } },
+            },
+            {
+              ty: 'as',
+              st: 'text',
+              si: startOf('bold'),
+              ei: endOf('bold'),
+              sm: { ts_bd: true },
+            },
+          ],
+        },
+      ];
+      const capture = parseGoogleDocsModelChunks(chunks);
+      const markdown = renderGoogleDocsCapture(capture, 'markdown');
+
+      expect(markdown).toBe('[Link with **bold** text](https://example.com)\n');
+    });
+
     it('keeps consecutive blockquote paragraphs in the same quote block (issue #96)', () => {
       const text = 'Quote paragraph one\nQuote paragraph two\n';
       const lineEnd = (needle) => text.indexOf(needle) + needle.length + 1;

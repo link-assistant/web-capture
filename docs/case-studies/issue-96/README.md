@@ -174,13 +174,13 @@ cd js
 npm test -- --runTestsByPath tests/unit/gdocs.test.js
 ```
 
-Result: 62 passed.
+Result: 63 passed.
 
 ```bash
 cargo test --manifest-path rust/Cargo.toml --test integration gdocs -- --nocapture
 ```
 
-Result: 48 passed.
+Result: 49 passed.
 
 Live smoke checks after the fix:
 

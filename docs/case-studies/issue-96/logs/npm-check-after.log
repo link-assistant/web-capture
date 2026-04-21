@@ -72,4 +72,4 @@ All matched files use Prettier code style!
 > @link-assistant/web-capture@1.7.11 check:duplication
 > jscpd .
 
-[3m[90mDetection time:[39m[23m: 0.23ms
+[3m[90mDetection time:[39m[23m: 0.133ms

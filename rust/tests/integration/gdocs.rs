@@ -685,6 +685,38 @@ fn test_render_nested_bold_italic_markers_balanced_issue_96() {
 }
 
 #[test]
+fn test_render_styled_same_target_link_segments_as_one_label_issue_96() {
+    let text = "Link with bold text\n";
+    let start_of = |needle: &str| text.find(needle).expect("needle should exist") + 1;
+    let end_of = |needle: &str| start_of(needle) + needle.len() - 1;
+    let chunks = vec![serde_json::json!({
+        "chunk": [
+            { "ty": "is", "s": text },
+            {
+                "ty": "as",
+                "st": "link",
+                "si": 1,
+                "ei": text.len() - 1,
+                "sm": { "lnks_link": { "ulnk_url": "https://example.com" } }
+            },
+            {
+                "ty": "as",
+                "st": "text",
+                "si": start_of("bold"),
+                "ei": end_of("bold"),
+                "sm": { "ts_bd": true }
+            }
+        ]
+    })];
+    let cid_urls = std::collections::HashMap::<String, String>::new();
+
+    let capture = parse_model_chunks(&chunks, &cid_urls);
+    let markdown = render_captured_document(&capture, "markdown");
+
+    assert_eq!(markdown, "[Link with **bold** text](https://example.com)\n");
+}
+
+#[test]
 fn test_render_consecutive_blockquote_paragraphs_stay_in_one_quote_issue_96() {
     let text = "Quote paragraph one\nQuote paragraph two\n";
     let line_end = |needle: &str| {

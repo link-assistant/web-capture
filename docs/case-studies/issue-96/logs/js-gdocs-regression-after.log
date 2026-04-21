@@ -2,22 +2,22 @@
 > @link-assistant/web-capture@1.7.11 test
 > node --experimental-vm-modules ./node_modules/.bin/jest --runTestsByPath tests/unit/gdocs.test.js
 
-(node:1353741) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(node:1354815) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
 (Use `node --trace-warnings ...` to show where the warning was created)
 PASS tests/unit/gdocs.test.js
   gdocs
     isGoogleDocsUrl
       ✓ returns true for standard Google Docs edit URL (2 ms)
-      ✓ returns true for URL with query parameters
+      ✓ returns true for URL with query parameters (1 ms)
       ✓ returns true for URL without /edit
-      ✓ returns false for non-Google Docs URL
+      ✓ returns false for non-Google Docs URL (1 ms)
       ✓ returns false for Google Sheets URL
       ✓ returns false for empty string
       ✓ returns false for null
       ✓ returns false for undefined
       ✓ returns false for non-string input
     extractDocumentId
-      ✓ extracts document ID from standard URL
+      ✓ extracts document ID from standard URL (1 ms)
       ✓ extracts document ID from URL with query params
       ✓ extracts document ID with hyphens and underscores
       ✓ returns null for non-Google Docs URL (1 ms)
@@ -27,64 +27,65 @@ PASS tests/unit/gdocs.test.js
       ✓ builds HTML export URL
       ✓ builds Markdown export URL
       ✓ builds PDF export URL
-      ✓ builds TXT export URL
+      ✓ builds TXT export URL (1 ms)
       ✓ defaults to html for unknown format
       ✓ defaults to html when format is omitted
       ✓ uses the real document ID from test document
     capture method selection (issue #72)
       ✓ honors explicit browser capture for Google Docs URLs
-      ✓ uses public export for API capture without token (1 ms)
-      ✓ uses Docs REST API for API capture with token
+      ✓ uses public export for API capture without token
+      ✓ uses Docs REST API for API capture with token (1 ms)
     buildEditUrl
       ✓ builds the fresh Google Docs editor URL
     buildDocsApiUrl
       ✓ builds the Google Docs REST API URL
     parseGoogleDocsModelChunks (issue #72)
-      ✓ includes regular and suggested text from DOCS_modelChunk data (1 ms)
+      ✓ includes regular and suggested text from DOCS_modelChunk data (2 ms)
       ✓ accepts individual DOCS_modelChunk items captured from push calls (1 ms)
-      ✓ extracts table cells and suggested images from DOCS_modelChunk data
-      ✓ parses multi-column tables when rows are separated by 0x0a (issue #92 R2) (1 ms)
+      ✓ extracts table cells and suggested images from DOCS_modelChunk data (1 ms)
+      ✓ parses multi-column tables when rows are separated by 0x0a (issue #92 R2)
       ✓ does not create empty columns when Docs emits both 0x1c and 0x0a cell separators (issue #96) (1 ms)
       ✓ numbers ordered list items sequentially (issue #92 R3) (1 ms)
-      ✓ joins consecutive list items with a single newline (issue #92 R4)
+      ✓ joins consecutive list items with a single newline (issue #92 R4) (1 ms)
       ✓ renders model style records for headings, inline formatting, links, lists, blockquotes, rules, and images (1 ms)
-      ✓ keeps nested bold and italic markers balanced (issue #96) (1 ms)
+      ✓ keeps nested bold and italic markers balanced (issue #96)
+      ✓ keeps styled same-target link segments in one link label (issue #96) (1 ms)
       ✓ keeps consecutive blockquote paragraphs in the same quote block (issue #96)
-      ✓ ends rendered markdown with a newline (issue #96) (1 ms)
+      ✓ ends rendered markdown with a newline (issue #96)
     renderDocsApiDocument (issue #72)
       ✓ renders Google Docs REST API paragraphs, tables, and inline images (1 ms)
     captureGoogleDocWithBrowserOrFallback (issue #81)
-      ✓ falls back to public export archive when the editor exposes no model chunks (29 ms)
+      ✓ falls back to public export archive when the editor exposes no model chunks (35 ms)
     GDOCS_EXPORT_FORMATS
       ✓ contains all expected formats
     localizeGoogleDocsModelImages (issue #92 R5)
       ✓ downloads docs-images-rt URLs and rewrites markdown/html (1 ms)
-      ✓ keeps original URL when download fails
+      ✓ keeps original URL when download fails (1 ms)
     preprocessGoogleDocsExportHtml (issue #92 R6)
-      ✓ hoists font-weight:700 spans into <strong> (3 ms)
+      ✓ hoists font-weight:700 spans into <strong> (2 ms)
       ✓ hoists font-style:italic spans into <em> (1 ms)
       ✓ hoists text-decoration:line-through spans into <del> (1 ms)
-      ✓ hoists Google Docs CSS class styles into semantic inline tags (3 ms)
+      ✓ hoists Google Docs CSS class styles into semantic inline tags (2 ms)
       ✓ combines multiple styles on a single span (1 ms)
       ✓ unwraps google.com/url?q= redirect links (1 ms)
       ✓ strips leading empty anchors and numbering span inside headings (1 ms)
       ✓ strips standalone empty anchors before headings (1 ms)
       ✓ turns class-indented Google Docs paragraphs into blockquotes (1 ms)
       ✓ replaces &nbsp; entity and U+00A0 with regular spaces (1 ms)
-      ✓ is a no-op for HTML without Google Docs markers
+      ✓ is a no-op for HTML without Google Docs markers (1 ms)
     extractBase64Images
-      ✓ extracts a single PNG data URI image (1 ms)
-      ✓ extracts multiple images with correct numbering and extensions
+      ✓ extracts a single PNG data URI image
+      ✓ extracts multiple images with correct numbering and extensions (1 ms)
       ✓ returns empty array when no data URI images
       ✓ preserves non-data-URI images
     image extraction pipeline (issue #53)
       ✓ extractBase64Images from HTML produces images with data buffers (2 ms)
       ✓ default markdown mode extracts base64 images to disk (not strip) (2 ms)
-      ✓ keepOriginalLinks strips base64 images
-      ✓ extractBase64ToBuffers produces in-memory buffers for archive (1 ms)
+      ✓ keepOriginalLinks strips base64 images (1 ms)
+      ✓ extractBase64ToBuffers produces in-memory buffers for archive
 
 Test Suites: 1 passed, 1 total
-Tests:       62 passed, 62 total
+Tests:       63 passed, 63 total
 Snapshots:   0 total
-Time:        0.725 s, estimated 1 s
+Time:        0.865 s, estimated 1 s
 Ran all test suites within paths "tests/unit/gdocs.test.js".
