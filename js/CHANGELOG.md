@@ -1,5 +1,13 @@
 # @link-assistant/web-capture
 
+## 1.7.12
+
+### Patch Changes
+
+- ed70bc8: Fix Google Docs browser-model markdown regressions around table separators,
+  blockquote continuation, nested inline markers, final newlines, and
+  public-export style preprocessing.
+
 ## 1.7.11
 
 ### Patch Changes
