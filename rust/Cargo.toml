@@ -1,6 +1,6 @@
 [package]
 name = "web-capture"
-version = "0.3.3"
+version = "0.3.4"
 edition = "2021"
 description = "CLI and microservice to render web pages as HTML, Markdown, or PNG"
 license = "Unlicense"
