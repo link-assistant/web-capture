@@ -1,5 +1,11 @@
 # @link-assistant/web-capture
 
+## 1.7.13
+
+### Patch Changes
+
+- Auto-release unreleased changes
+
 ## 1.7.12
 
 ### Patch Changes

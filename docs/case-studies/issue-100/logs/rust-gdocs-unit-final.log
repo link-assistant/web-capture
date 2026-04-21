@@ -1,52 +1,51 @@
     Blocking waiting for file lock on package cache
     Blocking waiting for file lock on package cache
     Blocking waiting for file lock on package cache
-   Compiling web-capture v0.3.4 (/tmp/gh-issue-solver-1776771484617/rust)
-    Finished `test` profile [unoptimized + debuginfo] target(s) in 3.80s
-     Running tests/integration/mod.rs (target/debug/deps/integration-c1956be393aea961)
+    Blocking waiting for file lock on artifact directory
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 8.37s
+     Running tests/integration/mod.rs (target/debug/deps/integration-48d24d0ce4d9ef44)
 
 running 41 tests
 test gdocs::test_build_edit_url ... ok
-test gdocs::test_build_docs_api_url ... ok
 test gdocs::test_build_export_url ... ok
 test gdocs::test_capture_method_selection_honors_browser_flag ... ok
+test gdocs::test_build_docs_api_url ... ok
 test gdocs::test_create_archive_zip_empty_images ... ok
 test gdocs::test_extract_bearer_token ... ok
 test gdocs::test_create_archive_zip_produces_valid_zip ... ok
-test gdocs::test_is_google_docs_url_invalid ... ok
 test gdocs::test_extract_base64_images_no_images ... ok
-test gdocs::test_extract_document_id ... ok
+test gdocs::test_is_google_docs_url_invalid ... ok
 test gdocs::test_is_google_docs_url_valid ... ok
-test gdocs::test_extract_base64_images_preserves_non_data_images ... ok
-test gdocs::test_extract_base64_images_single ... ok
 test gdocs::test_extract_base64_images_multiple ... ok
+test gdocs::test_extract_document_id ... ok
+test gdocs::test_extract_base64_images_single ... ok
+test gdocs::test_extract_base64_images_preserves_non_data_images ... ok
 test gdocs::test_parse_model_chunks_accepts_individual_model_items ... ok
 test gdocs::test_parse_model_chunks_drops_duplicate_table_separator_empty_cells_issue_96 ... ok
 test gdocs::test_parse_model_chunks_drops_live_gdocs_table_ghost_columns_issue_100 ... ok
-test gdocs::test_parse_model_chunks_includes_suggestions_and_images ... ok
-test gdocs::test_parse_model_chunks_multi_column_table_r2 ... ok
 test gdocs::test_parse_model_chunks_preserves_empty_table_cell_positions_issue_100 ... ok
+test gdocs::test_parse_model_chunks_multi_column_table_r2 ... ok
+test gdocs::test_parse_model_chunks_includes_suggestions_and_images ... ok
 test gdocs::test_parse_model_chunks_renders_style_records ... ok
 test gdocs::test_parse_model_chunks_translates_utf16_positions ... ok
 test gdocs::test_preprocess_exports_converts_class_indented_paragraphs_to_blockquotes_issue_96 ... ok
 test gdocs::test_preprocess_exports_hoists_font_weight_r6 ... ok
+test gdocs::test_preprocess_exports_hoists_strikethrough_r6 ... ok
+test gdocs::test_preprocess_exports_hoists_font_style_italic_r6 ... ok
 test gdocs::test_preprocess_exports_noop_for_regular_html_r6 ... ok
 test gdocs::test_preprocess_exports_hoists_google_docs_css_class_styles_issue_96 ... ok
-test gdocs::test_preprocess_exports_hoists_font_style_italic_r6 ... ok
-test gdocs::test_preprocess_exports_hoists_strikethrough_r6 ... ok
 test gdocs::test_render_captured_markdown_ends_with_newline_issue_96 ... ok
 test gdocs::test_render_consecutive_blockquote_paragraphs_stay_in_one_quote_issue_96 ... ok
 test gdocs::test_render_docs_api_document_paragraphs_tables_and_images ... ok
 test gdocs::test_render_list_items_joined_with_single_newline_r4 ... ok
 test gdocs::test_render_nested_bold_italic_markers_balanced_issue_96 ... ok
-test gdocs::test_render_nested_ordered_lists_keep_type_and_tight_spacing_issue_100 ... ok
 test gdocs::test_preprocess_exports_replaces_nbsp_r6 ... ok
-test gdocs::test_render_ordered_list_sequential_numbering_r3 ... ok
-test gdocs::test_render_styled_same_target_link_segments_as_one_label_issue_96 ... ok
-test gdocs::test_localize_rendered_remote_images_for_archive_downloads_model_images_issue_100 ... ok
 test gdocs::test_preprocess_exports_strips_heading_numbering_r6 ... ok
+test gdocs::test_render_nested_ordered_lists_keep_type_and_tight_spacing_issue_100 ... ok
+test gdocs::test_render_styled_same_target_link_segments_as_one_label_issue_96 ... ok
+test gdocs::test_render_ordered_list_sequential_numbering_r3 ... ok
 test gdocs::test_preprocess_exports_strips_standalone_empty_anchors_issue_96 ... ok
 test gdocs::test_preprocess_exports_unwraps_redirect_links_r6 ... ok
+test gdocs::test_localize_rendered_remote_images_for_archive_downloads_model_images_issue_100 ... ok
 
 test result: ok. 41 passed; 0 failed; 0 ignored; 0 measured; 44 filtered out; finished in 0.06s
-

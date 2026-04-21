@@ -1,5 +1,5 @@
 
-> @link-assistant/web-capture@1.7.12 lint
+> @link-assistant/web-capture@1.7.13 lint
 > eslint .
 
 
@@ -57,4 +57,3 @@
   91:8  warning  Function 'verifyMarkdownContent' has a complexity of 51. Maximum allowed is 15        complexity
 
 ✖ 31 problems (0 errors, 31 warnings)
-
