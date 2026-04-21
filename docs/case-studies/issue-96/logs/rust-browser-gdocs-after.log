@@ -1,0 +1,19 @@
+   Compiling web-capture v0.3.3 (/tmp/gh-issue-solver-1776760404302/rust)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 3.94s
+     Running `rust/target/debug/web-capture 'https://docs.google.com/document/d/1f5zI2xOFpKa90v0GjamO_t7lqSdzMlaM/edit' --capture browser -f markdown --verbose -o docs/case-studies/issue-96/reference/rust-browser-gdocs-after.md`
+2026-04-21T09:04:40.172620Z DEBUG web_capture: starting capture url=https://docs.google.com/document/d/1f5zI2xOFpKa90v0GjamO_t7lqSdzMlaM/edit format=markdown capture=browser has_api_token=false
+2026-04-21T09:04:40.173737Z DEBUG web_capture: selected Google Docs capture method url=https://docs.google.com/document/d/1f5zI2xOFpKa90v0GjamO_t7lqSdzMlaM/edit method=BrowserModel format=markdown model_format=true has_api_token=false
+2026-04-21T09:04:40.174003Z DEBUG web_capture::gdocs: capturing Google Doc editor model with a real browser document_id=1f5zI2xOFpKa90v0GjamO_t7lqSdzMlaM edit_url=https://docs.google.com/document/d/1f5zI2xOFpKa90v0GjamO_t7lqSdzMlaM/edit
+2026-04-21T09:04:40.174022Z  INFO web_capture::browser: Rendering HTML for URL: https://docs.google.com/document/d/1f5zI2xOFpKa90v0GjamO_t7lqSdzMlaM/edit
+2026-04-21T09:04:40.174717Z DEBUG web_capture::browser: launching headless Chrome for DOM capture chrome=/usr/bin/google-chrome user_data_dir=/tmp/web-capture-chrome-1340407-1776762280174377949-0 args=["--headless=new", "--disable-gpu", "--disable-extensions", "--disable-dev-shm-usage", "--disable-background-networking", "--disable-component-update", "--disable-default-apps", "--disable-sync", "--metrics-recording-only", "--no-default-browser-check", "--no-first-run", "--no-sandbox", "--user-data-dir=/tmp/web-capture-chrome-1340407-1776762280174377949-0", "--dump-dom", "--timeout=30000", "--virtual-time-budget=8000", "--run-all-compositor-stages-before-draw", "--window-size=1280,800", "https://docs.google.com/document/d/1f5zI2xOFpKa90v0GjamO_t7lqSdzMlaM/edit"]
+2026-04-21T09:04:55.208118Z  WARN web_capture::gdocs: real-browser Google Docs capture failed; falling back to editor HTTP fetch document_id=1f5zI2xOFpKa90v0GjamO_t7lqSdzMlaM error=Browser error: Timed out waiting for headless Chrome to render https://docs.google.com/document/d/1f5zI2xOFpKa90v0GjamO_t7lqSdzMlaM/edit
+2026-04-21T09:04:55.208192Z  INFO web_capture::html: Fetching HTML from URL: https://docs.google.com/document/d/1f5zI2xOFpKa90v0GjamO_t7lqSdzMlaM/edit
+2026-04-21T09:04:55.248340Z DEBUG reqwest::connect: starting new connection: https://docs.google.com/
+2026-04-21T09:04:55.249773Z DEBUG hyper_util::client::legacy::connect::http: connecting to 142.251.13.138:443
+2026-04-21T09:04:55.259586Z DEBUG hyper_util::client::legacy::connect::http: connected to 142.251.13.138:443
+2026-04-21T09:04:57.489797Z DEBUG hyper_util::client::legacy::pool: pooling idle connection for ("https", docs.google.com)
+2026-04-21T09:04:57.490471Z  INFO web_capture::html: Successfully fetched HTML (396121 bytes)
+2026-04-21T09:04:57.490605Z DEBUG web_capture::gdocs: fetched Google Docs editor HTML through HTTP fallback document_id=1f5zI2xOFpKa90v0GjamO_t7lqSdzMlaM html_bytes=396121
+2026-04-21T09:04:57.506122Z DEBUG web_capture::gdocs: extracted Google Docs editor model chunks document_id=1f5zI2xOFpKa90v0GjamO_t7lqSdzMlaM html_bytes=396121 chunks=1
+2026-04-21T09:04:57.526583Z  INFO web_capture::gdocs: parsed Google Docs editor model document_id=1f5zI2xOFpKa90v0GjamO_t7lqSdzMlaM chunks=1 cid_urls=4 blocks=121 tables=5 images=26 text_bytes=3323
+Google Doc (browser-model) saved to: docs/case-studies/issue-96/reference/rust-browser-gdocs-after.md

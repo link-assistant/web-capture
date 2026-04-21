@@ -1,0 +1,169 @@
+{
+  "_id": "@link-assistant/web-capture@1.7.11",
+  "_rev": "13-fcac2237f0a352221a41cf074f2e3ba9",
+  "name": "@link-assistant/web-capture",
+  "dist-tags": {
+    "latest": "1.7.11"
+  },
+  "versions": [
+    "1.1.2",
+    "1.4.2",
+    "1.7.1",
+    "1.7.2",
+    "1.7.3",
+    "1.7.4",
+    "1.7.5",
+    "1.7.6",
+    "1.7.7",
+    "1.7.8",
+    "1.7.9",
+    "1.7.10",
+    "1.7.11"
+  ],
+  "time": {
+    "created": "2025-12-22T15:43:32.225Z",
+    "modified": "2026-04-20T22:29:07.203Z",
+    "1.1.2": "2025-12-22T15:43:32.533Z",
+    "1.4.2": "2026-04-13T08:10:44.927Z",
+    "1.7.1": "2026-04-15T06:34:32.123Z",
+    "1.7.2": "2026-04-15T14:46:07.620Z",
+    "1.7.3": "2026-04-16T07:02:14.877Z",
+    "1.7.4": "2026-04-16T08:53:48.952Z",
+    "1.7.5": "2026-04-16T10:57:31.454Z",
+    "1.7.6": "2026-04-16T11:58:49.432Z",
+    "1.7.7": "2026-04-19T19:19:55.119Z",
+    "1.7.8": "2026-04-20T10:20:52.560Z",
+    "1.7.9": "2026-04-20T15:58:08.137Z",
+    "1.7.10": "2026-04-20T19:38:44.553Z",
+    "1.7.11": "2026-04-20T22:29:05.890Z"
+  },
+  "bugs": {
+    "url": "https://github.com/link-assistant/web-capture/issues"
+  },
+  "license": "Unlicense",
+  "homepage": "https://github.com/link-assistant/web-capture#readme",
+  "keywords": [
+    "render",
+    "markdown",
+    "screenshot",
+    "microservice"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/link-assistant/web-capture.git"
+  },
+  "description": "CLI and microservice to render web pages as HTML, Markdown, or PNG",
+  "maintainers": [
+    "konard <drakonard@gmail.com>"
+  ],
+  "readmeFilename": "README.md",
+  "version": "1.7.11",
+  "main": "src/index.js",
+  "bin": {
+    "web-capture": "bin/web-capture.js"
+  },
+  "scripts": {
+    "start": "docker compose up -d",
+    "dev": "nodemon bin/web-capture.js -- --serve",
+    "test": "node --experimental-vm-modules ./node_modules/.bin/jest",
+    "test:watch": "node --experimental-vm-modules ./node_modules/.bin/jest --watch",
+    "test:e2e:process": "node --experimental-vm-modules ./node_modules/.bin/jest tests/e2e.process.test.js",
+    "test:e2e:docker": "node --experimental-vm-modules ./node_modules/.bin/jest tests/e2e.docker.test.js",
+    "test:e2e": "yarn test:e2e:process && yarn test:e2e:docker",
+    "test:all": "yarn build && yarn test && yarn test:e2e",
+    "build": "docker compose down && docker compose build && yarn start",
+    "examples:python": "python3 examples/python/html_download.py && python3 examples/python/markdown_download.py && python3 examples/python/image_download.py",
+    "examples:javascript": "node examples/js/html_download.js && node examples/js/markdown_download.js && node examples/js/image_download.js",
+    "examples": "yarn build && yarn examples:javascript && yarn examples:python",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "check:duplication": "jscpd .",
+    "check": "npm run lint && npm run format:check && npm run check:duplication",
+    "prepare": "husky || true",
+    "changeset": "changeset",
+    "changeset:version": "node ../scripts/changeset-version.mjs",
+    "changeset:publish": "changeset publish",
+    "changeset:status": "changeset status --since=origin/main"
+  },
+  "dependencies": {
+    "archiver": "^7.0.1",
+    "browser-commander": "^0.8.0",
+    "cheerio": "^1.0.0",
+    "docx": "^9.6.1",
+    "express": "^4.18.2",
+    "he": "^1.2.0",
+    "iconv-lite": "^0.6.3",
+    "lino-arguments": "^0.3.0",
+    "log-lazy": "^1.0.4",
+    "node-fetch": "^2.7.0",
+    "playwright": "^1.49.0",
+    "puppeteer": "^24.8.2",
+    "puppeteer-core": "^24.40.0",
+    "turndown": "^7.1.1",
+    "turndown-plugin-gfm": "^1.0.2"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.24.0",
+    "@babel/preset-env": "^7.24.0",
+    "@changesets/cli": "^2.29.7",
+    "@types/archiver": "^7.0.0",
+    "babel-jest": "^29.7.0",
+    "eslint": "^9.38.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-prettier": "^5.5.4",
+    "get-port": "^7.1.0",
+    "husky": "^9.1.7",
+    "jest": "^29.7.0",
+    "jscpd": "^4.0.5",
+    "lint-staged": "^16.2.6",
+    "nock": "^13.5.4",
+    "prettier": "^3.6.2",
+    "supertest": "^6.3.4"
+  },
+  "type": "module",
+  "engines": {
+    "node": ">=22.0.0 <23.0.0"
+  },
+  "lint-staged": {
+    "*.{js,mjs,cjs}": [
+      "eslint --fix --max-warnings 0",
+      "prettier --write",
+      "prettier --check"
+    ],
+    "*.md": [
+      "prettier --write",
+      "prettier --check"
+    ]
+  },
+  "gitHead": "da3b371f74b482cab5366e084a922a27c32e3a90",
+  "_nodeVersion": "24.14.1",
+  "_npmVersion": "11.11.0",
+  "dist": {
+    "integrity": "sha512-veUtDaPBFQ0xnfd3btwbp3A9cFZxidOS2d1oQeWdJ+7p9HzgLJldS6OQEr1aI0e1vtFCWOjdK8EwU3lZI92mBQ==",
+    "shasum": "fd4a2219990e1f1158d2514f52e93b087ef5cfc2",
+    "tarball": "https://registry.npmjs.org/@link-assistant/web-capture/-/web-capture-1.7.11.tgz",
+    "fileCount": 78,
+    "unpackedSize": 423554,
+    "attestations": {
+      "url": "https://registry.npmjs.org/-/npm/v1/attestations/@link-assistant%2fweb-capture@1.7.11",
+      "provenance": {
+        "predicateType": "https://slsa.dev/provenance/v1"
+      }
+    },
+    "signatures": [
+      {
+        "keyid": "SHA256:DhQ8wR5APBvFHLF/+Tc+AYvPOdTpcIDqOhxsBHRwC7U",
+        "sig": "MEQCIGQ3cnrrZmvRvYdEjRUlX/8ZqoHw/uNf3S1sK8JRYS15AiBZc9+LGlLQ3NEkBXqxteu2GDG734DtQRulmFowxM9zrg=="
+      }
+    ]
+  },
+  "_npmUser": "GitHub Actions <npm-oidc-no-reply@github.com>",
+  "directories": {},
+  "_npmOperationalInternal": {
+    "host": "s3://npm-registry-packages-npm-production",
+    "tmp": "tmp/web-capture_1.7.11_1776724145738_0.20700529372565435"
+  },
+  "_hasShrinkwrap": false
+}
