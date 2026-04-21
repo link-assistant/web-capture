@@ -280,6 +280,16 @@ async fn live_browser_model_capture_of_public_document_preserves_markdown_featur
     assert!(result
         .markdown
         .contains("[Regular link](https://example.com)"));
+    assert!(result.markdown.contains("| Feature | Supported | Notes |"));
+    assert!(!result.markdown.contains("| Feature |  | Supported |"));
+    assert!(result.markdown.contains("|  | x |  |"));
+    assert!(result.markdown.contains("1. Parent item 1"));
+    assert!(result.markdown.contains("    1. Child item 1.1"));
+    assert!(result.markdown.contains("        1. Grandchild item 1.2.1"));
+    assert!(!result.markdown.contains("- Child item 1.1"));
+    assert!(!result.markdown.contains("1. Parent item 1\n\n"));
     assert!(result.markdown.contains("![Blue rectangle]("));
+    assert!(result.markdown.contains("docs-images-rt/"));
+    assert!(result.remote_images.len() >= 4);
     assert!(result.markdown.contains("---"));
 }

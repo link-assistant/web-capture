@@ -1,0 +1,21 @@
+    Blocking waiting for file lock on package cache
+    Blocking waiting for file lock on package cache
+    Blocking waiting for file lock on package cache
+    Blocking waiting for file lock on artifact directory
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 3.84s
+     Running tests/integration/mod.rs (target/debug/deps/integration-c1956be393aea961)
+
+running 8 tests
+Skipping live Google Docs browser-model capture test; set GDOCS_INTEGRATION=1 to enable.
+test gdocs_public_doc::capture_method_selection_is_locked_to_issue_72_semantics ... ok
+test gdocs_public_doc::live_browser_model_capture_of_public_document_preserves_markdown_features ... ok
+Skipping live Google Docs capture test; set GDOCS_INTEGRATION=1 to enable.
+test gdocs_public_doc::live_capture_of_public_document_preserves_every_section ... ok
+test gdocs_public_doc::public_document_id_is_extracted_from_every_url_variation ... ok
+test gdocs_public_doc::public_document_is_recognized_across_every_url_variation ... ok
+test gdocs_public_doc::reference_markdown_embeds_the_four_test_images ... ok
+test gdocs_public_doc::reference_markdown_contains_every_feature_section ... ok
+test gdocs_public_doc::urls_for_the_public_document_are_built_with_the_expected_shape ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 77 filtered out; finished in 0.00s
+

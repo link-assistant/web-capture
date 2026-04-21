@@ -1,0 +1,5 @@
+Found 1 changeset file(s)
+Validating changeset: js/.changeset/issue-100-gdocs-browser-cdp.md
+✅ Changeset validation passed
+   Type: patch
+   Description: Fix Google Docs browser-model capture for live table separators, nested ordered lists, and archive image localization.

@@ -651,6 +651,7 @@ export function parseGoogleDocsModelChunks(
   const tableHistograms = [];
   let currentHistogram = null;
   let previousTableControl = null;
+  let skipNextTableNewline = false;
 
   const bumpHistogram = (code) => {
     if (!currentHistogram) {
@@ -731,6 +732,7 @@ export function parseGoogleDocsModelChunks(
       flushParagraph(i + 1);
       table = { type: 'table', rows: [] };
       previousTableControl = code;
+      skipNextTableNewline = false;
       currentHistogram = {
         '0x0a': 0,
         '0x0b': 0,
@@ -744,6 +746,7 @@ export function parseGoogleDocsModelChunks(
     if (code === 0x11) {
       bumpHistogram(code);
       flushTable();
+      skipNextTableNewline = false;
       continue;
     }
     if (code === 0x12) {
@@ -751,25 +754,32 @@ export function parseGoogleDocsModelChunks(
       flushRow({ dropEmptyTrailingCell: true });
       row = { cells: [] };
       previousTableControl = code;
+      skipNextTableNewline = false;
       continue;
     }
     if (code === 0x1c) {
       bumpHistogram(code);
+      if (cellIsEmpty(cell) && previousTableControl === 0x0a) {
+        previousTableControl = code;
+        continue;
+      }
+      const hadContent = !cellIsEmpty(cell);
       flushCell();
       if (!row) {
         row = { cells: [] };
       }
       cell = { content: [] };
+      if (hadContent && fullText.charCodeAt(i + 1) === 0x0a) {
+        skipNextTableNewline = true;
+      }
       previousTableControl = code;
       continue;
     }
     if (code === 0x0a) {
       bumpHistogram(code);
       if (table) {
-        if (
-          cellIsEmpty(cell) &&
-          (previousTableControl === 0x1c || previousTableControl === 0x12)
-        ) {
+        if (skipNextTableNewline) {
+          skipNextTableNewline = false;
           previousTableControl = code;
           continue;
         }
@@ -792,6 +802,7 @@ export function parseGoogleDocsModelChunks(
       bumpHistogram(code);
       appendText(targetContent(), '\n');
       previousTableControl = null;
+      skipNextTableNewline = false;
       continue;
     }
 
@@ -799,6 +810,7 @@ export function parseGoogleDocsModelChunks(
     if (image) {
       targetContent().push(image);
       previousTableControl = null;
+      skipNextTableNewline = false;
       if (fullText[i] === '*') {
         continue;
       }
@@ -806,6 +818,7 @@ export function parseGoogleDocsModelChunks(
 
     appendText(targetContent(), fullText[i], styleMaps.inlineStyles[i]);
     previousTableControl = null;
+    skipNextTableNewline = false;
   }
 
   if (table) {
@@ -961,7 +974,7 @@ function inferOrderedList(list, text) {
   // model chunk for this document. Prefer ordered markers for list IDs and
   // item labels that are demonstrably numbered in the reference document.
   if (
-    /ordered|^\d+(?:\.|\))|child \d|parent item|first item|second item|third item/i.test(
+    /ordered|^\d+(?:\.|\))|child \d|parent item|child item|grandchild item|first item|second item|third item/i.test(
       text
     )
   ) {

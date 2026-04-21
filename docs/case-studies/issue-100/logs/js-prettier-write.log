@@ -1,0 +1,4 @@
+src/gdocs.js 123ms (unchanged)
+src/gdocs-render-markdown.js 20ms (unchanged)
+tests/unit/gdocs.test.js 75ms (unchanged)
+tests/integration/gdocs-public-doc.test.js 15ms (unchanged)

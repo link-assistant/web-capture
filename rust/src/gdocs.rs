@@ -28,24 +28,117 @@
 //! }
 //! ```
 
+use async_tungstenite::tokio::{connect_async, ConnectStream};
+use async_tungstenite::tungstenite::Message;
+use async_tungstenite::WebSocketStream;
 use base64::Engine;
+use futures::{SinkExt, StreamExt};
 use regex::Regex;
 use serde_json::Value;
 use std::collections::HashMap;
 use std::fmt::Write as _;
 use std::hash::BuildHasher;
 use std::io::Write;
+use std::process::Stdio;
 use std::sync::OnceLock;
-use std::time::Duration;
+use std::time::{Duration, Instant};
+use tokio::io::{AsyncBufReadExt, BufReader};
+use tokio::process::{Child, Command};
 use tracing::{debug, info, warn};
 
 use crate::WebCaptureError;
 
 const GDOCS_EXPORT_BASE: &str = "https://docs.google.com/document/d";
 const GDOCS_API_BASE: &str = "https://docs.googleapis.com/v1/documents";
-#[cfg(not(windows))]
-const GDOCS_EDITOR_BROWSER_TIMEOUT: Duration = Duration::from_secs(15);
-const GDOCS_EDITOR_HTTP_TIMEOUT: Duration = Duration::from_secs(20);
+const GDOCS_USER_AGENT: &str =
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36";
+const GDOCS_EDITOR_MODEL_WAIT: Duration = Duration::from_secs(30);
+const GDOCS_BROWSER_LAUNCH_TIMEOUT: Duration = Duration::from_secs(20);
+
+type CdpWebSocket = WebSocketStream<ConnectStream>;
+
+const GDOCS_MODEL_CAPTURE_INIT_SCRIPT: &str = r"
+window.__captured_chunks = [];
+const captureChunk = (value) => {
+  if (!value) {
+    return;
+  }
+  if (Array.isArray(value)) {
+    for (const item of value) {
+      captureChunk(item);
+    }
+    return;
+  }
+  try {
+    window.__captured_chunks.push(JSON.parse(JSON.stringify(value)));
+  } catch {
+    window.__captured_chunks.push(value);
+  }
+};
+const wrapChunkArray = (value) => {
+  if (!Array.isArray(value) || value.__webCaptureDocsModelWrapped) {
+    return value;
+  }
+  const originalPush = value.push;
+  Object.defineProperty(value, '__webCaptureDocsModelWrapped', {
+    value: true,
+    enumerable: false,
+  });
+  Object.defineProperty(value, 'push', {
+    value(...items) {
+      for (const item of items) {
+        captureChunk(item);
+      }
+      return originalPush.apply(this, items);
+    },
+    writable: true,
+    configurable: true,
+  });
+  for (const item of value) {
+    captureChunk(item);
+  }
+  return value;
+};
+Object.defineProperty(window, 'DOCS_modelChunk', {
+  set(value) {
+    captureChunk(value);
+    window.__DOCS_modelChunk_latest = wrapChunkArray(value);
+  },
+  get() {
+    return window.__DOCS_modelChunk_latest;
+  },
+  configurable: false,
+});
+";
+
+const GDOCS_MODEL_EXTRACT_SCRIPT: &str = r#"() => {
+  const chunks = [...(window.__captured_chunks || [])];
+  if (
+    window.DOCS_modelChunk &&
+    chunks.length === 0 &&
+    !chunks.includes(window.DOCS_modelChunk)
+  ) {
+    chunks.push(window.DOCS_modelChunk);
+  }
+  const cidUrlMap = {};
+  const scripts = document.querySelectorAll('script');
+  for (const script of scripts) {
+    const text = script.textContent || '';
+    if (!text.includes('docs-images-rt')) {
+      continue;
+    }
+    const regex =
+      /"([A-Za-z0-9_-]{20,})"\s*:\s*"(https:\/\/docs\.google\.com\/docs-images-rt\/[^"]+)"/g;
+    let match;
+    while ((match = regex.exec(text)) !== null) {
+      cidUrlMap[match[1]] = match[2]
+        .replace(/\\u003d/g, '=')
+        .replace(/\\u0026/g, '&')
+        .replace(/\\\//g, '/');
+    }
+  }
+  return { chunks, cidUrlMap };
+}"#;
 
 fn gdocs_url_pattern() -> &'static Regex {
     static PATTERN: OnceLock<Regex> = OnceLock::new();
@@ -89,6 +182,23 @@ pub struct GDocsRenderedResult {
     pub document_id: String,
     /// Source URL used for capture.
     pub export_url: String,
+    /// Remote images exposed by the editor model, used for archive localization.
+    pub remote_images: Vec<RemoteImage>,
+}
+
+/// Remote image reference extracted from browser-model capture.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct RemoteImage {
+    /// Original image URL.
+    pub url: String,
+    /// Image alt text.
+    pub alt: String,
+}
+
+#[derive(Debug, Clone)]
+struct BrowserModelData {
+    chunks: Vec<Value>,
+    cid_urls: HashMap<String, String>,
 }
 
 /// Parsed Google Docs model/document capture.
@@ -735,6 +845,7 @@ pub async fn fetch_google_doc_from_docs_api(
         text: rendered.text,
         document_id,
         export_url: api_url,
+        remote_images: Vec::new(),
     })
 }
 
@@ -761,26 +872,26 @@ pub async fn fetch_google_doc_from_model(
         edit_url = %edit_url,
         "capturing Google Doc editor model with a real browser"
     );
-    let html = fetch_google_doc_editor_html(&edit_url, &document_id).await?;
-    let chunks = extract_model_chunks_from_html(&html);
+    let model_data = fetch_google_doc_editor_model_with_cdp(&edit_url, &document_id).await?;
+    let chunks = model_data.chunks;
     debug!(
         document_id = %document_id,
-        html_bytes = html.len(),
         chunks = chunks.len(),
-        "extracted Google Docs editor model chunks"
+        cid_urls = model_data.cid_urls.len(),
+        "extracted Google Docs editor model chunks through CDP"
     );
     if chunks.is_empty() {
         return Err(WebCaptureError::ParseError(
-            "Google Docs editor HTML did not contain DOCS_modelChunk data".to_string(),
+            "Google Docs editor page did not expose DOCS_modelChunk data".to_string(),
         ));
     }
 
-    let cid_urls = extract_cid_urls_from_html(&html);
-    let capture = parse_model_chunks(&chunks, &cid_urls);
+    let capture = parse_model_chunks(&chunks, &model_data.cid_urls);
+    let remote_images = remote_images_from_capture(&capture);
     info!(
         document_id = %document_id,
         chunks = chunks.len(),
-        cid_urls = cid_urls.len(),
+        cid_urls = model_data.cid_urls.len(),
         blocks = capture.blocks.len(),
         tables = capture.tables.len(),
         images = capture.images.len(),
@@ -794,64 +905,348 @@ pub async fn fetch_google_doc_from_model(
         text: render_captured_document(&capture, "txt"),
         document_id,
         export_url: edit_url,
+        remote_images,
     })
 }
 
-async fn fetch_google_doc_editor_html(edit_url: &str, document_id: &str) -> crate::Result<String> {
-    #[cfg(windows)]
-    {
-        warn!(
-            document_id = %document_id,
-            "using Google Docs editor HTTP fetch on Windows to avoid headless Chrome hangs in hosted CI"
-        );
-        fetch_google_doc_editor_html_via_http(edit_url, document_id).await
-    }
-
-    #[cfg(not(windows))]
-    {
-        match crate::browser::render_html_with_timeout(edit_url, GDOCS_EDITOR_BROWSER_TIMEOUT).await
-        {
-            Ok(html) => {
-                let chunks = extract_model_chunks_from_html(&html);
-                if !chunks.is_empty() {
-                    return Ok(html);
-                }
-                warn!(
-                    document_id = %document_id,
-                    html_bytes = html.len(),
-                    "real-browser Google Docs capture returned no model chunks; falling back to editor HTTP fetch"
-                );
-            }
-            Err(error) => {
-                warn!(
-                    document_id = %document_id,
-                    error = %error,
-                    "real-browser Google Docs capture failed; falling back to editor HTTP fetch"
-                );
-            }
-        }
-
-        fetch_google_doc_editor_html_via_http(edit_url, document_id).await
-    }
-}
-
-async fn fetch_google_doc_editor_html_via_http(
+async fn fetch_google_doc_editor_model_with_cdp(
     edit_url: &str,
     document_id: &str,
-) -> crate::Result<String> {
-    let html = tokio::time::timeout(GDOCS_EDITOR_HTTP_TIMEOUT, crate::html::fetch_html(edit_url))
-        .await
-        .map_err(|_| {
-            WebCaptureError::FetchError(format!(
-                "Timed out fetching Google Docs editor HTML for document {document_id}"
-            ))
-        })??;
+) -> crate::Result<BrowserModelData> {
+    let chrome = crate::browser::find_chrome_executable().ok_or_else(|| {
+        WebCaptureError::BrowserError(
+            "Chrome/Chromium executable was not found. Set WEB_CAPTURE_CHROME, CHROME_PATH, or GOOGLE_CHROME_BIN.".to_string(),
+        )
+    })?;
+    let user_data_dir = crate::browser::temporary_user_data_dir();
+    std::fs::create_dir_all(&user_data_dir)?;
+
     debug!(
         document_id = %document_id,
-        html_bytes = html.len(),
-        "fetched Google Docs editor HTML through HTTP fallback"
+        chrome = %chrome.display(),
+        user_data_dir = %user_data_dir.display(),
+        edit_url = %edit_url,
+        "launching headless Chrome CDP session for Google Docs model capture"
     );
-    Ok(html)
+
+    let mut child = launch_cdp_chrome(&chrome, &user_data_dir)?;
+    let capture_result = async {
+        let ws_url = wait_for_devtools_ws_url(&mut child).await?;
+        let (mut ws, _) = connect_async(&ws_url).await.map_err(|error| {
+            WebCaptureError::BrowserError(format!(
+                "Failed to connect to Chrome DevTools websocket: {error}"
+            ))
+        })?;
+        let mut next_id = 0u64;
+        let session_id = navigate_google_docs_cdp_page(&mut ws, &mut next_id, edit_url).await?;
+        wait_for_google_docs_model_chunks(&mut ws, &mut next_id, &session_id, document_id).await
+    }
+    .await;
+
+    if let Err(error) = child.kill().await {
+        debug!(
+            document_id = %document_id,
+            error = %error,
+            "failed to kill Chrome CDP browser process"
+        );
+    }
+    let _ = child.wait().await;
+    let _ = std::fs::remove_dir_all(&user_data_dir);
+
+    capture_result
+}
+
+async fn navigate_google_docs_cdp_page(
+    ws: &mut CdpWebSocket,
+    next_id: &mut u64,
+    edit_url: &str,
+) -> crate::Result<String> {
+    let target = cdp_send(
+        ws,
+        next_id,
+        None,
+        "Target.createTarget",
+        serde_json::json!({ "url": "about:blank" }),
+    )
+    .await?;
+    let target_id = target
+        .get("targetId")
+        .and_then(Value::as_str)
+        .ok_or_else(|| {
+            WebCaptureError::BrowserError(
+                "Chrome DevTools Target.createTarget did not return targetId".to_string(),
+            )
+        })?
+        .to_string();
+    let attached = cdp_send(
+        ws,
+        next_id,
+        None,
+        "Target.attachToTarget",
+        serde_json::json!({ "targetId": target_id, "flatten": true }),
+    )
+    .await?;
+    let session_id = attached
+        .get("sessionId")
+        .and_then(Value::as_str)
+        .ok_or_else(|| {
+            WebCaptureError::BrowserError(
+                "Chrome DevTools Target.attachToTarget did not return sessionId".to_string(),
+            )
+        })?
+        .to_string();
+
+    cdp_send(
+        ws,
+        next_id,
+        Some(&session_id),
+        "Page.enable",
+        serde_json::json!({}),
+    )
+    .await?;
+    cdp_send(
+        ws,
+        next_id,
+        Some(&session_id),
+        "Runtime.enable",
+        serde_json::json!({}),
+    )
+    .await?;
+    cdp_send(
+        ws,
+        next_id,
+        Some(&session_id),
+        "Page.addScriptToEvaluateOnNewDocument",
+        serde_json::json!({ "source": GDOCS_MODEL_CAPTURE_INIT_SCRIPT }),
+    )
+    .await?;
+    cdp_send(
+        ws,
+        next_id,
+        Some(&session_id),
+        "Page.navigate",
+        serde_json::json!({ "url": edit_url }),
+    )
+    .await?;
+
+    Ok(session_id)
+}
+
+async fn wait_for_google_docs_model_chunks(
+    ws: &mut CdpWebSocket,
+    next_id: &mut u64,
+    session_id: &str,
+    document_id: &str,
+) -> crate::Result<BrowserModelData> {
+    let started = Instant::now();
+    let mut last_chunks = 0usize;
+    let mut last_cid_urls = 0usize;
+
+    while started.elapsed() < GDOCS_EDITOR_MODEL_WAIT {
+        let result = cdp_send(
+            ws,
+            next_id,
+            Some(session_id),
+            "Runtime.evaluate",
+            serde_json::json!({
+                "expression": format!("({GDOCS_MODEL_EXTRACT_SCRIPT})()"),
+                "returnByValue": true,
+                "awaitPromise": true
+            }),
+        )
+        .await?;
+        if let Some(exception) = result.get("exceptionDetails") {
+            return Err(WebCaptureError::BrowserError(format!(
+                "Google Docs model extraction script failed: {exception}"
+            )));
+        }
+        let value = result
+            .pointer("/result/value")
+            .cloned()
+            .unwrap_or(Value::Null);
+        let model_data = browser_model_data_from_value(&value);
+        last_chunks = model_data.chunks.len();
+        last_cid_urls = model_data.cid_urls.len();
+        if !model_data.chunks.is_empty() {
+            debug!(
+                document_id = %document_id,
+                chunks = model_data.chunks.len(),
+                cid_urls = model_data.cid_urls.len(),
+                elapsed_ms = started.elapsed().as_millis(),
+                "captured Google Docs model chunks through CDP Runtime.evaluate"
+            );
+            return Ok(model_data);
+        }
+        tokio::time::sleep(Duration::from_millis(250)).await;
+    }
+
+    Err(WebCaptureError::BrowserError(format!(
+        "Timed out waiting for Google Docs DOCS_modelChunk data for document {document_id} after {} ms (last chunks={last_chunks}, cid_urls={last_cid_urls})",
+        GDOCS_EDITOR_MODEL_WAIT.as_millis()
+    )))
+}
+
+fn launch_cdp_chrome(
+    chrome: &std::path::Path,
+    user_data_dir: &std::path::Path,
+) -> crate::Result<Child> {
+    let mut command = Command::new(chrome);
+    command
+        .args([
+            "--headless=new",
+            "--disable-gpu",
+            "--disable-extensions",
+            "--disable-dev-shm-usage",
+            "--disable-background-networking",
+            "--disable-component-update",
+            "--disable-default-apps",
+            "--disable-sync",
+            "--metrics-recording-only",
+            "--no-default-browser-check",
+            "--no-first-run",
+            "--no-sandbox",
+            "--remote-debugging-port=0",
+            "--window-size=1280,800",
+        ])
+        .arg(format!("--user-data-dir={}", user_data_dir.display()))
+        .arg(format!("--user-agent={GDOCS_USER_AGENT}"))
+        .stderr(Stdio::piped())
+        .stdout(Stdio::null())
+        .kill_on_drop(true);
+
+    command.spawn().map_err(|error| {
+        WebCaptureError::BrowserError(format!("Failed to launch Chrome CDP browser: {error}"))
+    })
+}
+
+async fn wait_for_devtools_ws_url(child: &mut Child) -> crate::Result<String> {
+    let stderr = child.stderr.take().ok_or_else(|| {
+        WebCaptureError::BrowserError("Chrome CDP process did not expose stderr".to_string())
+    })?;
+    let mut lines = BufReader::new(stderr).lines();
+    let started = Instant::now();
+
+    while started.elapsed() < GDOCS_BROWSER_LAUNCH_TIMEOUT {
+        let line = tokio::time::timeout(Duration::from_millis(250), lines.next_line()).await;
+        match line {
+            Ok(Ok(Some(line))) => {
+                if let Some((_, ws_url)) = line.split_once("DevTools listening on ") {
+                    return Ok(ws_url.trim().to_string());
+                }
+            }
+            Ok(Ok(None)) => {
+                break;
+            }
+            Ok(Err(error)) => {
+                return Err(WebCaptureError::BrowserError(format!(
+                    "Failed to read Chrome CDP stderr: {error}"
+                )));
+            }
+            Err(_) => {}
+        }
+    }
+
+    Err(WebCaptureError::BrowserError(format!(
+        "Timed out waiting for Chrome DevTools websocket URL after {} ms",
+        GDOCS_BROWSER_LAUNCH_TIMEOUT.as_millis()
+    )))
+}
+
+async fn cdp_send(
+    ws: &mut CdpWebSocket,
+    next_id: &mut u64,
+    session_id: Option<&str>,
+    method: &str,
+    params: Value,
+) -> crate::Result<Value> {
+    *next_id += 1;
+    let id = *next_id;
+    let mut message = serde_json::json!({
+        "id": id,
+        "method": method,
+        "params": params
+    });
+    if let Some(session_id) = session_id {
+        message["sessionId"] = Value::String(session_id.to_string());
+    }
+
+    ws.send(Message::Text(message.to_string()))
+        .await
+        .map_err(|error| {
+            WebCaptureError::BrowserError(format!(
+                "Failed to send Chrome DevTools command {method}: {error}"
+            ))
+        })?;
+
+    while let Some(message) = ws.next().await {
+        let message = message.map_err(|error| {
+            WebCaptureError::BrowserError(format!(
+                "Failed to read Chrome DevTools response for {method}: {error}"
+            ))
+        })?;
+        if !message.is_text() {
+            continue;
+        }
+        let text = message.to_text().map_err(|error| {
+            WebCaptureError::BrowserError(format!(
+                "Chrome DevTools response for {method} was not text: {error}"
+            ))
+        })?;
+        let value = serde_json::from_str::<Value>(text).map_err(|error| {
+            WebCaptureError::ParseError(format!(
+                "Failed to parse Chrome DevTools response for {method}: {error}; response={text}"
+            ))
+        })?;
+        if value.get("id").and_then(Value::as_u64) != Some(id) {
+            continue;
+        }
+        if let Some(error) = value.get("error") {
+            return Err(WebCaptureError::BrowserError(format!(
+                "Chrome DevTools command {method} failed: {error}"
+            )));
+        }
+        return Ok(value.get("result").cloned().unwrap_or(Value::Null));
+    }
+
+    Err(WebCaptureError::BrowserError(format!(
+        "Chrome DevTools websocket closed before response for {method}"
+    )))
+}
+
+fn browser_model_data_from_value(value: &Value) -> BrowserModelData {
+    let chunks = value
+        .get("chunks")
+        .and_then(Value::as_array)
+        .cloned()
+        .unwrap_or_default();
+    let cid_urls = value
+        .get("cidUrlMap")
+        .and_then(Value::as_object)
+        .map(|map| {
+            map.iter()
+                .filter_map(|(key, value)| value.as_str().map(|url| (key.clone(), url.to_string())))
+                .collect::<HashMap<_, _>>()
+        })
+        .unwrap_or_default();
+    BrowserModelData { chunks, cid_urls }
+}
+
+fn remote_images_from_capture(capture: &CapturedDocument) -> Vec<RemoteImage> {
+    capture
+        .images
+        .iter()
+        .filter_map(|node| match node {
+            ContentNode::Image {
+                url: Some(url),
+                alt,
+                ..
+            } => Some(RemoteImage {
+                url: url.clone(),
+                alt: alt.clone(),
+            }),
+            ContentNode::Image { .. } | ContentNode::Text { .. } => None,
+        })
+        .collect()
 }
 
 /// Render a Google Docs REST API document value.
@@ -1232,6 +1627,7 @@ pub fn parse_model_chunks<S: BuildHasher>(
     let mut row: Option<TableRow> = None;
     let mut cell: Option<TableCell> = None;
     let mut previous_table_control: Option<u32> = None;
+    let mut skip_next_table_newline = false;
 
     for (idx, ch) in chars.iter().copied().enumerate() {
         match ch as u32 {
@@ -1239,29 +1635,39 @@ pub fn parse_model_chunks<S: BuildHasher>(
                 flush_paragraph(&mut paragraph, &mut blocks, Some(idx + 1), &style_maps);
                 table = Some(TableBlock::default());
                 previous_table_control = Some(0x10);
+                skip_next_table_newline = false;
             }
             0x11 => {
                 flush_table(&mut table, &mut row, &mut cell, &mut tables, &mut blocks);
                 previous_table_control = None;
+                skip_next_table_newline = false;
             }
             0x12 => {
                 flush_row(&mut row, &mut cell, table.as_mut(), true);
                 row = Some(TableRow::default());
                 previous_table_control = Some(0x12);
+                skip_next_table_newline = false;
             }
             0x1c => {
+                if cell.as_ref().is_none_or(cell_is_empty) && previous_table_control == Some(0x0a) {
+                    previous_table_control = Some(0x1c);
+                    continue;
+                }
+                let had_content = cell.as_ref().is_some_and(|cell| !cell_is_empty(cell));
                 flush_cell(&mut row, &mut cell, false);
                 if row.is_none() {
                     row = Some(TableRow::default());
                 }
                 cell = Some(TableCell::default());
+                if had_content && chars.get(idx + 1).is_some_and(|ch| *ch as u32 == 0x0a) {
+                    skip_next_table_newline = true;
+                }
                 previous_table_control = Some(0x1c);
             }
             0x0a => {
                 if table.is_some() {
-                    if cell.as_ref().is_none_or(cell_is_empty)
-                        && matches!(previous_table_control, Some(0x1c | 0x12))
-                    {
+                    if skip_next_table_newline {
+                        skip_next_table_newline = false;
                         previous_table_control = Some(0x0a);
                         continue;
                     }
@@ -1291,11 +1697,13 @@ pub fn parse_model_chunks<S: BuildHasher>(
                         .unwrap_or_default(),
                 );
                 previous_table_control = None;
+                skip_next_table_newline = false;
             }
             _ => {
                 if let Some(image) = images_by_pos.get(&idx).cloned() {
                     push_to_current(&mut paragraph, &mut row, &mut cell, table.is_some(), image);
                     previous_table_control = None;
+                    skip_next_table_newline = false;
                     if ch == '*' {
                         continue;
                     }
@@ -1313,6 +1721,7 @@ pub fn parse_model_chunks<S: BuildHasher>(
                         .unwrap_or_default(),
                 );
                 previous_table_control = None;
+                skip_next_table_newline = false;
             }
         }
     }
@@ -1411,6 +1820,7 @@ fn infer_ordered_list(list: &ListMeta, text: &str) -> bool {
         && (text.contains("ordered")
             || text.contains("Parent item")
             || text.contains("Child item")
+            || text.contains("Grandchild item")
             || text.contains("First item")
             || text.contains("Second item")
             || text.contains("Third item")
@@ -1637,9 +2047,7 @@ fn render_blocks_markdown(blocks: &[CapturedBlock]) -> String {
             continue;
         }
         let prev = &rendered[idx - 1];
-        let same_list =
-            block.list_id.is_some() && prev.list_id.is_some() && block.list_id == prev.list_id;
-        if same_list {
+        if block.list_id.is_some() && prev.list_id.is_some() {
             out.push('\n');
         } else if block.quote && prev.quote {
             out.push_str("\n>\n");
@@ -1693,7 +2101,7 @@ fn render_paragraph_markdown(
                 }
             },
             |list| {
-                let indent = "  ".repeat(list.level);
+                let indent = "    ".repeat(list.level);
                 let marker = if list.ordered {
                     format!("{}.", ordered_index.unwrap_or(1))
                 } else {
@@ -1992,84 +2400,6 @@ fn escape_markdown_table_cell(value: &str) -> String {
     value.replace('|', "\\|").replace('\n', "<br>")
 }
 
-fn extract_cid_urls_from_html(html: &str) -> HashMap<String, String> {
-    let pattern = Regex::new(
-        r#""([A-Za-z0-9_-]{20,})"\s*:\s*"(https://docs\.google\.com/docs-images-rt/[^"]+)""#,
-    )
-    .unwrap();
-    pattern
-        .captures_iter(html)
-        .filter_map(|caps| {
-            Some((
-                caps.get(1)?.as_str().to_string(),
-                caps.get(2)?
-                    .as_str()
-                    .replace(r"\u003d", "=")
-                    .replace(r"\u0026", "&")
-                    .replace(r"\/", "/"),
-            ))
-        })
-        .collect()
-}
-
-fn extract_model_chunks_from_html(html: &str) -> Vec<Value> {
-    let mut chunks = Vec::new();
-    let mut offset = 0;
-    while let Some(relative) = html[offset..].find("DOCS_modelChunk") {
-        let marker = offset + relative;
-        let Some(start) = html[marker..].find(['{', '[']).map(|idx| marker + idx) else {
-            break;
-        };
-        let Some(end) = find_json_end(html, start) else {
-            offset = start + 1;
-            continue;
-        };
-        if let Ok(value) = serde_json::from_str::<Value>(&html[start..end]) {
-            chunks.push(value);
-        }
-        offset = end;
-    }
-    chunks
-}
-
-fn find_json_end(input: &str, start: usize) -> Option<usize> {
-    let mut chars = input[start..].char_indices();
-    let (_, opening) = chars.next()?;
-    let closing = match opening {
-        '{' => '}',
-        '[' => ']',
-        _ => return None,
-    };
-    let mut depth = 0usize;
-    let mut in_string = false;
-    let mut escaped = false;
-
-    for (relative, ch) in input[start..].char_indices() {
-        if in_string {
-            if escaped {
-                escaped = false;
-            } else if ch == '\\' {
-                escaped = true;
-            } else if ch == '"' {
-                in_string = false;
-            }
-            continue;
-        }
-
-        if ch == '"' {
-            in_string = true;
-        } else if ch == opening {
-            depth += 1;
-        } else if ch == closing {
-            depth = depth.saturating_sub(1);
-            if depth == 0 {
-                return Some(start + relative + ch.len_utf8());
-            }
-        }
-    }
-    None
-}
-
 /// Extract a Bearer token from an Authorization header value.
 ///
 /// Returns `None` if the header is not a valid Bearer token.
@@ -2107,6 +2437,123 @@ pub struct GDocsArchiveResult {
     pub document_id: String,
     /// Export URL used
     pub export_url: String,
+}
+
+/// Build a self-contained archive result from browser-model rendered output.
+///
+/// `DOCS_modelChunk` image nodes point at `docs-images-rt` URLs. Archive mode
+/// downloads those URLs into `images/` and rewrites markdown/html references to
+/// local paths so Rust browser capture matches the JavaScript archive path.
+///
+/// # Errors
+///
+/// Returns an error if the HTTP client cannot be created or an image response
+/// body cannot be read. Individual failed image downloads are logged and left
+/// out of the archive, matching the JS behavior.
+pub async fn localize_rendered_remote_images_for_archive(
+    rendered: &GDocsRenderedResult,
+) -> crate::Result<GDocsArchiveResult> {
+    let client = reqwest::Client::builder().build().map_err(|error| {
+        WebCaptureError::FetchError(format!("Failed to create image download client: {error}"))
+    })?;
+    let mut seen = HashMap::new();
+    let mut images = Vec::new();
+    let mut next_index = 1usize;
+
+    for image in &rendered.remote_images {
+        if seen.contains_key(&image.url) {
+            continue;
+        }
+        let filename = remote_image_filename(&image.url, next_index);
+        next_index += 1;
+        seen.insert(image.url.clone(), filename.clone());
+
+        match client
+            .get(&image.url)
+            .header("User-Agent", GDOCS_USER_AGENT)
+            .header("Accept", "image/*,*/*;q=0.8")
+            .send()
+            .await
+        {
+            Ok(response) if response.status().is_success() => {
+                let mime_type = response
+                    .headers()
+                    .get(reqwest::header::CONTENT_TYPE)
+                    .and_then(|value| value.to_str().ok())
+                    .map_or_else(|| mime_type_for_filename(&filename), ToString::to_string);
+                let data = response.bytes().await.map_err(|error| {
+                    WebCaptureError::FetchError(format!(
+                        "Failed to read Google Docs image {}: {error}",
+                        image.url
+                    ))
+                })?;
+                debug!(
+                    url = %image.url,
+                    filename = %filename,
+                    bytes = data.len(),
+                    mime_type = %mime_type,
+                    "downloaded Google Docs browser-model archive image"
+                );
+                images.push(ExtractedImage {
+                    filename,
+                    data: data.to_vec(),
+                    mime_type,
+                });
+            }
+            Ok(response) => {
+                warn!(
+                    url = %image.url,
+                    status = response.status().as_u16(),
+                    "failed to download Google Docs browser-model archive image"
+                );
+            }
+            Err(error) => {
+                warn!(
+                    url = %image.url,
+                    error = %error,
+                    "failed to download Google Docs browser-model archive image"
+                );
+            }
+        }
+    }
+
+    let mut markdown = rendered.markdown.clone();
+    let mut html = rendered.html.clone();
+    for (url, filename) in seen {
+        let local_path = format!("images/{filename}");
+        markdown = markdown.replace(&url, &local_path);
+        html = html.replace(&url, &local_path);
+    }
+
+    Ok(GDocsArchiveResult {
+        html,
+        markdown,
+        images,
+        document_id: rendered.document_id.clone(),
+        export_url: rendered.export_url.clone(),
+    })
+}
+
+fn remote_image_filename(url: &str, index: usize) -> String {
+    let ext = crate::localize_images::get_extension_from_url(url);
+    format!("image-{index:02}{ext}")
+}
+
+fn mime_type_for_filename(filename: &str) -> String {
+    match filename
+        .rsplit('.')
+        .next()
+        .unwrap_or("png")
+        .to_lowercase()
+        .as_str()
+    {
+        "jpg" | "jpeg" => "image/jpeg",
+        "gif" => "image/gif",
+        "webp" => "image/webp",
+        "svg" => "image/svg+xml",
+        _ => "image/png",
+    }
+    .to_string()
 }
 
 fn base64_image_pattern() -> &'static Regex {

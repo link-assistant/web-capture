@@ -308,6 +308,72 @@ describe('gdocs', () => {
       expect(markdown).not.toContain('| A |  | B |');
     });
 
+    it('does not create ghost columns from the live Google Docs 0x0a+0x1c table separator pattern (issue #100)', () => {
+      const chunks = [
+        {
+          chunk: [
+            {
+              ty: 'is',
+              s: `${String.fromCharCode(0x10)}${String.fromCharCode(
+                0x12
+              )}${String.fromCharCode(0x1c)}Feature\n${String.fromCharCode(
+                0x1c
+              )}Supported\n${String.fromCharCode(0x1c)}Notes\n${String.fromCharCode(
+                0x12
+              )}${String.fromCharCode(0x1c)}Bold\n${String.fromCharCode(
+                0x1c
+              )}Yes\n${String.fromCharCode(
+                0x1c
+              )}Using double asterisks\n${String.fromCharCode(0x11)}`,
+            },
+          ],
+        },
+      ];
+      const capture = parseGoogleDocsModelChunks(chunks);
+      const markdown = renderGoogleDocsCapture(capture, 'markdown');
+
+      expect(capture.tables[0].rows.map((row) => row.cells.length)).toEqual([
+        3, 3,
+      ]);
+      expect(markdown).toContain('| Feature | Supported | Notes |');
+      expect(markdown).toContain('| Bold | Yes | Using double asterisks |');
+      expect(markdown).not.toContain('| Feature |  | Supported |');
+    });
+
+    it('preserves intentionally empty table cells without shifting following cells (issue #100)', () => {
+      const chunks = [
+        {
+          chunk: [
+            {
+              ty: 'is',
+              s: `${String.fromCharCode(0x10)}${String.fromCharCode(
+                0x12
+              )}${String.fromCharCode(0x1c)}A\n${String.fromCharCode(
+                0x1c
+              )}B\n${String.fromCharCode(0x1c)}C\n${String.fromCharCode(
+                0x12
+              )}${String.fromCharCode(0x1c)}\n${String.fromCharCode(
+                0x1c
+              )}x\n${String.fromCharCode(0x1c)}\n${String.fromCharCode(
+                0x12
+              )}${String.fromCharCode(0x1c)}y\n${String.fromCharCode(
+                0x1c
+              )}\n${String.fromCharCode(0x1c)}z\n${String.fromCharCode(0x11)}`,
+            },
+          ],
+        },
+      ];
+      const capture = parseGoogleDocsModelChunks(chunks);
+      const markdown = renderGoogleDocsCapture(capture, 'markdown');
+
+      expect(capture.tables[0].rows.map((row) => row.cells.length)).toEqual([
+        3, 3, 3,
+      ]);
+      expect(markdown).toContain('| A | B | C |');
+      expect(markdown).toContain('|  | x |  |');
+      expect(markdown).toContain('| y |  | z |');
+    });
+
     it('numbers ordered list items sequentially (issue #92 R3)', () => {
       // Three list items sharing the same list id should render as 1. 2. 3.
       const text = 'First item\nSecond item\nThird item\n';
@@ -385,6 +451,92 @@ describe('gdocs', () => {
 
       expect(markdown).not.toMatch(/First item\n\n2\. Second item/u);
       expect(markdown).toMatch(/First item\n2\. Second item/u);
+    });
+
+    it('keeps nested ordered lists ordered and tight when Google Docs uses separate list ids per level (issue #100)', () => {
+      const text = [
+        'Parent item 1',
+        'Child item 1.1',
+        'Child item 1.2',
+        'Grandchild item 1.2.1',
+        'Grandchild item 1.2.2',
+        'Child item 1.3',
+        'Parent item 2',
+        '',
+      ].join('\n');
+      const lineEnd = (needle) => text.indexOf('\n', text.indexOf(needle)) + 1;
+      const chunks = [
+        {
+          chunk: [
+            { ty: 'is', s: text },
+            {
+              ty: 'as',
+              st: 'list',
+              si: lineEnd('Parent item 1'),
+              ei: lineEnd('Parent item 1'),
+              sm: { ls_id: 'kix.list.8' },
+            },
+            {
+              ty: 'as',
+              st: 'list',
+              si: lineEnd('Child item 1.1'),
+              ei: lineEnd('Child item 1.1'),
+              sm: { ls_id: 'kix.list.9', ls_nest: 1 },
+            },
+            {
+              ty: 'as',
+              st: 'list',
+              si: lineEnd('Child item 1.2'),
+              ei: lineEnd('Child item 1.2'),
+              sm: { ls_id: 'kix.list.9', ls_nest: 1 },
+            },
+            {
+              ty: 'as',
+              st: 'list',
+              si: lineEnd('Grandchild item 1.2.1'),
+              ei: lineEnd('Grandchild item 1.2.1'),
+              sm: { ls_id: 'kix.list.10', ls_nest: 2 },
+            },
+            {
+              ty: 'as',
+              st: 'list',
+              si: lineEnd('Grandchild item 1.2.2'),
+              ei: lineEnd('Grandchild item 1.2.2'),
+              sm: { ls_id: 'kix.list.10', ls_nest: 2 },
+            },
+            {
+              ty: 'as',
+              st: 'list',
+              si: lineEnd('Child item 1.3'),
+              ei: lineEnd('Child item 1.3'),
+              sm: { ls_id: 'kix.list.9', ls_nest: 1 },
+            },
+            {
+              ty: 'as',
+              st: 'list',
+              si: lineEnd('Parent item 2'),
+              ei: lineEnd('Parent item 2'),
+              sm: { ls_id: 'kix.list.8' },
+            },
+          ],
+        },
+      ];
+      const capture = parseGoogleDocsModelChunks(chunks);
+      const markdown = renderGoogleDocsCapture(capture, 'markdown');
+
+      expect(markdown).toContain(
+        [
+          '1. Parent item 1',
+          '    1. Child item 1.1',
+          '    2. Child item 1.2',
+          '        1. Grandchild item 1.2.1',
+          '        2. Grandchild item 1.2.2',
+          '    3. Child item 1.3',
+          '2. Parent item 2',
+        ].join('\n')
+      );
+      expect(markdown).not.toContain('Parent item 1\n\n');
+      expect(markdown).not.toContain('- Child item 1.1');
     });
 
     it('renders model style records for headings, inline formatting, links, lists, blockquotes, rules, and images', () => {

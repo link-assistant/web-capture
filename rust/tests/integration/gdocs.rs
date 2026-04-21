@@ -1,9 +1,10 @@
 use web_capture::gdocs::{
     build_docs_api_url, build_edit_url, build_export_url, create_archive_zip,
     extract_base64_images, extract_bearer_token, extract_document_id, is_google_docs_url,
-    parse_model_chunks, preprocess_google_docs_export_html, render_captured_document,
-    render_docs_api_document, select_capture_method, ExtractedImage, GDocsArchiveResult,
-    GDocsCaptureMethod,
+    localize_rendered_remote_images_for_archive, parse_model_chunks,
+    preprocess_google_docs_export_html, render_captured_document, render_docs_api_document,
+    select_capture_method, ExtractedImage, GDocsArchiveResult, GDocsCaptureMethod,
+    GDocsRenderedResult, RemoteImage,
 };
 
 #[test]
@@ -480,6 +481,36 @@ fn test_create_archive_zip_produces_valid_zip() {
     assert!(found_image, "ZIP must contain images/image-01.png");
 }
 
+#[tokio::test]
+async fn test_localize_rendered_remote_images_for_archive_downloads_model_images_issue_100() {
+    let png_bytes = vec![137, 80, 78, 71, 13, 10, 26, 10];
+    let server = ImageServer::start(png_bytes.clone()).await;
+    let image_url = format!("{}/image", server.url.trim_end_matches('/'));
+    let rendered = GDocsRenderedResult {
+        markdown: format!("![pic]({image_url})\n"),
+        html: format!(r#"<img src="{image_url}" alt="pic">"#),
+        text: "[pic]".to_string(),
+        document_id: "doc".to_string(),
+        export_url: "https://docs.google.com/document/d/doc/edit".to_string(),
+        remote_images: vec![RemoteImage {
+            url: image_url,
+            alt: "pic".to_string(),
+        }],
+    };
+
+    let archive = localize_rendered_remote_images_for_archive(&rendered)
+        .await
+        .unwrap();
+    server.shutdown().await;
+
+    assert_eq!(archive.images.len(), 1);
+    assert_eq!(archive.images[0].filename, "image-01.png");
+    assert_eq!(archive.images[0].data, png_bytes);
+    assert!(archive.markdown.contains("images/image-01.png"));
+    assert!(archive.html.contains("images/image-01.png"));
+    assert!(!archive.markdown.contains("http://"));
+}
+
 #[test]
 fn test_parse_model_chunks_multi_column_table_r2() {
     // Inside a table, a bare '\n' separates cells within the current row.
@@ -546,6 +577,85 @@ fn test_parse_model_chunks_drops_duplicate_table_separator_empty_cells_issue_96(
     assert!(
         !markdown.contains("| A |  | B |"),
         "markdown should not contain duplicate empty columns: {markdown}"
+    );
+}
+
+#[test]
+fn test_parse_model_chunks_drops_live_gdocs_table_ghost_columns_issue_100() {
+    let text = format!(
+        "{open}{new_row}{cell}Feature\n{cell}Supported\n{cell}Notes\n{new_row}{cell}Bold\n{cell}Yes\n{cell}Using double asterisks\n{close}",
+        open = '\u{10}',
+        close = '\u{11}',
+        new_row = '\u{12}',
+        cell = '\u{1c}',
+    );
+    let chunks = vec![serde_json::json!({
+        "chunk": [
+            { "ty": "is", "s": text }
+        ]
+    })];
+    let cid_urls = std::collections::HashMap::<String, String>::new();
+
+    let capture = parse_model_chunks(&chunks, &cid_urls);
+    let markdown = render_captured_document(&capture, "markdown");
+
+    assert_eq!(
+        capture.tables[0]
+            .rows
+            .iter()
+            .map(|row| row.cells.len())
+            .collect::<Vec<_>>(),
+        vec![3, 3]
+    );
+    assert!(
+        markdown.contains("| Feature | Supported | Notes |"),
+        "markdown was: {markdown}"
+    );
+    assert!(
+        markdown.contains("| Bold | Yes | Using double asterisks |"),
+        "markdown was: {markdown}"
+    );
+    assert!(
+        !markdown.contains("| Feature |  | Supported |"),
+        "markdown should not contain ghost columns: {markdown}"
+    );
+}
+
+#[test]
+fn test_parse_model_chunks_preserves_empty_table_cell_positions_issue_100() {
+    let text = format!(
+        "{open}{new_row}{cell}A\n{cell}B\n{cell}C\n{new_row}{cell}\n{cell}x\n{cell}\n{new_row}{cell}y\n{cell}\n{cell}z\n{close}",
+        open = '\u{10}',
+        close = '\u{11}',
+        new_row = '\u{12}',
+        cell = '\u{1c}',
+    );
+    let chunks = vec![serde_json::json!({
+        "chunk": [
+            { "ty": "is", "s": text }
+        ]
+    })];
+    let cid_urls = std::collections::HashMap::<String, String>::new();
+
+    let capture = parse_model_chunks(&chunks, &cid_urls);
+    let markdown = render_captured_document(&capture, "markdown");
+
+    assert_eq!(
+        capture.tables[0]
+            .rows
+            .iter()
+            .map(|row| row.cells.len())
+            .collect::<Vec<_>>(),
+        vec![3, 3, 3]
+    );
+    assert!(
+        markdown.contains("| A | B | C |"),
+        "markdown was: {markdown}"
+    );
+    assert!(markdown.contains("|  | x |  |"), "markdown was: {markdown}");
+    assert!(
+        markdown.contains("| y |  | z |"),
+        "markdown was: {markdown}"
     );
 }
 
@@ -646,6 +756,98 @@ fn test_render_list_items_joined_with_single_newline_r4() {
     assert!(
         !markdown.contains("- Alpha\n\n- Beta"),
         "list items should not have a blank line between them; markdown was: {markdown}"
+    );
+}
+
+#[test]
+fn test_render_nested_ordered_lists_keep_type_and_tight_spacing_issue_100() {
+    let text = [
+        "Parent item 1",
+        "Child item 1.1",
+        "Child item 1.2",
+        "Grandchild item 1.2.1",
+        "Grandchild item 1.2.2",
+        "Child item 1.3",
+        "Parent item 2",
+        "",
+    ]
+    .join("\n");
+    let line_end = |needle: &str| {
+        let start = text.find(needle).expect("needle should exist");
+        start + text[start..].find('\n').expect("line should end") + 1
+    };
+    let chunks = vec![serde_json::json!({
+        "chunk": [
+            { "ty": "is", "s": text },
+            {
+                "ty": "as",
+                "st": "list",
+                "si": line_end("Parent item 1"),
+                "ei": line_end("Parent item 1"),
+                "sm": { "ls_id": "kix.list.8" }
+            },
+            {
+                "ty": "as",
+                "st": "list",
+                "si": line_end("Child item 1.1"),
+                "ei": line_end("Child item 1.1"),
+                "sm": { "ls_id": "kix.list.9", "ls_nest": 1 }
+            },
+            {
+                "ty": "as",
+                "st": "list",
+                "si": line_end("Child item 1.2"),
+                "ei": line_end("Child item 1.2"),
+                "sm": { "ls_id": "kix.list.9", "ls_nest": 1 }
+            },
+            {
+                "ty": "as",
+                "st": "list",
+                "si": line_end("Grandchild item 1.2.1"),
+                "ei": line_end("Grandchild item 1.2.1"),
+                "sm": { "ls_id": "kix.list.10", "ls_nest": 2 }
+            },
+            {
+                "ty": "as",
+                "st": "list",
+                "si": line_end("Grandchild item 1.2.2"),
+                "ei": line_end("Grandchild item 1.2.2"),
+                "sm": { "ls_id": "kix.list.10", "ls_nest": 2 }
+            },
+            {
+                "ty": "as",
+                "st": "list",
+                "si": line_end("Child item 1.3"),
+                "ei": line_end("Child item 1.3"),
+                "sm": { "ls_id": "kix.list.9", "ls_nest": 1 }
+            },
+            {
+                "ty": "as",
+                "st": "list",
+                "si": line_end("Parent item 2"),
+                "ei": line_end("Parent item 2"),
+                "sm": { "ls_id": "kix.list.8" }
+            }
+        ]
+    })];
+    let cid_urls = std::collections::HashMap::<String, String>::new();
+
+    let capture = parse_model_chunks(&chunks, &cid_urls);
+    let markdown = render_captured_document(&capture, "markdown");
+
+    assert!(
+        markdown.contains(
+            "1. Parent item 1\n    1. Child item 1.1\n    2. Child item 1.2\n        1. Grandchild item 1.2.1\n        2. Grandchild item 1.2.2\n    3. Child item 1.3\n2. Parent item 2"
+        ),
+        "markdown was: {markdown}"
+    );
+    assert!(
+        !markdown.contains("Parent item 1\n\n"),
+        "nested list should not contain blank lines: {markdown}"
+    );
+    assert!(
+        !markdown.contains("- Child item 1.1"),
+        "nested ordered children should not render as bullets: {markdown}"
     );
 }
 
@@ -877,4 +1079,54 @@ fn test_create_archive_zip_empty_images() {
     let reader = std::io::Cursor::new(&zip_bytes);
     let zip = zip::ZipArchive::new(reader).unwrap();
     assert_eq!(zip.len(), 2); // document.md + document.html only
+}
+
+struct ImageServer {
+    url: String,
+    shutdown: tokio::sync::oneshot::Sender<()>,
+    handle: tokio::task::JoinHandle<()>,
+}
+
+impl ImageServer {
+    async fn start(body: Vec<u8>) -> Self {
+        let listener = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
+        let addr = listener.local_addr().unwrap();
+        let (shutdown, mut shutdown_rx) = tokio::sync::oneshot::channel::<()>();
+        let handle = tokio::spawn(async move {
+            loop {
+                tokio::select! {
+                    _ = &mut shutdown_rx => break,
+                    accepted = listener.accept() => {
+                        let Ok((mut stream, _)) = accepted else {
+                            break;
+                        };
+                        let body = body.clone();
+                        tokio::spawn(async move {
+                            use tokio::io::{AsyncReadExt, AsyncWriteExt};
+
+                            let mut request = [0_u8; 1024];
+                            let _ = stream.read(&mut request).await;
+                            let headers = format!(
+                                "HTTP/1.1 200 OK\r\nContent-Type: image/png\r\nContent-Length: {}\r\nConnection: close\r\n\r\n",
+                                body.len()
+                            );
+                            let _ = stream.write_all(headers.as_bytes()).await;
+                            let _ = stream.write_all(&body).await;
+                        });
+                    }
+                }
+            }
+        });
+
+        Self {
+            url: format!("http://{addr}"),
+            shutdown,
+            handle,
+        }
+    }
+
+    async fn shutdown(self) {
+        let _ = self.shutdown.send(());
+        let _ = self.handle.await;
+    }
 }

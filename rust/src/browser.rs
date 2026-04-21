@@ -155,7 +155,7 @@ fn common_chrome_args(user_data_dir: &Path) -> Vec<String> {
     ]
 }
 
-fn find_chrome_executable() -> Option<PathBuf> {
+pub(crate) fn find_chrome_executable() -> Option<PathBuf> {
     for env_var in [
         "WEB_CAPTURE_CHROME",
         "CHROME_PATH",
@@ -216,7 +216,7 @@ fn find_on_path(name: &str) -> Option<PathBuf> {
     None
 }
 
-fn temporary_user_data_dir() -> PathBuf {
+pub(crate) fn temporary_user_data_dir() -> PathBuf {
     let nonce = SystemTime::now()
         .duration_since(UNIX_EPOCH)
         .map_or(0, |duration| duration.as_nanos());

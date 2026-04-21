@@ -1,0 +1,173 @@
+
+> @link-assistant/web-capture@1.7.12 test
+> node --experimental-vm-modules ./node_modules/.bin/jest --runTestsByPath tests/unit/gdocs.test.js --runInBand
+
+(node:1559582) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+FAIL tests/unit/gdocs.test.js
+  gdocs
+    isGoogleDocsUrl
+      ✓ returns true for standard Google Docs edit URL (2 ms)
+      ✓ returns true for URL with query parameters (1 ms)
+      ✓ returns true for URL without /edit (1 ms)
+      ✓ returns false for non-Google Docs URL
+      ✓ returns false for Google Sheets URL
+      ✓ returns false for empty string (1 ms)
+      ✓ returns false for null
+      ✓ returns false for undefined
+      ✓ returns false for non-string input
+    extractDocumentId
+      ✓ extracts document ID from standard URL
+      ✓ extracts document ID from URL with query params
+      ✓ extracts document ID with hyphens and underscores
+      ✓ returns null for non-Google Docs URL
+      ✓ returns null for empty string
+      ✓ returns null for null input
+    buildExportUrl
+      ✓ builds HTML export URL
+      ✓ builds Markdown export URL
+      ✓ builds PDF export URL
+      ✓ builds TXT export URL
+      ✓ defaults to html for unknown format (1 ms)
+      ✓ defaults to html when format is omitted
+      ✓ uses the real document ID from test document
+    capture method selection (issue #72)
+      ✓ honors explicit browser capture for Google Docs URLs
+      ✓ uses public export for API capture without token
+      ✓ uses Docs REST API for API capture with token (2 ms)
+    buildEditUrl
+      ✓ builds the fresh Google Docs editor URL
+    buildDocsApiUrl
+      ✓ builds the Google Docs REST API URL
+    parseGoogleDocsModelChunks (issue #72)
+      ✓ includes regular and suggested text from DOCS_modelChunk data (1 ms)
+      ✓ accepts individual DOCS_modelChunk items captured from push calls
+      ✓ extracts table cells and suggested images from DOCS_modelChunk data (1 ms)
+      ✓ parses multi-column tables when rows are separated by 0x0a (issue #92 R2) (1 ms)
+      ✓ does not create empty columns when Docs emits both 0x1c and 0x0a cell separators (issue #96)
+      ✕ does not create ghost columns from the live Google Docs 0x0a+0x1c table separator pattern (issue #100) (4 ms)
+      ✕ preserves intentionally empty table cells without shifting following cells (issue #100) (2 ms)
+      ✓ numbers ordered list items sequentially (issue #92 R3) (2 ms)
+      ✓ joins consecutive list items with a single newline (issue #92 R4)
+      ✕ keeps nested ordered lists ordered and tight when Google Docs uses separate list ids per level (issue #100) (2 ms)
+      ✓ renders model style records for headings, inline formatting, links, lists, blockquotes, rules, and images (13 ms)
+      ✓ keeps nested bold and italic markers balanced (issue #96) (1 ms)
+      ✓ keeps styled same-target link segments in one link label (issue #96)
+      ✓ keeps consecutive blockquote paragraphs in the same quote block (issue #96) (1 ms)
+      ✓ ends rendered markdown with a newline (issue #96)
+    renderDocsApiDocument (issue #72)
+      ✓ renders Google Docs REST API paragraphs, tables, and inline images (2 ms)
+    captureGoogleDocWithBrowserOrFallback (issue #81)
+      ✓ falls back to public export archive when the editor exposes no model chunks (42 ms)
+    GDOCS_EXPORT_FORMATS
+      ✓ contains all expected formats
+    localizeGoogleDocsModelImages (issue #92 R5)
+      ✓ downloads docs-images-rt URLs and rewrites markdown/html (2 ms)
+      ✓ keeps original URL when download fails
+    preprocessGoogleDocsExportHtml (issue #92 R6)
+      ✓ hoists font-weight:700 spans into <strong> (3 ms)
+      ✓ hoists font-style:italic spans into <em> (1 ms)
+      ✓ hoists text-decoration:line-through spans into <del>
+      ✓ hoists Google Docs CSS class styles into semantic inline tags (2 ms)
+      ✓ combines multiple styles on a single span (1 ms)
+      ✓ unwraps google.com/url?q= redirect links (2 ms)
+      ✓ strips leading empty anchors and numbering span inside headings (1 ms)
+      ✓ strips standalone empty anchors before headings (1 ms)
+      ✓ turns class-indented Google Docs paragraphs into blockquotes (1 ms)
+      ✓ replaces &nbsp; entity and U+00A0 with regular spaces (1 ms)
+      ✓ is a no-op for HTML without Google Docs markers (1 ms)
+    extractBase64Images
+      ✓ extracts a single PNG data URI image
+      ✓ extracts multiple images with correct numbering and extensions
+      ✓ returns empty array when no data URI images
+      ✓ preserves non-data-URI images
+    image extraction pipeline (issue #53)
+      ✓ extractBase64Images from HTML produces images with data buffers (1 ms)
+      ✓ default markdown mode extracts base64 images to disk (not strip) (2 ms)
+      ✓ keepOriginalLinks strips base64 images (1 ms)
+      ✓ extractBase64ToBuffers produces in-memory buffers for archive (1 ms)
+
+  ● gdocs › parseGoogleDocsModelChunks (issue #72) › does not create ghost columns from the live Google Docs 0x0a+0x1c table separator pattern (issue #100)
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 2
+    + Received  + 2
+
+      Array [
+    -   3,
+    -   3,
+    +   5,
+    +   5,
+      ]
+
+      333 |       const markdown = renderGoogleDocsCapture(capture, 'markdown');
+      334 |
+    > 335 |       expect(capture.tables[0].rows.map((row) => row.cells.length)).toEqual([
+          |                                                                     ^
+      336 |         3, 3,
+      337 |       ]);
+      338 |       expect(markdown).toContain('| Feature | Supported | Notes |');
+
+      at Object.toEqual (tests/unit/gdocs.test.js:335:69)
+
+  ● gdocs › parseGoogleDocsModelChunks (issue #72) › preserves intentionally empty table cells without shifting following cells (issue #100)
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 2
+    + Received  + 2
+
+      Array [
+    -   3,
+    -   3,
+    +   5,
+        3,
+    +   4,
+      ]
+
+      367 |       const markdown = renderGoogleDocsCapture(capture, 'markdown');
+      368 |
+    > 369 |       expect(capture.tables[0].rows.map((row) => row.cells.length)).toEqual([
+          |                                                                     ^
+      370 |         3, 3, 3,
+      371 |       ]);
+      372 |       expect(markdown).toContain('| A | B | C |');
+
+      at Object.toEqual (tests/unit/gdocs.test.js:369:69)
+
+  ● gdocs › parseGoogleDocsModelChunks (issue #72) › keeps nested ordered lists ordered and tight when Google Docs uses separate list ids per level (issue #100)
+
+    expect(received).toContain(expected) // indexOf
+
+    Expected substring: "1. Parent item 1
+        1. Child item 1.1
+        2. Child item 1.2
+            1. Grandchild item 1.2.1
+            2. Grandchild item 1.2.2
+        3. Child item 1.3
+    2. Parent item 2"
+    Received string:    "- Parent item 1·
+      - Child item 1.1
+      - Child item 1.2·
+        - Grandchild item 1.2.1
+        - Grandchild item 1.2.2·
+      - Child item 1.3·
+    - Parent item 2
+    "
+
+      525 |       const markdown = renderGoogleDocsCapture(capture, 'markdown');
+      526 |
+    > 527 |       expect(markdown).toContain(
+          |                        ^
+      528 |         [
+      529 |           '1. Parent item 1',
+      530 |           '    1. Child item 1.1',
+
+      at Object.toContain (tests/unit/gdocs.test.js:527:24)
+
+Test Suites: 1 failed, 1 total
+Tests:       3 failed, 63 passed, 66 total
+Snapshots:   0 total
+Time:        1.568 s
+Ran all test suites within paths "tests/unit/gdocs.test.js".
