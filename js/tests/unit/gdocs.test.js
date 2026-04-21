@@ -285,6 +285,29 @@ describe('gdocs', () => {
       expect(markdown).toContain('| D | E | F |');
     });
 
+    it('does not create empty columns when Docs emits both 0x1c and 0x0a cell separators (issue #96)', () => {
+      const chunks = [
+        {
+          chunk: [
+            {
+              ty: 'is',
+              s: `${
+                String.fromCharCode(0x10) + String.fromCharCode(0x12)
+              }A${String.fromCharCode(0x1c)}\nB${String.fromCharCode(
+                0x1c
+              )}\nC\n${String.fromCharCode(0x11)}`,
+            },
+          ],
+        },
+      ];
+      const capture = parseGoogleDocsModelChunks(chunks);
+      const markdown = renderGoogleDocsCapture(capture, 'markdown');
+
+      expect(capture.tables[0].rows[0].cells).toHaveLength(3);
+      expect(markdown).toContain('| A | B | C |');
+      expect(markdown).not.toContain('| A |  | B |');
+    });
+
     it('numbers ordered list items sequentially (issue #92 R3)', () => {
       // Three list items sharing the same list id should render as 1. 2. 3.
       const text = 'First item\nSecond item\nThird item\n';
@@ -469,6 +492,77 @@ describe('gdocs', () => {
       expect(markdown).toContain(
         '![Blue rectangle](https://docs.google.com/docs-images-rt/image-id)'
       );
+    });
+
+    it('keeps nested bold and italic markers balanced (issue #96)', () => {
+      const text = 'Bold text with italic inside and back to bold\n';
+      const chunks = [
+        {
+          chunk: [
+            { ty: 'is', s: text },
+            {
+              ty: 'as',
+              st: 'text',
+              si: 1,
+              ei: text.length - 1,
+              sm: { ts_bd: true },
+            },
+            {
+              ty: 'as',
+              st: 'text',
+              si: text.indexOf('italic') + 1,
+              ei: text.indexOf('italic') + 'italic inside'.length,
+              sm: { ts_it: true },
+            },
+          ],
+        },
+      ];
+      const capture = parseGoogleDocsModelChunks(chunks);
+      const markdown = renderGoogleDocsCapture(capture, 'markdown');
+
+      expect(markdown).toBe(
+        '**Bold text with *italic inside* and back to bold**\n'
+      );
+    });
+
+    it('keeps consecutive blockquote paragraphs in the same quote block (issue #96)', () => {
+      const text = 'Quote paragraph one\nQuote paragraph two\n';
+      const lineEnd = (needle) => text.indexOf(needle) + needle.length + 1;
+      const chunks = [
+        {
+          chunk: [
+            { ty: 'is', s: text },
+            {
+              ty: 'as',
+              st: 'paragraph',
+              si: lineEnd('Quote paragraph one'),
+              ei: lineEnd('Quote paragraph one'),
+              sm: { ps_il: 24, ps_ifl: 24 },
+            },
+            {
+              ty: 'as',
+              st: 'paragraph',
+              si: lineEnd('Quote paragraph two'),
+              ei: lineEnd('Quote paragraph two'),
+              sm: { ps_il: 24, ps_ifl: 24 },
+            },
+          ],
+        },
+      ];
+      const capture = parseGoogleDocsModelChunks(chunks);
+      const markdown = renderGoogleDocsCapture(capture, 'markdown');
+
+      expect(markdown).toBe(
+        '> Quote paragraph one\n>\n> Quote paragraph two\n'
+      );
+    });
+
+    it('ends rendered markdown with a newline (issue #96)', () => {
+      const capture = parseGoogleDocsModelChunks([
+        { ty: 'is', s: 'Last line\n' },
+      ]);
+
+      expect(renderGoogleDocsCapture(capture, 'markdown')).toBe('Last line\n');
     });
   });
 
@@ -689,6 +783,18 @@ describe('gdocs', () => {
       expect(out).toContain('<del>');
     });
 
+    it('hoists Google Docs CSS class styles into semantic inline tags', () => {
+      const html =
+        '<style>.c7{font-weight:700}.c19{font-style:italic}.c21{text-decoration:line-through}</style>' +
+        '<p><span class="c7">Bold</span> <span class="c19">Italic</span> <span class="c21">Strike</span></p>';
+      const { html: out, hoisted } = preprocessGoogleDocsExportHtml(html);
+
+      expect(hoisted).toBe(3);
+      expect(out).toContain('<strong>Bold</strong>');
+      expect(out).toContain('<em>Italic</em>');
+      expect(out).toContain('<del>Strike</del>');
+    });
+
     it('combines multiple styles on a single span', () => {
       const html =
         '<p><span style="font-weight:700;font-style:italic;text-decoration:line-through">Mixed</span></p>';
@@ -716,6 +822,22 @@ describe('gdocs', () => {
       expect(out).toContain('<h1>Headings</h1>');
       expect(out).not.toContain('1. ');
       expect(out).not.toContain('<a id=');
+    });
+
+    it('strips standalone empty anchors before headings', () => {
+      const html = '<a id="anchor-1"></a><h2>Headings</h2>';
+      const { html: out } = preprocessGoogleDocsExportHtml(html);
+
+      expect(out).toContain('<h2>Headings</h2>');
+      expect(out).not.toContain('<a id=');
+    });
+
+    it('turns class-indented Google Docs paragraphs into blockquotes', () => {
+      const html =
+        '<style>.c18{margin-left:24pt;margin-right:24pt}</style><p class="c18">Quote</p>';
+      const { html: out } = preprocessGoogleDocsExportHtml(html);
+
+      expect(out).toContain('<blockquote><p>Quote</p></blockquote>');
     });
 
     it('replaces &nbsp; entity and U+00A0 with regular spaces', () => {

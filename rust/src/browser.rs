@@ -11,7 +11,7 @@ use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicU64, Ordering};
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 use tokio::process::Command;
-use tracing::info;
+use tracing::{debug, info};
 
 static USER_DATA_DIR_COUNTER: AtomicU64 = AtomicU64::new(0);
 
@@ -63,6 +63,15 @@ impl std::str::FromStr for BrowserEngine {
 ///
 /// Returns an error if browser operations fail
 pub async fn render_html(url: &str) -> Result<String> {
+    render_html_with_timeout(url, Duration::from_secs(60)).await
+}
+
+/// Render HTML content from a URL using a headless browser and caller-provided timeout.
+///
+/// # Errors
+///
+/// Returns an error if Chrome is unavailable, fails, or does not finish before `timeout`.
+pub async fn render_html_with_timeout(url: &str, timeout: Duration) -> Result<String> {
     info!("Rendering HTML for URL: {}", url);
 
     let chrome = find_chrome_executable().ok_or_else(|| {
@@ -72,29 +81,32 @@ pub async fn render_html(url: &str) -> Result<String> {
     })?;
     let user_data_dir = temporary_user_data_dir();
     std::fs::create_dir_all(&user_data_dir)?;
+    let args = chrome_render_args(&user_data_dir, url);
+    debug!(
+        chrome = %chrome.display(),
+        user_data_dir = %user_data_dir.display(),
+        args = ?args,
+        "launching headless Chrome for DOM capture"
+    );
 
-    let output = tokio::time::timeout(
-        Duration::from_secs(60),
-        Command::new(&chrome)
-            .arg("--headless=new")
-            .arg("--disable-gpu")
-            .arg("--disable-extensions")
-            .arg("--disable-dev-shm-usage")
-            .arg("--no-sandbox")
-            .arg("--dump-dom")
-            .arg(format!("--user-data-dir={}", user_data_dir.display()))
-            .arg(url)
-            .output(),
-    )
-    .await
-    .map_err(|_| {
-        WebCaptureError::BrowserError(format!(
-            "Timed out waiting for headless Chrome to render {url}"
-        ))
-    })?
-    .map_err(|e| WebCaptureError::BrowserError(format!("Failed to launch Chrome: {e}")))?;
-
+    let output_result =
+        tokio::time::timeout(timeout, Command::new(&chrome).args(&args).output()).await;
     let _ = std::fs::remove_dir_all(&user_data_dir);
+
+    let output = output_result
+        .map_err(|_| {
+            WebCaptureError::BrowserError(format!(
+                "Timed out waiting for headless Chrome to render {url}"
+            ))
+        })?
+        .map_err(|e| WebCaptureError::BrowserError(format!("Failed to launch Chrome: {e}")))?;
+    debug!(
+        status = %output.status,
+        stdout_bytes = output.stdout.len(),
+        stderr_bytes = output.stderr.len(),
+        stderr = %String::from_utf8_lossy(&output.stderr),
+        "headless Chrome DOM capture finished"
+    );
 
     if !output.status.success() {
         return Err(WebCaptureError::BrowserError(format!(
@@ -109,6 +121,37 @@ pub async fn render_html(url: &str) -> Result<String> {
 
     info!("Successfully rendered HTML ({} bytes)", html.len());
     Ok(html)
+}
+
+fn chrome_render_args(user_data_dir: &Path, url: &str) -> Vec<String> {
+    let mut args = common_chrome_args(user_data_dir);
+    args.extend([
+        "--dump-dom".to_string(),
+        "--timeout=30000".to_string(),
+        "--virtual-time-budget=8000".to_string(),
+        "--run-all-compositor-stages-before-draw".to_string(),
+        "--window-size=1280,800".to_string(),
+        url.to_string(),
+    ]);
+    args
+}
+
+fn common_chrome_args(user_data_dir: &Path) -> Vec<String> {
+    vec![
+        "--headless=new".to_string(),
+        "--disable-gpu".to_string(),
+        "--disable-extensions".to_string(),
+        "--disable-dev-shm-usage".to_string(),
+        "--disable-background-networking".to_string(),
+        "--disable-component-update".to_string(),
+        "--disable-default-apps".to_string(),
+        "--disable-sync".to_string(),
+        "--metrics-recording-only".to_string(),
+        "--no-default-browser-check".to_string(),
+        "--no-first-run".to_string(),
+        "--no-sandbox".to_string(),
+        format!("--user-data-dir={}", user_data_dir.display()),
+    ]
 }
 
 fn find_chrome_executable() -> Option<PathBuf> {
@@ -214,32 +257,36 @@ pub async fn capture_screenshot(url: &str) -> Result<Vec<u8>> {
     })?;
 
     let screenshot_path = temporary_screenshot_path();
-    let screenshot_arg = format!("--screenshot={}", screenshot_path.display());
+    let args = chrome_screenshot_args(&user_data_dir, &screenshot_path, url);
+    debug!(
+        chrome = %chrome.display(),
+        user_data_dir = %user_data_dir.display(),
+        screenshot_path = %screenshot_path.display(),
+        args = ?args,
+        "launching headless Chrome for screenshot capture"
+    );
 
-    let output = tokio::time::timeout(
+    let output_result = tokio::time::timeout(
         Duration::from_secs(60),
-        Command::new(&chrome)
-            .arg("--headless=new")
-            .arg("--disable-gpu")
-            .arg("--disable-extensions")
-            .arg("--disable-dev-shm-usage")
-            .arg("--no-sandbox")
-            .arg("--hide-scrollbars")
-            .arg("--window-size=1280,800")
-            .arg(&screenshot_arg)
-            .arg(format!("--user-data-dir={}", user_data_dir.display()))
-            .arg(url)
-            .output(),
+        Command::new(&chrome).args(&args).output(),
     )
-    .await
-    .map_err(|_| {
-        WebCaptureError::ScreenshotError(format!(
-            "Timed out waiting for headless Chrome to capture {url}"
-        ))
-    })?
-    .map_err(|e| WebCaptureError::ScreenshotError(format!("Failed to launch Chrome: {e}")))?;
-
+    .await;
     let _ = std::fs::remove_dir_all(&user_data_dir);
+
+    let output = output_result
+        .map_err(|_| {
+            WebCaptureError::ScreenshotError(format!(
+                "Timed out waiting for headless Chrome to capture {url}"
+            ))
+        })?
+        .map_err(|e| WebCaptureError::ScreenshotError(format!("Failed to launch Chrome: {e}")))?;
+    debug!(
+        status = %output.status,
+        stdout_bytes = output.stdout.len(),
+        stderr_bytes = output.stderr.len(),
+        stderr = %String::from_utf8_lossy(&output.stderr),
+        "headless Chrome screenshot capture finished"
+    );
 
     if !output.status.success() {
         let _ = std::fs::remove_file(&screenshot_path);
@@ -271,6 +318,18 @@ fn temporary_screenshot_path() -> PathBuf {
         "web-capture-screenshot-{}-{nonce}.png",
         std::process::id()
     ))
+}
+
+fn chrome_screenshot_args(user_data_dir: &Path, screenshot_path: &Path, url: &str) -> Vec<String> {
+    let mut args = common_chrome_args(user_data_dir);
+    args.extend([
+        "--hide-scrollbars".to_string(),
+        "--window-size=1280,800".to_string(),
+        "--timeout=30000".to_string(),
+        format!("--screenshot={}", screenshot_path.display()),
+        url.to_string(),
+    ]);
+    args
 }
 
 fn read_screenshot_bytes(path: &Path) -> Result<Vec<u8>> {

@@ -25,14 +25,15 @@ export function preprocessGoogleDocsExportHtml(html) {
   }
 
   const $ = cheerio.load(html, { decodeEntities: false });
+  const classStyles = parseCssClassStyles($);
   let hoisted = 0;
   let unwrappedLinks = 0;
 
-  $('span[style], p[style]').each(function () {
-    const style = String($(this).attr('style') || '');
-    const hasBold = /font-weight\s*:\s*(?:bold|[6-9]\d{2})/i.test(style);
-    const hasItalic = /font-style\s*:\s*italic/i.test(style);
-    const hasStrike = /text-decoration[^;]*\bline-through\b/i.test(style);
+  $('span, p').each(function () {
+    const style = combinedElementStyle($, this, classStyles);
+    const hasBold = hasBoldStyle(style);
+    const hasItalic = hasItalicStyle(style);
+    const hasStrike = hasStrikeStyle(style);
     if (!hasBold && !hasItalic && !hasStrike) {
       return;
     }
@@ -47,8 +48,29 @@ export function preprocessGoogleDocsExportHtml(html) {
     if (hasBold) {
       wrapped = `<strong>${wrapped}</strong>`;
     }
-    $(this).replaceWith(wrapped);
+    if (this.tagName === 'p') {
+      $(this).html(wrapped);
+    } else {
+      $(this).replaceWith(wrapped);
+    }
     hoisted += 1;
+  });
+
+  $('p').each(function () {
+    const style = combinedElementStyle($, this, classStyles);
+    if (!isBlockquoteStyle(style)) {
+      return;
+    }
+    $(this).replaceWith(
+      `<blockquote><p>${$(this).html() || ''}</p></blockquote>`
+    );
+  });
+
+  $('a').each(function () {
+    const $a = $(this);
+    if (!$a.attr('href') && !$a.text().trim() && !$a.find('img').length) {
+      $a.remove();
+    }
   });
 
   $('h1, h2, h3, h4, h5, h6').each(function () {
@@ -102,4 +124,64 @@ export function preprocessGoogleDocsExportHtml(html) {
   rewritten = rewritten.replace(/&nbsp;/g, ' ');
 
   return { html: rewritten, hoisted, unwrappedLinks };
+}
+
+function parseCssClassStyles($) {
+  const classStyles = new Map();
+  $('style').each(function () {
+    const css = $(this).html() || '';
+    const classRule = /\.([A-Za-z0-9_-]+)\s*\{([^{}]*)\}/g;
+    let match;
+    while ((match = classRule.exec(css)) !== null) {
+      const [, className, style] = match;
+      classStyles.set(
+        className,
+        `${classStyles.get(className) || ''};${style}`
+      );
+    }
+  });
+  return classStyles;
+}
+
+function combinedElementStyle($, element, classStyles) {
+  const $el = $(element);
+  const styles = [String($el.attr('style') || '')];
+  const classes = String($el.attr('class') || '')
+    .split(/\s+/u)
+    .filter(Boolean);
+  for (const className of classes) {
+    if (classStyles.has(className)) {
+      styles.push(classStyles.get(className));
+    }
+  }
+  return styles.join(';');
+}
+
+function hasBoldStyle(style) {
+  return /font-weight\s*:\s*(?:bold|[6-9]\d{2})/i.test(style);
+}
+
+function hasItalicStyle(style) {
+  return /font-style\s*:\s*italic/i.test(style);
+}
+
+function hasStrikeStyle(style) {
+  return /text-decoration[^;]*\bline-through\b/i.test(style);
+}
+
+function isBlockquoteStyle(style) {
+  const marginLeft = numericCssPointValue(style, 'margin-left');
+  const marginRight = numericCssPointValue(style, 'margin-right');
+  return (
+    marginLeft > 0 &&
+    marginRight > 0 &&
+    Math.abs(marginLeft - marginRight) < 0.1
+  );
+}
+
+function numericCssPointValue(style, property) {
+  const match = style.match(
+    new RegExp(`${property}\\s*:\\s*(-?\\d+(?:\\.\\d+)?)pt`, 'i')
+  );
+  return match ? Number(match[1]) : 0;
 }

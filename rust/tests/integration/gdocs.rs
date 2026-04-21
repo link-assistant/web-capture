@@ -519,6 +519,37 @@ fn test_parse_model_chunks_multi_column_table_r2() {
 }
 
 #[test]
+fn test_parse_model_chunks_drops_duplicate_table_separator_empty_cells_issue_96() {
+    let text = format!(
+        "{open}{new_row}A{cell}\nB{cell}\nC\n{close}",
+        open = '\u{10}',
+        close = '\u{11}',
+        new_row = '\u{12}',
+        cell = '\u{1c}',
+    );
+    let chunks = vec![serde_json::json!({
+        "chunk": [
+            { "ty": "is", "s": text }
+        ]
+    })];
+    let cid_urls = std::collections::HashMap::<String, String>::new();
+
+    let capture = parse_model_chunks(&chunks, &cid_urls);
+    let table = &capture.tables[0];
+    let markdown = render_captured_document(&capture, "markdown");
+
+    assert_eq!(table.rows[0].cells.len(), 3);
+    assert!(
+        markdown.contains("| A | B | C |"),
+        "markdown was: {markdown}"
+    );
+    assert!(
+        !markdown.contains("| A |  | B |"),
+        "markdown should not contain duplicate empty columns: {markdown}"
+    );
+}
+
+#[test]
 fn test_render_ordered_list_sequential_numbering_r3() {
     let text = "First item\nSecond item\nThird item\n";
     let line_end = |needle: &str| {
@@ -619,6 +650,90 @@ fn test_render_list_items_joined_with_single_newline_r4() {
 }
 
 #[test]
+fn test_render_nested_bold_italic_markers_balanced_issue_96() {
+    let text = "Bold text with italic inside and back to bold\n";
+    let start_of = |needle: &str| text.find(needle).expect("needle should exist") + 1;
+    let end_of = |needle: &str| start_of(needle) + needle.len() - 1;
+    let chunks = vec![serde_json::json!({
+        "chunk": [
+            { "ty": "is", "s": text },
+            {
+                "ty": "as",
+                "st": "text",
+                "si": 1,
+                "ei": text.len() - 1,
+                "sm": { "ts_bd": true }
+            },
+            {
+                "ty": "as",
+                "st": "text",
+                "si": start_of("italic"),
+                "ei": end_of("italic inside"),
+                "sm": { "ts_it": true }
+            }
+        ]
+    })];
+    let cid_urls = std::collections::HashMap::<String, String>::new();
+
+    let capture = parse_model_chunks(&chunks, &cid_urls);
+    let markdown = render_captured_document(&capture, "markdown");
+
+    assert_eq!(
+        markdown,
+        "**Bold text with *italic inside* and back to bold**\n"
+    );
+}
+
+#[test]
+fn test_render_consecutive_blockquote_paragraphs_stay_in_one_quote_issue_96() {
+    let text = "Quote paragraph one\nQuote paragraph two\n";
+    let line_end = |needle: &str| {
+        let start = text.find(needle).expect("needle should exist");
+        start + text[start..].find('\n').expect("line should end") + 1
+    };
+    let chunks = vec![serde_json::json!({
+        "chunk": [
+            { "ty": "is", "s": text },
+            {
+                "ty": "as",
+                "st": "paragraph",
+                "si": line_end("Quote paragraph one"),
+                "ei": line_end("Quote paragraph one"),
+                "sm": { "ps_il": 24, "ps_ifl": 24 }
+            },
+            {
+                "ty": "as",
+                "st": "paragraph",
+                "si": line_end("Quote paragraph two"),
+                "ei": line_end("Quote paragraph two"),
+                "sm": { "ps_il": 24, "ps_ifl": 24 }
+            }
+        ]
+    })];
+    let cid_urls = std::collections::HashMap::<String, String>::new();
+
+    let capture = parse_model_chunks(&chunks, &cid_urls);
+    let markdown = render_captured_document(&capture, "markdown");
+
+    assert_eq!(
+        markdown,
+        "> Quote paragraph one\n>\n> Quote paragraph two\n"
+    );
+}
+
+#[test]
+fn test_render_captured_markdown_ends_with_newline_issue_96() {
+    let chunks = vec![serde_json::json!({ "ty": "is", "s": "Last line\n" })];
+    let cid_urls = std::collections::HashMap::<String, String>::new();
+    let capture = parse_model_chunks(&chunks, &cid_urls);
+
+    assert_eq!(
+        render_captured_document(&capture, "markdown"),
+        "Last line\n"
+    );
+}
+
+#[test]
 fn test_preprocess_exports_hoists_font_weight_r6() {
     let html = r#"<p><span style="font-weight:700">Bold text</span></p>"#;
     let out = preprocess_google_docs_export_html(html);
@@ -641,6 +756,16 @@ fn test_preprocess_exports_hoists_strikethrough_r6() {
     let out = preprocess_google_docs_export_html(html);
     assert_eq!(out.hoisted, 1);
     assert!(out.html.contains("<del>"));
+}
+
+#[test]
+fn test_preprocess_exports_hoists_google_docs_css_class_styles_issue_96() {
+    let html = r#"<style>.c7{font-weight:700}.c19{font-style:italic}.c21{text-decoration:line-through}</style><p><span class="c7">Bold</span> <span class="c19">Italic</span> <span class="c21">Strike</span></p>"#;
+    let out = preprocess_google_docs_export_html(html);
+    assert_eq!(out.hoisted, 3);
+    assert!(out.html.contains("<strong>Bold</strong>"));
+    assert!(out.html.contains("<em>Italic</em>"));
+    assert!(out.html.contains("<del>Strike</del>"));
 }
 
 #[test]
@@ -667,6 +792,21 @@ fn test_preprocess_exports_strips_heading_numbering_r6() {
     );
     assert!(!out.html.contains("1. "));
     assert!(!out.html.contains(r#"<a id="h.abc""#));
+}
+
+#[test]
+fn test_preprocess_exports_strips_standalone_empty_anchors_issue_96() {
+    let html = r#"<a id="anchor-1"></a><h2>Headings</h2>"#;
+    let out = preprocess_google_docs_export_html(html);
+    assert!(out.html.contains("<h2>Headings</h2>"));
+    assert!(!out.html.contains(r#"<a id="anchor-1""#));
+}
+
+#[test]
+fn test_preprocess_exports_converts_class_indented_paragraphs_to_blockquotes_issue_96() {
+    let html = r#"<style>.c18{margin-left:24pt;margin-right:24pt}</style><p class="c18">Quote</p>"#;
+    let out = preprocess_google_docs_export_html(html);
+    assert!(out.html.contains("<blockquote><p>Quote</p></blockquote>"));
 }
 
 #[test]
