@@ -43,6 +43,9 @@ use crate::WebCaptureError;
 
 const GDOCS_EXPORT_BASE: &str = "https://docs.google.com/document/d";
 const GDOCS_API_BASE: &str = "https://docs.googleapis.com/v1/documents";
+#[cfg(not(windows))]
+const GDOCS_EDITOR_BROWSER_TIMEOUT: Duration = Duration::from_secs(15);
+const GDOCS_EDITOR_HTTP_TIMEOUT: Duration = Duration::from_secs(20);
 
 fn gdocs_url_pattern() -> &'static Regex {
     static PATTERN: OnceLock<Regex> = OnceLock::new();
@@ -795,28 +798,54 @@ pub async fn fetch_google_doc_from_model(
 }
 
 async fn fetch_google_doc_editor_html(edit_url: &str, document_id: &str) -> crate::Result<String> {
-    match crate::browser::render_html_with_timeout(edit_url, Duration::from_secs(15)).await {
-        Ok(html) => {
-            let chunks = extract_model_chunks_from_html(&html);
-            if !chunks.is_empty() {
-                return Ok(html);
-            }
-            warn!(
-                document_id = %document_id,
-                html_bytes = html.len(),
-                "real-browser Google Docs capture returned no model chunks; falling back to editor HTTP fetch"
-            );
-        }
-        Err(error) => {
-            warn!(
-                document_id = %document_id,
-                error = %error,
-                "real-browser Google Docs capture failed; falling back to editor HTTP fetch"
-            );
-        }
+    #[cfg(windows)]
+    {
+        warn!(
+            document_id = %document_id,
+            "using Google Docs editor HTTP fetch on Windows to avoid headless Chrome hangs in hosted CI"
+        );
+        fetch_google_doc_editor_html_via_http(edit_url, document_id).await
     }
 
-    let html = crate::html::fetch_html(edit_url).await?;
+    #[cfg(not(windows))]
+    {
+        match crate::browser::render_html_with_timeout(edit_url, GDOCS_EDITOR_BROWSER_TIMEOUT).await
+        {
+            Ok(html) => {
+                let chunks = extract_model_chunks_from_html(&html);
+                if !chunks.is_empty() {
+                    return Ok(html);
+                }
+                warn!(
+                    document_id = %document_id,
+                    html_bytes = html.len(),
+                    "real-browser Google Docs capture returned no model chunks; falling back to editor HTTP fetch"
+                );
+            }
+            Err(error) => {
+                warn!(
+                    document_id = %document_id,
+                    error = %error,
+                    "real-browser Google Docs capture failed; falling back to editor HTTP fetch"
+                );
+            }
+        }
+
+        fetch_google_doc_editor_html_via_http(edit_url, document_id).await
+    }
+}
+
+async fn fetch_google_doc_editor_html_via_http(
+    edit_url: &str,
+    document_id: &str,
+) -> crate::Result<String> {
+    let html = tokio::time::timeout(GDOCS_EDITOR_HTTP_TIMEOUT, crate::html::fetch_html(edit_url))
+        .await
+        .map_err(|_| {
+            WebCaptureError::FetchError(format!(
+                "Timed out fetching Google Docs editor HTML for document {document_id}"
+            ))
+        })??;
     debug!(
         document_id = %document_id,
         html_bytes = html.len(),

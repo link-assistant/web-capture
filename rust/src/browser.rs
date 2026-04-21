@@ -89,8 +89,9 @@ pub async fn render_html_with_timeout(url: &str, timeout: Duration) -> Result<St
         "launching headless Chrome for DOM capture"
     );
 
-    let output_result =
-        tokio::time::timeout(timeout, Command::new(&chrome).args(&args).output()).await;
+    let mut command = Command::new(&chrome);
+    command.args(&args).kill_on_drop(true);
+    let output_result = tokio::time::timeout(timeout, command.output()).await;
     let _ = std::fs::remove_dir_all(&user_data_dir);
 
     let output = output_result

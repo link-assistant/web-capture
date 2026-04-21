@@ -27,6 +27,9 @@ The investigation data for #96 is committed under this directory:
   used during the investigation.
 - `logs/*-before.log` and `logs/*-after.log` preserve the failing and passing
   regression-test runs plus live smoke-command logs.
+- `ci-logs/rust-checks-24714236603.log` preserves the current-head CI failure
+  where the Windows Google Docs browser-model live test hit the workflow
+  timeout.
 
 ## Timeline
 
@@ -38,12 +41,13 @@ The investigation data for #96 is committed under this directory:
 | 2026-04-21 | Seven focused regressions were added and first captured as failures in `logs/js-gdocs-regression-before.log` and `logs/rust-gdocs-regression-before.log`.                                |
 | 2026-04-21 | Rust live Google Docs browser capture reproduced the Chrome `--dump-dom` timeout; the model path now falls back to direct editor HTML fetch and the live test passes.                    |
 | 2026-04-21 | This PR fixes the reproducible browser/model regressions, adds Rust browser launch diagnostics and safer Chrome flags, and improves public-export style preprocessing for both runtimes. |
+| 2026-04-21 | Current-head CI then exposed a Windows-hosted runner hang in the browser-model live test. The fix skips headless Chrome for Google Docs editor model fetch on Windows and bounds the HTTP fallback. |
 
 ## Requirements
 
 | ID  | Requirement                                                                   | Status in PR #97                                                                                                                                                                                                                                                                            |
 | --- | ----------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| R1  | Rust `--capture browser` must not time out immediately.                       | Fixed for Google Docs browser-model capture by bounding the Chrome attempt and falling back to direct editor HTML model fetch. General browser capture also logs Chrome path/args/status/stderr and cleans temp profiles. `https://example.com` and the public Google Doc now pass locally. |
+| R1  | Rust `--capture browser` must not time out immediately.                       | Fixed for Google Docs browser-model capture by bounding the Chrome attempt and falling back to direct editor HTML model fetch. On Windows, Google Docs model capture uses the HTTP model fallback directly to avoid hosted-runner Chrome hangs. General browser capture also logs Chrome path/args/status/stderr and cleans temp profiles. `https://example.com` and the public Google Doc now pass locally. |
 | R2  | JS browser tables must not gain empty columns from duplicate Docs separators. | Fixed and covered by JS/Rust parser tests.                                                                                                                                                                                                                                                  |
 | R3  | JS browser nested list markdown must not gain extra blank lines.              | The model renderer now keeps list adjacency by list id. Public-export nested-list fidelity is still a follow-up because Google exports each nesting level as a separate CSS-only list.                                                                                                      |
 | R4  | Multi-paragraph blockquotes must keep quote context.                          | Fixed for model rendering with `>` continuation lines. Public export now converts CSS-indented paragraphs to `<blockquote>`.                                                                                                                                                                |
@@ -84,6 +88,17 @@ attempt. If Chrome does not return the editor DOM quickly, the model path falls
 back to fetching the editor HTML directly and parsing the embedded
 `DOCS_modelChunk` payload. That preserves the v0.3.2 behavior described in the
 issue while keeping the diagnostics needed to debug future Chrome failures.
+
+The first current-head CI run after the main fix passed Linux/macOS but timed
+out on the Windows Google Docs browser-model live test:
+`ci-logs/rust-checks-24714236603.log` lines 4879-4881 show the export-mode
+live test passing, the browser-model test running for over 60 seconds, and the
+workflow killing the step at 10 minutes. The follow-up change avoids launching
+headless Chrome for this Google Docs editor-model path on Windows, where the
+static editor HTML fallback already contains the model chunks needed by this
+capture mode. The fallback fetch is now also wrapped in a 20-second timeout, and
+Chrome processes launched by the generic browser helper use `kill_on_drop(true)`
+so future timeouts clean up the child process.
 
 ### R2 - Empty table columns
 
@@ -197,6 +212,13 @@ cargo run --manifest-path rust/Cargo.toml -- "https://docs.google.com/document/d
 Result: passed. The log shows Chrome timing out after the bounded attempt and
 the editor-HTML fallback extracting one model chunk, four CID URLs, 121 blocks,
 five tables, and 26 image records.
+
+```bash
+cd rust
+GDOCS_INTEGRATION=1 cargo test --test integration gdocs_public_doc::live_browser_model_capture_of_public_document_preserves_markdown_features -- --nocapture
+```
+
+Result after the Windows-timeout fix: passed on this Linux runner in 15.45s.
 
 ```bash
 cargo run --manifest-path rust/Cargo.toml -- "https://docs.google.com/document/d/1f5zI2xOFpKa90v0GjamO_t7lqSdzMlaM/edit" --capture api -f markdown --verbose -o docs/case-studies/issue-96/reference/rust-api-after.md
