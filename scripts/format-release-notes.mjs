@@ -187,8 +187,14 @@ try {
     console.log('ℹ️ No commit SHA available - not adding PR link');
   }
 
-  // Build formatted release notes
-  const versionWithoutV = version.replace(/^v/, '');
+  // Build formatted release notes.
+  //
+  // Strip any language prefix like "js-" or "rust-" and a leading "v" so the
+  // numeric version reaches shields.io cleanly. shields.io's /badge/ path uses
+  // "-" as the label/message/color separator, so a raw tag like "js-v1.7.12"
+  // would be parsed as label="npm-js", message="v1.7.12-blue" and render as
+  // "404: badge not found" (see issue #98).
+  const versionWithoutV = version.replace(/^[a-z]+-/i, '').replace(/^v/i, '');
   const npmBadge = `[![npm version](https://img.shields.io/badge/npm-${versionWithoutV}-blue.svg)](https://www.npmjs.com/package/${PACKAGE_NAME}/v/${versionWithoutV})`;
 
   let formattedBody = `${cleanDescription}`;
