@@ -13,6 +13,7 @@ import { convertHtmlToMarkdown } from './lib.js';
 import { createBrowser as defaultCreateBrowser } from './browser.js';
 import { preprocessGoogleDocsExportHtml } from './gdocs-preprocess.js';
 import { localizeGoogleDocsModelImages } from './gdocs-images.js';
+import { renderBlocksMarkdown } from './gdocs-render-markdown.js';
 import {
   googleDocsBrowserModelUnavailableError,
   isGoogleDocsBrowserModelUnavailableError,
@@ -649,6 +650,7 @@ export function parseGoogleDocsModelChunks(
   let cell = null;
   const tableHistograms = [];
   let currentHistogram = null;
+  let previousTableControl = null;
 
   const bumpHistogram = (code) => {
     if (!currentHistogram) {
@@ -672,7 +674,7 @@ export function parseGoogleDocsModelChunks(
 
   const flushCell = ({ dropEmpty = false } = {}) => {
     if (cell && row) {
-      const isEmpty = cell.content.length === 0;
+      const isEmpty = cellIsEmpty(cell);
       if (!dropEmpty || !isEmpty) {
         row.cells.push(cell);
       }
@@ -695,7 +697,7 @@ export function parseGoogleDocsModelChunks(
       // last cell content (from `\n` just before the `0x11` close marker).
       while (
         table.rows.length > 1 &&
-        table.rows[table.rows.length - 1].cells.length === 0
+        rowIsEmpty(table.rows[table.rows.length - 1])
       ) {
         table.rows.pop();
       }
@@ -707,6 +709,7 @@ export function parseGoogleDocsModelChunks(
     }
     currentHistogram = null;
     table = null;
+    previousTableControl = null;
   };
 
   const targetContent = () => {
@@ -727,6 +730,7 @@ export function parseGoogleDocsModelChunks(
     if (code === 0x10) {
       flushParagraph(i + 1);
       table = { type: 'table', rows: [] };
+      previousTableControl = code;
       currentHistogram = {
         '0x0a': 0,
         '0x0b': 0,
@@ -746,6 +750,7 @@ export function parseGoogleDocsModelChunks(
       bumpHistogram(code);
       flushRow({ dropEmptyTrailingCell: true });
       row = { cells: [] };
+      previousTableControl = code;
       continue;
     }
     if (code === 0x1c) {
@@ -755,11 +760,19 @@ export function parseGoogleDocsModelChunks(
         row = { cells: [] };
       }
       cell = { content: [] };
+      previousTableControl = code;
       continue;
     }
     if (code === 0x0a) {
       bumpHistogram(code);
       if (table) {
+        if (
+          cellIsEmpty(cell) &&
+          (previousTableControl === 0x1c || previousTableControl === 0x12)
+        ) {
+          previousTableControl = code;
+          continue;
+        }
         // Inside a Google Docs table, `\n` (0x0a) separates CELLS, not rows.
         // Row boundaries are communicated via the explicit `0x12` marker and
         // the closing `0x11` marker. Earlier versions collapsed multi-column
@@ -769,6 +782,7 @@ export function parseGoogleDocsModelChunks(
           row = { cells: [] };
         }
         cell = { content: [] };
+        previousTableControl = code;
       } else {
         flushParagraph(i + 1);
       }
@@ -777,18 +791,21 @@ export function parseGoogleDocsModelChunks(
     if (code === 0x0b) {
       bumpHistogram(code);
       appendText(targetContent(), '\n');
+      previousTableControl = null;
       continue;
     }
 
     const image = imagesByPos.get(i);
     if (image) {
       targetContent().push(image);
+      previousTableControl = null;
       if (fullText[i] === '*') {
         continue;
       }
     }
 
     appendText(targetContent(), fullText[i], styleMaps.inlineStyles[i]);
+    previousTableControl = null;
   }
 
   if (table) {
@@ -815,6 +832,22 @@ export function parseGoogleDocsModelChunks(
     images,
     text: contentBlocksToText(blocks),
   };
+}
+
+function cellIsEmpty(cell) {
+  if (!cell) {
+    return true;
+  }
+  return (cell.content || []).every((node) => {
+    if (node.type === 'image') {
+      return false;
+    }
+    return !String(node.text || '').trim();
+  });
+}
+
+function rowIsEmpty(row) {
+  return !row || row.cells.length === 0 || row.cells.every(cellIsEmpty);
 }
 
 function buildModelStyleMaps(items, textLength) {
@@ -868,11 +901,17 @@ function applyInlineTextStyle(inlineStyles, start, end, patch) {
 }
 
 function textStyleFromModel(item) {
-  return {
-    bold: Boolean(item.sm?.ts_bd),
-    italic: Boolean(item.sm?.ts_it),
-    strike: Boolean(item.sm?.ts_st),
-  };
+  const style = {};
+  if (item.sm?.ts_bd) {
+    style.bold = true;
+  }
+  if (item.sm?.ts_it) {
+    style.italic = true;
+  }
+  if (item.sm?.ts_st) {
+    style.strike = true;
+  }
+  return style;
 }
 
 function paragraphStyleFromModel(item) {
@@ -1105,152 +1144,6 @@ function sameTextStyle(a, b) {
   );
 }
 
-function renderBlocksMarkdown(blocks) {
-  const counters = new Map();
-  const rendered = blocks.map((block) => {
-    if (block.type === 'table') {
-      counters.clear();
-      return { text: renderTableMarkdown(block), list: null };
-    }
-    const counterKey = block.list
-      ? `${block.list.id || ''}\u0000${block.list.level || 0}`
-      : null;
-    if (block.list) {
-      // Reset deeper siblings when we re-enter a shallower level so
-      // nested lists restart from 1 on each new parent.
-      for (const key of [...counters.keys()]) {
-        const level = Number(key.split('\u0000')[1]);
-        if (level > (block.list.level || 0)) {
-          counters.delete(key);
-        }
-      }
-      const next = (counters.get(counterKey) || 0) + 1;
-      counters.set(counterKey, next);
-      return {
-        text: renderParagraphMarkdown(block, { orderedIndex: next }),
-        list: block.list,
-      };
-    }
-    counters.clear();
-    return { text: renderParagraphMarkdown(block), list: null };
-  });
-
-  const joined = [];
-  for (let i = 0; i < rendered.length; i++) {
-    const cur = rendered[i];
-    if (!cur.text) {
-      continue;
-    }
-    if (joined.length > 0) {
-      const prev = rendered
-        .slice(0, i)
-        .reverse()
-        .find((entry) => entry.text);
-      const sameList =
-        cur.list && prev?.list && (cur.list.id || '') === (prev.list.id || '');
-      joined.push(sameList ? '\n' : '\n\n');
-    }
-    joined.push(cur.text);
-  }
-  return joined.join('').replace(/\s+$/u, '');
-}
-
-function renderParagraphMarkdown(block, context = {}) {
-  const text = renderContentMarkdown(block.content).trim();
-  if (block.horizontalRule) {
-    return '---';
-  }
-  const style = block.style || '';
-  const headingMatch = style.match(/^HEADING_(\d)$/u);
-  if (headingMatch) {
-    return `${'#'.repeat(Number(headingMatch[1]))} ${text}`;
-  }
-  if (style === 'TITLE') {
-    return `# ${text}`;
-  }
-  if (style === 'SUBTITLE') {
-    return `## ${text}`;
-  }
-  if (block.list) {
-    const indent = '  '.repeat(Math.max(0, block.list.level || 0));
-    const orderedIndex = Math.max(1, Number(context.orderedIndex) || 1);
-    const marker = block.list.ordered ? `${orderedIndex}.` : '-';
-    return `${indent}${marker} ${text}`;
-  }
-  if (block.quote) {
-    return text
-      .split('\n')
-      .map((line) => (line ? `> ${line}` : '>'))
-      .join('\n');
-  }
-  return text;
-}
-
-function renderTableMarkdown(table) {
-  if (!table.rows.length) {
-    return '';
-  }
-  const width = Math.max(...table.rows.map((row) => row.cells.length), 1);
-  const rows = table.rows.map((row) =>
-    Array.from({ length: width }, (_, idx) =>
-      escapeMarkdownTableCell(
-        renderContentMarkdown(row.cells[idx]?.content || [])
-      )
-    )
-  );
-  const separator = Array.from({ length: width }, () => '---');
-  return [rows[0], separator, ...rows.slice(1)]
-    .map((row) => `| ${row.join(' | ')} |`)
-    .join('\n');
-}
-
-function renderContentMarkdown(content = []) {
-  const rendered = [];
-  for (let idx = 0; idx < content.length; idx++) {
-    const node = content[idx];
-    if (node.type === 'image') {
-      rendered.push(node.url ? `![${node.alt || 'image'}](${node.url})` : '');
-      continue;
-    }
-    if (!node.link) {
-      rendered.push(renderMarkedText(node.text || '', node));
-      continue;
-    }
-
-    const link = node.link;
-    const linkNodes = [node];
-    while (
-      content[idx + 1]?.type === 'text' &&
-      content[idx + 1].link === link
-    ) {
-      linkNodes.push(content[++idx]);
-    }
-    const label = linkNodes
-      .map((linkNode) => renderMarkedText(linkNode.text || '', linkNode))
-      .join('');
-    rendered.push(`[${label}](${link})`);
-  }
-  return rendered.join('');
-}
-
-function renderMarkedText(text, node = {}) {
-  let output = text;
-  if (!output) {
-    return output;
-  }
-  if (node.bold && node.italic) {
-    output = `***${output}***`;
-  } else if (node.bold) {
-    output = `**${output}**`;
-  } else if (node.italic) {
-    output = `*${output}*`;
-  }
-  if (node.strike) {
-    output = `~~${output}~~`;
-  }
-  return output;
-}
-
 function renderBlocksHtml(blocks) {
   return `<!doctype html><html><body>${blocks
     .map((block) => {
@@ -1381,10 +1274,6 @@ function escapeHtml(value) {
         return '&#39;';
     }
   });
-}
-
-function escapeMarkdownTableCell(value) {
-  return String(value).replace(/\|/g, '\\|').replace(/\n/g, '<br>');
 }
 
 /**

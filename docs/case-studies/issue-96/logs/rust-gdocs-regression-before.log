@@ -1,0 +1,123 @@
+ Downloading crates ...
+  Downloaded tokio-stream v0.1.18
+  Downloaded tokio-test v0.4.5
+   Compiling tokio v1.51.1
+   Compiling tokio-util v0.7.18
+   Compiling tokio-native-tls v0.3.1
+   Compiling tower v0.5.3
+   Compiling async-compression v0.4.41
+   Compiling async-tungstenite v0.27.0
+   Compiling tokio-stream v0.1.18
+   Compiling h2 v0.4.13
+   Compiling tower-http v0.6.8
+   Compiling tokio-test v0.4.5
+   Compiling hyper v1.9.0
+   Compiling hyper-util v0.1.20
+   Compiling hyper-tls v0.6.0
+   Compiling axum v0.8.8
+   Compiling reqwest v0.12.28
+   Compiling fantoccini v0.21.5
+   Compiling chromiumoxide v0.7.0
+   Compiling browser-commander v0.9.1
+   Compiling web-capture v0.3.3 (/tmp/gh-issue-solver-1776760404302/rust)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 21.36s
+     Running tests/integration/mod.rs (rust/target/debug/deps/integration-e3901ccbd7fddafc)
+
+running 48 tests
+test gdocs::test_build_docs_api_url ... ok
+test gdocs::test_build_edit_url ... ok
+test gdocs::test_build_export_url ... ok
+test gdocs::test_capture_method_selection_honors_browser_flag ... ok
+test gdocs::test_create_archive_zip_empty_images ... ok
+test gdocs::test_create_archive_zip_produces_valid_zip ... ok
+test gdocs::test_extract_base64_images_no_images ... ok
+test gdocs::test_extract_bearer_token ... ok
+test gdocs::test_extract_base64_images_single ... ok
+test gdocs::test_extract_base64_images_preserves_non_data_images ... ok
+test gdocs::test_parse_model_chunks_accepts_individual_model_items ... ok
+
+thread 'gdocs::test_parse_model_chunks_drops_duplicate_table_separator_empty_cells_issue_96' (1314792) panicked at tests/integration/gdocs.rs:541:5:
+assertion `left == right` failed
+  left: 5
+ right: 3
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test gdocs::test_is_google_docs_url_invalid ... ok
+test gdocs::test_extract_base64_images_multiple ... ok
+test gdocs::test_parse_model_chunks_drops_duplicate_table_separator_empty_cells_issue_96 ... FAILED
+test gdocs::test_parse_model_chunks_includes_suggestions_and_images ... ok
+test gdocs::test_is_google_docs_url_valid ... ok
+test gdocs::test_parse_model_chunks_multi_column_table_r2 ... ok
+test gdocs::test_parse_model_chunks_translates_utf16_positions ... ok
+test gdocs::test_extract_document_id ... ok
+test gdocs::test_parse_model_chunks_renders_style_records ... ok
+
+thread 'gdocs::test_preprocess_exports_converts_class_indented_paragraphs_to_blockquotes_issue_96' (1314797) panicked at tests/integration/gdocs.rs:806:5:
+assertion failed: out.html.contains("<blockquote><p>Quote</p></blockquote>")
+test gdocs::test_preprocess_exports_converts_class_indented_paragraphs_to_blockquotes_issue_96 ... FAILED
+test gdocs::test_preprocess_exports_hoists_font_style_italic_r6 ... ok
+
+thread 'gdocs::test_preprocess_exports_hoists_google_docs_css_class_styles_issue_96' (1314800) panicked at tests/integration/gdocs.rs:762:5:
+assertion `left == right` failed
+  left: 0
+ right: 3
+test gdocs::test_preprocess_exports_hoists_google_docs_css_class_styles_issue_96 ... FAILED
+test gdocs::test_preprocess_exports_hoists_strikethrough_r6 ... ok
+test gdocs::test_preprocess_exports_noop_for_regular_html_r6 ... ok
+
+thread 'gdocs::test_render_captured_markdown_ends_with_newline_issue_96' (1314807) panicked at tests/integration/gdocs.rs:730:5:
+assertion `left == right` failed
+  left: "Last line"
+ right: "Last line\n"
+test gdocs::test_render_captured_markdown_ends_with_newline_issue_96 ... FAILED
+test gdocs::test_preprocess_exports_hoists_font_weight_r6 ... ok
+
+thread 'gdocs::test_render_consecutive_blockquote_paragraphs_stay_in_one_quote_issue_96' (1314808) panicked at tests/integration/gdocs.rs:718:5:
+assertion `left == right` failed
+  left: "> Quote paragraph one\n\n> Quote paragraph two"
+ right: "> Quote paragraph one\n>\n> Quote paragraph two\n"
+test gdocs::test_render_consecutive_blockquote_paragraphs_stay_in_one_quote_issue_96 ... FAILED
+test gdocs::test_render_docs_api_document_paragraphs_tables_and_images ... ok
+
+thread 'gdocs::test_render_nested_bold_italic_markers_balanced_issue_96' (1314811) panicked at tests/integration/gdocs.rs:681:5:
+assertion `left == right` failed
+  left: "**Bold text with *****italic inside***** and back to bold**"
+ right: "**Bold text with *italic inside* and back to bold**\n"
+test gdocs::test_render_nested_bold_italic_markers_balanced_issue_96 ... FAILED
+test gdocs::test_render_ordered_list_sequential_numbering_r3 ... ok
+test gdocs::test_render_list_items_joined_with_single_newline_r4 ... ok
+test gdocs::test_preprocess_exports_replaces_nbsp_r6 ... ok
+
+thread 'gdocs::test_preprocess_exports_strips_standalone_empty_anchors_issue_96' (1314805) panicked at tests/integration/gdocs.rs:799:5:
+assertion failed: !out.html.contains(r#"<a id="anchor-1""#)
+test gdocs::test_preprocess_exports_strips_standalone_empty_anchors_issue_96 ... FAILED
+test gdocs::test_preprocess_exports_unwraps_redirect_links_r6 ... ok
+test gdocs_public_doc::capture_method_selection_is_locked_to_issue_72_semantics ... ok
+Skipping live Google Docs browser-model capture test; set GDOCS_INTEGRATION=1 to enable.
+test gdocs_public_doc::live_browser_model_capture_of_public_document_preserves_markdown_features ... ok
+Skipping live Google Docs capture test; set GDOCS_INTEGRATION=1 to enable.
+test gdocs_public_doc::live_capture_of_public_document_preserves_every_section ... ok
+test gdocs_public_doc::public_document_id_is_extracted_from_every_url_variation ... ok
+test gdocs_public_doc::public_document_is_recognized_across_every_url_variation ... ok
+test gdocs_public_doc::reference_markdown_contains_every_feature_section ... ok
+test gdocs::test_preprocess_exports_strips_heading_numbering_r6 ... ok
+test gdocs_public_doc::urls_for_the_public_document_are_built_with_the_expected_shape ... ok
+test gdocs_public_doc::reference_markdown_embeds_the_four_test_images ... ok
+test gdocs_image_parity::image_count_parity_across_pipeline ... ok
+test gdocs_image_parity::img_inside_heading_is_kept_in_markdown ... ok
+test gdocs_image_parity::gdocs_style_heading_with_spans_keeps_img ... ok
+test gdocs_image_parity::img_inside_all_heading_levels_is_kept ... ok
+
+failures:
+
+failures:
+    gdocs::test_parse_model_chunks_drops_duplicate_table_separator_empty_cells_issue_96
+    gdocs::test_preprocess_exports_converts_class_indented_paragraphs_to_blockquotes_issue_96
+    gdocs::test_preprocess_exports_hoists_google_docs_css_class_styles_issue_96
+    gdocs::test_preprocess_exports_strips_standalone_empty_anchors_issue_96
+    gdocs::test_render_captured_markdown_ends_with_newline_issue_96
+    gdocs::test_render_consecutive_blockquote_paragraphs_stay_in_one_quote_issue_96
+    gdocs::test_render_nested_bold_italic_markers_balanced_issue_96
+
+test result: FAILED. 41 passed; 7 failed; 0 ignored; 0 measured; 32 filtered out; finished in 0.11s
+
+error: test failed, to rerun pass `--test integration`
