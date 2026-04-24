@@ -42,9 +42,7 @@ export function renderBlocksMarkdown(blocks) {
         .slice(0, i)
         .reverse()
         .find((entry) => entry.text);
-      const sameList =
-        cur.list && prev?.list && (cur.list.id || '') === (prev.list.id || '');
-      if (sameList) {
+      if (cur.list && prev?.list) {
         joined.push('\n');
       } else if (cur.quote && prev?.quote) {
         joined.push('\n>\n');
@@ -75,7 +73,7 @@ function renderParagraphMarkdown(block, context = {}) {
     return `## ${text}`;
   }
   if (block.list) {
-    const indent = '  '.repeat(Math.max(0, block.list.level || 0));
+    const indent = '    '.repeat(Math.max(0, block.list.level || 0));
     const orderedIndex = Math.max(1, Number(context.orderedIndex) || 1);
     const marker = block.list.ordered ? `${orderedIndex}.` : '-';
     return `${indent}${marker} ${text}`;

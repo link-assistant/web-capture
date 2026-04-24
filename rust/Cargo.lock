@@ -3335,14 +3335,16 @@ dependencies = [
 
 [[package]]
 name = "web-capture"
-version = "0.3.3"
+version = "0.3.5"
 dependencies = [
  "anyhow",
+ "async-tungstenite",
  "axum",
  "base64 0.22.1",
  "browser-commander",
  "clap",
  "encoding_rs",
+ "futures",
  "html-escape",
  "html2md",
  "lino-arguments",

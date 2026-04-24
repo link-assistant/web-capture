@@ -1,0 +1,9 @@
+2026-04-21T11:58:14.874582Z DEBUG web_capture: starting capture url=https://docs.google.com/document/d/1f5zI2xOFpKa90v0GjamO_t7lqSdzMlaM/edit format=markdown capture=browser has_api_token=false
+2026-04-21T11:58:14.875700Z DEBUG web_capture: selected Google Docs capture method url=https://docs.google.com/document/d/1f5zI2xOFpKa90v0GjamO_t7lqSdzMlaM/edit method=BrowserModel format=markdown model_format=true has_api_token=false
+2026-04-21T11:58:14.875987Z DEBUG web_capture::gdocs: capturing Google Doc editor model with a real browser document_id=1f5zI2xOFpKa90v0GjamO_t7lqSdzMlaM edit_url=https://docs.google.com/document/d/1f5zI2xOFpKa90v0GjamO_t7lqSdzMlaM/edit
+2026-04-21T11:58:14.876671Z DEBUG web_capture::gdocs: launching headless Chrome CDP session for Google Docs model capture document_id=1f5zI2xOFpKa90v0GjamO_t7lqSdzMlaM chrome=/usr/bin/google-chrome user_data_dir=/tmp/web-capture-chrome-1567296-1776772694876366185-0 edit_url=https://docs.google.com/document/d/1f5zI2xOFpKa90v0GjamO_t7lqSdzMlaM/edit
+2026-04-21T11:58:15.482791Z DEBUG tungstenite::handshake::client: Client handshake done.
+2026-04-21T11:58:15.548470Z DEBUG chromiumoxide::conn::raw_ws::parse_errors: Failed to parse raw WS message msg="{\"method\":\"Page.frameRequestedNavigation\",\"params\":{\"frameId\":\"CA5006E425FD25366523DE08734D7149\",\"reason\":\"initialFrameNavigation\",\"url\":\"about:blank\",\"disposition\":\"currentTab\"},\"sessionId\":\"6417E0E99B8653994D63C99C2EF6B444\"}"
+2026-04-21T11:58:15.548817Z ERROR chromiumoxide::conn: Failed to deserialize WS response data did not match any variant of untagged enum Message
+2026-04-21T11:58:15.548839Z ERROR chromiumoxide::handler: WS Connection error: Serde(Error("data did not match any variant of untagged enum Message", line: 0, column: 0))
+2026-04-21T11:58:15.549058Z DEBUG web_capture::gdocs: failed to close Chrome CDP browser cleanly document_id=1f5zI2xOFpKa90v0GjamO_t7lqSdzMlaM error=send failed because receiver is gone

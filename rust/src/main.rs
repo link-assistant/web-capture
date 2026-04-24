@@ -903,13 +903,8 @@ async fn write_rendered_gdoc(
     label: &str,
 ) -> anyhow::Result<()> {
     if format == "archive" || format == "zip" {
-        let archive = web_capture::gdocs::GDocsArchiveResult {
-            html: rendered.html.clone(),
-            markdown: rendered.markdown.clone(),
-            images: Vec::new(),
-            document_id: rendered.document_id.clone(),
-            export_url: rendered.export_url.clone(),
-        };
+        let archive =
+            web_capture::gdocs::localize_rendered_remote_images_for_archive(rendered).await?;
         let zip_bytes = web_capture::gdocs::create_archive_zip(&archive, !args.no_pretty_html)?;
         write_archive_capture(
             &zip_bytes,
