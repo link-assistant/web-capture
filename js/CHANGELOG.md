@@ -1,5 +1,11 @@
 # @link-assistant/web-capture
 
+## 1.7.16
+
+### Patch Changes
+
+- bf7eaec: Keep Google Docs browser-model soft line breaks outside inline mark tags and preserve image dimensions in HTML output.
+
 ## 1.7.15
 
 ### Patch Changes
