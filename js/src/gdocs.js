@@ -1,4 +1,4 @@
-/* global document, window */
+/* global window */
 // Google Docs capture module.
 //
 // Public export capture uses:
@@ -23,6 +23,10 @@ import {
   fetchGoogleDocByExportFormat as fetchGoogleDocByExportFormatImpl,
   captureGoogleDocWithBrowserOrFallback as captureGoogleDocWithBrowserOrFallbackImpl,
 } from './gdocs-fallback.js';
+import {
+  resolveGoogleDocsModelWaitOptions,
+  waitForGoogleDocsModelQuiescence,
+} from './gdocs-model-wait.js';
 
 export {
   normalizeGoogleDocsExportMarkdown,
@@ -369,7 +373,10 @@ export function captureGoogleDocWithBrowserOrFallback(url, options = {}) {
  * @param {Object} [options] - Capture options
  * @param {string} [options.engine='playwright'] - Browser engine
  * @param {string} [options.apiToken] - Optional Authorization header token
- * @param {number} [options.waitMs=8000] - Post-load wait for chunks
+ * @param {number} [options.waitMs] - Deprecated alias for modelMaxWaitMs
+ * @param {number} [options.modelStabilityMs=1500] - Required quiet period after the last model change
+ * @param {number} [options.modelMaxWaitMs=30000] - Hard timeout for model quiescence
+ * @param {number} [options.modelPollMs=250] - Poll interval while waiting for model quiescence
  * @param {Function} [options.createBrowser] - Browser factory for tests
  * @returns {Promise<{capture: Object, markdown: string, html: string, text: string, documentId: string, exportUrl: string}>}
  */
@@ -377,10 +384,10 @@ export async function captureGoogleDocWithBrowser(url, options = {}) {
   const {
     engine = 'playwright',
     apiToken,
-    waitMs = 8000,
     createBrowser = defaultCreateBrowser,
     log,
   } = options;
+  const modelWait = resolveGoogleDocsModelWaitOptions(options);
   const documentId = extractDocumentId(url);
   if (!documentId) {
     throw new Error(`Not a valid Google Docs URL: ${url}`);
@@ -392,7 +399,9 @@ export async function captureGoogleDocWithBrowser(url, options = {}) {
     documentId,
     editUrl,
     engine,
-    waitMs,
+    modelStabilityMs: modelWait.stabilityMs,
+    modelMaxWaitMs: modelWait.maxWaitMs,
+    modelPollMs: modelWait.pollMs,
     hasApiToken: Boolean(apiToken),
   }));
   const browser = await createBrowser(engine);
@@ -416,35 +425,10 @@ export async function captureGoogleDocWithBrowser(url, options = {}) {
       documentId,
       editUrl,
     }));
-    await waitForPage(page, waitMs);
-
-    const modelData = await evaluateOnPage(page, () => {
-      const chunks = [...(window.__captured_chunks || [])];
-      if (
-        window.DOCS_modelChunk &&
-        chunks.length === 0 &&
-        !chunks.includes(window.DOCS_modelChunk)
-      ) {
-        chunks.push(window.DOCS_modelChunk);
-      }
-      const cidUrlMap = {};
-      const scripts = document.querySelectorAll('script');
-      for (const script of scripts) {
-        const text = script.textContent || '';
-        if (!text.includes('docs-images-rt')) {
-          continue;
-        }
-        const regex =
-          /"([A-Za-z0-9_-]{20,})"\s*:\s*"(https:\/\/docs\.google\.com\/docs-images-rt\/[^"]+)"/g;
-        let match;
-        while ((match = regex.exec(text)) !== null) {
-          cidUrlMap[match[1]] = match[2]
-            .replace(/\\u003d/g, '=')
-            .replace(/\\u0026/g, '&')
-            .replace(/\\\//g, '/');
-        }
-      }
-      return { chunks, cidUrlMap };
+    const modelData = await waitForGoogleDocsModelQuiescence(page, {
+      ...modelWait,
+      documentId,
+      log,
     });
 
     const capture = parseGoogleDocsModelChunks(
@@ -457,6 +441,9 @@ export async function captureGoogleDocWithBrowser(url, options = {}) {
       documentId,
       chunks: modelData.chunks?.length || 0,
       cidUrls: Object.keys(modelData.cidUrlMap || {}).length,
+      chunkPayloadBytes: modelData.chunkPayloadBytes,
+      pollCount: modelData.pollCount,
+      stableForMs: modelData.stableForMs,
       blocks: capture.blocks.length,
       tables: capture.tables.length,
       images: capture.images.length,
@@ -474,6 +461,11 @@ export async function captureGoogleDocWithBrowser(url, options = {}) {
       text: renderGoogleDocsCapture(capture, 'txt'),
       documentId,
       exportUrl: editUrl,
+      diagnostics: {
+        modelChunkPayloadBytes: modelData.chunkPayloadBytes,
+        modelPollCount: modelData.pollCount,
+        modelStableForMs: modelData.stableForMs,
+      },
     };
   } finally {
     if (page) {
@@ -546,30 +538,6 @@ async function installDocsModelCapture(page) {
   } else if (typeof page.addInitScript === 'function') {
     await page.addInitScript(initScript);
   }
-}
-
-async function waitForPage(page, waitMs) {
-  if (waitMs <= 0) {
-    return;
-  }
-  const rawPage = page.rawPage || page;
-  if (typeof rawPage.waitForTimeout === 'function') {
-    await rawPage.waitForTimeout(waitMs);
-    return;
-  }
-  if (typeof page.waitForTimeout === 'function') {
-    await page.waitForTimeout(waitMs);
-    return;
-  }
-  await new Promise((resolve) => setTimeout(resolve, waitMs));
-}
-
-async function evaluateOnPage(page, fn) {
-  const rawPage = page.rawPage || page;
-  if (rawPage !== page && typeof rawPage.evaluate === 'function') {
-    return await rawPage.evaluate(fn);
-  }
-  return await page.evaluate(fn);
 }
 
 /**
