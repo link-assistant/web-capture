@@ -1,5 +1,11 @@
 # @link-assistant/web-capture
 
+## 1.7.14
+
+### Patch Changes
+
+- b2a57f5: Fix Google Docs browser-model capture for live table separators, nested ordered lists, and archive image localization.
+
 ## 1.7.13
 
 ### Patch Changes
