@@ -27,6 +27,10 @@ fn read_issue_104_fixture(filename: &str) -> String {
         .unwrap_or_else(|error| panic!("failed to read {}: {error}", path.display()))
 }
 
+fn read_issue_104_fixture_normalized(filename: &str) -> String {
+    read_issue_104_fixture(filename).replace("\r\n", "\n")
+}
+
 fn load_issue_104_model_fixture() -> (Vec<serde_json::Value>, HashMap<String, String>) {
     let fixture: serde_json::Value = serde_json::from_str(&read_issue_104_fixture(
         "multiline-marked-inline-image-model.json",
@@ -349,7 +353,7 @@ fn test_parse_model_chunks_renders_soft_breaks_and_image_dimensions_issue_104() 
     );
     assert_eq!(
         render_captured_document(&capture, "markdown"),
-        read_issue_104_fixture("multiline-marked-inline-image.expected.md")
+        read_issue_104_fixture_normalized("multiline-marked-inline-image.expected.md")
     );
 }
 
