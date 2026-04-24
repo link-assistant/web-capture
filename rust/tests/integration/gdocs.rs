@@ -1,10 +1,10 @@
 use web_capture::gdocs::{
     build_docs_api_url, build_edit_url, build_export_url, create_archive_zip,
     extract_base64_images, extract_bearer_token, extract_document_id, is_google_docs_url,
-    localize_rendered_remote_images_for_archive, parse_model_chunks,
-    preprocess_google_docs_export_html, render_captured_document, render_docs_api_document,
-    select_capture_method, ExtractedImage, GDocsArchiveResult, GDocsCaptureMethod,
-    GDocsRenderedResult, RemoteImage,
+    localize_rendered_remote_images_for_archive, normalize_google_docs_export_markdown,
+    parse_model_chunks, preprocess_google_docs_export_html, render_captured_document,
+    render_docs_api_document, select_capture_method, ExtractedImage, GDocsArchiveResult,
+    GDocsCaptureMethod, GDocsRenderedResult, RemoteImage,
 };
 
 #[test]
@@ -1061,6 +1061,62 @@ fn test_preprocess_exports_noop_for_regular_html_r6() {
     assert!(out
         .html
         .contains("<p>Plain text with <strong>bold</strong>.</p>"));
+}
+
+#[test]
+fn test_public_export_markdown_normalization_issue_102() {
+    let html = r#"
+        <style>
+          .c5{margin-left:36pt}
+          .c8{margin-left:72pt}
+          .c19{margin-left:108pt}
+          .q{margin-left:24pt;margin-right:24pt}
+          .i{font-style:italic}
+          .s{text-decoration:line-through}
+        </style>
+        <h2><span class="i">1. Headings</span></h2>
+        <p class="q">Quote one.</p>
+        <p class="q">Quote two.</p>
+        <ol><li class="c5">Parent</li></ol>
+        <ol><li class="c8">Child</li></ol>
+        <ol><li class="c19">Grandchild</li></ol>
+        <ol><li class="c5">Parent 2</li></ol>
+        <table>
+          <thead>
+            <tr><td><p>Feature</p></td><td><p>Supported</p></td><tbody></tbody></tr>
+            <tr><td><p><span class="s">Strike</span></p></td><td><p>Yes</p></td></tr>
+          </thead>
+        </table>
+    "#;
+    let preprocessed = preprocess_google_docs_export_html(html);
+    let raw_markdown =
+        web_capture::markdown::convert_html_to_markdown(&preprocessed.html, None).unwrap();
+    let markdown = normalize_google_docs_export_markdown(&raw_markdown);
+
+    assert!(
+        markdown.contains("## 1. Headings"),
+        "markdown was: {markdown}"
+    );
+    assert!(
+        !markdown.contains("*1. Headings*"),
+        "heading style should not leak as inline emphasis: {markdown}"
+    );
+    assert!(
+        markdown.contains("> Quote one.\n>\n> Quote two."),
+        "blockquote paragraphs should stay grouped: {markdown}"
+    );
+    assert!(
+        markdown.contains("1. Parent\n   1. Child\n      1. Grandchild\n2. Parent 2"),
+        "nested list indentation should be preserved: {markdown}"
+    );
+    assert!(
+        markdown.contains("| Feature | Supported |"),
+        "table should be compact: {markdown}"
+    );
+    assert!(
+        markdown.contains("| ~~Strike~~ | Yes |"),
+        "strikethrough should use double tildes in tables: {markdown}"
+    );
 }
 
 #[test]

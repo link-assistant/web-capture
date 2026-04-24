@@ -1,0 +1,8 @@
+   Compiling web-capture v0.3.6 (/tmp/gh-issue-solver-1777041944196/rust)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 6.38s
+     Running tests/integration/mod.rs (target/debug/deps/integration-1605a3b8ff1fae98)
+
+running 1 test
+test gdocs::test_public_export_markdown_normalization_issue_102 ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 85 filtered out; finished in 0.13s

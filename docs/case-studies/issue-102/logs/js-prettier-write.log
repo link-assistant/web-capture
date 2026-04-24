@@ -1,0 +1,4 @@
+src/gdocs.js 178ms (unchanged)
+src/gdocs-preprocess.js 40ms
+tests/unit/gdocs.test.js 85ms (unchanged)
+tests/integration/gdocs-public-doc.test.js 17ms (unchanged)

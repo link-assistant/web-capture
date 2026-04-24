@@ -227,25 +227,26 @@ async fn live_capture_of_public_document_preserves_every_section() {
         "captured markdown unexpectedly short: {} bytes",
         result.content.len()
     );
-    // The public-export HTML-to-Markdown pipeline escapes dots after leading
-    // numerals (e.g. `1\. Headings`). That defect is tracked as R2 in the
-    // case study; until it is fixed we normalise the escapes so this
-    // regression guard only covers content preservation. See
-    // docs/case-studies/issue-90/README.md for the follow-up plan.
-    let normalized = result
-        .content
-        .replace("\\.", ".")
-        .replace("\\!", "!")
-        .replace("\\(", "(")
-        .replace("\\)", ")")
-        .replace("\\[", "[")
-        .replace("\\]", "]");
     for section in SECTION_HEADINGS {
         assert!(
-            normalized.contains(section),
+            result.content.contains(section),
             "captured markdown is missing section `{section}`"
         );
     }
+    assert!(result.content.contains("## 1. Headings"));
+    assert!(result.content.contains("**This text is bold**"));
+    assert!(result.content.contains("*This text is italic*"));
+    assert!(result.content.contains("~~This text has strikethrough~~"));
+    assert!(result
+        .content
+        .contains("> This is a single-level blockquote"));
+    assert!(result.content.contains("| Feature | Supported | Notes |"));
+    assert!(!result.content.contains("| Feature |  | Supported |"));
+    assert!(result.content.contains("|  | x |  |"));
+    assert!(result.content.contains("1. Parent item 1"));
+    assert!(result.content.contains("   1. Child item 1.1"));
+    assert!(result.content.contains("      1. Grandchild item 1.2.1"));
+    assert!(!result.content.contains("- Child item 1.1"));
 }
 
 #[tokio::test]

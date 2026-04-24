@@ -507,8 +507,9 @@ pub async fn fetch_google_doc_as_markdown(
         unwrapped_links = preprocess.unwrapped_links,
         "google-docs-export pre-processor rewrote markup"
     );
-    let markdown =
-        crate::markdown::convert_html_to_markdown(&preprocess.html, Some(&result.export_url))?;
+    let markdown = normalize_google_docs_export_markdown(
+        &crate::markdown::convert_html_to_markdown(&preprocess.html, Some(&result.export_url))?,
+    );
     debug!(
         document_id = %result.document_id,
         bytes = markdown.len(),
@@ -553,7 +554,9 @@ pub fn preprocess_google_docs_export_html(html: &str) -> GDocsExportPreprocessRe
     let mut out = hoist_inline_style_spans(html, &mut hoisted);
     out = hoist_class_style_spans(&out, &class_styles, &mut hoisted);
     out = convert_class_indented_blockquotes(&out, &class_styles);
+    out = nest_google_docs_lists(&out, &class_styles);
     out = strip_google_docs_heading_noise(&out);
+    out = strip_heading_inline_formatting(&out);
     out = unwrap_google_redirect_links(&out, &mut unwrapped_links);
     out = out.replace("&nbsp;", " ");
     out = out.replace('\u{00A0}', " ");
@@ -563,6 +566,19 @@ pub fn preprocess_google_docs_export_html(html: &str) -> GDocsExportPreprocessRe
         hoisted,
         unwrapped_links,
     }
+}
+
+/// Normalize Markdown emitted from Google Docs public-export HTML converters.
+#[must_use]
+pub fn normalize_google_docs_export_markdown(markdown: &str) -> String {
+    let markdown = unescape_public_export_punctuation(markdown);
+    let markdown = convert_setext_headings(&markdown);
+    let markdown = normalize_atx_headings(&markdown);
+    let markdown = normalize_bullet_markers(&markdown);
+    let markdown = normalize_list_spacing(&markdown);
+    let markdown = normalize_blockquote_spacing(&markdown);
+    let markdown = normalize_markdown_tables(&markdown);
+    crate::markdown::clean_markdown(&markdown)
 }
 
 fn hoist_inline_style_spans(html: &str, hoisted: &mut usize) -> String {
@@ -626,6 +642,240 @@ fn convert_class_indented_blockquotes(
         .into_owned()
 }
 
+#[derive(Debug, Clone)]
+struct ExportListBlock {
+    start: usize,
+    end: usize,
+    tag: String,
+    inner: String,
+}
+
+#[derive(Debug, Clone)]
+struct ExportListItem {
+    tag: String,
+    level: usize,
+    inner: String,
+}
+
+fn nest_google_docs_lists(html: &str, class_styles: &HashMap<String, String>) -> String {
+    let list_re = Regex::new(r"(?is)<(ul|ol)\b([^>]*)>(.*?)</(ul|ol)>").expect("valid regex");
+    let blocks: Vec<ExportListBlock> = list_re
+        .captures_iter(html)
+        .filter_map(|caps| {
+            let open_tag = caps.get(1)?.as_str().to_ascii_lowercase();
+            let close_tag = caps.get(4)?.as_str().to_ascii_lowercase();
+            if open_tag != close_tag {
+                return None;
+            }
+            let whole = caps.get(0)?;
+            Some(ExportListBlock {
+                start: whole.start(),
+                end: whole.end(),
+                tag: open_tag,
+                inner: caps.get(3).map_or("", |m| m.as_str()).to_string(),
+            })
+        })
+        .collect();
+
+    if blocks.len() < 2 {
+        return html.to_string();
+    }
+
+    let mut groups: Vec<Vec<ExportListBlock>> = Vec::new();
+    let mut current: Vec<ExportListBlock> = Vec::new();
+    for block in blocks {
+        if let Some(previous) = current.last() {
+            if !html[previous.end..block.start].trim().is_empty() {
+                if current.len() > 1 {
+                    groups.push(std::mem::take(&mut current));
+                } else {
+                    current.clear();
+                }
+            }
+        }
+        current.push(block);
+    }
+    if current.len() > 1 {
+        groups.push(current);
+    }
+
+    if groups.is_empty() {
+        return html.to_string();
+    }
+
+    let mut out = html.to_string();
+    for group in groups.iter().rev() {
+        let rendered = render_nested_list_group(group, class_styles);
+        let start = group.first().expect("non-empty group").start;
+        let end = group.last().expect("non-empty group").end;
+        out.replace_range(start..end, &rendered);
+    }
+    out
+}
+
+fn render_nested_list_group(
+    group: &[ExportListBlock],
+    class_styles: &HashMap<String, String>,
+) -> String {
+    let item_re = Regex::new(r"(?is)<li\b([^>]*)>(.*?)</li>").expect("valid regex");
+    let items: Vec<ExportListItem> = group
+        .iter()
+        .flat_map(|block| {
+            item_re.captures_iter(&block.inner).map(|caps| {
+                let attrs = caps.get(1).map_or("", |m| m.as_str());
+                let inner = caps.get(2).map_or("", |m| m.as_str()).to_string();
+                ExportListItem {
+                    tag: block.tag.clone(),
+                    level: google_docs_list_item_level(attrs, class_styles),
+                    inner,
+                }
+            })
+        })
+        .collect();
+
+    if items.is_empty() {
+        let mut unchanged = String::new();
+        for block in group {
+            write!(unchanged, "<{}>{}</{}>", block.tag, block.inner, block.tag)
+                .expect("write to String");
+        }
+        return unchanged;
+    }
+
+    let mut html = String::new();
+    let mut current_level: Option<usize> = None;
+    let mut open_tags: Vec<Option<String>> = Vec::new();
+    let mut item_open: Vec<bool> = Vec::new();
+
+    for item in items {
+        let level = item.level;
+        while current_level.is_some_and(|current| current > level) {
+            let current = current_level.expect("checked as Some");
+            close_rendered_list(&mut html, &mut open_tags, &mut item_open, current);
+            current_level = current.checked_sub(1);
+        }
+
+        while current_level.is_none_or(|current| current < level) {
+            let next_level = current_level.map_or(0, |current| current + 1);
+            open_rendered_list(
+                &mut html,
+                &mut open_tags,
+                &mut item_open,
+                next_level,
+                &item.tag,
+            );
+            current_level = Some(next_level);
+        }
+
+        ensure_list_stack(&mut open_tags, &mut item_open, level);
+        if open_tags[level]
+            .as_deref()
+            .is_some_and(|tag| tag != item.tag)
+        {
+            close_rendered_list(&mut html, &mut open_tags, &mut item_open, level);
+            open_rendered_list(&mut html, &mut open_tags, &mut item_open, level, &item.tag);
+        } else if open_tags[level].is_none() {
+            open_rendered_list(&mut html, &mut open_tags, &mut item_open, level, &item.tag);
+        }
+
+        close_rendered_item(&mut html, &mut item_open, level);
+        html.push_str("<li>");
+        html.push_str(&item.inner);
+        item_open[level] = true;
+
+        for deeper in (level + 1)..item_open.len() {
+            item_open[deeper] = false;
+            open_tags[deeper] = None;
+        }
+    }
+
+    while let Some(current) = current_level {
+        close_rendered_list(&mut html, &mut open_tags, &mut item_open, current);
+        current_level = current.checked_sub(1);
+    }
+
+    html
+}
+
+fn ensure_list_stack(open_tags: &mut Vec<Option<String>>, item_open: &mut Vec<bool>, level: usize) {
+    while open_tags.len() <= level {
+        open_tags.push(None);
+        item_open.push(false);
+    }
+}
+
+fn open_rendered_list(
+    html: &mut String,
+    open_tags: &mut Vec<Option<String>>,
+    item_open: &mut Vec<bool>,
+    level: usize,
+    tag: &str,
+) {
+    ensure_list_stack(open_tags, item_open, level);
+    html.push('<');
+    html.push_str(tag);
+    html.push('>');
+    open_tags[level] = Some(tag.to_string());
+    item_open[level] = false;
+}
+
+fn close_rendered_item(html: &mut String, item_open: &mut [bool], level: usize) {
+    if item_open.get(level).copied().unwrap_or(false) {
+        html.push_str("</li>");
+        item_open[level] = false;
+    }
+}
+
+fn close_rendered_list(
+    html: &mut String,
+    open_tags: &mut [Option<String>],
+    item_open: &mut [bool],
+    level: usize,
+) {
+    close_rendered_item(html, item_open, level);
+    if let Some(tag) = open_tags.get_mut(level).and_then(Option::take) {
+        html.push_str("</");
+        html.push_str(&tag);
+        html.push('>');
+    }
+}
+
+fn google_docs_list_item_level(attrs: &str, class_styles: &HashMap<String, String>) -> usize {
+    let style = combined_attr_style(class_styles, attrs);
+    let margin_left = css_point_value(&style, "margin-left");
+    if margin_left <= 0.0 {
+        return 0;
+    }
+    [54.0, 90.0, 126.0, 162.0, 198.0, 234.0, 270.0, 306.0]
+        .iter()
+        .take_while(|boundary| margin_left >= **boundary)
+        .count()
+}
+
+fn combined_attr_style(class_styles: &HashMap<String, String>, attrs: &str) -> String {
+    let mut styles = String::new();
+    if let Some(style) = attr_value(attrs, "style") {
+        styles.push_str(&style);
+    }
+    if let Some(class_attr) = attr_value(attrs, "class") {
+        styles.push_str(&combined_class_style(class_styles, &class_attr));
+    }
+    styles
+}
+
+fn attr_value(attrs: &str, name: &str) -> Option<String> {
+    let attr_re = Regex::new(&format!(
+        r#"(?is)\b{}\s*=\s*(?:"([^"]*)"|'([^']*)')"#,
+        regex::escape(name)
+    ))
+    .expect("valid regex");
+    attr_re.captures(attrs).and_then(|caps| {
+        caps.get(1)
+            .or_else(|| caps.get(2))
+            .map(|value| value.as_str().to_string())
+    })
+}
+
 fn strip_google_docs_heading_noise(html: &str) -> String {
     let empty_anchor_re = Regex::new(r#"(?is)<a\s+id="[^"]*"\s*>\s*</a>"#).expect("valid regex");
     let numbering_re =
@@ -641,6 +891,25 @@ fn strip_google_docs_heading_noise(html: &str) -> String {
                 let close = &caps[3];
                 let mut cleaned = empty_anchor_re.replace_all(inner, "").into_owned();
                 cleaned = numbering_re.replace_all(&cleaned, "").into_owned();
+                format!("{open}{cleaned}{close}")
+            })
+            .into_owned();
+    }
+    out
+}
+
+fn strip_heading_inline_formatting(html: &str) -> String {
+    let inline_marker_re = Regex::new(r"(?is)</?(?:strong|em|del)>").expect("valid regex");
+    let mut out = html.to_string();
+    for level in 1..=6 {
+        let heading_re = Regex::new(&format!(r"(?is)(<h{level}\b[^>]*>)(.*?)(</h{level}>)"))
+            .expect("valid regex");
+        out = heading_re
+            .replace_all(&out, |caps: &regex::Captures<'_>| {
+                let open = &caps[1];
+                let inner = &caps[2];
+                let close = &caps[3];
+                let cleaned = inline_marker_re.replace_all(inner, "");
                 format!("{open}{cleaned}{close}")
             })
             .into_owned();
@@ -772,6 +1041,250 @@ fn percent_decode_utf8_lossy(input: &str) -> String {
         i += 1;
     }
     String::from_utf8_lossy(&decoded).into_owned()
+}
+
+fn unescape_public_export_punctuation(markdown: &str) -> String {
+    markdown
+        .replace("\\.", ".")
+        .replace("\\!", "!")
+        .replace("\\(", "(")
+        .replace("\\)", ")")
+        .replace("\\[", "[")
+        .replace("\\]", "]")
+}
+
+fn convert_setext_headings(markdown: &str) -> String {
+    let lines: Vec<&str> = markdown.lines().collect();
+    let mut out = Vec::with_capacity(lines.len());
+    let mut index = 0;
+    while index < lines.len() {
+        if index + 1 < lines.len() {
+            let underline = lines[index + 1].trim();
+            if is_setext_underline(underline, '=') {
+                out.push(format!("# {}", lines[index].trim()));
+                index += 2;
+                continue;
+            }
+            if is_setext_underline(underline, '-') {
+                out.push(format!("## {}", lines[index].trim()));
+                index += 2;
+                continue;
+            }
+        }
+        out.push(lines[index].to_string());
+        index += 1;
+    }
+    out.join("\n")
+}
+
+fn is_setext_underline(line: &str, marker: char) -> bool {
+    line.len() >= 5 && line.chars().all(|ch| ch == marker)
+}
+
+fn normalize_atx_headings(markdown: &str) -> String {
+    let heading_re = Regex::new(r"^(#{1,6})\s+(.+?)\s*$").expect("valid regex");
+    let closing_re = closing_atx_heading_re();
+    markdown
+        .lines()
+        .map(|line| {
+            let Some(caps) = heading_re.captures(line) else {
+                return line.to_string();
+            };
+            let hashes = caps.get(1).map_or("", |m| m.as_str());
+            let mut text = caps.get(2).map_or("", |m| m.as_str()).trim().to_string();
+            text = closing_re.replace(&text, "").trim().to_string();
+            text = strip_wrapping_markdown_emphasis(&text);
+            format!("{hashes} {text}")
+        })
+        .collect::<Vec<_>>()
+        .join("\n")
+}
+
+fn strip_wrapping_markdown_emphasis(text: &str) -> String {
+    let trimmed = text.trim();
+    for marker in ["***", "**", "*"] {
+        if trimmed.len() > marker.len() * 2
+            && trimmed.starts_with(marker)
+            && trimmed.ends_with(marker)
+        {
+            return trimmed[marker.len()..trimmed.len() - marker.len()]
+                .trim()
+                .to_string();
+        }
+    }
+    trimmed.to_string()
+}
+
+fn normalize_bullet_markers(markdown: &str) -> String {
+    let bullet_re = asterisk_bullet_re();
+    markdown
+        .lines()
+        .map(|line| bullet_re.replace(line, "$1- ").into_owned())
+        .collect::<Vec<_>>()
+        .join("\n")
+}
+
+fn normalize_list_spacing(markdown: &str) -> String {
+    let lines: Vec<&str> = markdown.lines().collect();
+    let mut out = Vec::with_capacity(lines.len());
+
+    for (index, line) in lines.iter().enumerate() {
+        if line.trim().is_empty()
+            && previous_non_empty_line(&lines, index).is_some_and(is_markdown_list_item)
+            && next_non_empty_line(&lines, index).is_some_and(is_markdown_list_item)
+        {
+            continue;
+        }
+        out.push((*line).to_string());
+    }
+
+    out.join("\n")
+}
+
+fn previous_non_empty_line<'a>(lines: &'a [&str], index: usize) -> Option<&'a str> {
+    lines[..index]
+        .iter()
+        .rev()
+        .copied()
+        .find(|line| !line.trim().is_empty())
+}
+
+fn next_non_empty_line<'a>(lines: &'a [&str], index: usize) -> Option<&'a str> {
+    lines[index + 1..]
+        .iter()
+        .copied()
+        .find(|line| !line.trim().is_empty())
+}
+
+fn is_markdown_list_item(line: &str) -> bool {
+    markdown_list_item_re().is_match(line)
+}
+
+fn normalize_blockquote_spacing(markdown: &str) -> String {
+    let mut out = String::with_capacity(markdown.len());
+    let mut pending_quote_blank = false;
+    let mut in_quote = false;
+
+    for line in markdown.lines() {
+        if line.trim().is_empty() && in_quote {
+            pending_quote_blank = true;
+            continue;
+        }
+
+        if line.trim() == ">" {
+            if in_quote {
+                pending_quote_blank = true;
+            }
+            continue;
+        }
+
+        if line.starts_with("> ") {
+            if pending_quote_blank {
+                out.push_str(">\n");
+                pending_quote_blank = false;
+            }
+            out.push_str(line);
+            out.push('\n');
+            in_quote = true;
+            continue;
+        }
+
+        if in_quote && !line.trim().is_empty() {
+            out.push('\n');
+        }
+        pending_quote_blank = false;
+        in_quote = false;
+        out.push_str(line);
+        out.push('\n');
+    }
+
+    out
+}
+
+fn normalize_markdown_tables(markdown: &str) -> String {
+    let lines: Vec<&str> = markdown.lines().collect();
+    let mut out = Vec::with_capacity(lines.len());
+    let mut index = 0;
+
+    while index < lines.len() {
+        if !is_markdown_table_line(lines[index]) {
+            out.push(lines[index].to_string());
+            index += 1;
+            continue;
+        }
+
+        let start = index;
+        while index < lines.len() && is_markdown_table_line(lines[index]) {
+            index += 1;
+        }
+        let block = &lines[start..index];
+        if block.len() >= 2 && is_markdown_separator_line(block[1]) {
+            out.extend(normalize_markdown_table_block(block));
+        } else {
+            out.extend(block.iter().map(|line| (*line).to_string()));
+        }
+    }
+
+    out.join("\n")
+}
+
+fn is_markdown_table_line(line: &str) -> bool {
+    let trimmed = line.trim();
+    trimmed.starts_with('|') && trimmed.ends_with('|') && trimmed.matches('|').count() >= 2
+}
+
+fn is_markdown_separator_line(line: &str) -> bool {
+    split_markdown_table_cells(line)
+        .iter()
+        .all(|cell| markdown_table_separator_cell_re().is_match(cell))
+}
+
+fn normalize_markdown_table_block(lines: &[&str]) -> Vec<String> {
+    lines
+        .iter()
+        .enumerate()
+        .map(|(index, line)| {
+            let cells = split_markdown_table_cells(line);
+            if index == 1 {
+                let separators = vec!["---".to_string(); cells.len()];
+                render_markdown_table_row(&separators)
+            } else {
+                render_markdown_table_row(&cells)
+            }
+        })
+        .collect()
+}
+
+fn split_markdown_table_cells(line: &str) -> Vec<String> {
+    line.trim()
+        .trim_matches('|')
+        .split('|')
+        .map(|cell| cell.trim().to_string())
+        .collect()
+}
+
+fn render_markdown_table_row(cells: &[String]) -> String {
+    format!("| {} |", cells.join(" | "))
+}
+
+fn closing_atx_heading_re() -> &'static Regex {
+    static RE: OnceLock<Regex> = OnceLock::new();
+    RE.get_or_init(|| Regex::new(r"\s+#{1,6}$").expect("valid regex"))
+}
+
+fn asterisk_bullet_re() -> &'static Regex {
+    static RE: OnceLock<Regex> = OnceLock::new();
+    RE.get_or_init(|| Regex::new(r"^(\s*)\* ").expect("valid regex"))
+}
+
+fn markdown_list_item_re() -> &'static Regex {
+    static RE: OnceLock<Regex> = OnceLock::new();
+    RE.get_or_init(|| Regex::new(r"^\s*(?:[-+*]|\d+\.)\s+").expect("valid regex"))
+}
+
+fn markdown_table_separator_cell_re() -> &'static Regex {
+    static RE: OnceLock<Regex> = OnceLock::new();
+    RE.get_or_init(|| Regex::new(r"^:?-{3,}:?$").expect("valid regex"))
 }
 
 /// Fetch and render a Google Docs document via the authenticated REST API.
@@ -2650,7 +3163,9 @@ pub async fn fetch_google_doc_as_archive(
 
     let (local_html, images) = extract_base64_images(&preprocess.html);
 
-    let markdown = crate::markdown::convert_html_to_markdown(&local_html, None)?;
+    let markdown = normalize_google_docs_export_markdown(
+        &crate::markdown::convert_html_to_markdown(&local_html, None)?,
+    );
 
     debug!(
         "Archive prepared: {} images extracted, {} bytes HTML, {} bytes Markdown",

@@ -1,0 +1,5 @@
+Found 1 changeset file(s)
+Validating changeset: js/.changeset/fix-gdocs-public-export-fidelity.md
+✅ Changeset validation passed
+   Type: patch
+   Description: Improve Google Docs public-export Markdown fidelity for headings, strikethrough, blockquotes, nested lists, and tables.

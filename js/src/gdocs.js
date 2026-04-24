@@ -11,7 +11,10 @@ import fetch from 'node-fetch';
 import he from 'he';
 import { convertHtmlToMarkdown } from './lib.js';
 import { createBrowser as defaultCreateBrowser } from './browser.js';
-import { preprocessGoogleDocsExportHtml } from './gdocs-preprocess.js';
+import {
+  normalizeGoogleDocsExportMarkdown,
+  preprocessGoogleDocsExportHtml,
+} from './gdocs-preprocess.js';
 import { localizeGoogleDocsModelImages } from './gdocs-images.js';
 import { renderBlocksMarkdown } from './gdocs-render-markdown.js';
 import {
@@ -22,6 +25,7 @@ import {
 } from './gdocs-fallback.js';
 
 export {
+  normalizeGoogleDocsExportMarkdown,
   preprocessGoogleDocsExportHtml,
   localizeGoogleDocsModelImages,
   isGoogleDocsBrowserModelUnavailableError,
@@ -305,7 +309,9 @@ export async function fetchGoogleDocAsMarkdown(url, options = {}) {
     hoisted: preprocessed.hoisted,
     unwrappedLinks: preprocessed.unwrappedLinks,
   }));
-  const markdown = convertHtmlToMarkdown(preprocessed.html, result.exportUrl);
+  const markdown = normalizeGoogleDocsExportMarkdown(
+    convertHtmlToMarkdown(preprocessed.html, result.exportUrl)
+  );
   log?.debug?.(() => ({
     event: 'gdocs.public-export.markdown',
     documentId: result.documentId,
@@ -1354,7 +1360,9 @@ export async function fetchGoogleDocAsArchive(url, options = {}) {
   const { html: localHtml, images } = extractBase64Images(preprocessed.html);
 
   // Convert the localized HTML to Markdown
-  const markdown = convertHtmlToMarkdown(localHtml);
+  const markdown = normalizeGoogleDocsExportMarkdown(
+    convertHtmlToMarkdown(localHtml)
+  );
   log?.debug?.(() => ({
     event: 'gdocs.public-export.archive',
     documentId: result.documentId,
