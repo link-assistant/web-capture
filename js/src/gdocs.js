@@ -1219,7 +1219,17 @@ function renderContentHtml(content = []) {
 }
 
 function renderMarkedHtml(node) {
-  let output = escapeHtml(node.text || '').replace(/\n/g, '<br>');
+  return String(node.text || '')
+    .split('\n')
+    .map((segment) => renderMarkedHtmlSegment(node, segment))
+    .join('<br>');
+}
+
+function renderMarkedHtmlSegment(node, text) {
+  if (!text) {
+    return '';
+  }
+  let output = escapeHtml(text);
   if (node.bold) {
     output = `<strong>${output}</strong>`;
   }

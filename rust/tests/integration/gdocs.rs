@@ -1,11 +1,52 @@
+use std::collections::HashMap;
+use std::fs;
+use std::path::PathBuf;
+
 use web_capture::gdocs::{
     build_docs_api_url, build_edit_url, build_export_url, create_archive_zip,
     extract_base64_images, extract_bearer_token, extract_document_id, is_google_docs_url,
     localize_rendered_remote_images_for_archive, normalize_google_docs_export_markdown,
     parse_model_chunks, preprocess_google_docs_export_html, render_captured_document,
-    render_docs_api_document, select_capture_method, ExtractedImage, GDocsArchiveResult,
-    GDocsCaptureMethod, GDocsRenderedResult, RemoteImage,
+    render_docs_api_document, select_capture_method, CapturedBlock, CapturedDocument, ContentNode,
+    ExtractedImage, GDocsArchiveResult, GDocsCaptureMethod, GDocsRenderedResult, RemoteImage,
 };
+
+fn issue_104_fixture_path(filename: &str) -> PathBuf {
+    PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .join("..")
+        .join("docs")
+        .join("case-studies")
+        .join("issue-104")
+        .join("fixtures")
+        .join(filename)
+}
+
+fn read_issue_104_fixture(filename: &str) -> String {
+    let path = issue_104_fixture_path(filename);
+    fs::read_to_string(&path)
+        .unwrap_or_else(|error| panic!("failed to read {}: {error}", path.display()))
+}
+
+fn load_issue_104_model_fixture() -> (Vec<serde_json::Value>, HashMap<String, String>) {
+    let fixture: serde_json::Value = serde_json::from_str(&read_issue_104_fixture(
+        "multiline-marked-inline-image-model.json",
+    ))
+    .expect("issue 104 model fixture should be valid JSON");
+    let chunks = fixture
+        .get("chunks")
+        .and_then(serde_json::Value::as_array)
+        .expect("fixture should include chunks")
+        .clone();
+    let cid_urls = fixture
+        .get("cidUrlMap")
+        .and_then(serde_json::Value::as_object)
+        .expect("fixture should include cidUrlMap")
+        .iter()
+        .filter_map(|(key, value)| value.as_str().map(|url| (key.clone(), url.to_string())))
+        .collect();
+
+    (chunks, cid_urls)
+}
 
 #[test]
 fn test_is_google_docs_url_valid() {
@@ -236,6 +277,109 @@ fn test_parse_model_chunks_renders_style_records() {
     assert!(markdown.contains("- Item"));
     assert!(markdown.contains("> Quote"));
     assert!(markdown.contains("![Blue rectangle](https://docs.google.com/docs-images-rt/image-id)"));
+}
+
+#[test]
+fn test_parse_model_chunks_renders_soft_breaks_and_image_dimensions_issue_104() {
+    let (chunks, cid_urls) = load_issue_104_model_fixture();
+    let capture = parse_model_chunks(&chunks, &cid_urls);
+
+    let CapturedBlock::Paragraph { content, .. } = &capture.blocks[0] else {
+        panic!("issue 104 fixture should produce one paragraph block");
+    };
+    assert_eq!(
+        content[0],
+        ContentNode::Text {
+            text: "Line one of bold text.".to_string(),
+            bold: true,
+            italic: false,
+            strike: false,
+            link: None,
+        }
+    );
+    assert_eq!(
+        content[1],
+        ContentNode::Text {
+            text: "\n".to_string(),
+            bold: false,
+            italic: false,
+            strike: false,
+            link: None,
+        }
+    );
+    assert_eq!(
+        content[2],
+        ContentNode::Text {
+            text: "Line two of bold text.".to_string(),
+            bold: true,
+            italic: false,
+            strike: false,
+            link: None,
+        }
+    );
+    assert!(
+        matches!(&content[3], ContentNode::Image { alt, .. } if alt == "Inline diagram"),
+        "expected inline image at content index 3, got {:?}",
+        content[3]
+    );
+    assert_eq!(
+        content[4],
+        ContentNode::Text {
+            text: "\n\n".to_string(),
+            bold: false,
+            italic: false,
+            strike: false,
+            link: None,
+        }
+    );
+    assert_eq!(
+        content[5],
+        ContentNode::Text {
+            text: "Line three of bold text.".to_string(),
+            bold: true,
+            italic: false,
+            strike: false,
+            link: None,
+        }
+    );
+
+    assert_eq!(
+        render_captured_document(&capture, "html"),
+        read_issue_104_fixture("multiline-marked-inline-image.expected.html").trim_end()
+    );
+    assert_eq!(
+        render_captured_document(&capture, "markdown"),
+        read_issue_104_fixture("multiline-marked-inline-image.expected.md")
+    );
+}
+
+#[test]
+fn test_render_markdown_and_html_close_marks_around_embedded_newlines_issue_104() {
+    let capture = CapturedDocument {
+        blocks: vec![CapturedBlock::Paragraph {
+            content: vec![ContentNode::Text {
+                text: "Alpha\nBeta".to_string(),
+                bold: true,
+                italic: false,
+                strike: false,
+                link: None,
+            }],
+            style: None,
+            list: None,
+            quote: false,
+            horizontal_rule: false,
+        }],
+        ..CapturedDocument::default()
+    };
+
+    assert_eq!(
+        render_captured_document(&capture, "html"),
+        "<!doctype html><html><body><p><strong>Alpha</strong><br><strong>Beta</strong></p></body></html>"
+    );
+    assert_eq!(
+        render_captured_document(&capture, "markdown"),
+        "**Alpha**\n**Beta**\n"
+    );
 }
 
 #[test]

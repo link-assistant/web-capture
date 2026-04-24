@@ -279,6 +279,10 @@ pub enum ContentNode {
         url: Option<String>,
         /// Alt text.
         alt: String,
+        /// Editor-model image width, when available.
+        width: Option<String>,
+        /// Editor-model image height, when available.
+        height: Option<String>,
         /// Whether this image came from a suggested edit.
         is_suggestion: bool,
     },
@@ -1911,8 +1915,18 @@ fn inline_object_to_image(inline_id: &str, inline_objects: &Value) -> Option<Con
         cid: None,
         url: Some(url.to_string()),
         alt: alt.to_string(),
+        width: json_dimension_to_string(embedded.pointer("/size/width/magnitude")),
+        height: json_dimension_to_string(embedded.pointer("/size/height/magnitude")),
         is_suggestion: false,
     })
+}
+
+fn json_dimension_to_string(value: Option<&Value>) -> Option<String> {
+    match value? {
+        Value::Number(number) => Some(number.to_string()),
+        Value::String(text) if !text.is_empty() => Some(text.clone()),
+        _ => None,
+    }
 }
 
 fn build_model_style_maps(
@@ -2127,6 +2141,8 @@ pub fn parse_model_chunks<S: BuildHasher>(
                     }
                 })
                 .to_string(),
+            width: json_dimension_to_string(item.pointer("/epm/ee_eo/i_wth")),
+            height: json_dimension_to_string(item.pointer("/epm/ee_eo/i_ht")),
             is_suggestion: ty == Some("ase"),
         };
         images_by_pos.insert(pos, node.clone());
@@ -2203,11 +2219,7 @@ pub fn parse_model_chunks<S: BuildHasher>(
                     &mut cell,
                     table.is_some(),
                     "\n",
-                    style_maps
-                        .inline_styles
-                        .get(idx)
-                        .cloned()
-                        .unwrap_or_default(),
+                    TextStyle::default(),
                 );
                 previous_table_control = None;
                 skip_next_table_newline = false;
@@ -2725,9 +2737,26 @@ fn render_text_runs_markdown(runs: &[(&str, bool, bool, bool)]) -> String {
             italic: *italic,
             strike: *strike,
         };
-        output.push_str(&markdown_marker_transition(active, next));
-        output.push_str(text);
-        active = next;
+        let mut start = 0usize;
+        for (offset, ch) in text.char_indices() {
+            if ch != '\n' {
+                continue;
+            }
+            if offset > start {
+                output.push_str(&markdown_marker_transition(active, next));
+                output.push_str(&text[start..offset]);
+                active = next;
+            }
+            output.push_str(&markdown_marker_transition(active, inactive));
+            output.push('\n');
+            active = inactive;
+            start = offset + ch.len_utf8();
+        }
+        if start < text.len() {
+            output.push_str(&markdown_marker_transition(active, next));
+            output.push_str(&text[start..]);
+            active = next;
+        }
     }
     output.push_str(&markdown_marker_transition(active, inactive));
     output
@@ -2816,17 +2845,29 @@ fn render_content_html(content: &[ContentNode]) -> String {
             ContentNode::Image {
                 url: Some(url),
                 alt,
+                width,
+                height,
                 ..
-            } => {
-                format!(
-                    "<img src=\"{}\" alt=\"{}\">",
-                    escape_html(url),
-                    escape_html(alt)
-                )
-            }
+            } => render_image_html(url, alt, width.as_deref(), height.as_deref()),
             ContentNode::Image { .. } => String::new(),
         })
         .collect()
+}
+
+fn render_image_html(url: &str, alt: &str, width: Option<&str>, height: Option<&str>) -> String {
+    let mut html = format!(
+        "<img src=\"{}\" alt=\"{}\"",
+        escape_html(url),
+        escape_html(alt)
+    );
+    if let Some(width) = width.filter(|value| !value.is_empty()) {
+        let _ = write!(html, " width=\"{}\"", escape_html(width));
+    }
+    if let Some(height) = height.filter(|value| !value.is_empty()) {
+        let _ = write!(html, " height=\"{}\"", escape_html(height));
+    }
+    html.push('>');
+    html
 }
 
 fn render_marked_html(
@@ -2836,7 +2877,23 @@ fn render_marked_html(
     strike: bool,
     link: Option<&str>,
 ) -> String {
-    let mut output = escape_html(text).replace('\n', "<br>");
+    text.split('\n')
+        .map(|segment| render_marked_html_segment(segment, bold, italic, strike, link))
+        .collect::<Vec<_>>()
+        .join("<br>")
+}
+
+fn render_marked_html_segment(
+    text: &str,
+    bold: bool,
+    italic: bool,
+    strike: bool,
+    link: Option<&str>,
+) -> String {
+    if text.is_empty() {
+        return String::new();
+    }
+    let mut output = escape_html(text);
     if bold {
         output = format!("<strong>{output}</strong>");
     }
