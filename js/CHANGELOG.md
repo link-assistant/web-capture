@@ -1,5 +1,11 @@
 # @link-assistant/web-capture
 
+## 1.7.15
+
+### Patch Changes
+
+- bf7eaec: Improve Google Docs public-export Markdown fidelity for headings, strikethrough, blockquotes, nested lists, and tables.
+
 ## 1.7.14
 
 ### Patch Changes
