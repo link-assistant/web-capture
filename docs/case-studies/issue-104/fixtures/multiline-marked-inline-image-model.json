@@ -1,0 +1,43 @@
+{
+  "description": "Synthetic DOCS_modelChunk fixture for issue 104: a bold list-like paragraph with soft line breaks and an inline image carrying dimensions.",
+  "cidUrlMap": {
+    "cid_issue104_multiline": "https://docs.google.com/docs-images-rt/issue-104-image.png"
+  },
+  "chunks": [
+    {
+      "chunk": [
+        {
+          "ty": "is",
+          "s": "Line one of bold text.\u000bLine two of bold text.*\u000b\u000bLine three of bold text.\n"
+        },
+        {
+          "ty": "as",
+          "st": "text",
+          "si": 1,
+          "ei": 72,
+          "sm": {
+            "ts_bd": true
+          }
+        },
+        {
+          "ty": "ae",
+          "et": "inline",
+          "id": "image-1",
+          "epm": {
+            "ee_eo": {
+              "i_cid": "cid_issue104_multiline",
+              "eo_ad": "Inline diagram",
+              "i_wth": 320,
+              "i_ht": 180
+            }
+          }
+        },
+        {
+          "ty": "te",
+          "id": "image-1",
+          "spi": 46
+        }
+      ]
+    }
+  ]
+}

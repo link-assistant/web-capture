@@ -138,9 +138,27 @@ function renderTextRunsMarkdown(nodes = []) {
       italic: Boolean(node.italic),
       strike: Boolean(node.strike),
     };
-    output += markdownStyleTransition(active, next);
-    output += node.text || '';
-    active = next;
+    const text = node.text || '';
+    let start = 0;
+    for (let idx = 0; idx < text.length; idx++) {
+      if (text[idx] !== '\n') {
+        continue;
+      }
+      if (idx > start) {
+        output += markdownStyleTransition(active, next);
+        output += text.slice(start, idx);
+        active = next;
+      }
+      output += markdownStyleTransition(active, inactive);
+      output += '\n';
+      active = inactive;
+      start = idx + 1;
+    }
+    if (start < text.length) {
+      output += markdownStyleTransition(active, next);
+      output += text.slice(start);
+      active = next;
+    }
   }
   output += markdownStyleTransition(active, inactive);
   return output;

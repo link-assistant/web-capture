@@ -1,0 +1,75 @@
+
+> @link-assistant/web-capture@1.7.14 check
+> npm run lint && npm run format:check && npm run check:duplication
+
+
+> @link-assistant/web-capture@1.7.14 lint
+> eslint .
+
+
+/tmp/gh-issue-solver-1777052151265/js/bin/web-capture.js
+   32:10  warning  Method 'yargs' has too many lines (232). Maximum allowed is 150                   max-lines-per-function
+  416:1   warning  Async function 'captureUrl' has too many lines (678). Maximum allowed is 150      max-lines-per-function
+  416:1   warning  Async function 'captureUrl' has too many statements (290). Maximum allowed is 60  max-statements
+  416:1   warning  Async function 'captureUrl' has a complexity of 128. Maximum allowed is 15        complexity
+  688:13  warning  Blocks are nested too deeply (6). Maximum allowed is 5                            max-depth
+  711:13  warning  Blocks are nested too deeply (6). Maximum allowed is 5                            max-depth
+  730:13  warning  Blocks are nested too deeply (6). Maximum allowed is 5                            max-depth
+  734:15  warning  Blocks are nested too deeply (7). Maximum allowed is 5                            max-depth
+  745:15  warning  Blocks are nested too deeply (7). Maximum allowed is 5                            max-depth
+
+/tmp/gh-issue-solver-1777052151265/js/src/animation.js
+  93:8  warning  Async function 'captureAnimationFrames' has a complexity of 19. Maximum allowed is 15  complexity
+
+/tmp/gh-issue-solver-1777052151265/js/src/archive.js
+  31:8  warning  Async function 'archiveHandler' has too many statements (66). Maximum allowed is 60  max-statements
+  31:8  warning  Async function 'archiveHandler' has a complexity of 28. Maximum allowed is 15        complexity
+
+/tmp/gh-issue-solver-1777052151265/js/src/docx.js
+  26:8   warning  Async function 'docxHandler' has a complexity of 35. Maximum allowed is 15  complexity
+  77:13  warning  Blocks are nested too deeply (6). Maximum allowed is 5                      max-depth
+
+/tmp/gh-issue-solver-1777052151265/js/src/gdocs-images.js
+  59:8  warning  Async function 'localizeGoogleDocsModelImages' has a complexity of 21. Maximum allowed is 15  complexity
+
+/tmp/gh-issue-solver-1777052151265/js/src/gdocs.js
+  146:8  warning  Async function 'fetchGoogleDoc' has a complexity of 16. Maximum allowed is 15               complexity
+  604:8  warning  Function 'parseGoogleDocsModelChunks' has too many lines (229). Maximum allowed is 150      max-lines-per-function
+  604:8  warning  Function 'parseGoogleDocsModelChunks' has too many statements (109). Maximum allowed is 60  max-statements
+  604:8  warning  Function 'parseGoogleDocsModelChunks' has a complexity of 47. Maximum allowed is 15         complexity
+  872:1  warning  Function 'buildModelStyleMaps' has a complexity of 17. Maximum allowed is 15                complexity
+
+/tmp/gh-issue-solver-1777052151265/js/src/image.js
+  18:8  warning  Async function 'imageHandler' has a complexity of 17. Maximum allowed is 15  complexity
+
+/tmp/gh-issue-solver-1777052151265/js/src/lib.js
+  328:8  warning  Function 'convertHtmlToMarkdownEnhanced' has too many lines (186). Maximum allowed is 150  max-lines-per-function
+  328:8  warning  Function 'convertHtmlToMarkdownEnhanced' has a complexity of 18. Maximum allowed is 15     complexity
+
+/tmp/gh-issue-solver-1777052151265/js/src/metadata.js
+   24:8  warning  Function 'extractMetadata' has too many statements (64). Maximum allowed is 60  max-statements
+   24:8  warning  Function 'extractMetadata' has a complexity of 25. Maximum allowed is 15        complexity
+  172:8  warning  Function 'formatMetadataBlock' has a complexity of 20. Maximum allowed is 15    complexity
+  264:8  warning  Function 'formatFooterBlock' has a complexity of 19. Maximum allowed is 15      complexity
+
+/tmp/gh-issue-solver-1777052151265/js/src/postprocess.js
+  102:17  warning  Arrow function has a complexity of 18. Maximum allowed is 15  complexity
+
+/tmp/gh-issue-solver-1777052151265/js/src/verify.js
+  91:8  warning  Function 'verifyMarkdownContent' has too many lines (190). Maximum allowed is 150     max-lines-per-function
+  91:8  warning  Function 'verifyMarkdownContent' has too many statements (86). Maximum allowed is 60  max-statements
+  91:8  warning  Function 'verifyMarkdownContent' has a complexity of 51. Maximum allowed is 15        complexity
+
+✖ 31 problems (0 errors, 31 warnings)
+
+
+> @link-assistant/web-capture@1.7.14 format:check
+> prettier --check .
+
+Checking formatting...
+All matched files use Prettier code style!
+
+> @link-assistant/web-capture@1.7.14 check:duplication
+> jscpd .
+
+[3m[90mDetection time:[39m[23m: 0.143ms

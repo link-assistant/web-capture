@@ -26,9 +26,25 @@ import {
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
+import { fileURLToPath } from 'url';
 import nock from 'nock';
 
 jest.setTimeout(30000);
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const REPO_ROOT = path.resolve(__dirname, '..', '..', '..');
+const ISSUE_104_FIXTURE_DIR = path.join(
+  REPO_ROOT,
+  'docs',
+  'case-studies',
+  'issue-104',
+  'fixtures'
+);
+
+function readIssue104Fixture(filename) {
+  return fs.readFileSync(path.join(ISSUE_104_FIXTURE_DIR, filename), 'utf-8');
+}
 
 describe('gdocs', () => {
   describe('isGoogleDocsUrl', () => {
@@ -645,6 +661,74 @@ describe('gdocs', () => {
       expect(markdown).toContain('> Quote');
       expect(markdown).toContain(
         '![Blue rectangle](https://docs.google.com/docs-images-rt/image-id)'
+      );
+    });
+
+    it('renders soft breaks outside marks and preserves image dimensions (issue #104)', () => {
+      const fixture = JSON.parse(
+        readIssue104Fixture('multiline-marked-inline-image-model.json')
+      );
+      const capture = parseGoogleDocsModelChunks(
+        fixture.chunks,
+        fixture.cidUrlMap
+      );
+
+      expect(capture.blocks[0].content).toEqual([
+        expect.objectContaining({
+          type: 'text',
+          text: 'Line one of bold text.',
+          bold: true,
+        }),
+        expect.objectContaining({ type: 'text', text: '\n', bold: false }),
+        expect.objectContaining({
+          type: 'text',
+          text: 'Line two of bold text.',
+          bold: true,
+        }),
+        expect.objectContaining({
+          type: 'image',
+          alt: 'Inline diagram',
+          width: 320,
+          height: 180,
+        }),
+        expect.objectContaining({ type: 'text', text: '\n\n', bold: false }),
+        expect.objectContaining({
+          type: 'text',
+          text: 'Line three of bold text.',
+          bold: true,
+        }),
+      ]);
+      expect(renderGoogleDocsCapture(capture, 'html')).toBe(
+        readIssue104Fixture(
+          'multiline-marked-inline-image.expected.html'
+        ).trimEnd()
+      );
+      expect(renderGoogleDocsCapture(capture, 'markdown')).toBe(
+        readIssue104Fixture('multiline-marked-inline-image.expected.md')
+      );
+    });
+
+    it('does not keep inline marks open across embedded newlines (issue #104)', () => {
+      const capture = {
+        blocks: [
+          {
+            type: 'paragraph',
+            content: [
+              {
+                type: 'text',
+                text: 'Alpha\nBeta',
+                bold: true,
+              },
+            ],
+          },
+        ],
+      };
+
+      expect(renderGoogleDocsCapture(capture, 'html')).toBe(
+        '<!doctype html><html><body><p><strong>Alpha</strong><br><strong>Beta</strong></p></body></html>'
+      );
+      expect(renderGoogleDocsCapture(capture, 'markdown')).toBe(
+        '**Alpha**\n**Beta**\n'
       );
     });
 
