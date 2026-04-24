@@ -1,0 +1,27 @@
+npm warn EBADENGINE Unsupported engine {
+npm warn EBADENGINE   package: '@link-assistant/web-capture@1.7.14',
+npm warn EBADENGINE   required: { node: '>=22.0.0 <23.0.0' },
+npm warn EBADENGINE   current: { node: 'v20.20.2', npm: '11.12.1' }
+npm warn EBADENGINE }
+npm warn deprecated supertest@6.3.4: Please upgrade to supertest v7.1.3+, see release notes at https://github.com/forwardemail/supertest/releases/tag/v7.1.3 - maintenance is supported by Forward Email @ https://forwardemail.net
+npm warn deprecated inflight@1.0.6: This module is not supported, and leaks memory. Do not use it. Check out lru-cache if you want a good and tested way to coalesce async requests by a key value, which is much more comprehensive and powerful.
+npm warn deprecated glob@7.2.3: Glob versions prior to v9 are no longer supported
+npm warn deprecated superagent@8.1.2: Please upgrade to superagent v10.2.2+, see release notes at https://github.com/forwardemail/superagent/releases/tag/v10.2.2 - maintenance is supported by Forward Email @ https://forwardemail.net
+npm warn deprecated puppeteer@24.8.2: < 24.15.0 is no longer supported
+npm warn deprecated glob@10.5.0: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
+
+> @link-assistant/web-capture@1.7.14 prepare
+> husky || true
+
+.git can't be found
+added 857 packages, and audited 858 packages in 18s
+
+136 packages are looking for funding
+  run `npm fund` for details
+
+14 vulnerabilities (1 low, 5 moderate, 6 high, 2 critical)
+
+To address all issues, run:
+  npm audit fix
+
+Run `npm audit` for details.

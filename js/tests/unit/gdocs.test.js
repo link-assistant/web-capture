@@ -13,9 +13,11 @@ import {
   renderDocsApiDocument,
   selectGoogleDocsCaptureMethod,
   localizeGoogleDocsModelImages,
+  normalizeGoogleDocsExportMarkdown,
   preprocessGoogleDocsExportHtml,
   GDOCS_EXPORT_FORMATS,
 } from '../../src/gdocs.js';
+import { convertHtmlToMarkdown } from '../../src/lib.js';
 import {
   extractAndSaveImages,
   extractBase64ToBuffers,
@@ -1041,6 +1043,46 @@ describe('gdocs', () => {
       expect(hoisted).toBe(0);
       expect(unwrappedLinks).toBe(0);
       expect(out).toContain('<p>Plain text with <strong>bold</strong>.</p>');
+    });
+
+    it('recovers public-export markdown structure for issue #102', () => {
+      const html = `
+        <style>
+          .c5{margin-left:36pt}
+          .c8{margin-left:72pt}
+          .c19{margin-left:108pt}
+          .q{margin-left:24pt;margin-right:24pt}
+          .i{font-style:italic}
+          .s{text-decoration:line-through}
+        </style>
+        <h2><span class="i">1. Headings</span></h2>
+        <p class="q">Quote one.</p>
+        <p class="q">Quote two.</p>
+        <ol><li class="c5">Parent</li></ol>
+        <ol><li class="c8">Child</li></ol>
+        <ol><li class="c19">Grandchild</li></ol>
+        <ol><li class="c5">Parent 2</li></ol>
+        <table>
+          <thead>
+            <tr><td><p>Feature</p></td><td><p>Supported</p></td><tbody></tbody></tr>
+            <tr><td><p><span class="s">Strike</span></p></td><td><p>Yes</p></td></tr>
+          </thead>
+        </table>
+      `;
+
+      const preprocessed = preprocessGoogleDocsExportHtml(html);
+      const markdown = normalizeGoogleDocsExportMarkdown(
+        convertHtmlToMarkdown(preprocessed.html)
+      );
+
+      expect(markdown).toContain('## 1. Headings');
+      expect(markdown).not.toContain('*1. Headings*');
+      expect(markdown).toContain('> Quote one.\n> \n> Quote two.');
+      expect(markdown).toMatch(
+        /1\.\s+Parent\n\s+1\.\s+Child\n\s+1\.\s+Grandchild\n2\.\s+Parent 2/
+      );
+      expect(markdown).toContain('| Feature | Supported |');
+      expect(markdown).toContain('| ~~Strike~~ | Yes |');
     });
   });
 

@@ -172,17 +172,6 @@ describe('Google Docs public test document (issue #90)', () => {
     // the captured markdown. This is our regression net for any future
     // changes to the public-export or HTML-to-markdown pipeline.
     //
-    // The captured markdown from `--capture api` still escapes leading
-    // numeric prefixes (e.g. `1\.` instead of `1.`) and strips inline
-    // formatting — both are documented as R2 in
-    // docs/case-studies/issue-90/README.md and are not yet fixed. For the
-    // purposes of this regression test we normalise Turndown's backslash
-    // escapes before checking that every section heading is present so the
-    // test locks down content preservation rather than format fidelity. The
-    // next wave of work (R2) will tighten this matcher once the HTML-to-
-    // Markdown pipeline stops escaping the dots.
-    const normalizeEscapes = (text) => text.replace(/\\([.!()[\]])/g, '$1');
-
     // Google Docs occasionally returns transient 500s on the public-export
     // endpoint. The Habr integration suite has the same flake and solves it
     // with retry + exponential backoff, so we reuse the shared helper here.
@@ -207,10 +196,21 @@ describe('Google Docs public test document (issue #90)', () => {
       expect(exportUrl).toBe(buildExportUrl(PUBLIC_TEST_DOCUMENT.id, 'html'));
       expect(markdown.length).toBeGreaterThan(1000);
 
-      const normalized = normalizeEscapes(markdown);
       for (const section of PUBLIC_TEST_DOCUMENT.sections) {
-        expect(normalized).toContain(section);
+        expect(markdown).toContain(section);
       }
+      expect(markdown).toContain('## 1. Headings');
+      expect(markdown).toContain('**This text is bold**');
+      expect(markdown).toContain('*This text is italic*');
+      expect(markdown).toContain('~~This text has strikethrough~~');
+      expect(markdown).toContain('> This is a single-level blockquote');
+      expect(markdown).toContain('| Feature | Supported | Notes |');
+      expect(markdown).not.toContain('| Feature |  | Supported |');
+      expect(markdown).toContain('|  | x |  |');
+      expect(markdown).toContain('1.  Parent item 1');
+      expect(markdown).toContain('    1.  Child item 1.1');
+      expect(markdown).toContain('        1.  Grandchild item 1.2.1');
+      expect(markdown).not.toContain('-   Child item 1.1');
     });
 
     it.each(PUBLIC_TEST_DOCUMENT.urlVariations)(
