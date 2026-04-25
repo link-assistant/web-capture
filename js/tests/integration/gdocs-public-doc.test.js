@@ -182,7 +182,7 @@ describe('Google Docs public test document (issue #90)', () => {
       });
 
     const captureBrowserWithRetry = (url) =>
-      retry(() => captureGoogleDocWithBrowser(url, { waitMs: 3000 }), {
+      retry(() => captureGoogleDocWithBrowser(url), {
         retries: 2,
         baseDelay: 2000,
       });

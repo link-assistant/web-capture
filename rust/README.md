@@ -139,6 +139,10 @@ web-capture https://docs.google.com/document/d/DOC_ID/edit --capture api
 # Google Docs REST API with OAuth token
 web-capture https://docs.google.com/document/d/DOC_ID/edit --capture api --api-token YOUR_TOKEN
 
+# Tune browser-model quiescence for large or slow documents
+WEB_CAPTURE_GDOCS_STABILITY_MS=2500 WEB_CAPTURE_GDOCS_MAX_WAIT_MS=60000 \
+  web-capture https://docs.google.com/document/d/DOC_ID/edit --capture browser
+
 # Screenshot
 web-capture https://example.com -f png -o screenshot.png
 

@@ -7,6 +7,7 @@ import {
   buildDocsApiUrl,
   extractBase64Images,
   captureGoogleDocWithBrowserOrFallback,
+  captureGoogleDocWithBrowser,
   isGoogleDocsBrowserModelUnavailableError,
   parseGoogleDocsModelChunks,
   renderGoogleDocsCapture,
@@ -948,6 +949,57 @@ describe('gdocs', () => {
     });
   });
 
+  describe('captureGoogleDocWithBrowser (issue #106)', () => {
+    it('waits for DOCS_modelChunk data to stop changing before parsing', async () => {
+      const browser = fakeBrowserReturningModelSequence([
+        {
+          chunks: [{ chunk: [{ ty: 'is', s: 'First paragraph\n' }] }],
+          cidUrlMap: {},
+        },
+        {
+          chunks: [{ chunk: [{ ty: 'is', s: 'First paragraph\n' }] }],
+          cidUrlMap: {},
+        },
+        {
+          chunks: [
+            { chunk: [{ ty: 'is', s: 'First paragraph\n' }] },
+            { chunk: [{ ty: 'is', s: 'Second paragraph\n' }] },
+          ],
+          cidUrlMap: {},
+        },
+        {
+          chunks: [
+            { chunk: [{ ty: 'is', s: 'First paragraph\n' }] },
+            { chunk: [{ ty: 'is', s: 'Second paragraph\n' }] },
+          ],
+          cidUrlMap: {},
+        },
+        {
+          chunks: [
+            { chunk: [{ ty: 'is', s: 'First paragraph\n' }] },
+            { chunk: [{ ty: 'is', s: 'Second paragraph\n' }] },
+          ],
+          cidUrlMap: {},
+        },
+      ]);
+
+      const result = await captureGoogleDocWithBrowser(
+        'https://docs.google.com/document/d/quiescence-doc/edit',
+        {
+          waitMs: 0,
+          modelMaxWaitMs: 200,
+          modelPollMs: 2,
+          modelStabilityMs: 2,
+          createBrowser: async () => browser,
+        }
+      );
+
+      expect(result.markdown).toContain('First paragraph');
+      expect(result.markdown).toContain('Second paragraph');
+      expect(browser.evaluateCalls).toBeGreaterThan(2);
+    });
+  });
+
   describe('GDOCS_EXPORT_FORMATS', () => {
     it('contains all expected formats', () => {
       expect(GDOCS_EXPORT_FORMATS).toEqual({
@@ -1296,6 +1348,34 @@ function fakeBrowserReturningModel(modelData) {
         async waitForTimeout() {},
         async evaluate() {
           return modelData;
+        },
+        async close() {},
+      };
+    },
+    async close() {},
+  };
+}
+
+function fakeBrowserReturningModelSequence(modelDataSequence) {
+  let evaluateCalls = 0;
+  return {
+    get evaluateCalls() {
+      return evaluateCalls;
+    },
+    async newPage() {
+      return {
+        async addInitScript() {},
+        async setUserAgent() {},
+        async setExtraHTTPHeaders() {},
+        async setViewport() {},
+        async goto() {},
+        async waitForTimeout(waitMs) {
+          await new Promise((resolve) => setTimeout(resolve, waitMs));
+        },
+        async evaluate() {
+          const index = Math.min(evaluateCalls, modelDataSequence.length - 1);
+          evaluateCalls += 1;
+          return JSON.parse(JSON.stringify(modelDataSequence[index]));
         },
         async close() {},
       };

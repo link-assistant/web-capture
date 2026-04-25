@@ -1,0 +1,215 @@
+   Compiling web-capture v0.3.9 (/tmp/gh-issue-solver-1777067118354/rust)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 3.74s
+     Running unittests src/lib.rs (target/debug/deps/web_capture-03758c7b86820efb)
+
+running 2 tests
+test gdocs::tests::browser_model_quiescence_resets_when_chunks_change ... ok
+test gdocs::tests::browser_model_fingerprint_includes_payload_size ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/main.rs (target/debug/deps/web_capture-99bf89fdf33cd51f)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/integration/mod.rs (target/debug/deps/integration-dfca0959f4764e3b)
+
+running 88 tests
+test animation::test_animation_options_default ... ok
+test animation::test_capture_mode_display ... ok
+test animation::test_compare_frames_completely_different ... ok
+test animation::test_capture_mode_from_str ... ok
+test animation::test_compare_frames_empty ... ok
+test animation::test_compare_frames_different_length ... ok
+test animation::test_compare_frames_identical ... ok
+test animation::test_compare_frames_partial ... ok
+test batch::test_get_article_merges_defaults ... ok
+test batch::test_get_all_articles ... ok
+test batch::test_get_all_versions ... ok
+test batch::test_create_config_from_urls ... ok
+test batch::test_get_article_unknown_version ... ok
+test batch::test_validate_config_invalid_url ... ok
+test batch::test_validate_config_missing_url ... ok
+test batch::test_validate_config_valid ... ok
+test browser::test_browser_engine_default ... ok
+test browser::test_browser_engine_display ... ok
+test browser::test_browser_engine_from_str ... ok
+test figures::test_extract_figures_relative_url ... ok
+test figures::test_extract_figures_basic ... ok
+test figures::test_extract_figures_no_img ... ok
+test figures::test_extract_figures_sequential_numbering ... ok
+test figures::test_extract_figures_russian_caption ... ok
+test figures::test_extract_figures_skips_data_uri ... ok
+test gdocs::test_build_docs_api_url ... ok
+test gdocs::test_build_edit_url ... ok
+test figures::test_extract_figures_skips_svg ... ok
+test gdocs::test_build_export_url ... ok
+test gdocs::test_capture_method_selection_honors_browser_flag ... ok
+test gdocs::test_create_archive_zip_empty_images ... ok
+test gdocs::test_create_archive_zip_produces_valid_zip ... ok
+test gdocs::test_extract_base64_images_no_images ... ok
+test gdocs::test_extract_base64_images_multiple ... ok
+test gdocs::test_extract_base64_images_preserves_non_data_images ... ok
+test gdocs::test_extract_bearer_token ... ok
+test gdocs::test_is_google_docs_url_invalid ... ok
+test gdocs::test_extract_document_id ... ok
+test gdocs::test_is_google_docs_url_valid ... ok
+test gdocs::test_extract_base64_images_single ... ok
+test gdocs::test_parse_model_chunks_accepts_individual_model_items ... ok
+test gdocs::test_parse_model_chunks_drops_duplicate_table_separator_empty_cells_issue_96 ... ok
+test gdocs::test_parse_model_chunks_drops_live_gdocs_table_ghost_columns_issue_100 ... ok
+test gdocs::test_parse_model_chunks_includes_suggestions_and_images ... ok
+test gdocs::test_parse_model_chunks_multi_column_table_r2 ... ok
+test gdocs::test_parse_model_chunks_preserves_empty_table_cell_positions_issue_100 ... ok
+test gdocs::test_parse_model_chunks_renders_style_records ... ok
+test gdocs::test_parse_model_chunks_renders_soft_breaks_and_image_dimensions_issue_104 ... ok
+test gdocs::test_parse_model_chunks_translates_utf16_positions ... ok
+test gdocs::test_preprocess_exports_hoists_font_style_italic_r6 ... ok
+test gdocs::test_preprocess_exports_converts_class_indented_paragraphs_to_blockquotes_issue_96 ... ok
+test gdocs::test_localize_rendered_remote_images_for_archive_downloads_model_images_issue_100 ... ok
+test gdocs::test_preprocess_exports_hoists_font_weight_r6 ... ok
+test gdocs::test_preprocess_exports_noop_for_regular_html_r6 ... ok
+test gdocs::test_preprocess_exports_hoists_strikethrough_r6 ... ok
+test gdocs::test_preprocess_exports_hoists_google_docs_css_class_styles_issue_96 ... ok
+test gdocs::test_preprocess_exports_replaces_nbsp_r6 ... ok
+test gdocs::test_preprocess_exports_strips_heading_numbering_r6 ... ok
+test gdocs::test_preprocess_exports_strips_standalone_empty_anchors_issue_96 ... ok
+test gdocs::test_render_captured_markdown_ends_with_newline_issue_96 ... ok
+test gdocs::test_render_consecutive_blockquote_paragraphs_stay_in_one_quote_issue_96 ... ok
+test gdocs::test_render_docs_api_document_paragraphs_tables_and_images ... ok
+test gdocs::test_render_list_items_joined_with_single_newline_r4 ... ok
+test gdocs::test_render_markdown_and_html_close_marks_around_embedded_newlines_issue_104 ... ok
+test gdocs::test_render_nested_bold_italic_markers_balanced_issue_96 ... ok
+test gdocs::test_render_nested_ordered_lists_keep_type_and_tight_spacing_issue_100 ... ok
+test gdocs::test_render_ordered_list_sequential_numbering_r3 ... ok
+test gdocs::test_render_styled_same_target_link_segments_as_one_label_issue_96 ... ok
+test gdocs::test_preprocess_exports_unwraps_redirect_links_r6 ... ok
+test gdocs_image_parity::gdocs_style_heading_with_spans_keeps_img ... ok
+test gdocs_image_parity::image_count_parity_across_pipeline ... ok
+test gdocs_image_parity::img_inside_heading_is_kept_in_markdown ... ok
+test gdocs_public_doc::capture_method_selection_is_locked_to_issue_72_semantics ... ok
+test gdocs_public_doc::live_browser_model_capture_of_public_document_preserves_markdown_features ... ok
+test gdocs_public_doc::live_capture_of_public_document_preserves_every_section ... ok
+test gdocs_public_doc::public_document_id_is_extracted_from_every_url_variation ... ok
+test gdocs_public_doc::public_document_is_recognized_across_every_url_variation ... ok
+test gdocs_public_doc::reference_markdown_contains_every_feature_section ... ok
+test gdocs_public_doc::reference_markdown_embeds_the_four_test_images ... ok
+test gdocs_public_doc::urls_for_the_public_document_are_built_with_the_expected_shape ... ok
+test themed_image::test_theme_display ... ok
+test themed_image::test_theme_from_str ... ok
+test themed_image::test_themed_image_options_default ... ok
+test gdocs::test_public_export_markdown_normalization_issue_102 ... ok
+test gdocs_image_parity::img_inside_all_heading_levels_is_kept ... ok
+test browser::test_render_html_executes_page_javascript ... ok
+test browser::test_capture_screenshot_returns_png_bytes ... ok
+test browser::test_cli_capture_browser_renders_markdown_with_javascript ... ok
+
+test result: ok. 88 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.82s
+
+     Running tests/unit/mod.rs (target/debug/deps/unit-a9c2eb6753c5d15b)
+
+running 92 tests
+test extract_images::test_has_base64_images_false ... ok
+test extract_images::test_has_base64_images_true ... ok
+test extract_images::test_extract_base64_to_buffers ... ok
+test extract_images::test_extract_base64_to_buffers_custom_dir ... ok
+test extract_images::test_custom_images_dir ... ok
+test extract_images::test_strip_base64_images_empty_alt ... ok
+test extract_images::test_no_base64_images ... ok
+test extract_images::test_strip_base64_multiple_images ... ok
+test extract_images::test_preserves_alt_text ... ok
+test extract_images::test_extract_single_png ... ok
+test extract_images::test_preserves_remote_urls ... ok
+test extract_images::test_strip_base64_images_with_alt ... ok
+test extract_images::test_strip_base64_preserves_remote_urls ... ok
+test extract_images::test_svg_data_uri ... ok
+test extract_images::test_extract_duplicate_images_same_hash ... ok
+test html::test_convert_to_utf8_already_utf8 ... ok
+test html::test_decode_html_entities_basic ... ok
+test html::test_decode_html_entities_no_entities ... ok
+test html::test_decode_html_entities_unicode ... ok
+test html::test_convert_to_utf8_other_charset ... ok
+test html::test_has_javascript_with_script ... ok
+test html::test_has_javascript_without_script ... ok
+test html::test_is_html_invalid ... ok
+test html::test_is_html_valid ... ok
+test html::test_normalize_url_empty ... ok
+test html::test_normalize_url_already_absolute ... ok
+test html::test_normalize_url_relative ... ok
+test html::test_pretty_print_html_empty ... ok
+test html::test_pretty_print_html_basic ... ok
+test html::test_pretty_print_html_void_elements ... ok
+test latex::test_extract_formula_dispatches_correctly ... ok
+test latex::test_extract_habr_formula_alt ... ok
+test latex::test_extract_habr_formula_source ... ok
+test latex::test_extract_katex_formula_annotation ... ok
+test html::test_convert_relative_urls_href ... ok
+test latex::test_extract_katex_formula_data_tex ... ok
+test latex::test_extract_mathjax_formula_data_tex ... ok
+test html::test_convert_relative_urls_absolute ... ok
+test latex::test_is_math_element_katex ... ok
+test latex::test_is_formula_image_regular_img ... ok
+test latex::test_is_formula_image_with_class ... ok
+test latex::test_is_math_element_mathjax ... ok
+test lib_api::test_version ... ok
+test lib_api::test_convert_to_utf8_already_utf8 ... ok
+test localize_images::test_extract_image_references ... ok
+test localize_images::test_extract_image_references_no_match ... ok
+test html::test_convert_relative_urls_data_url ... ok
+test html::test_convert_relative_urls_src ... ok
+test localize_images::test_get_extension_from_url_jpg ... ok
+test lib_api::test_convert_relative_urls_basic ... ok
+test localize_images::test_localize_images_already_local ... ok
+test localize_images::test_get_extension_from_url_no_extension ... ok
+test localize_images::test_localize_images_exclude_domain ... ok
+test markdown::test_clean_markdown_adds_trailing_newline ... ok
+test markdown::test_clean_markdown_removes_excessive_newlines ... ok
+test localize_images::test_get_extension_from_url_with_query ... ok
+test localize_images::test_get_extension_from_url_png ... ok
+test localize_images::test_generate_local_filename ... ok
+test localize_images::test_localize_images_dry_run ... ok
+test markdown::test_convert_html_to_markdown_removes_style ... ok
+test markdown::test_convert_html_to_markdown_removes_script ... ok
+test markdown::test_convert_html_to_markdown_basic ... ok
+test markdown::test_convert_html_to_markdown_with_link ... ok
+test metadata::test_extract_metadata_author ... ok
+test metadata::test_extract_metadata_date ... ok
+test metadata::test_extract_metadata_empty_html ... ok
+test metadata::test_extract_metadata_ld_json ... ok
+test markdown::test_convert_html_to_markdown_with_relative_url ... ok
+test metadata::test_extract_metadata_tags ... ok
+test metadata::test_format_footer_block_tags ... ok
+test metadata::test_format_metadata_block_author ... ok
+test postprocess::test_latex_spacing_adds_space_before ... ok
+test postprocess::test_latex_spacing_handles_no_formulas ... ok
+test postprocess::test_latex_spacing_skips_block_formulas ... ok
+test postprocess::test_percent_sign_fix ... ok
+test postprocess::test_bold_formatting_empty_bold ... ok
+test postprocess::test_unicode_normalization_curly_quotes ... ok
+test postprocess::test_unicode_normalization_ellipsis ... ok
+test postprocess::test_unicode_normalization_nbsp ... ok
+test markdown::test_enhanced_markdown_can_disable_latex_extraction ... ok
+test verify::test_normalize_code ... ok
+test verify::test_normalize_text_latex ... ok
+test verify::test_normalize_text_unicode ... ok
+test markdown::test_enhanced_markdown_corrects_coq_code_language ... ok
+test postprocess::test_post_process_markdown_full ... ok
+test markdown::test_enhanced_markdown_extracts_habr_formula_images ... ok
+test verify::test_normalize_text_whitespace ... ok
+test lib_api::test_enhanced_markdown_scopes_habr_article_body_and_keeps_metadata ... ok
+test verify::test_verify_empty_content ... ok
+test verify::test_verify_title_missing ... ok
+test verify::test_verify_title_present ... ok
+test verify::test_verify_headings ... ok
+
+test result: ok. 92 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.12s
+
+   Doc-tests web_capture
+
+running 2 tests
+test src/gdocs.rs - gdocs (line 17) - compile ... ok
+test src/lib.rs - (line 15) - compile ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.09s

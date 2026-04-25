@@ -52,7 +52,9 @@ const GDOCS_EXPORT_BASE: &str = "https://docs.google.com/document/d";
 const GDOCS_API_BASE: &str = "https://docs.googleapis.com/v1/documents";
 const GDOCS_USER_AGENT: &str =
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36";
-const GDOCS_EDITOR_MODEL_WAIT: Duration = Duration::from_secs(30);
+const GDOCS_EDITOR_MODEL_MAX_WAIT_DEFAULT: Duration = Duration::from_secs(30);
+const GDOCS_EDITOR_MODEL_STABILITY_DEFAULT: Duration = Duration::from_millis(1500);
+const GDOCS_EDITOR_MODEL_POLL_INTERVAL: Duration = Duration::from_millis(250);
 const GDOCS_BROWSER_LAUNCH_TIMEOUT: Duration = Duration::from_secs(20);
 
 type CdpWebSocket = WebSocketStream<ConnectStream>;
@@ -199,6 +201,64 @@ pub struct RemoteImage {
 struct BrowserModelData {
     chunks: Vec<Value>,
     cid_urls: HashMap<String, String>,
+    chunk_payload_bytes: usize,
+    poll_count: usize,
+    stable_for: Duration,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+struct BrowserModelFingerprint {
+    chunks: usize,
+    payload_bytes: usize,
+}
+
+#[derive(Debug, Default)]
+struct BrowserModelQuiescence {
+    last_fingerprint: Option<BrowserModelFingerprint>,
+    stable_since: Option<Instant>,
+}
+
+impl BrowserModelData {
+    const fn fingerprint(&self) -> BrowserModelFingerprint {
+        BrowserModelFingerprint {
+            chunks: self.chunks.len(),
+            payload_bytes: self.chunk_payload_bytes,
+        }
+    }
+}
+
+impl BrowserModelQuiescence {
+    fn observe(
+        &mut self,
+        fingerprint: BrowserModelFingerprint,
+        now: Instant,
+        stability_window: Duration,
+    ) -> Option<Duration> {
+        if fingerprint.chunks == 0 {
+            self.last_fingerprint = Some(fingerprint);
+            self.stable_since = None;
+            return None;
+        }
+
+        if self.last_fingerprint == Some(fingerprint) {
+            let stable_since = *self.stable_since.get_or_insert(now);
+            let stable_for = now.saturating_duration_since(stable_since);
+            if stable_for >= stability_window {
+                return Some(stable_for);
+            }
+        } else {
+            self.last_fingerprint = Some(fingerprint);
+            self.stable_since = None;
+        }
+
+        None
+    }
+
+    fn stable_for(&self, now: Instant) -> Duration {
+        self.stable_since.map_or(Duration::ZERO, |stable_since| {
+            now.saturating_duration_since(stable_since)
+        })
+    }
 }
 
 /// Parsed Google Docs model/document capture.
@@ -1390,11 +1450,20 @@ pub async fn fetch_google_doc_from_model(
         "capturing Google Doc editor model with a real browser"
     );
     let model_data = fetch_google_doc_editor_model_with_cdp(&edit_url, &document_id).await?;
-    let chunks = model_data.chunks;
+    let BrowserModelData {
+        chunks,
+        cid_urls,
+        chunk_payload_bytes,
+        poll_count,
+        stable_for,
+    } = model_data;
     debug!(
         document_id = %document_id,
         chunks = chunks.len(),
-        cid_urls = model_data.cid_urls.len(),
+        cid_urls = cid_urls.len(),
+        chunk_payload_bytes,
+        poll_count,
+        stable_for_ms = stable_for.as_millis(),
         "extracted Google Docs editor model chunks through CDP"
     );
     if chunks.is_empty() {
@@ -1403,12 +1472,15 @@ pub async fn fetch_google_doc_from_model(
         ));
     }
 
-    let capture = parse_model_chunks(&chunks, &model_data.cid_urls);
+    let capture = parse_model_chunks(&chunks, &cid_urls);
     let remote_images = remote_images_from_capture(&capture);
     info!(
         document_id = %document_id,
         chunks = chunks.len(),
-        cid_urls = model_data.cid_urls.len(),
+        cid_urls = cid_urls.len(),
+        chunk_payload_bytes,
+        poll_count,
+        stable_for_ms = stable_for.as_millis(),
         blocks = capture.blocks.len(),
         tables = capture.tables.len(),
         images = capture.images.len(),
@@ -1556,10 +1628,16 @@ async fn wait_for_google_docs_model_chunks(
     document_id: &str,
 ) -> crate::Result<BrowserModelData> {
     let started = Instant::now();
+    let max_wait = gdocs_editor_model_max_wait();
+    let stability_window = gdocs_editor_model_stability_window();
+    let mut quiescence = BrowserModelQuiescence::default();
     let mut last_chunks = 0usize;
     let mut last_cid_urls = 0usize;
+    let mut last_payload_bytes = 0usize;
+    let mut last_stable_for = Duration::ZERO;
+    let mut poll_count = 0usize;
 
-    while started.elapsed() < GDOCS_EDITOR_MODEL_WAIT {
+    while started.elapsed() < max_wait {
         let result = cdp_send(
             ws,
             next_id,
@@ -1582,24 +1660,36 @@ async fn wait_for_google_docs_model_chunks(
             .cloned()
             .unwrap_or(Value::Null);
         let model_data = browser_model_data_from_value(&value);
+        poll_count += 1;
+        let fingerprint = model_data.fingerprint();
         last_chunks = model_data.chunks.len();
         last_cid_urls = model_data.cid_urls.len();
-        if !model_data.chunks.is_empty() {
+        last_payload_bytes = model_data.chunk_payload_bytes;
+        let now = Instant::now();
+        if let Some(stable_for) = quiescence.observe(fingerprint, now, stability_window) {
+            let mut model_data = model_data;
+            model_data.poll_count = poll_count;
+            model_data.stable_for = stable_for;
             debug!(
                 document_id = %document_id,
                 chunks = model_data.chunks.len(),
                 cid_urls = model_data.cid_urls.len(),
+                chunk_payload_bytes = model_data.chunk_payload_bytes,
+                poll_count,
+                stable_for_ms = stable_for.as_millis(),
                 elapsed_ms = started.elapsed().as_millis(),
-                "captured Google Docs model chunks through CDP Runtime.evaluate"
+                "captured quiesced Google Docs model chunks through CDP Runtime.evaluate"
             );
             return Ok(model_data);
         }
-        tokio::time::sleep(Duration::from_millis(250)).await;
+        last_stable_for = quiescence.stable_for(now);
+        tokio::time::sleep(GDOCS_EDITOR_MODEL_POLL_INTERVAL).await;
     }
 
     Err(WebCaptureError::BrowserError(format!(
-        "Timed out waiting for Google Docs DOCS_modelChunk data for document {document_id} after {} ms (last chunks={last_chunks}, cid_urls={last_cid_urls})",
-        GDOCS_EDITOR_MODEL_WAIT.as_millis()
+        "Timed out waiting for Google Docs DOCS_modelChunk stream to quiesce for document {document_id} after {} ms (last chunks={last_chunks}, payload_bytes={last_payload_bytes}, cid_urls={last_cid_urls}, poll_count={poll_count}, stable_for_ms={})",
+        max_wait.as_millis(),
+        last_stable_for.as_millis()
     )))
 }
 
@@ -1736,6 +1826,7 @@ fn browser_model_data_from_value(value: &Value) -> BrowserModelData {
         .and_then(Value::as_array)
         .cloned()
         .unwrap_or_default();
+    let chunk_payload_bytes = model_chunk_payload_bytes(&chunks);
     let cid_urls = value
         .get("cidUrlMap")
         .and_then(Value::as_object)
@@ -1745,7 +1836,50 @@ fn browser_model_data_from_value(value: &Value) -> BrowserModelData {
                 .collect::<HashMap<_, _>>()
         })
         .unwrap_or_default();
-    BrowserModelData { chunks, cid_urls }
+    BrowserModelData {
+        chunks,
+        cid_urls,
+        chunk_payload_bytes,
+        poll_count: 0,
+        stable_for: Duration::ZERO,
+    }
+}
+
+fn model_chunk_payload_bytes(chunks: &[Value]) -> usize {
+    chunks
+        .iter()
+        .map(|chunk| serde_json::to_vec(chunk).map_or(0, |encoded| encoded.len()))
+        .sum()
+}
+
+fn gdocs_editor_model_max_wait() -> Duration {
+    duration_from_env_ms(
+        "WEB_CAPTURE_GDOCS_MAX_WAIT_MS",
+        GDOCS_EDITOR_MODEL_MAX_WAIT_DEFAULT,
+    )
+}
+
+fn gdocs_editor_model_stability_window() -> Duration {
+    duration_from_env_ms(
+        "WEB_CAPTURE_GDOCS_STABILITY_MS",
+        GDOCS_EDITOR_MODEL_STABILITY_DEFAULT,
+    )
+}
+
+fn duration_from_env_ms(name: &str, default: Duration) -> Duration {
+    std::env::var(name).map_or(default, |value| match value.trim().parse::<u64>() {
+        Ok(ms) => Duration::from_millis(ms),
+        Err(error) => {
+            warn!(
+                name,
+                value,
+                error = %error,
+                default_ms = default.as_millis(),
+                "ignoring invalid Google Docs model wait environment variable"
+            );
+            default
+        }
+    })
 }
 
 fn remote_images_from_capture(capture: &CapturedDocument) -> Vec<RemoteImage> {
@@ -3285,4 +3419,77 @@ pub fn create_archive_zip(
     }
 
     Ok(buf.into_inner())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use serde_json::json;
+
+    #[test]
+    fn browser_model_fingerprint_includes_payload_size() {
+        let small = browser_model_data_from_value(&json!({
+            "chunks": [{ "chunk": [{ "ty": "is", "s": "first" }] }],
+            "cidUrlMap": {}
+        }));
+        let larger = browser_model_data_from_value(&json!({
+            "chunks": [{ "chunk": [{ "ty": "is", "s": "first and later text" }] }],
+            "cidUrlMap": {}
+        }));
+
+        assert_eq!(small.fingerprint().chunks, larger.fingerprint().chunks);
+        assert_ne!(
+            small.fingerprint().payload_bytes,
+            larger.fingerprint().payload_bytes
+        );
+    }
+
+    #[test]
+    fn browser_model_quiescence_resets_when_chunks_change() {
+        let start = Instant::now();
+        let stability_window = Duration::from_millis(1500);
+        let one_chunk = BrowserModelFingerprint {
+            chunks: 1,
+            payload_bytes: 100,
+        };
+        let two_chunks = BrowserModelFingerprint {
+            chunks: 2,
+            payload_bytes: 200,
+        };
+        let mut quiescence = BrowserModelQuiescence::default();
+
+        assert_eq!(quiescence.observe(one_chunk, start, stability_window), None);
+        assert_eq!(
+            quiescence.observe(
+                one_chunk,
+                start + Duration::from_millis(250),
+                stability_window
+            ),
+            None
+        );
+        assert_eq!(
+            quiescence.observe(
+                two_chunks,
+                start + Duration::from_millis(500),
+                stability_window
+            ),
+            None
+        );
+        assert_eq!(
+            quiescence.observe(
+                two_chunks,
+                start + Duration::from_millis(750),
+                stability_window
+            ),
+            None
+        );
+        assert_eq!(
+            quiescence.observe(
+                two_chunks,
+                start + Duration::from_millis(2300),
+                stability_window
+            ),
+            Some(Duration::from_millis(1550))
+        );
+    }
 }

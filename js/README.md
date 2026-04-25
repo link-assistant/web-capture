@@ -102,6 +102,11 @@ web-capture https://docs.google.com/document/d/DOC_ID/edit --capture api
 web-capture https://docs.google.com/document/d/DOC_ID/edit --capture api --apiToken YOUR_TOKEN
 ```
 
+Browser-model capture waits until `DOCS_modelChunk` data stops changing before
+parsing. For very large or slow documents, tune the wait with
+`WEB_CAPTURE_GDOCS_STABILITY_MS` (default `1500`) and
+`WEB_CAPTURE_GDOCS_MAX_WAIT_MS` (default `30000`).
+
 ## API Endpoints (Server Mode)
 
 Start the server with `web-capture --serve` and use the endpoints below.
