@@ -1,5 +1,11 @@
 # @link-assistant/web-capture
 
+## 1.7.17
+
+### Patch Changes
+
+- 86b6fc5: Wait for Google Docs browser-model chunks to quiesce before parsing captures.
+
 ## 1.7.16
 
 ### Patch Changes
