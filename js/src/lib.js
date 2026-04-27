@@ -166,9 +166,32 @@ export function convertHtmlToMarkdown(html, baseUrl) {
     style: false,
   });
   turndown.use(turndownPluginGfm.gfm);
+  preserveTableCellLineBreaks(turndown);
   // Decode HTML entities to unicode after markdown conversion
   // Preserve non-breaking spaces as &nbsp; entities for clear marking
   return he.decode(turndown.turndown($.html())).replace(/\u00A0/g, '&nbsp;');
+}
+
+function preserveTableCellLineBreaks(turndown) {
+  turndown.addRule('tableCellLineBreak', {
+    filter(node) {
+      return node.nodeName === 'BR' && hasAncestorNode(node, ['TD', 'TH']);
+    },
+    replacement() {
+      return '<br>';
+    },
+  });
+}
+
+function hasAncestorNode(node, nodeNames) {
+  let current = node.parentNode;
+  while (current) {
+    if (nodeNames.includes(current.nodeName)) {
+      return true;
+    }
+    current = current.parentNode;
+  }
+  return false;
 }
 
 function selectedHtml($, selector) {
@@ -531,6 +554,7 @@ export function convertHtmlToMarkdownEnhanced(html, baseUrl, options = {}) {
     style: false,
   });
   turndown.use(turndownPluginGfm.gfm);
+  preserveTableCellLineBreaks(turndown);
 
   // Decode HTML entities to unicode after markdown conversion
   // Normalize non-breaking spaces to regular spaces in Markdown text
