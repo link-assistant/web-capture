@@ -1,5 +1,11 @@
 # @link-assistant/web-capture
 
+## 1.7.18
+
+### Patch Changes
+
+- 2c69a73: Fix Google Docs browser capture list semantics and continuation paragraph handling.
+
 ## 1.7.17
 
 ### Patch Changes
