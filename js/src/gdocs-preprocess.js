@@ -379,7 +379,7 @@ function inlineTableCellHtml($, cell) {
         parts.push(this.data);
       }
     });
-  return parts.join('<br>');
+  return parts.join('<br><br>');
 }
 
 function hasBoldStyle(style) {
