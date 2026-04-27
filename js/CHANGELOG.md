@@ -1,5 +1,11 @@
 # @link-assistant/web-capture
 
+## 1.7.19
+
+### Patch Changes
+
+- 3a483aa: Fix Google Docs public-export Markdown for multi-paragraph table cells.
+
 ## 1.7.18
 
 ### Patch Changes
