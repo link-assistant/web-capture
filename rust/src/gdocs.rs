@@ -34,6 +34,7 @@ use async_tungstenite::WebSocketStream;
 use base64::Engine;
 use futures::{SinkExt, StreamExt};
 use regex::Regex;
+use scraper::{node::Node, ElementRef, Html, Selector};
 use serde_json::Value;
 use std::collections::HashMap;
 use std::fmt::Write as _;
@@ -381,6 +382,13 @@ struct ParagraphStyle {
     indent_first_line: f64,
 }
 
+#[derive(Debug, Clone)]
+struct ExportSemanticHint {
+    text: String,
+    list_ordered: Option<bool>,
+    quote: bool,
+}
+
 #[derive(Debug, Clone, Default)]
 struct ModelStyleMaps {
     inline_styles: Vec<TextStyle>,
@@ -531,9 +539,10 @@ pub async fn fetch_google_doc(
         "read Google Docs public export body"
     );
 
-    // Decode HTML entities to unicode for text-based formats
+    // Keep HTML markup escaped so literal examples such as `&lt;ol&gt;` do not
+    // become real tags before the HTML parser sees the document.
     let content = match format {
-        "html" | "txt" | "md" => crate::html::decode_html_entities(&raw_content),
+        "txt" | "md" => crate::html::decode_html_entities(&raw_content),
         _ => raw_content,
     };
 
@@ -1472,7 +1481,18 @@ pub async fn fetch_google_doc_from_model(
         ));
     }
 
-    let capture = parse_model_chunks(&chunks, &cid_urls);
+    let export_html = match fetch_google_doc(url, "html", None).await {
+        Ok(result) => Some(result.content),
+        Err(error) => {
+            warn!(
+                document_id = %document_id,
+                error = %error,
+                "failed to fetch Google Docs export HTML for browser-model semantic hints"
+            );
+            None
+        }
+    };
+    let capture = parse_model_chunks_with_export_html(&chunks, &cid_urls, export_html.as_deref());
     let remote_images = remote_images_from_capture(&capture);
     info!(
         document_id = %document_id,
@@ -2165,9 +2185,12 @@ fn apply_inline_style(styles: &mut [TextStyle], start: usize, end: usize, patch:
 
 fn text_style(item: &Value) -> TextStyle {
     TextStyle {
-        bold: item.pointer("/sm/ts_bd").and_then(Value::as_bool) == Some(true),
-        italic: item.pointer("/sm/ts_it").and_then(Value::as_bool) == Some(true),
-        strike: item.pointer("/sm/ts_st").and_then(Value::as_bool) == Some(true),
+        bold: item.pointer("/sm/ts_bd").and_then(Value::as_bool) == Some(true)
+            && item.pointer("/sm/ts_bd_i").and_then(Value::as_bool) != Some(true),
+        italic: item.pointer("/sm/ts_it").and_then(Value::as_bool) == Some(true)
+            && item.pointer("/sm/ts_it_i").and_then(Value::as_bool) != Some(true),
+        strike: item.pointer("/sm/ts_st").and_then(Value::as_bool) == Some(true)
+            && item.pointer("/sm/ts_st_i").and_then(Value::as_bool) != Some(true),
         link: None,
     }
 }
@@ -2212,10 +2235,21 @@ fn utf16_position_to_char_position(map: &[usize], position: usize) -> usize {
 
 /// Parse captured `DOCS_modelChunk` values.
 #[must_use]
-#[allow(clippy::too_many_lines)]
 pub fn parse_model_chunks<S: BuildHasher>(
     chunks: &[Value],
     cid_urls: &HashMap<String, String, S>,
+) -> CapturedDocument {
+    parse_model_chunks_with_export_html(chunks, cid_urls, None)
+}
+
+/// Parse captured `DOCS_modelChunk` values and optionally merge semantic hints
+/// from Google Docs export HTML.
+#[must_use]
+#[allow(clippy::too_many_lines)]
+pub fn parse_model_chunks_with_export_html<S: BuildHasher>(
+    chunks: &[Value],
+    cid_urls: &HashMap<String, String, S>,
+    export_html: Option<&str>,
 ) -> CapturedDocument {
     let items = collect_model_items(chunks);
     let full_text = items
@@ -2390,12 +2424,17 @@ pub fn parse_model_chunks<S: BuildHasher>(
     }
     flush_paragraph(&mut paragraph, &mut blocks, Some(chars.len()), &style_maps);
 
-    CapturedDocument {
+    let mut capture = CapturedDocument {
         text: blocks_to_text(&blocks),
         blocks,
         tables,
         images,
+    };
+    if let Some(export_html) = export_html {
+        apply_export_semantic_hints(&mut capture.blocks, export_html);
+        capture.text = blocks_to_text(&capture.blocks);
     }
+    capture
 }
 
 fn collect_model_items(chunks: &[Value]) -> Vec<Value> {
@@ -2470,20 +2509,139 @@ fn paragraph_meta_for_end_position(
     meta
 }
 
-fn infer_ordered_list(list: &ListMeta, text: &str) -> bool {
-    let ordered_id = matches!(
-        list.id.as_str(),
-        "kix.list.7" | "kix.list.8" | "kix.list.9" | "kix.list.10" | "kix.list.11" | "kix.list.13"
-    );
-    ordered_id
-        && (text.contains("ordered")
-            || text.contains("Parent item")
-            || text.contains("Child item")
-            || text.contains("Grandchild item")
-            || text.contains("First item")
-            || text.contains("Second item")
-            || text.contains("Third item")
-            || text.contains("Ordered child"))
+const fn infer_ordered_list(_list: &ListMeta, _text: &str) -> bool {
+    false
+}
+
+fn apply_export_semantic_hints(blocks: &mut [CapturedBlock], export_html: &str) {
+    let hints = extract_export_semantic_hints(export_html);
+    let mut cursor = 0usize;
+    for block in blocks {
+        let CapturedBlock::Paragraph {
+            content,
+            list,
+            quote,
+            ..
+        } = block
+        else {
+            continue;
+        };
+        let text = normalize_semantic_text(&content_to_text(content));
+        if text.is_empty() {
+            continue;
+        }
+        let Some((index, hint)) = find_next_semantic_hint(&hints, &text, cursor, list.is_some())
+        else {
+            continue;
+        };
+        cursor = index + 1;
+        if let Some(list) = list.as_mut() {
+            if let Some(ordered) = hint.list_ordered {
+                list.ordered = ordered;
+            }
+        } else {
+            *quote = hint.quote;
+        }
+    }
+}
+
+fn find_next_semantic_hint<'a>(
+    hints: &'a [ExportSemanticHint],
+    text: &str,
+    cursor: usize,
+    needs_list_hint: bool,
+) -> Option<(usize, &'a ExportSemanticHint)> {
+    hints.iter().enumerate().skip(cursor).find(|(_, hint)| {
+        hint.text == text
+            && if needs_list_hint {
+                hint.list_ordered.is_some()
+            } else {
+                hint.list_ordered.is_none()
+            }
+    })
+}
+
+fn extract_export_semantic_hints(export_html: &str) -> Vec<ExportSemanticHint> {
+    let preprocessed = preprocess_google_docs_export_html(export_html).html;
+    let document = Html::parse_document(&preprocessed);
+    let selector =
+        Selector::parse("body h1,body h2,body h3,body h4,body h5,body h6,body p,body li")
+            .expect("valid semantic hint selector");
+    document
+        .select(&selector)
+        .filter_map(|element| {
+            let tag = element.value().name();
+            let text = export_element_semantic_text(&element);
+            if text.is_empty() {
+                return None;
+            }
+            let list_ordered = if tag == "li" {
+                nearest_list_is_ordered(&element)
+            } else {
+                None
+            };
+            Some(ExportSemanticHint {
+                text,
+                list_ordered,
+                quote: tag != "li" && has_ancestor_tag(&element, "blockquote"),
+            })
+        })
+        .collect()
+}
+
+fn export_element_semantic_text(element: &ElementRef<'_>) -> String {
+    let raw_text = if element.value().name() == "li" {
+        list_item_own_text(element)
+    } else {
+        element.text().collect()
+    };
+    normalize_semantic_text(&raw_text)
+}
+
+fn list_item_own_text(element: &ElementRef<'_>) -> String {
+    let mut text = String::new();
+    let mut stack: Vec<_> = element.children().collect();
+    stack.reverse();
+
+    while let Some(node) = stack.pop() {
+        match node.value() {
+            Node::Text(value) => text.push_str(value),
+            Node::Element(child) if matches!(child.name(), "ol" | "ul") => {}
+            Node::Element(_) => {
+                let mut children: Vec<_> = node.children().collect();
+                children.reverse();
+                stack.extend(children);
+            }
+            _ => {}
+        }
+    }
+
+    text
+}
+
+fn nearest_list_is_ordered(element: &ElementRef<'_>) -> Option<bool> {
+    element
+        .ancestors()
+        .filter_map(ElementRef::wrap)
+        .find_map(|ancestor| match ancestor.value().name() {
+            "ol" => Some(true),
+            "ul" => Some(false),
+            _ => None,
+        })
+}
+
+fn has_ancestor_tag(element: &ElementRef<'_>, tag: &str) -> bool {
+    element
+        .ancestors()
+        .filter_map(ElementRef::wrap)
+        .any(|ancestor| ancestor.value().name() == tag)
+}
+
+fn normalize_semantic_text(text: &str) -> String {
+    text.replace('\u{a0}', " ")
+        .split_whitespace()
+        .collect::<Vec<_>>()
+        .join(" ")
 }
 
 fn cell_is_empty(cell: &TableCell) -> bool {

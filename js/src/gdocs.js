@@ -9,6 +9,7 @@
 
 import fetch from 'node-fetch';
 import he from 'he';
+import * as cheerio from 'cheerio';
 import { convertHtmlToMarkdown } from './lib.js';
 import { createBrowser as defaultCreateBrowser } from './browser.js';
 import {
@@ -200,11 +201,10 @@ export async function fetchGoogleDoc(url, options = {}) {
     bytes: Buffer.byteLength(rawContent),
   }));
 
-  // Decode HTML entities to unicode for text-based formats
+  // Keep HTML markup escaped so literal examples such as `&lt;ol&gt;` do not
+  // become real tags before the HTML parser sees the document.
   const content =
-    format === 'html' || format === 'txt' || format === 'md'
-      ? he.decode(rawContent)
-      : rawContent;
+    format === 'txt' || format === 'md' ? he.decode(rawContent) : rawContent;
 
   return {
     content,
@@ -430,11 +430,16 @@ export async function captureGoogleDocWithBrowser(url, options = {}) {
       documentId,
       log,
     });
+    const exportHtml = await fetchGoogleDocsExportHtmlFromPage(
+      page,
+      documentId,
+      log
+    );
 
     const capture = parseGoogleDocsModelChunks(
       modelData.chunks,
       modelData.cidUrlMap,
-      { log }
+      { log, exportHtml }
     );
     log?.debug?.(() => ({
       event: 'gdocs.browser-model.parsed',
@@ -567,6 +572,7 @@ export function extractCidUrlMapFromHtml(html) {
  * @param {Object<string,string>} [cidUrlMap={}] - CID-to-docs-images-rt URL map
  * @param {Object} [options] - Parse options
  * @param {Object} [options.log] - Optional verbose logger
+ * @param {string} [options.exportHtml] - Optional Google Docs export HTML used for list and quote semantics
  * @returns {{blocks: Array, tables: Array, images: Array, text: string}}
  */
 export function parseGoogleDocsModelChunks(
@@ -813,12 +819,17 @@ export function parseGoogleDocsModelChunks(
     }
   }
 
-  return {
+  const capture = {
     blocks,
     tables,
     images,
     text: contentBlocksToText(blocks),
   };
+  if (options.exportHtml) {
+    applyGoogleDocsExportSemanticHints(capture, options.exportHtml);
+    capture.text = contentBlocksToText(capture.blocks);
+  }
+  return capture;
 }
 
 function cellIsEmpty(cell) {
@@ -889,13 +900,13 @@ function applyInlineTextStyle(inlineStyles, start, end, patch) {
 
 function textStyleFromModel(item) {
   const style = {};
-  if (item.sm?.ts_bd) {
+  if (item.sm?.ts_bd && item.sm?.ts_bd_i !== true) {
     style.bold = true;
   }
-  if (item.sm?.ts_it) {
+  if (item.sm?.ts_it && item.sm?.ts_it_i !== true) {
     style.italic = true;
   }
-  if (item.sm?.ts_st) {
+  if (item.sm?.ts_st && item.sm?.ts_st_i !== true) {
     style.strike = true;
   }
   return style;
@@ -944,17 +955,134 @@ function paragraphMetaForEndPosition(styleMaps, endPos, text) {
 }
 
 function inferOrderedList(list, text) {
-  // Google Docs does not expose imported DOCX list marker type in the public
-  // model chunk for this document. Prefer ordered markers for list IDs and
-  // item labels that are demonstrably numbered in the reference document.
-  if (
-    /ordered|^\d+(?:\.|\))|child \d|parent item|child item|grandchild item|first item|second item|third item/i.test(
-      text
-    )
-  ) {
-    return /^kix\.list\.(7|8|9|10|11|13)$/u.test(list.id);
-  }
+  void list;
+  void text;
   return false;
+}
+
+async function fetchGoogleDocsExportHtmlFromPage(page, documentId, log) {
+  const exportUrl = buildExportUrl(documentId, 'html');
+  try {
+    const result = await page.evaluate(async (url) => {
+      const response = await fetch(url, {
+        credentials: 'include',
+        redirect: 'follow',
+      });
+      return {
+        ok: response.ok,
+        status: response.status,
+        statusText: response.statusText,
+        contentType: response.headers.get('content-type'),
+        body: await response.text(),
+      };
+    }, exportUrl);
+    log?.debug?.(() => ({
+      event: 'gdocs.browser-model.export-hints.response',
+      documentId,
+      exportUrl,
+      status: result.status,
+      ok: result.ok,
+      contentType: result.contentType,
+      bytes: Buffer.byteLength(result.body || ''),
+    }));
+    return result.ok ? result.body || '' : null;
+  } catch (error) {
+    log?.debug?.(() => ({
+      event: 'gdocs.browser-model.export-hints.failed',
+      documentId,
+      exportUrl,
+      error: error?.message || String(error),
+    }));
+    return null;
+  }
+}
+
+function applyGoogleDocsExportSemanticHints(capture, exportHtml) {
+  const hints = extractGoogleDocsExportSemanticHints(exportHtml);
+  let cursor = 0;
+  for (const block of capture.blocks || []) {
+    if (block.type !== 'paragraph') {
+      continue;
+    }
+    const text = normalizeSemanticText(contentToText(block.content));
+    if (!text) {
+      continue;
+    }
+    const match = findNextSemanticHint(
+      hints,
+      text,
+      cursor,
+      Boolean(block.list)
+    );
+    if (!match) {
+      continue;
+    }
+    cursor = match.index + 1;
+    if (block.list && match.hint.listOrdered !== null) {
+      block.list.ordered = match.hint.listOrdered;
+    } else if (!block.list) {
+      block.quote = match.hint.quote;
+    }
+  }
+}
+
+function findNextSemanticHint(hints, text, cursor, needsListHint) {
+  for (let index = cursor; index < hints.length; index++) {
+    const hint = hints[index];
+    if (hint.text !== text) {
+      continue;
+    }
+    if (needsListHint && hint.listOrdered === null) {
+      continue;
+    }
+    if (!needsListHint && hint.listOrdered !== null) {
+      continue;
+    }
+    return { index, hint };
+  }
+  return null;
+}
+
+function extractGoogleDocsExportSemanticHints(exportHtml) {
+  const preprocessed = preprocessGoogleDocsExportHtml(exportHtml).html;
+  const $ = cheerio.load(preprocessed);
+  const hints = [];
+  $('body')
+    .find('h1,h2,h3,h4,h5,h6,p,li')
+    .each((_, element) => {
+      const tag = element.tagName?.toLowerCase();
+      const text = getExportElementSemanticText($, element, tag);
+      if (!text) {
+        return;
+      }
+      const parentList = $(element).parents('ol,ul').first();
+      const listOrdered =
+        tag === 'li' && parentList.length
+          ? parentList[0].tagName?.toLowerCase() === 'ol'
+          : null;
+      hints.push({
+        text,
+        listOrdered,
+        quote: tag !== 'li' && $(element).parents('blockquote').length > 0,
+      });
+    });
+  return hints;
+}
+
+function getExportElementSemanticText($, element, tag) {
+  if (tag !== 'li') {
+    return normalizeSemanticText($(element).text());
+  }
+  const clone = $(element).clone();
+  clone.find('ol,ul').remove();
+  return normalizeSemanticText(clone.text());
+}
+
+function normalizeSemanticText(text) {
+  return String(text || '')
+    .replace(/\u00a0/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
 }
 
 function collectModelItems(chunks) {

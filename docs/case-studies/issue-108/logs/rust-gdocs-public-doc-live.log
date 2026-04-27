@@ -1,0 +1,14 @@
+    Blocking waiting for file lock on package cache
+    Blocking waiting for file lock on package cache
+    Blocking waiting for file lock on package cache
+    Blocking waiting for file lock on artifact directory
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 4.41s
+     Running tests/integration/mod.rs (target/debug/deps/integration-dfca0959f4764e3b)
+
+running 4 tests
+test gdocs_public_doc::live_capture_of_public_document_preserves_every_section ... ok
+test gdocs_public_doc::live_capture_of_issue_108_v2_document_preserves_section_15_api_semantics ... ok
+test gdocs_public_doc::live_browser_model_capture_of_public_document_preserves_markdown_features ... ok
+test gdocs_public_doc::live_browser_model_capture_of_issue_108_v2_document_preserves_section_15_semantics ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 87 filtered out; finished in 5.77s

@@ -22,6 +22,7 @@ use web_capture::gdocs::{
 };
 
 const PUBLIC_DOCUMENT_ID: &str = "1f5zI2xOFpKa90v0GjamO_t7lqSdzMlaM";
+const PUBLIC_DOCUMENT_V2_ID: &str = "1Rvaod_u2wgkAUNdXG-e29yQem-P36KAQ";
 
 const URL_VARIATIONS: &[&str] = &[
     "https://docs.google.com/document/d/1f5zI2xOFpKa90v0GjamO_t7lqSdzMlaM",
@@ -163,6 +164,47 @@ fn live_enabled() -> bool {
     )
 }
 
+fn contains_ordered_item(markdown: &str, number: usize, text: &str) -> bool {
+    markdown.contains(&format!("{number}. {text}"))
+        || markdown.contains(&format!("{number}.  {text}"))
+}
+
+fn contains_bullet_item(markdown: &str, text: &str) -> bool {
+    markdown.contains(&format!("- {text}")) || markdown.contains(&format!("-   {text}"))
+}
+
+fn assert_issue_108_markdown(markdown: &str) {
+    assert!(
+        markdown.contains("15. List & Blockquote Edge Cases (browser-mode reproducers)"),
+        "missing issue #108 section: {markdown}"
+    );
+    assert!(
+        contains_ordered_item(markdown, 1, "Apple")
+            && contains_ordered_item(markdown, 2, "Banana")
+            && contains_ordered_item(markdown, 3, "Cherry"),
+        "Apple/Banana/Cherry should render as an ordered list: {markdown}"
+    );
+    assert!(
+        !contains_bullet_item(markdown, "Apple"),
+        "Apple should not render as a bullet: {markdown}"
+    );
+    assert!(
+        markdown
+            .contains("Continuation paragraph that is not a list item. Same indent as Step one."),
+        "missing continuation paragraph: {markdown}"
+    );
+    assert!(
+        !markdown.contains("> Continuation paragraph that is not a list item."),
+        "continuation paragraph should not be a blockquote: {markdown}"
+    );
+    assert!(
+        contains_bullet_item(markdown, "Red")
+            && contains_bullet_item(markdown, "Green")
+            && contains_bullet_item(markdown, "Blue"),
+        "Red/Green/Blue should render as bullets: {markdown}"
+    );
+}
+
 // Google Docs occasionally returns transient 500s on the public-export
 // endpoint. The Habr integration suite in the JS codebase uses a retry
 // helper to smooth this flake; Rust's test crate doesn't pull in a retry
@@ -293,4 +335,49 @@ async fn live_browser_model_capture_of_public_document_preserves_markdown_featur
     assert!(result.markdown.contains("docs-images-rt/"));
     assert!(result.remote_images.len() >= 4);
     assert!(result.markdown.contains("---"));
+}
+
+#[tokio::test]
+async fn live_capture_of_issue_108_v2_document_preserves_section_15_api_semantics() {
+    if !live_enabled() {
+        eprintln!("Skipping live Google Docs capture test; set GDOCS_INTEGRATION=1 to enable.");
+        return;
+    }
+
+    let url = format!("https://docs.google.com/document/d/{PUBLIC_DOCUMENT_V2_ID}/edit");
+    let result = fetch_with_retry(&url)
+        .await
+        .expect("issue #108 v2 document should be reachable without a token");
+
+    assert_eq!(result.document_id, PUBLIC_DOCUMENT_V2_ID);
+    assert_issue_108_markdown(&result.content);
+}
+
+#[tokio::test]
+async fn live_browser_model_capture_of_issue_108_v2_document_preserves_section_15_semantics() {
+    if !live_enabled() {
+        eprintln!(
+            "Skipping live Google Docs browser-model capture test; set GDOCS_INTEGRATION=1 to enable."
+        );
+        return;
+    }
+
+    let url = format!("https://docs.google.com/document/d/{PUBLIC_DOCUMENT_V2_ID}/edit");
+    let result = fetch_browser_model_with_retry(&url)
+        .await
+        .expect("issue #108 v2 document should be capturable from the editor model");
+
+    assert_eq!(result.document_id, PUBLIC_DOCUMENT_V2_ID);
+    assert_eq!(result.export_url, build_edit_url(PUBLIC_DOCUMENT_V2_ID));
+    assert_issue_108_markdown(&result.markdown);
+    assert!(
+        !result.markdown.contains("*Apple*"),
+        "inherited italic style should not leak onto Section 15 list items: {}",
+        result.markdown
+    );
+    assert!(
+        !result.markdown.contains("*Red*"),
+        "inherited italic style should not leak onto Section 15 bullets: {}",
+        result.markdown
+    );
 }
