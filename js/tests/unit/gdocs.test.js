@@ -431,7 +431,16 @@ describe('gdocs', () => {
           ],
         },
       ];
-      const capture = parseGoogleDocsModelChunks(chunks);
+      const exportHtml = `
+        <html><body>
+          <ol>
+            <li>First item</li>
+            <li>Second item</li>
+            <li>Third item</li>
+          </ol>
+        </body></html>
+      `;
+      const capture = parseGoogleDocsModelChunks(chunks, {}, { exportHtml });
       const markdown = renderGoogleDocsCapture(capture, 'markdown');
       const lines = markdown.split('\n');
 
@@ -465,7 +474,15 @@ describe('gdocs', () => {
           ],
         },
       ];
-      const capture = parseGoogleDocsModelChunks(chunks);
+      const exportHtml = `
+        <html><body>
+          <ol>
+            <li>First item</li>
+            <li>Second item</li>
+          </ol>
+        </body></html>
+      `;
+      const capture = parseGoogleDocsModelChunks(chunks, {}, { exportHtml });
       const markdown = renderGoogleDocsCapture(capture, 'markdown');
 
       expect(markdown).not.toMatch(/First item\n\n2\. Second item/u);
@@ -540,7 +557,10 @@ describe('gdocs', () => {
           ],
         },
       ];
-      const capture = parseGoogleDocsModelChunks(chunks);
+      const exportHtml = `
+        <html><body><ol><li>Parent item 1<ol><li>Child item 1.1</li><li>Child item 1.2<ol><li>Grandchild item 1.2.1</li><li>Grandchild item 1.2.2</li></ol></li><li>Child item 1.3</li></ol></li><li>Parent item 2</li></ol></body></html>
+      `;
+      const capture = parseGoogleDocsModelChunks(chunks, {}, { exportHtml });
       const markdown = renderGoogleDocsCapture(capture, 'markdown');
 
       expect(markdown).toContain(
@@ -556,6 +576,91 @@ describe('gdocs', () => {
       );
       expect(markdown).not.toContain('Parent item 1\n\n');
       expect(markdown).not.toContain('- Child item 1.1');
+    });
+
+    it('uses export semantics for ambiguous browser-model lists and continuation paragraphs (issue #108)', () => {
+      const text = [
+        'Apple',
+        'Banana',
+        'Cherry',
+        'Step one',
+        'Continuation paragraph that is not a list item. Same indent as Step one.',
+        'Step two',
+        'Red',
+        'Green',
+        'Blue',
+        '',
+      ].join('\n');
+      const lineEnd = (needle) => text.indexOf('\n', text.indexOf(needle)) + 1;
+      const listStyle = (needle, id) => ({
+        ty: 'as',
+        st: 'list',
+        si: lineEnd(needle),
+        ei: lineEnd(needle),
+        sm: { ls_id: id },
+      });
+      const paragraphStyle = (needle, indentStart, indentFirstLine) => ({
+        ty: 'as',
+        st: 'paragraph',
+        si: lineEnd(needle),
+        ei: lineEnd(needle),
+        sm: { ps_il: indentStart, ps_ifl: indentFirstLine },
+      });
+      const chunks = [
+        {
+          chunk: [
+            { ty: 'is', s: text },
+            listStyle('Apple', 'kix.ordered'),
+            listStyle('Banana', 'kix.ordered'),
+            listStyle('Cherry', 'kix.ordered'),
+            listStyle('Step one', 'kix.step-one'),
+            paragraphStyle(
+              'Continuation paragraph that is not a list item',
+              36,
+              36
+            ),
+            listStyle('Step two', 'kix.step-two'),
+            listStyle('Red', 'kix.bullets'),
+            listStyle('Green', 'kix.bullets'),
+            listStyle('Blue', 'kix.bullets'),
+            {
+              ty: 'as',
+              st: 'text',
+              si: 1,
+              ei: text.length - 1,
+              sm: { ts_it: true, ts_it_i: true },
+            },
+          ],
+        },
+      ];
+      const exportHtml = `
+        <html><body>
+          <ol><li>Apple</li><li>Banana</li><li>Cherry</li></ol>
+          <ol><li>Step one</li></ol>
+          <p>Continuation paragraph that is not a list item. Same indent as Step one.</p>
+          <ol><li>Step two</li></ol>
+          <ul><li>Red</li><li>Green</li><li>Blue</li></ul>
+        </body></html>
+      `;
+      const capture = parseGoogleDocsModelChunks(chunks, {}, { exportHtml });
+      const markdown = renderGoogleDocsCapture(capture, 'markdown');
+      const html = renderGoogleDocsCapture(capture, 'html');
+
+      expect(markdown).toContain('1. Apple\n2. Banana\n3. Cherry');
+      expect(markdown).not.toContain('- Apple');
+      expect(markdown).toContain(
+        'Continuation paragraph that is not a list item. Same indent as Step one.'
+      );
+      expect(markdown).not.toContain(
+        '> Continuation paragraph that is not a list item.'
+      );
+      expect(markdown).toContain('- Red\n- Green\n- Blue');
+      expect(markdown).not.toContain('*Apple*');
+      expect(html).toContain('<ol><li>Apple</li></ol>');
+      expect(html).toContain('<ul><li>Red</li></ul>');
+      expect(html).not.toContain(
+        '<blockquote>Continuation paragraph that is not a list item.'
+      );
     });
 
     it('renders model style records for headings, inline formatting, links, lists, blockquotes, rules, and images', () => {

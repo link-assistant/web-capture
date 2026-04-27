@@ -86,6 +86,33 @@ export const PUBLIC_TEST_DOCUMENT = {
   ],
 };
 
+// The issue #108 v2 document extends the public reference fixture with Section
+// 15, covering browser-model list type and continuation-paragraph regressions.
+export const PUBLIC_TEST_DOCUMENT_V2 = {
+  id: '1Rvaod_u2wgkAUNdXG-e29yQem-P36KAQ',
+  canonicalUrl:
+    'https://docs.google.com/document/d/1Rvaod_u2wgkAUNdXG-e29yQem-P36KAQ/edit',
+};
+
+function expectIssue108Markdown(markdown) {
+  expect(markdown).toContain(
+    '15. List & Blockquote Edge Cases (browser-mode reproducers)'
+  );
+  expect(markdown).toMatch(/1\.\s+Apple/u);
+  expect(markdown).toMatch(/2\.\s+Banana/u);
+  expect(markdown).toMatch(/3\.\s+Cherry/u);
+  expect(markdown).not.toMatch(/^-\s+Apple$/mu);
+  expect(markdown).toContain(
+    'Continuation paragraph that is not a list item. Same indent as Step one.'
+  );
+  expect(markdown).not.toContain(
+    '> Continuation paragraph that is not a list item.'
+  );
+  expect(markdown).toMatch(/^-\s+Red$/mu);
+  expect(markdown).toMatch(/^-\s+Green$/mu);
+  expect(markdown).toMatch(/^-\s+Blue$/mu);
+}
+
 describe('Google Docs public test document (issue #90)', () => {
   describe('URL variations', () => {
     it.each(PUBLIC_TEST_DOCUMENT.urlVariations)(
@@ -181,11 +208,19 @@ describe('Google Docs public test document (issue #90)', () => {
         baseDelay: 2000,
       });
 
+    const browserEngine =
+      process.env.GDOCS_BROWSER_ENGINE || process.env.BROWSER_ENGINE;
     const captureBrowserWithRetry = (url) =>
-      retry(() => captureGoogleDocWithBrowser(url), {
-        retries: 2,
-        baseDelay: 2000,
-      });
+      retry(
+        () =>
+          captureGoogleDocWithBrowser(url, {
+            ...(browserEngine ? { engine: browserEngine } : {}),
+          }),
+        {
+          retries: 2,
+          baseDelay: 2000,
+        }
+      );
 
     it('fetches the public document via --capture api and returns markdown', async () => {
       const { markdown, documentId, exportUrl } = await fetchWithRetry(
@@ -251,6 +286,30 @@ describe('Google Docs public test document (issue #90)', () => {
       expect(markdown).toContain('![Yellow square](');
       expect(markdown).toContain('docs-images-rt/');
       expect(markdown).toContain('---');
+    });
+
+    it('fetches the issue #108 v2 document via --capture api and preserves Section 15 semantics', async () => {
+      const { markdown, documentId, exportUrl } = await fetchWithRetry(
+        PUBLIC_TEST_DOCUMENT_V2.canonicalUrl
+      );
+
+      expect(documentId).toBe(PUBLIC_TEST_DOCUMENT_V2.id);
+      expect(exportUrl).toBe(
+        buildExportUrl(PUBLIC_TEST_DOCUMENT_V2.id, 'html')
+      );
+      expectIssue108Markdown(markdown);
+    });
+
+    it('captures the issue #108 v2 document via --capture browser and preserves Section 15 semantics', async () => {
+      const { markdown, documentId, exportUrl, capture } =
+        await captureBrowserWithRetry(PUBLIC_TEST_DOCUMENT_V2.canonicalUrl);
+
+      expect(documentId).toBe(PUBLIC_TEST_DOCUMENT_V2.id);
+      expect(exportUrl).toBe(buildEditUrl(PUBLIC_TEST_DOCUMENT_V2.id));
+      expect(capture.blocks.length).toBeGreaterThan(30);
+      expectIssue108Markdown(markdown);
+      expect(markdown).not.toContain('*Apple*');
+      expect(markdown).not.toContain('*Red*');
     });
   });
 });

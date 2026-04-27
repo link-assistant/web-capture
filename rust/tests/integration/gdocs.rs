@@ -6,9 +6,10 @@ use web_capture::gdocs::{
     build_docs_api_url, build_edit_url, build_export_url, create_archive_zip,
     extract_base64_images, extract_bearer_token, extract_document_id, is_google_docs_url,
     localize_rendered_remote_images_for_archive, normalize_google_docs_export_markdown,
-    parse_model_chunks, preprocess_google_docs_export_html, render_captured_document,
-    render_docs_api_document, select_capture_method, CapturedBlock, CapturedDocument, ContentNode,
-    ExtractedImage, GDocsArchiveResult, GDocsCaptureMethod, GDocsRenderedResult, RemoteImage,
+    parse_model_chunks, parse_model_chunks_with_export_html, preprocess_google_docs_export_html,
+    render_captured_document, render_docs_api_document, select_capture_method, CapturedBlock,
+    CapturedDocument, ContentNode, ExtractedImage, GDocsArchiveResult, GDocsCaptureMethod,
+    GDocsRenderedResult, RemoteImage,
 };
 
 fn issue_104_fixture_path(filename: &str) -> PathBuf {
@@ -842,7 +843,9 @@ fn test_render_ordered_list_sequential_numbering_r3() {
     })];
     let cid_urls = std::collections::HashMap::<String, String>::new();
 
-    let capture = parse_model_chunks(&chunks, &cid_urls);
+    let export_html =
+        "<html><body><ol><li>First item</li><li>Second item</li><li>Third item</li></ol></body></html>";
+    let capture = parse_model_chunks_with_export_html(&chunks, &cid_urls, Some(export_html));
     let markdown = render_captured_document(&capture, "markdown");
 
     assert!(
@@ -980,7 +983,8 @@ fn test_render_nested_ordered_lists_keep_type_and_tight_spacing_issue_100() {
     })];
     let cid_urls = std::collections::HashMap::<String, String>::new();
 
-    let capture = parse_model_chunks(&chunks, &cid_urls);
+    let export_html = "<html><body><ol><li>Parent item 1<ol><li>Child item 1.1</li><li>Child item 1.2<ol><li>Grandchild item 1.2.1</li><li>Grandchild item 1.2.2</li></ol></li><li>Child item 1.3</li></ol></li><li>Parent item 2</li></ol></body></html>";
+    let capture = parse_model_chunks_with_export_html(&chunks, &cid_urls, Some(export_html));
     let markdown = render_captured_document(&capture, "markdown");
 
     assert!(
@@ -996,6 +1000,136 @@ fn test_render_nested_ordered_lists_keep_type_and_tight_spacing_issue_100() {
     assert!(
         !markdown.contains("- Child item 1.1"),
         "nested ordered children should not render as bullets: {markdown}"
+    );
+}
+
+const ISSUE_108_EXPORT_HTML: &str = r"
+    <html><body>
+        <ol><li>Apple</li><li>Banana</li><li>Cherry</li></ol>
+        <ol><li>Step one</li></ol>
+        <p>Continuation paragraph that is not a list item. Same indent as Step one.</p>
+        <ol><li>Step two</li></ol>
+        <ul><li>Red</li><li>Green</li><li>Blue</li></ul>
+    </body></html>
+";
+
+fn issue_108_model_chunks() -> Vec<serde_json::Value> {
+    let text = [
+        "Apple",
+        "Banana",
+        "Cherry",
+        "Step one",
+        "Continuation paragraph that is not a list item. Same indent as Step one.",
+        "Step two",
+        "Red",
+        "Green",
+        "Blue",
+        "",
+    ]
+    .join("\n");
+    let line_end = |needle: &str| {
+        let start = text.find(needle).expect("needle should exist");
+        start + text[start..].find('\n').expect("line should end") + 1
+    };
+    let chunks = vec![serde_json::json!({
+        "chunk": [
+            { "ty": "is", "s": text },
+            {
+                "ty": "as", "st": "list",
+                "si": line_end("Apple"), "ei": line_end("Apple"),
+                "sm": { "ls_id": "kix.ordered" }
+            },
+            {
+                "ty": "as", "st": "list",
+                "si": line_end("Banana"), "ei": line_end("Banana"),
+                "sm": { "ls_id": "kix.ordered" }
+            },
+            {
+                "ty": "as", "st": "list",
+                "si": line_end("Cherry"), "ei": line_end("Cherry"),
+                "sm": { "ls_id": "kix.ordered" }
+            },
+            {
+                "ty": "as", "st": "list",
+                "si": line_end("Step one"), "ei": line_end("Step one"),
+                "sm": { "ls_id": "kix.step-one" }
+            },
+            {
+                "ty": "as", "st": "paragraph",
+                "si": line_end("Continuation paragraph that is not a list item"),
+                "ei": line_end("Continuation paragraph that is not a list item"),
+                "sm": { "ps_il": 36, "ps_ifl": 36 }
+            },
+            {
+                "ty": "as", "st": "list",
+                "si": line_end("Step two"), "ei": line_end("Step two"),
+                "sm": { "ls_id": "kix.step-two" }
+            },
+            {
+                "ty": "as", "st": "list",
+                "si": line_end("Red"), "ei": line_end("Red"),
+                "sm": { "ls_id": "kix.bullets" }
+            },
+            {
+                "ty": "as", "st": "list",
+                "si": line_end("Green"), "ei": line_end("Green"),
+                "sm": { "ls_id": "kix.bullets" }
+            },
+            {
+                "ty": "as", "st": "list",
+                "si": line_end("Blue"), "ei": line_end("Blue"),
+                "sm": { "ls_id": "kix.bullets" }
+            },
+            {
+                "ty": "as", "st": "text",
+                "si": 1, "ei": text.len() - 1,
+                "sm": { "ts_it": true, "ts_it_i": true }
+            }
+        ]
+    })];
+    chunks
+}
+
+#[test]
+fn test_export_semantic_hints_fix_ambiguous_lists_and_continuation_paragraph_issue_108() {
+    let chunks = issue_108_model_chunks();
+    let cid_urls = std::collections::HashMap::<String, String>::new();
+
+    let capture =
+        parse_model_chunks_with_export_html(&chunks, &cid_urls, Some(ISSUE_108_EXPORT_HTML));
+    let markdown = render_captured_document(&capture, "markdown");
+    let html = render_captured_document(&capture, "html");
+
+    assert!(
+        markdown.contains("1. Apple\n2. Banana\n3. Cherry"),
+        "ordered list should stay ordered: {markdown}"
+    );
+    assert!(
+        !markdown.contains("- Apple"),
+        "ordered list should not render as bullets: {markdown}"
+    );
+    assert!(
+        markdown
+            .contains("Continuation paragraph that is not a list item. Same indent as Step one."),
+        "continuation paragraph should be present: {markdown}"
+    );
+    assert!(
+        !markdown.contains("> Continuation paragraph that is not a list item."),
+        "continuation paragraph should not be a blockquote: {markdown}"
+    );
+    assert!(
+        markdown.contains("- Red\n- Green\n- Blue"),
+        "unordered list should stay unordered: {markdown}"
+    );
+    assert!(
+        !markdown.contains("*Apple*"),
+        "inherited italic records should not style list content: {markdown}"
+    );
+    assert!(html.contains("<ol><li>Apple</li></ol>"), "html was: {html}");
+    assert!(html.contains("<ul><li>Red</li></ul>"), "html was: {html}");
+    assert!(
+        !html.contains("<blockquote>Continuation paragraph that is not a list item."),
+        "html was: {html}"
     );
 }
 

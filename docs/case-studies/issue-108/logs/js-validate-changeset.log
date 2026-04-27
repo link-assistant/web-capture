@@ -1,0 +1,5 @@
+Found 1 changeset file(s)
+Validating changeset: js/.changeset/issue-108-gdocs-browser-semantics.md
+✅ Changeset validation passed
+   Type: patch
+   Description: Fix Google Docs browser capture list semantics and continuation paragraph handling.

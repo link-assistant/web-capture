@@ -1,0 +1,100 @@
+
+> @link-assistant/web-capture@1.7.17 test
+> node --experimental-vm-modules ./node_modules/.bin/jest --runTestsByPath tests/unit/gdocs.test.js --runInBand
+
+(node:788624) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+PASS tests/unit/gdocs.test.js
+  gdocs
+    isGoogleDocsUrl
+      ✓ returns true for standard Google Docs edit URL (2 ms)
+      ✓ returns true for URL with query parameters
+      ✓ returns true for URL without /edit (3 ms)
+      ✓ returns false for non-Google Docs URL (1 ms)
+      ✓ returns false for Google Sheets URL
+      ✓ returns false for empty string
+      ✓ returns false for null
+      ✓ returns false for undefined
+      ✓ returns false for non-string input (1 ms)
+    extractDocumentId
+      ✓ extracts document ID from standard URL
+      ✓ extracts document ID from URL with query params
+      ✓ extracts document ID with hyphens and underscores
+      ✓ returns null for non-Google Docs URL
+      ✓ returns null for empty string
+      ✓ returns null for null input
+    buildExportUrl
+      ✓ builds HTML export URL (1 ms)
+      ✓ builds Markdown export URL
+      ✓ builds PDF export URL
+      ✓ builds TXT export URL
+      ✓ defaults to html for unknown format
+      ✓ defaults to html when format is omitted
+      ✓ uses the real document ID from test document
+    capture method selection (issue #72)
+      ✓ honors explicit browser capture for Google Docs URLs (1 ms)
+      ✓ uses public export for API capture without token
+      ✓ uses Docs REST API for API capture with token (2 ms)
+    buildEditUrl
+      ✓ builds the fresh Google Docs editor URL (1 ms)
+    buildDocsApiUrl
+      ✓ builds the Google Docs REST API URL
+    parseGoogleDocsModelChunks (issue #72)
+      ✓ includes regular and suggested text from DOCS_modelChunk data (2 ms)
+      ✓ accepts individual DOCS_modelChunk items captured from push calls
+      ✓ extracts table cells and suggested images from DOCS_modelChunk data (1 ms)
+      ✓ parses multi-column tables when rows are separated by 0x0a (issue #92 R2) (1 ms)
+      ✓ does not create empty columns when Docs emits both 0x1c and 0x0a cell separators (issue #96)
+      ✓ does not create ghost columns from the live Google Docs 0x0a+0x1c table separator pattern (issue #100) (1 ms)
+      ✓ preserves intentionally empty table cells without shifting following cells (issue #100) (1 ms)
+      ✓ numbers ordered list items sequentially (issue #92 R3) (10 ms)
+      ✓ joins consecutive list items with a single newline (issue #92 R4) (3 ms)
+      ✓ keeps nested ordered lists ordered and tight when Google Docs uses separate list ids per level (issue #100) (4 ms)
+      ✓ uses export semantics for ambiguous browser-model lists and continuation paragraphs (issue #108) (6 ms)
+      ✓ renders model style records for headings, inline formatting, links, lists, blockquotes, rules, and images (1 ms)
+      ✓ renders soft breaks outside marks and preserves image dimensions (issue #104) (2 ms)
+      ✓ does not keep inline marks open across embedded newlines (issue #104)
+      ✓ keeps nested bold and italic markers balanced (issue #96) (1 ms)
+      ✓ keeps styled same-target link segments in one link label (issue #96)
+      ✓ keeps consecutive blockquote paragraphs in the same quote block (issue #96)
+      ✓ ends rendered markdown with a newline (issue #96) (1 ms)
+    renderDocsApiDocument (issue #72)
+      ✓ renders Google Docs REST API paragraphs, tables, and inline images (1 ms)
+    captureGoogleDocWithBrowserOrFallback (issue #81)
+      ✓ falls back to public export archive when the editor exposes no model chunks (20 ms)
+    captureGoogleDocWithBrowser (issue #106)
+      ✓ waits for DOCS_modelChunk data to stop changing before parsing (9 ms)
+    GDOCS_EXPORT_FORMATS
+      ✓ contains all expected formats
+    localizeGoogleDocsModelImages (issue #92 R5)
+      ✓ downloads docs-images-rt URLs and rewrites markdown/html (1 ms)
+      ✓ keeps original URL when download fails
+    preprocessGoogleDocsExportHtml (issue #92 R6)
+      ✓ hoists font-weight:700 spans into <strong> (2 ms)
+      ✓ hoists font-style:italic spans into <em> (1 ms)
+      ✓ hoists text-decoration:line-through spans into <del>
+      ✓ hoists Google Docs CSS class styles into semantic inline tags (5 ms)
+      ✓ combines multiple styles on a single span (1 ms)
+      ✓ unwraps google.com/url?q= redirect links (1 ms)
+      ✓ strips leading empty anchors and numbering span inside headings (1 ms)
+      ✓ strips standalone empty anchors before headings (1 ms)
+      ✓ turns class-indented Google Docs paragraphs into blockquotes (1 ms)
+      ✓ replaces &nbsp; entity and U+00A0 with regular spaces (2 ms)
+      ✓ is a no-op for HTML without Google Docs markers
+      ✓ recovers public-export markdown structure for issue #102 (13 ms)
+    extractBase64Images
+      ✓ extracts a single PNG data URI image (1 ms)
+      ✓ extracts multiple images with correct numbering and extensions
+      ✓ returns empty array when no data URI images (1 ms)
+      ✓ preserves non-data-URI images
+    image extraction pipeline (issue #53)
+      ✓ extractBase64Images from HTML produces images with data buffers (2 ms)
+      ✓ default markdown mode extracts base64 images to disk (not strip) (3 ms)
+      ✓ keepOriginalLinks strips base64 images
+      ✓ extractBase64ToBuffers produces in-memory buffers for archive (1 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       71 passed, 71 total
+Snapshots:   0 total
+Time:        0.847 s, estimated 1 s
+Ran all test suites within paths "tests/unit/gdocs.test.js".
