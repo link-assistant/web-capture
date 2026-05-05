@@ -59,6 +59,10 @@ export function convertHtmlToMarkdown(html, baseUrl) {
   //    Demoting avoids ATX heading prefix, leaving the sub-number on a clean line.
   preserveLeadingHeadingNumbering($);
 
+  // Number consecutive top-level <ol>s continuously across the document
+  // (1, 2, 3 ... N) so JS and Rust agree. <ol start="N"> resets the counter.
+  applyContinuousOrderedListNumbering($);
+
   // Remove <a> tags with no direct text content (including only whitespace or only child elements)
   $('a').each(function () {
     // Get all text nodes directly under this <a>
@@ -225,6 +229,28 @@ function preserveLeadingHeadingNumbering($) {
       $p.html(`<strong>${inner}</strong>`);
     }
     $h.replaceWith($p);
+  });
+}
+
+// Walk every top-level <ol> in document order and assign a `start` attribute
+// so consecutive lists number continuously (1, 2, 3, ... N). An explicit
+// `start="N"` resets the running counter to N and is preserved.
+//
+// Top-level here means "not inside another <ol> or <ul>" — nested ordered
+// lists keep their own numbering and Turndown's per-list start handling.
+function applyContinuousOrderedListNumbering($) {
+  let counter = 1;
+  $('ol').each(function () {
+    if ($(this).parents('ol, ul').length > 0) {
+      return;
+    }
+    const explicitStart = parseInt($(this).attr('start') ?? '', 10);
+    if (Number.isFinite(explicitStart)) {
+      counter = explicitStart;
+    } else {
+      $(this).attr('start', String(counter));
+    }
+    counter += $(this).children('li').length;
   });
 }
 
@@ -505,6 +531,9 @@ export function convertHtmlToMarkdownEnhanced(html, baseUrl, options = {}) {
 
   // Preserve hierarchical heading numbering (see convertHtmlToMarkdown).
   preserveLeadingHeadingNumbering($);
+
+  // Continuous numbering across consecutive top-level <ol>s (see convertHtmlToMarkdown).
+  applyContinuousOrderedListNumbering($);
 
   // Remove empty links (same logic as convertHtmlToMarkdown)
   $('a').each(function () {
