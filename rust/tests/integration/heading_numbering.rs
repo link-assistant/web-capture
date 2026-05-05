@@ -8,11 +8,10 @@ fn preserves_hierarchical_heading_numbering() {
 
     // Parent "13."
     assert!(
-        md.lines().any(|l| l
-            .trim_start_matches('#')
-            .trim_start()
-            .starts_with("13.")
-            || l.trim_start().starts_with("13.")),
+        md.lines().any(
+            |l| l.trim_start_matches('#').trim_start().starts_with("13.")
+                || l.trim_start().starts_with("13.")
+        ),
         "expected parent number 13 to be preserved as heading or numbered item; got:\n{md}"
     );
 
