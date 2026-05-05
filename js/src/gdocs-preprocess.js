@@ -245,6 +245,12 @@ function renderNestedListGroup($, group, classStyles) {
   const openTags = [];
   const itemOpen = [];
 
+  const topLevelStart =
+    group[0]?.tagName?.toLowerCase() === 'ol'
+      ? $(group[0]).attr('start')
+      : undefined;
+  let topLevelOpened = false;
+
   const closeItem = (level) => {
     if (itemOpen[level]) {
       html += '</li>';
@@ -261,7 +267,21 @@ function renderNestedListGroup($, group, classStyles) {
   const openList = (level, tagName) => {
     openTags[level] = tagName;
     itemOpen[level] = false;
-    html += `<${tagName}>`;
+    if (
+      level === 0 &&
+      !topLevelOpened &&
+      tagName === 'ol' &&
+      topLevelStart !== undefined &&
+      topLevelStart !== ''
+    ) {
+      html += `<ol start="${topLevelStart}">`;
+      topLevelOpened = true;
+    } else {
+      if (level === 0) {
+        topLevelOpened = true;
+      }
+      html += `<${tagName}>`;
+    }
   };
 
   for (const list of group) {
