@@ -5,4 +5,5 @@ mod figures;
 mod gdocs;
 mod gdocs_image_parity;
 mod gdocs_public_doc;
+mod heading_numbering;
 mod themed_image;

@@ -52,6 +52,13 @@ export function convertHtmlToMarkdown(html, baseUrl) {
     }
   });
 
+  // Preserve hierarchical heading numbering in source text (e.g. 13, 13.1).
+  // 1) <ol><li><hN>13. Foo</hN></li></ol> → <ol start="13"><li><hN>Foo</hN></li></ol>
+  //    Then Turndown emits "13.  #### Foo" instead of restarting at "1.".
+  // 2) <hN>13.1 Bar</hN> (sub-numbering with decimal) → <p><strong>13.1 Bar</strong></p>
+  //    Demoting avoids ATX heading prefix, leaving the sub-number on a clean line.
+  preserveLeadingHeadingNumbering($);
+
   // Remove <a> tags with no direct text content (including only whitespace or only child elements)
   $('a').each(function () {
     // Get all text nodes directly under this <a>
@@ -170,6 +177,100 @@ export function convertHtmlToMarkdown(html, baseUrl) {
   // Decode HTML entities to unicode after markdown conversion
   // Preserve non-breaking spaces as &nbsp; entities for clear marking
   return he.decode(turndown.turndown($.html())).replace(/\u00A0/g, '&nbsp;');
+}
+
+function preserveLeadingHeadingNumbering($) {
+  // Hoist the OL counter onto a heading inside its first <li>.
+  // Example: <ol><li><h4>13. Foo</h4></li></ol> → <ol start="13"><li><h4>Foo</h4></li></ol>
+  $('ol > li').each(function () {
+    const $li = $(this);
+    const $heading = $li.children('h1, h2, h3, h4, h5, h6').first();
+    if (!$heading.length) {
+      return;
+    }
+    // Only act when the <li> has just one heading child and no other meaningful text.
+    if ($li.children().length !== 1) {
+      return;
+    }
+    const text = $heading.text();
+    const m = text.match(/^\s*(\d+)\.\s+(.*)$/s);
+    if (!m) {
+      return;
+    }
+    const [, num, rest] = m;
+    const $ol = $li.parent();
+    if ($ol.children('li').length !== 1) {
+      return;
+    }
+    if (!$ol.attr('start')) {
+      $ol.attr('start', num);
+    }
+    stripLeadingTextFromHeading($, $heading, m[0].length - rest.length);
+  });
+
+  // Demote <hN> with sub-numbering text (e.g. "13.1 Foo") to a bold paragraph.
+  // Avoids emitting `##### 13.1 Foo` (which collides with renderers that strip
+  // numbering or blockquote-wrap subsections downstream).
+  $('h1, h2, h3, h4, h5, h6').each(function () {
+    const $h = $(this);
+    const text = $h.text();
+    if (!/^\s*\d+\.\d+/.test(text)) {
+      return;
+    }
+    const inner = $h.html() || '';
+    const $p = $('<p></p>');
+    if (/^\s*<strong[\s>]/i.test(inner)) {
+      $p.html(inner);
+    } else {
+      $p.html(`<strong>${inner}</strong>`);
+    }
+    $h.replaceWith($p);
+  });
+}
+
+function stripLeadingTextFromHeading($, $heading, prefixLen) {
+  // Walk text nodes from the start of the heading and remove prefixLen characters.
+  let remaining = prefixLen;
+  const stack = [$heading.get(0)];
+  while (stack.length && remaining > 0) {
+    const node = stack.shift();
+    const children = node.children || [];
+    for (const child of children) {
+      if (remaining <= 0) {
+        break;
+      }
+      if (child.type === 'text') {
+        const data = child.data || '';
+        if (data.length <= remaining) {
+          remaining -= data.length;
+          child.data = '';
+        } else {
+          child.data = data.slice(remaining);
+          remaining = 0;
+        }
+      } else {
+        stack.push(child);
+      }
+    }
+  }
+  // Trim leading whitespace from the first non-empty text node.
+  const walk = (node) => {
+    const children = node.children || [];
+    for (const child of children) {
+      if (child.type === 'text') {
+        if (child.data) {
+          child.data = child.data.replace(/^\s+/, '');
+          if (child.data) {
+            return true;
+          }
+        }
+      } else if (walk(child)) {
+        return true;
+      }
+    }
+    return false;
+  };
+  walk($heading.get(0));
 }
 
 function preserveTableCellLineBreaks(turndown) {
@@ -401,6 +502,9 @@ export function convertHtmlToMarkdownEnhanced(html, baseUrl, options = {}) {
       $(this).remove();
     }
   });
+
+  // Preserve hierarchical heading numbering (see convertHtmlToMarkdown).
+  preserveLeadingHeadingNumbering($);
 
   // Remove empty links (same logic as convertHtmlToMarkdown)
   $('a').each(function () {
