@@ -164,6 +164,10 @@ export function convertHtmlToMarkdown(html, baseUrl) {
     $table.replaceWith($newTable);
   });
 
+  // Hoist <br>s out of inline edges so Turndown's flanking-whitespace trim
+  // does not eat the hard break. See liftBrFromInlineEdges for details.
+  liftBrFromInlineEdges($);
+
   // Convert cleaned HTML to Markdown
   const turndown = new TurndownService({
     headingStyle: 'atx',
@@ -181,6 +185,72 @@ export function convertHtmlToMarkdown(html, baseUrl) {
   // Decode HTML entities to unicode after markdown conversion
   // Preserve non-breaking spaces as &nbsp; entities for clear marking
   return he.decode(turndown.turndown($.html())).replace(/\u00A0/g, '&nbsp;');
+}
+
+// Lift <br> nodes out of inline parents when they sit at the leading or
+// trailing edge.
+//
+// Turndown calls `content.trim()` on the inner markdown of any inline element
+// whose `flankingWhitespace` is non-empty (turndown.cjs.js:902), which strips
+// the `  \n` hard break that the <br> rule emits. Google Docs export-html
+// commonly produces `<strong>X</strong><span> Y.<br></span><strong>Z</strong>`
+// — the trailing <br> inside a leading-space <span> gets `.trim()`-ed away,
+// so X/Y/Z collapse onto one line.
+//
+// Hoisting trailing/leading <br>s out of their inline wrapper sidesteps the
+// trim entirely. The hard break then attaches at the parent level, which
+// Turndown handles correctly.
+function liftBrFromInlineEdges($) {
+  const inlineParents = new Set([
+    'span',
+    'a',
+    'strong',
+    'b',
+    'em',
+    'i',
+    'u',
+    's',
+    'del',
+    'ins',
+    'sub',
+    'sup',
+    'mark',
+    'small',
+    'q',
+    'cite',
+    'code',
+    'abbr',
+    'time',
+    'kbd',
+    'samp',
+    'var',
+    'font',
+  ]);
+
+  // Hoist <br>s repeatedly until none sit at an inline edge — this handles
+  // nested wrappers like `<span><em>foo<br></em></span>`.
+  let changed = true;
+  while (changed) {
+    changed = false;
+    $('br').each(function () {
+      const el = this;
+      const parent = el.parent;
+      if (!parent || !inlineParents.has(parent.tagName)) {
+        return;
+      }
+      const isFirst = parent.children[0] === el;
+      const isLast = parent.children[parent.children.length - 1] === el;
+      if (!isFirst && !isLast) {
+        return;
+      }
+      if (isLast) {
+        $(parent).after(el);
+      } else {
+        $(parent).before(el);
+      }
+      changed = true;
+    });
+  }
 }
 
 function preserveLeadingHeadingNumbering($) {
@@ -673,6 +743,9 @@ export function convertHtmlToMarkdownEnhanced(html, baseUrl, options = {}) {
     }
     $table.replaceWith($newTable);
   });
+
+  // Hoist <br>s out of inline edges (see liftBrFromInlineEdges).
+  liftBrFromInlineEdges($);
 
   // Convert to Markdown using Turndown
   const turndown = new TurndownService({
