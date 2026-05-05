@@ -184,7 +184,19 @@ export function convertHtmlToMarkdown(html, baseUrl) {
   preserveTableCellLineBreaks(turndown);
   // Decode HTML entities to unicode after markdown conversion
   // Preserve non-breaking spaces as &nbsp; entities for clear marking
-  return he.decode(turndown.turndown($.html())).replace(/\u00A0/g, '&nbsp;');
+  return coalesceBrRunsToParagraphBreak(
+    he.decode(turndown.turndown($.html())).replace(/\u00A0/g, '&nbsp;')
+  );
+}
+
+// Coalesce runs of CommonMark hard breaks (`  \n`) into a single paragraph
+// break. Google Docs export wraps every visual line break in `<br>`, including
+// `<br><br>` at paragraph boundaries; Turndown faithfully emits two trailing-
+// two-space-newline pairs for that, which renders as `<br><br>` joined inside
+// one `<p>` instead of two paragraphs. Two or more adjacent hard breaks always
+// mean "paragraph break" in the source HTML, so collapse them to `\n\n`.
+function coalesceBrRunsToParagraphBreak(markdown) {
+  return markdown.replace(/(?: {2,}\n){2,}/g, '\n\n');
 }
 
 // Lift <br> nodes out of inline parents when they sit at the leading or
@@ -764,7 +776,9 @@ export function convertHtmlToMarkdownEnhanced(html, baseUrl, options = {}) {
 
   // Decode HTML entities to unicode after markdown conversion
   // Normalize non-breaking spaces to regular spaces in Markdown text
-  let markdown = he.decode(turndown.turndown($.html())).replace(/\u00A0/g, ' ');
+  let markdown = coalesceBrRunsToParagraphBreak(
+    he.decode(turndown.turndown($.html())).replace(/\u00A0/g, ' ')
+  );
 
   // Apply post-processing
   if (postProcess) {
