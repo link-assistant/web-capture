@@ -721,6 +721,7 @@ struct ExportListBlock {
     end: usize,
     tag: String,
     inner: String,
+    start_attr: Option<String>,
 }
 
 #[derive(Debug, Clone)]
@@ -732,6 +733,7 @@ struct ExportListItem {
 
 fn nest_google_docs_lists(html: &str, class_styles: &HashMap<String, String>) -> String {
     let list_re = Regex::new(r"(?is)<(ul|ol)\b([^>]*)>(.*?)</(ul|ol)>").expect("valid regex");
+    let start_attr_re = Regex::new(r#"(?i)\bstart\s*=\s*"([^"]*)""#).expect("valid regex");
     let blocks: Vec<ExportListBlock> = list_re
         .captures_iter(html)
         .filter_map(|caps| {
@@ -741,11 +743,20 @@ fn nest_google_docs_lists(html: &str, class_styles: &HashMap<String, String>) ->
                 return None;
             }
             let whole = caps.get(0)?;
+            let attrs = caps.get(2).map_or("", |m| m.as_str());
+            let start_attr = if open_tag == "ol" {
+                start_attr_re
+                    .captures(attrs)
+                    .and_then(|c| c.get(1).map(|m| m.as_str().to_string()))
+            } else {
+                None
+            };
             Some(ExportListBlock {
                 start: whole.start(),
                 end: whole.end(),
                 tag: open_tag,
                 inner: caps.get(3).map_or("", |m| m.as_str()).to_string(),
+                start_attr,
             })
         })
         .collect();
@@ -786,6 +797,7 @@ fn nest_google_docs_lists(html: &str, class_styles: &HashMap<String, String>) ->
     out
 }
 
+#[allow(clippy::too_many_lines)]
 fn render_nested_list_group(
     group: &[ExportListBlock],
     class_styles: &HashMap<String, String>,
@@ -815,10 +827,13 @@ fn render_nested_list_group(
         return unchanged;
     }
 
+    let top_level_start = group.first().and_then(|block| block.start_attr.clone());
+
     let mut html = String::new();
     let mut current_level: Option<usize> = None;
     let mut open_tags: Vec<Option<String>> = Vec::new();
     let mut item_open: Vec<bool> = Vec::new();
+    let mut top_level_opened = false;
 
     for item in items {
         let level = item.level;
@@ -830,12 +845,19 @@ fn render_nested_list_group(
 
         while current_level.is_none_or(|current| current < level) {
             let next_level = current_level.map_or(0, |current| current + 1);
+            let start_attr = if next_level == 0 && !top_level_opened {
+                top_level_opened = true;
+                top_level_start.as_deref()
+            } else {
+                None
+            };
             open_rendered_list(
                 &mut html,
                 &mut open_tags,
                 &mut item_open,
                 next_level,
                 &item.tag,
+                start_attr,
             );
             current_level = Some(next_level);
         }
@@ -846,9 +868,35 @@ fn render_nested_list_group(
             .is_some_and(|tag| tag != item.tag)
         {
             close_rendered_list(&mut html, &mut open_tags, &mut item_open, level);
-            open_rendered_list(&mut html, &mut open_tags, &mut item_open, level, &item.tag);
+            let start_attr = if level == 0 && !top_level_opened {
+                top_level_opened = true;
+                top_level_start.as_deref()
+            } else {
+                None
+            };
+            open_rendered_list(
+                &mut html,
+                &mut open_tags,
+                &mut item_open,
+                level,
+                &item.tag,
+                start_attr,
+            );
         } else if open_tags[level].is_none() {
-            open_rendered_list(&mut html, &mut open_tags, &mut item_open, level, &item.tag);
+            let start_attr = if level == 0 && !top_level_opened {
+                top_level_opened = true;
+                top_level_start.as_deref()
+            } else {
+                None
+            };
+            open_rendered_list(
+                &mut html,
+                &mut open_tags,
+                &mut item_open,
+                level,
+                &item.tag,
+                start_attr,
+            );
         }
 
         close_rendered_item(&mut html, &mut item_open, level);
@@ -883,10 +931,16 @@ fn open_rendered_list(
     item_open: &mut Vec<bool>,
     level: usize,
     tag: &str,
+    start_attr: Option<&str>,
 ) {
     ensure_list_stack(open_tags, item_open, level);
     html.push('<');
     html.push_str(tag);
+    if let Some(start) = start_attr {
+        if tag == "ol" && !start.is_empty() {
+            write!(html, r#" start="{start}""#).expect("write to String");
+        }
+    }
     html.push('>');
     open_tags[level] = Some(tag.to_string());
     item_open[level] = false;

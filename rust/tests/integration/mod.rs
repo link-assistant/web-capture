@@ -6,4 +6,5 @@ mod gdocs;
 mod gdocs_image_parity;
 mod gdocs_public_doc;
 mod heading_numbering;
+mod html2md_ol_numbering;
 mod themed_image;
