@@ -50,8 +50,9 @@ export function postProcessMarkdown(markdown, options = {}) {
     result = applyBoldFormattingFixes(result);
   }
 
-  // Fix double spaces (but not in code blocks)
-  result = result.replace(/([^\n`]) +/g, (match, char) => `${char} `);
+  // Fix double spaces (but not in code blocks, and preserve CommonMark hard
+  // breaks which require two trailing spaces before a newline).
+  result = result.replace(/([^\n`]) +(?!\n)/g, (match, char) => `${char} `);
 
   // Clean up extra spaces around em-dashes
   result = result.replace(/\s+—\s+/g, ' — ');
