@@ -1,5 +1,11 @@
 # @link-assistant/web-capture
 
+## 1.7.20
+
+### Patch Changes
+
+- 5a3e588: Preserve hierarchical heading numbering (e.g. 13, 13.1) in API-path Markdown conversion. Numbered headings wrapped in `<ol><li><hN>` no longer get renumbered to 1, and sub-numbered headings render with their original number on a clean line.
+
 ## 1.7.19
 
 ### Patch Changes
