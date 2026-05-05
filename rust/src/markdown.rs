@@ -37,6 +37,12 @@ pub fn convert_html_to_markdown(html: &str, base_url: Option<&str>) -> Result<St
     // Parse and clean the HTML
     let cleaned_html = clean_html(&processed_html);
 
+    // Preserve hierarchical heading numbering (e.g. "13. Foo", "13.1 Bar").
+    // Unwrap <ol><li><hN>13. Foo</hN></li></ol> -> <hN>13. Foo</hN> so that
+    // html2md does not restart the OL counter at "1." and clobber the source
+    // number that already lives inside the heading text.
+    let cleaned_html = preserve_leading_heading_numbering(&cleaned_html);
+
     // Move <img> elements out of headings so html2md always sees them.
     // Some html2md versions only emit text children for <h1>..<h6>,
     // silently dropping inline images.
@@ -107,6 +113,45 @@ fn clean_html(html: &str) -> String {
     }
 
     cleaned
+}
+
+/// Unwrap `<ol><li><hN>...</hN></li></ol>` when the heading text already
+/// carries a leading number (e.g. "13. Foo"), and replace such a list with the
+/// bare heading. Without this, `html2md` restarts ordered-list numbering at
+/// "1." and the document loses the original section number.
+///
+/// Also lifts a leading "13. " out of an inner `<strong>` so html2md emits
+/// `#### 13. Foo` (matchable by the test) rather than `#### **13. Foo**`.
+fn preserve_leading_heading_numbering(html: &str) -> String {
+    let pattern = Regex::new(
+        r"(?is)<ol\b[^>]*>\s*<li\b[^>]*>\s*(<h[1-6]\b[^>]*>(?:.*?)</h[1-6]>)\s*</li>\s*</ol>",
+    )
+    .expect("valid regex");
+    let leading_number_in_strong =
+        Regex::new(r"(?is)(<h[1-6]\b[^>]*>)\s*<strong\b[^>]*>\s*(\d+\.\s+)([\s\S]*?)</strong>")
+            .expect("valid regex");
+    let leading_number_plain = Regex::new(r"(?is)<h[1-6]\b[^>]*>\s*\d+\.\s").expect("valid regex");
+
+    let unwrapped = pattern
+        .replace_all(html, |caps: &regex::Captures<'_>| {
+            let heading = &caps[1];
+            if leading_number_in_strong.is_match(heading) || leading_number_plain.is_match(heading)
+            {
+                heading.to_string()
+            } else {
+                caps[0].to_string()
+            }
+        })
+        .into_owned();
+
+    leading_number_in_strong
+        .replace_all(&unwrapped, |caps: &regex::Captures<'_>| {
+            let open = &caps[1];
+            let number = &caps[2];
+            let inner = &caps[3];
+            format!("{open}{number}<strong>{inner}</strong>")
+        })
+        .into_owned()
 }
 
 /// Move `<img>` tags out of `<h1>`..`<h6>` elements.
