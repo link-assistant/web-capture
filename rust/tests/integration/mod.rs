@@ -8,4 +8,5 @@ mod gdocs_public_doc;
 mod heading_numbering;
 mod html2md_br_in_list_item;
 mod html2md_ol_numbering;
+mod paragraph_vs_line_break;
 mod themed_image;
