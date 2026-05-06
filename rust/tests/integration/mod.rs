@@ -1,5 +1,6 @@
 mod animation;
 mod batch;
+mod bold_coalesce_and_leakage;
 mod browser;
 mod figures;
 mod gdocs;

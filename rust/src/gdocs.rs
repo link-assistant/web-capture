@@ -626,6 +626,10 @@ pub fn preprocess_google_docs_export_html(html: &str) -> GDocsExportPreprocessRe
 
     let mut out = hoist_inline_style_spans(html, &mut hoisted);
     out = hoist_class_style_spans(&out, &class_styles, &mut hoisted);
+    out = split_strong_at_block_boundaries(&out);
+    out = split_paragraphs_at_bold_boundaries(&out);
+    out = remove_empty_strong(&out);
+    out = coalesce_adjacent_strong(&out);
     out = convert_class_indented_blockquotes(&out, &class_styles);
     out = nest_google_docs_lists(&out, &class_styles);
     out = strip_google_docs_heading_noise(&out);
@@ -693,6 +697,151 @@ fn hoist_class_style_spans(
             )
         })
         .into_owned()
+}
+
+// Issue #120: a `<strong>` whose closing tag would land on the far side of a
+// `<br>`/`<img>` boundary leaks bold across an image or paragraph break.
+// Split such a strong so each piece on either side of the boundary becomes
+// its own bold run.
+fn split_strong_at_block_boundaries(html: &str) -> String {
+    let strong_re = Regex::new(r"(?is)<strong>(.*?)</strong>").expect("valid regex");
+    let boundary_re = Regex::new(r"(?is)<br\s*/?>|<img\b[^>]*/?>").expect("valid regex");
+
+    let mut current = html.to_string();
+    loop {
+        let mut changed = false;
+        let next = strong_re
+            .replace_all(&current, |caps: &regex::Captures<'_>| {
+                let inner = caps.get(1).map_or("", |m| m.as_str());
+                if !boundary_re.is_match(inner) {
+                    return caps[0].to_string();
+                }
+                changed = true;
+                let mut result = String::new();
+                let mut last_end = 0usize;
+                for boundary in boundary_re.find_iter(inner) {
+                    let chunk = &inner[last_end..boundary.start()];
+                    if chunk.trim().is_empty() {
+                        result.push_str(chunk);
+                    } else {
+                        result.push_str("<strong>");
+                        result.push_str(chunk);
+                        result.push_str("</strong>");
+                    }
+                    result.push_str(boundary.as_str());
+                    last_end = boundary.end();
+                }
+                let tail = &inner[last_end..];
+                if tail.trim().is_empty() {
+                    result.push_str(tail);
+                } else {
+                    result.push_str("<strong>");
+                    result.push_str(tail);
+                    result.push_str("</strong>");
+                }
+                result
+            })
+            .into_owned();
+        current = next;
+        if !changed {
+            break;
+        }
+    }
+    current
+}
+
+// Issue #120: when a `<p>` contains a `<br>` adjacent to a `<strong>` or
+// `<img>`, split the paragraph at those boundaries so the markdown converter
+// emits separate blocks (`**Caption**\n\n![](x)`) instead of an inline soft
+// break that keeps them on the same line.
+fn split_paragraphs_at_bold_boundaries(html: &str) -> String {
+    let p_re = Regex::new(r"(?is)<p\b([^>]*)>(.*?)</p>").expect("valid regex");
+    let br_re = Regex::new(r"(?is)<br\s*/?>").expect("valid regex");
+    let img_re = Regex::new(r"(?is)<img\b[^>]*/?>").expect("valid regex");
+    let strong_or_img_re = Regex::new(r"(?is)<strong>|<img\b").expect("valid regex");
+
+    p_re.replace_all(html, |caps: &regex::Captures<'_>| {
+        let attrs = caps.get(1).map_or("", |m| m.as_str());
+        let inner = caps.get(2).map_or("", |m| m.as_str());
+        if !br_re.is_match(inner) {
+            return caps[0].to_string();
+        }
+        if !strong_or_img_re.is_match(inner) {
+            return caps[0].to_string();
+        }
+
+        let mut segments: Vec<String> = Vec::new();
+        let mut current = String::new();
+        let mut idx = 0usize;
+        while idx < inner.len() {
+            if let Some(br) = br_re.find_at(inner, idx) {
+                if br.start() == idx {
+                    flush_paragraph_segment(&mut segments, &mut current);
+                    idx = br.end();
+                    continue;
+                }
+            }
+            if let Some(img) = img_re.find_at(inner, idx) {
+                if img.start() == idx {
+                    flush_paragraph_segment(&mut segments, &mut current);
+                    segments.push(img.as_str().to_string());
+                    idx = img.end();
+                    continue;
+                }
+            }
+            // Find the next boundary.
+            let next_br = br_re.find_at(inner, idx).map(|m| m.start());
+            let next_img = img_re.find_at(inner, idx).map(|m| m.start());
+            let next = match (next_br, next_img) {
+                (Some(a), Some(b)) => a.min(b),
+                (Some(a), None) | (None, Some(a)) => a,
+                (None, None) => inner.len(),
+            };
+            current.push_str(&inner[idx..next]);
+            idx = next;
+        }
+        flush_paragraph_segment(&mut segments, &mut current);
+
+        if segments.len() <= 1 {
+            return caps[0].to_string();
+        }
+        let mut out = String::new();
+        for segment in &segments {
+            let _ = write!(out, "<p{attrs}>{segment}</p>");
+        }
+        out
+    })
+    .into_owned()
+}
+
+fn flush_paragraph_segment(segments: &mut Vec<String>, current: &mut String) {
+    let trimmed = current.trim();
+    if !trimmed.is_empty() {
+        segments.push(current.clone());
+    }
+    current.clear();
+}
+
+// Issue #120: drop empty `<strong></strong>` so they cannot pair with a
+// neighbour and emit `****`.
+fn remove_empty_strong(html: &str) -> String {
+    let empty_re = Regex::new(r"(?is)<strong>\s*</strong>").expect("valid regex");
+    empty_re.replace_all(html, "").into_owned()
+}
+
+// Issue #120: merge adjacent `<strong>` siblings (optionally separated by
+// whitespace) into a single bold run so the converter emits `**a b**`
+// instead of `**a** **b**`.
+fn coalesce_adjacent_strong(html: &str) -> String {
+    let adjacent_re = Regex::new(r"(?is)</strong>(\s*)<strong>").expect("valid regex");
+    let mut current = html.to_string();
+    loop {
+        let next = adjacent_re.replace_all(&current, "$1").into_owned();
+        if next == current {
+            return next;
+        }
+        current = next;
+    }
 }
 
 fn convert_class_indented_blockquotes(
