@@ -62,6 +62,11 @@ export function preprocessGoogleDocsExportHtml(html) {
     hoisted += 1;
   });
 
+  splitStrongAtBlockBoundaries($);
+  splitParagraphsAtBoldBoundaries($);
+  removeEmptyStrong($);
+  coalesceAdjacentStrong($);
+
   groupGoogleDocsBlockquotes($, classStyles);
   nestGoogleDocsLists($, classStyles);
   normalizeGoogleDocsTables($);
@@ -142,6 +147,172 @@ export function normalizeGoogleDocsExportMarkdown(markdown) {
     .replace(/(^|[^\w~])~([^~\n]+)~(?=$|[^\w~])/g, '$1~~$2~~')
     .replace(/\n{3,}(?=> )/g, '\n\n')
     .replace(/\n{3,}/g, '\n\n');
+}
+
+// Issue #120: a `<strong>` whose closing tag would land in a different block
+// boundary leaks bolding across paragraphs and images. Split such a strong
+// into multiple bold runs that each stop at the boundary.
+function splitStrongAtBlockBoundaries($) {
+  let changed = true;
+  while (changed) {
+    changed = false;
+    const offenders = $('strong').filter(function () {
+      return $(this).find('br, img, p, div, li').length > 0;
+    });
+    if (!offenders.length) {
+      break;
+    }
+    offenders.each(function () {
+      const $strong = $(this);
+      const segments = [];
+      let current = [];
+      const flush = () => {
+        if (current.length) {
+          segments.push({ type: 'inline', nodes: current });
+          current = [];
+        }
+      };
+      $strong.contents().each(function () {
+        if (this.type === 'tag' && this.tagName === 'br') {
+          flush();
+          segments.push({ type: 'br' });
+        } else if (this.type === 'tag' && this.tagName === 'img') {
+          flush();
+          segments.push({ type: 'img', node: this });
+        } else if (
+          this.type === 'tag' &&
+          ['p', 'div', 'li'].includes(this.tagName)
+        ) {
+          flush();
+          segments.push({ type: 'block', node: this });
+        } else {
+          current.push(this);
+        }
+      });
+      flush();
+
+      const pieces = segments.map((segment) => {
+        if (segment.type === 'br') {
+          return '<br>';
+        }
+        if (segment.type === 'img') {
+          return $.html(segment.node);
+        }
+        if (segment.type === 'block') {
+          const inner = $(segment.node).html() || '';
+          const tag = segment.node.tagName;
+          const innerWrapped = inner.trim() ? `<strong>${inner}</strong>` : '';
+          return `<${tag}>${innerWrapped}</${tag}>`;
+        }
+        const inner = segment.nodes.map((node) => $.html(node)).join('');
+        if (!inner.trim()) {
+          return inner;
+        }
+        return `<strong>${inner}</strong>`;
+      });
+      $strong.replaceWith(pieces.join(''));
+      changed = true;
+    });
+  }
+}
+
+// Issue #120: when a `<p>` contains a `<br>` adjacent to a `<strong>` or an
+// `<img>`, split it into multiple paragraphs so each bold run and image
+// becomes its own block. Without this, the markdown converter renders
+// `**Caption**  \n![](x)` (inline) instead of separate blocks.
+function splitParagraphsAtBoldBoundaries($) {
+  $('p').each(function () {
+    const $p = $(this);
+    const contents = $p.contents().toArray();
+    if (!contents.some((n) => n.type === 'tag' && n.tagName === 'br')) {
+      return;
+    }
+    const hasStrongOrImg = contents.some(
+      (n) => n.type === 'tag' && (n.tagName === 'strong' || n.tagName === 'img')
+    );
+    if (!hasStrongOrImg) {
+      return;
+    }
+    const segments = [];
+    let current = [];
+    const flush = () => {
+      const html = current
+        .map((node) => $.html(node))
+        .join('')
+        .trim();
+      if (html) {
+        segments.push(html);
+      }
+      current = [];
+    };
+    for (const node of contents) {
+      if (node.type === 'tag' && node.tagName === 'br') {
+        flush();
+      } else if (node.type === 'tag' && node.tagName === 'img') {
+        flush();
+        segments.push($.html(node));
+      } else {
+        current.push(node);
+      }
+    }
+    flush();
+    if (segments.length <= 1) {
+      return;
+    }
+    const replacement = segments.map((html) => `<p>${html}</p>`).join('');
+    $p.replaceWith(replacement);
+  });
+}
+
+// Issue #120: drop empty `<strong></strong>` so they cannot pair with a
+// neighbour and emit `****`.
+function removeEmptyStrong($) {
+  $('strong').each(function () {
+    const $strong = $(this);
+    if (!$strong.html() || !$strong.text().trim()) {
+      if (!$strong.find('img').length) {
+        $strong.remove();
+      }
+    }
+  });
+}
+
+// Issue #120: merge adjacent `<strong>` siblings (optionally separated by
+// whitespace text nodes) into a single `<strong>` so the converter emits
+// `**a b**` instead of `**a** **b**`.
+function coalesceAdjacentStrong($) {
+  let changed = true;
+  while (changed) {
+    changed = false;
+    $('strong').each(function () {
+      const $strong = $(this);
+      if (!$strong.parent().length) {
+        return;
+      }
+      let sibling = this.next;
+      const between = [];
+      while (sibling) {
+        if (sibling.type === 'text' && /^\s*$/.test(sibling.data || '')) {
+          between.push(sibling);
+          sibling = sibling.next;
+          continue;
+        }
+        if (sibling.type === 'tag' && sibling.tagName === 'strong') {
+          const innerSelf = $strong.html() || '';
+          const innerNext = $(sibling).html() || '';
+          const joiner = between.map((node) => node.data || '').join('');
+          $strong.html(`${innerSelf}${joiner}${innerNext}`);
+          for (const node of between) {
+            $(node).remove();
+          }
+          $(sibling).remove();
+          changed = true;
+          return;
+        }
+        break;
+      }
+    });
+  }
 }
 
 function parseCssClassStyles($) {
