@@ -12,8 +12,17 @@ use tracing::debug;
 fn base64_md_image_pattern() -> &'static Regex {
     static PATTERN: OnceLock<Regex> = OnceLock::new();
     PATTERN.get_or_init(|| {
-        Regex::new(r"!\[([^\]]*)\]\(data:image/(png|jpeg|jpg|gif|webp|svg\+xml);base64,([^)]+)\)")
-            .unwrap()
+        // Capture groups:
+        //   1: alt text
+        //   2: image subtype (png|jpeg|...)
+        //   3: base64 payload — strictly alphabet/digits/+, /, =
+        // An optional trailing ` "title"` block is matched but discarded, so
+        // markdown like `![](data:...;base64,XYZ== "")` decodes cleanly
+        // instead of letting the empty title leak into the base64 payload.
+        Regex::new(
+            r#"!\[([^\]]*)\]\(data:image/(png|jpeg|jpg|gif|webp|svg\+xml);base64,([A-Za-z0-9+/=]+)(?:\s+"[^"]*")?\)"#,
+        )
+        .unwrap()
     })
 }
 
