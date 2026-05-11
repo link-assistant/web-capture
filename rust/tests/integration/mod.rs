@@ -12,4 +12,5 @@ mod html2md_br_in_list_item;
 mod html2md_ol_numbering;
 mod markdown_no_empty_title;
 mod paragraph_vs_line_break;
+mod strip_base64_empty_alt;
 mod themed_image;

@@ -95,9 +95,16 @@ export function extractBase64ToBuffers(markdown, imagesDir = 'images') {
 }
 
 /**
- * Strip base64 data URI images from markdown, leaving only the alt text
- * as a placeholder. Used when keepOriginalLinks is enabled — base64 images
- * have no original URL to restore, so we remove the heavy data URI.
+ * Strip base64 data URI images from markdown, leaving a visible placeholder.
+ * Used when keepOriginalLinks is enabled — base64 images have no original URL
+ * to restore, so we remove the heavy data URI but still leave a marker so the
+ * reader can see that an image was here.
+ *
+ * Non-empty alt becomes `*[image: <alt>]*`. Empty alt — common for Google Docs
+ * HTML exports, which emit `<img alt="" src="data:...">` for every image —
+ * becomes `![]()`, an empty markdown image reference that renderers still
+ * surface as a slot. Emitting `''` for empty-alt would silently delete every
+ * image in the document (see issue #117).
  *
  * @param {string} markdown - Markdown content with data URI images
  * @returns {{markdown: string, stripped: number}}
@@ -108,7 +115,7 @@ export function stripBase64Images(markdown) {
     BASE64_IMAGE_REGEX,
     (_match, altText) => {
       stripped++;
-      return altText ? `*[image: ${altText}]*` : '';
+      return altText ? `*[image: ${altText}]*` : '![]()';
     }
   );
   return { markdown: updatedMarkdown, stripped };
