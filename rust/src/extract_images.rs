@@ -157,7 +157,13 @@ pub struct ImageBuffer {
     pub data: Vec<u8>,
 }
 
-/// Strip base64 data URI images from markdown, leaving alt text placeholders.
+/// Strip base64 data URI images from markdown, leaving a visible placeholder.
+///
+/// Non-empty alt becomes `*[image: <alt>]*`. Empty alt — common for Google
+/// Docs HTML exports, which emit `<img alt="" src="data:...">` for every
+/// image — becomes `![]()`, an empty markdown image reference that renderers
+/// still surface as a slot. Emitting `""` for empty-alt would silently delete
+/// every image in the document (see issue #117).
 #[must_use]
 pub fn strip_base64_images(markdown: &str) -> StrippedResult {
     let mut stripped = 0;
@@ -165,7 +171,7 @@ pub fn strip_base64_images(markdown: &str) -> StrippedResult {
         stripped += 1;
         let alt_text = &caps[1];
         if alt_text.is_empty() {
-            String::new()
+            "![]()".to_string()
         } else {
             format!("*[image: {alt_text}]*")
         }

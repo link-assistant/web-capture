@@ -204,12 +204,18 @@ describe('extract-images module', () => {
       expect(result.markdown).not.toContain('data:image');
     });
 
-    it('strips base64 images with empty alt text', () => {
-      const md = `![](data:image/png;base64,${TINY_PNG})`;
+    it('leaves a visible placeholder when stripping a base64 image with empty alt', () => {
+      // Google Docs HTML exports emit `<img alt="" src="data:image/png;base64,...">`,
+      // which renders as `![](data:...)`. If stripping drops the markdown image
+      // entirely, every image in the doc vanishes from the output with no
+      // indication that anything was lost. Leave a visible placeholder so the
+      // reader can see that an image was here.
+      const md = `Hi.\n\n![](data:image/png;base64,${TINY_PNG})\n\nBye.\n`;
       const result = stripBase64Images(md);
 
       expect(result.stripped).toBe(1);
-      expect(result.markdown).toBe('');
+      expect(result.markdown).not.toMatch(/data:image/);
+      expect(result.markdown).toMatch(/!\[|\[image/);
     });
 
     it('preserves remote image URLs', () => {

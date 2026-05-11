@@ -206,13 +206,23 @@ fn test_strip_base64_images_with_alt() {
 }
 
 #[test]
-fn test_strip_base64_images_empty_alt() {
-    let md = format!("![](data:image/png;base64,{TINY_PNG})");
+fn test_strip_base64_images_empty_alt_leaves_visible_placeholder() {
+    // Google Docs HTML exports emit `<img alt="" src="data:image/png;base64,...">`,
+    // which renders as `![](data:...)`. If the stripper drops the markdown image
+    // entirely, every image in the doc vanishes from the output with no
+    // indication that anything was lost. Leave a visible placeholder so the
+    // reader can see that an image was here.
+    let md = format!("Hi.\n\n![](data:image/png;base64,{TINY_PNG})\n\nBye.\n");
 
     let result = strip_base64_images(&md);
 
     assert_eq!(result.stripped, 1);
-    assert!(result.markdown.is_empty());
+    assert!(!result.markdown.contains("data:image"));
+    assert!(
+        result.markdown.contains("![") || result.markdown.contains("[image"),
+        "stripping must leave a visible placeholder; got:\n{}",
+        result.markdown
+    );
 }
 
 #[test]
