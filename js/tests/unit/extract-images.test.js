@@ -130,6 +130,26 @@ describe('extract-images module', () => {
       );
     });
 
+    it('extracts a base64 image even when followed by an empty markdown title', () => {
+      // Google Docs HTML exports embed `<img title="" alt="" src="...">`, and
+      // the html2md pipeline can render that as `![](src "")`. The base64
+      // extractor must still pull the image out cleanly so the rendered
+      // markdown does not carry multi-megabyte data URIs.
+      const md = `Hello.\n\n![](data:image/png;base64,${TINY_PNG} "")\n\nEnd.\n`;
+      const result = extractAndSaveImages(md, tmpDir);
+      expect(result.extracted).toBe(1);
+      expect(result.markdown).toMatch(/images\/image-[a-f0-9]+\.png/);
+      expect(result.markdown).not.toContain('data:image');
+    });
+
+    it('extracts a base64 image with a non-empty markdown title', () => {
+      const md = `Hello.\n\n![alt](data:image/png;base64,${TINY_PNG} "caption")\n\nEnd.\n`;
+      const result = extractAndSaveImages(md, tmpDir);
+      expect(result.extracted).toBe(1);
+      expect(result.markdown).toMatch(/images\/image-[a-f0-9]+\.png/);
+      expect(result.markdown).not.toContain('data:image');
+    });
+
     it('handles SVG data URIs', () => {
       const svgContent =
         '<svg xmlns="http://www.w3.org/2000/svg" width="1" height="1"><rect fill="red" width="1" height="1"/></svg>';

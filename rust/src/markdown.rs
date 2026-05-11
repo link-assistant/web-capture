@@ -43,6 +43,12 @@ pub fn convert_html_to_markdown(html: &str, base_url: Option<&str>) -> Result<St
     // number that already lives inside the heading text.
     let cleaned_html = preserve_leading_heading_numbering(&cleaned_html);
 
+    // Drop empty `title=""` attributes from `<img>` tags. html2md emits
+    // `![](src "")` for them, which the markdown-side base64 image extractor
+    // mis-parses (its `[^)]+` payload group swallows the trailing ` ""`,
+    // making the decoded base64 invalid).
+    let cleaned_html = strip_empty_img_titles(&cleaned_html);
+
     // Move <img> elements out of headings so html2md always sees them.
     // Some html2md versions only emit text children for <h1>..<h6>,
     // silently dropping inline images.
@@ -203,6 +209,29 @@ fn hoist_images_from_headings(html: &str) -> String {
     }
 
     result
+}
+
+/// Remove `title=""` (case-insensitive, single or double quoted, with any
+/// surrounding whitespace) from `<img>` tags.
+///
+/// Background: Google Docs HTML exports emit `<img title="" alt="" src="...">`.
+/// The `html2md` crate renders that as `![](src "")` — a syntactically valid
+/// markdown image, but the empty title attribute then trips up the markdown-side
+/// base64 image extractor, whose `[^)]+` payload group greedily swallows the
+/// trailing ` ""`, leaving an invalid base64 string that fails to decode.
+///
+/// Stripping the attribute here keeps the rendered markdown clean *and* lets
+/// any downstream tool that parses the markdown image syntax do the right
+/// thing. Non-empty titles are left untouched.
+fn strip_empty_img_titles(html: &str) -> String {
+    let img_re = Regex::new(r"(?is)<img\b[^>]*>").expect("valid regex");
+    let empty_title_re = Regex::new(r#"(?i)\s+title\s*=\s*(?:""|'')"#).expect("valid regex");
+    img_re
+        .replace_all(html, |caps: &regex::Captures<'_>| {
+            let tag = caps.get(0).expect("match 0").as_str();
+            empty_title_re.replace_all(tag, "").into_owned()
+        })
+        .into_owned()
 }
 
 /// Walk every top-level `<ol>` in document order and return the number that

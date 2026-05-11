@@ -2,8 +2,11 @@ import { createHash } from 'crypto';
 import fs from 'fs';
 import path from 'path';
 
+// Capture groups: alt text, mime subtype, base64 payload. A trailing
+// markdown title attribute (e.g. `![](src "")`) is matched but discarded so
+// the empty title cannot leak into the base64 payload.
 const BASE64_IMAGE_REGEX =
-  /!\[([^\]]*)\]\(data:image\/(png|jpeg|jpg|gif|webp|svg\+xml);base64,([^)]+)\)/gi;
+  /!\[([^\]]*)\]\(data:image\/(png|jpeg|jpg|gif|webp|svg\+xml);base64,([A-Za-z0-9+/=]+)(?:\s+"[^"]*")?\)/gi;
 
 /**
  * @param {string} markdown - Markdown content with data URI images
