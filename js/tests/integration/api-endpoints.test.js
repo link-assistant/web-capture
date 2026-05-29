@@ -9,6 +9,7 @@
 import { jest } from '@jest/globals';
 import request from 'supertest';
 import nock from 'nock';
+import unzipper from 'unzipper';
 import { app } from '../../src/index.js';
 
 jest.setTimeout(60000);
@@ -95,6 +96,14 @@ describe('API Endpoint Tests', () => {
       // ZIP signature: PK (0x50 0x4B)
       expect(res.body[0]).toBe(0x50);
       expect(res.body[1]).toBe(0x4b);
+
+      // Default archive layout contract (issue #113): the markdown archive must
+      // bundle document.md AND document.html for reference.
+      const dir = await unzipper.Open.buffer(res.body);
+      const names = dir.files.map((f) => f.path);
+      expect(names).toEqual(
+        expect.arrayContaining(['document.md', 'document.html'])
+      );
     });
 
     it('returns a ZIP archive with HTML format', async () => {

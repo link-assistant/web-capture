@@ -1,4 +1,5 @@
 mod animation;
+mod archive_default_layout;
 mod batch;
 mod bold_coalesce_and_leakage;
 mod browser;
