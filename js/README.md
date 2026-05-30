@@ -251,33 +251,33 @@ web-capture --serve [--port <port>]
 web-capture <url> [options]
 ```
 
-| Option                      | Short | Description                                    | Default                             |
-| --------------------------- | ----- | ---------------------------------------------- | ----------------------------------- |
-| `--format`                  | `-f`  | Output format (see below)                      | `markdown`                          |
-| `--output`                  | `-o`  | Output file path. Use `-o -` for stdout        | auto-derived from URL               |
-| `--data-dir`                |       | Base directory for auto-derived output paths   | `./data/web-capture`                |
-| `--engine`                  | `-e`  | Browser engine: `puppeteer`, `playwright`      | `puppeteer` (or BROWSER_ENGINE env) |
-| `--theme`                   | `-t`  | Color scheme: `light`, `dark`, `no-preference` | browser default                     |
-| `--width`                   |       | Viewport width in pixels                       | 1280                                |
-| `--height`                  |       | Viewport height in pixels                      | 800                                 |
-| `--quality`                 |       | JPEG quality 0-100                             | 80                                  |
-| `--fullPage`                |       | Capture full scrollable page                   | false                               |
-| `--embed-images`            |       | Keep images inline as base64 (self-contained)  | false                               |
-| `--no-extract-images`       |       | Alias for `--embed-images`                     | false                               |
-| `--extract-images[=DIR]`    |       | Extract images to `DIR/images/` + download remote | -                                |
-| `--keep-original-links`     |       | Keep remote URLs as direct links (the default) | false                               |
-| `--images-dir`              |       | Subdirectory name for extracted images         | `images`                            |
-| `--archive`                 |       | Create archive: `zip`, `7z`, `tar.gz`, `tar`   | -                                   |
-| `--document-format`         |       | Document format in archive: `markdown`, `html` | `markdown`                          |
-| `--localImages`             |       | Download images locally in archive mode        | true                                |
-| `--extract-latex`           |       | Extract LaTeX formulas                         | true                                |
-| `--no-extract-latex`        |       | Disable LaTeX extraction                       | -                                   |
-| `--extract-metadata`        |       | Extract article metadata                       | true                                |
-| `--no-extract-metadata`     |       | Disable metadata extraction                    | -                                   |
-| `--post-process`            |       | Apply post-processing                          | true                                |
-| `--no-post-process`         |       | Disable post-processing                        | -                                   |
-| `--detect-code-language`    |       | Detect code block languages                    | true                                |
-| `--no-detect-code-language` |       | Disable code language detection                | -                                   |
+| Option                      | Short | Description                                       | Default                             |
+| --------------------------- | ----- | ------------------------------------------------- | ----------------------------------- |
+| `--format`                  | `-f`  | Output format (see below)                         | `markdown`                          |
+| `--output`                  | `-o`  | Output file path. Use `-o -` for stdout           | auto-derived from URL               |
+| `--data-dir`                |       | Base directory for auto-derived output paths      | `./data/web-capture`                |
+| `--engine`                  | `-e`  | Browser engine: `puppeteer`, `playwright`         | `puppeteer` (or BROWSER_ENGINE env) |
+| `--theme`                   | `-t`  | Color scheme: `light`, `dark`, `no-preference`    | browser default                     |
+| `--width`                   |       | Viewport width in pixels                          | 1280                                |
+| `--height`                  |       | Viewport height in pixels                         | 800                                 |
+| `--quality`                 |       | JPEG quality 0-100                                | 80                                  |
+| `--fullPage`                |       | Capture full scrollable page                      | false                               |
+| `--embed-images`            |       | Keep images inline as base64 (self-contained)     | false                               |
+| `--no-extract-images`       |       | Alias for `--embed-images`                        | false                               |
+| `--extract-images[=DIR]`    |       | Extract images to `DIR/images/` + download remote | -                                   |
+| `--keep-original-links`     |       | Keep remote URLs as direct links (the default)    | false                               |
+| `--images-dir`              |       | Subdirectory name for extracted images            | `images`                            |
+| `--archive`                 |       | Create archive: `zip`, `7z`, `tar.gz`, `tar`      | -                                   |
+| `--document-format`         |       | Document format in archive: `markdown`, `html`    | `markdown`                          |
+| `--localImages`             |       | Download images locally in archive mode           | true                                |
+| `--extract-latex`           |       | Extract LaTeX formulas                            | true                                |
+| `--no-extract-latex`        |       | Disable LaTeX extraction                          | -                                   |
+| `--extract-metadata`        |       | Extract article metadata                          | true                                |
+| `--no-extract-metadata`     |       | Disable metadata extraction                       | -                                   |
+| `--post-process`            |       | Apply post-processing                             | true                                |
+| `--no-post-process`         |       | Disable post-processing                           | -                                   |
+| `--detect-code-language`    |       | Detect code block languages                       | true                                |
+| `--no-detect-code-language` |       | Disable code language detection                   | -                                   |
 
 **Supported formats:**
 
