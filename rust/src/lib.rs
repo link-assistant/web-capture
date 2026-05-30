@@ -46,6 +46,7 @@ pub mod localize_images;
 pub mod markdown;
 pub mod metadata;
 pub mod postprocess;
+pub mod search;
 pub mod themed_image;
 pub mod verify;
 
@@ -488,3 +489,7 @@ fn extract_attr(tag: &str, attr: &str) -> Option<String> {
 
 // Re-export commonly used types
 pub use browser::BrowserEngine;
+pub use search::{
+    search, SearchDiagnostics, SearchResult, SearchResultItem, DEFAULT_LIMIT, DEFAULT_PROVIDER,
+    SEARCH_PROVIDERS,
+};
