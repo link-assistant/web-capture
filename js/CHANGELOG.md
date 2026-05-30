@@ -1,5 +1,11 @@
 # @link-assistant/web-capture
 
+## 1.10.0
+
+### Minor Changes
+
+- b892585: Add kreuzberg html-to-markdown as high-performance alternative converter with structured results
+
 ## 1.9.0
 
 ### Minor Changes
