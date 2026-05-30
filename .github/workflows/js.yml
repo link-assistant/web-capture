@@ -249,38 +249,42 @@ jobs:
 
       # The GitHub runner image ships an incomplete Chrome cache entry (the
       # version folder exists but the executable is missing). `puppeteer
-      # browsers install` aborts instantly when it finds such a folder instead
-      # of (re)downloading, so the step failed before ever hitting the network.
-      # Remove any incomplete Chrome install first, then download with
-      # timeout+retry (Chrome for Testing is served from a reliable CDN).
+      # browsers install` then aborts instantly without re-downloading, and the
+      # browser-launch tests later fail with a confusing "Could not find Chrome"
+      # error. Start from a clean cache so the download always runs, clear any
+      # skip-download env the runner image may set, retry on transient failures,
+      # then hard-verify the executable Puppeteer resolves at launch time.
       - name: Install Puppeteer browsers
+        env:
+          PUPPETEER_SKIP_DOWNLOAD: 'false'
+          PUPPETEER_SKIP_CHROMIUM_DOWNLOAD: 'false'
         run: |
-          node -e '
-            const fs = require("fs");
-            const path = require("path");
-            const os = require("os");
-            const dir = path.join(os.homedir(), ".cache", "puppeteer", "chrome");
-            if (!fs.existsSync(dir)) process.exit(0);
-            for (const name of fs.readdirSync(dir)) {
-              const exe = path.join(dir, name, "chrome-linux64", "chrome");
-              if (!fs.existsSync(exe)) {
-                fs.rmSync(path.join(dir, name), { recursive: true, force: true });
-                console.log("Removed incomplete Chrome install: " + name);
-              }
-            }
-          '
+          CACHE="${HOME}/.cache/puppeteer"
+          echo "Puppeteer cache dir: $CACHE"
+          echo "Puppeteer-related env:"; env | grep -i puppeteer || echo "  (none)"
+          rm -rf "$CACHE/chrome" "$CACHE/chrome-headless-shell" || true
+          installed=0
           for attempt in 1 2 3; do
             echo "::group::Puppeteer install (attempt $attempt)"
             if timeout 300 npx puppeteer browsers install chrome; then
               echo "::endgroup::"
-              exit 0
+              installed=1
+              break
             fi
             echo "::endgroup::"
             echo "Puppeteer install attempt $attempt failed or timed out; retrying..."
+            rm -rf "$CACHE/chrome" || true
             sleep 10
           done
-          echo "Puppeteer install failed after 3 attempts" >&2
-          exit 1
+          if [ "$installed" != "1" ]; then
+            echo "Puppeteer install failed after 3 attempts" >&2
+            exit 1
+          fi
+          echo "::group::Chrome cache after install"
+          ls -laR "$CACHE/chrome" 2>/dev/null | head -40 || echo "(empty)"
+          echo "::endgroup::"
+          # Fail loudly if the executable Puppeteer will look for is still missing.
+          node -e "const p=require('puppeteer');const fs=require('fs');const e=p.executablePath();fs.accessSync(e, fs.constants.X_OK);console.log('Verified Chrome executable: '+e)"
 
       - name: Run unit, integration, and e2e process tests
         run: npm test -- --testPathIgnorePatterns="docker.test.js"
