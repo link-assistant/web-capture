@@ -70,6 +70,8 @@ web-capture --serve --port 8080
 ### API Endpoints (Server Mode)
 
 - **Markdown**: `GET /markdown?url=<URL>` (original links kept, base64 stripped by default)
+- **Markdown (kreuzberg)**: `GET /markdown?url=<URL>&converter=kreuzberg`
+- **Markdown (structured JSON)**: `GET /markdown?url=<URL>&converter=kreuzberg&format=json`
 - **Markdown (base64 inline)**: `GET /markdown?url=<URL>&embedImages=true`
 - **Markdown (all images stripped)**: `GET /markdown?url=<URL>&keepOriginalLinks=false`
 - **HTML**: `GET /html?url=<URL>`

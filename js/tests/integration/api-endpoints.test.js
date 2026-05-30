@@ -11,6 +11,7 @@ import request from 'supertest';
 import nock from 'nock';
 import unzipper from 'unzipper';
 import { app } from '../../src/index.js';
+import { isKreuzbergAvailable } from '../../src/kreuzberg.js';
 
 jest.setTimeout(60000);
 
@@ -67,6 +68,68 @@ describe('API Endpoint Tests', () => {
       expect(res.headers['content-type']).toMatch(/text\/markdown/);
       expect(res.text).toContain('Test Page');
       expect(res.text).toContain('Hello world');
+    });
+
+    it('rejects unsupported converter names', async () => {
+      await request(app)
+        .get('/markdown')
+        .query({
+          url: 'https://example.com/md-test',
+          converter: 'unknown',
+        })
+        .expect(400);
+    });
+
+    it('rejects JSON format without the kreuzberg converter', async () => {
+      await request(app)
+        .get('/markdown')
+        .query({
+          url: 'https://example.com/md-test',
+          format: 'json',
+        })
+        .expect(400);
+    });
+
+    it('returns structured kreuzberg JSON with selectors and absolute links', async () => {
+      if (!(await isKreuzbergAvailable())) {
+        return;
+      }
+
+      nock('https://example.com')
+        .get('/kreuzberg-json')
+        .reply(
+          200,
+          `<!DOCTYPE html><html><body>
+            <main>
+              <h1>Article Title</h1>
+              <nav>Navigation</nav>
+              <article><p>Wanted body with <a href="/about">relative link</a>.</p></article>
+            </main>
+          </body></html>`,
+          { 'content-type': 'text/html' }
+        );
+
+      const res = await request(app)
+        .get('/markdown')
+        .query({
+          url: 'https://example.com/kreuzberg-json',
+          converter: 'kreuzberg',
+          format: 'json',
+          contentSelector: 'main',
+          bodySelector: 'article',
+        })
+        .expect(200);
+
+      expect(res.headers['content-type']).toMatch(/application\/json/);
+      expect(res.body).toHaveProperty('content');
+      expect(res.body).toHaveProperty('metadata');
+      expect(res.body).toHaveProperty('tables');
+      expect(res.body).toHaveProperty('images');
+      expect(res.body).toHaveProperty('warnings');
+      expect(res.body.content).toContain('Article Title');
+      expect(res.body.content).toContain('Wanted body');
+      expect(res.body.content).toContain('https://example.com/about');
+      expect(res.body.content).not.toContain('Navigation');
     });
   });
 

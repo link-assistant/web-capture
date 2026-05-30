@@ -411,6 +411,20 @@ function selectedHtml($, selector) {
   return $selected.length ? $.html($selected) : null;
 }
 
+export function scopeHtmlForMarkdown(html, options = {}) {
+  const { contentSelector, bodySelector } = options;
+  const $ = cheerio.load(html);
+  const bodyHtml = selectedHtml($, bodySelector);
+  const contentHtml = selectedHtml($, contentSelector);
+  if (!bodyHtml && !contentHtml) {
+    return html;
+  }
+
+  const titleSelector = contentSelector ? `${contentSelector} h1, h1` : 'h1';
+  const titleHtml = bodyHtml ? selectedHtml($, titleSelector) : null;
+  return [titleHtml, bodyHtml || contentHtml].filter(Boolean).join('\n');
+}
+
 // Convert relative URLs to absolute URLs in HTML content
 export function convertRelativeUrls(html, baseUrl) {
   const base = new URL(baseUrl);
@@ -581,15 +595,8 @@ export function convertHtmlToMarkdownEnhanced(html, baseUrl, options = {}) {
     metadata = extractMetadata($);
   }
 
-  const bodyHtml = selectedHtml($, bodySelector);
-  const contentHtml = selectedHtml($, contentSelector);
-  if (bodyHtml || contentHtml) {
-    const titleSelector = contentSelector ? `${contentSelector} h1, h1` : 'h1';
-    const titleHtml = bodyHtml ? selectedHtml($, titleSelector) : null;
-    $ = cheerio.load(
-      [titleHtml, bodyHtml || contentHtml].filter(Boolean).join('\n')
-    );
-  }
+  html = scopeHtmlForMarkdown(html, { contentSelector, bodySelector });
+  $ = cheerio.load(html);
 
   // Remove unwanted elements
   $('style, script, noscript').remove();

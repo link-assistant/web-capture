@@ -37,7 +37,7 @@ use web_capture::extract_images::{apply_image_mode, ImageMode, PendingRemoteImag
 use web_capture::search::{format_search_as_markdown, DEFAULT_PROVIDER};
 use web_capture::{
     capture_screenshot, convert_html_to_markdown_enhanced, convert_relative_urls, convert_to_utf8,
-    fetch_html, html, render_html, EnhancedOptions,
+    convert_with_kreuzberg_enhanced, fetch_html, html, render_html, EnhancedOptions,
 };
 
 /// CLI arguments
@@ -194,6 +194,10 @@ struct UrlQuery {
 #[allow(dead_code)]
 struct MarkdownQuery {
     url: String,
+    #[serde(default)]
+    converter: Option<String>,
+    #[serde(default)]
+    format: Option<String>,
     #[serde(default, rename = "embedImages")]
     embed_images: bool,
     #[serde(default = "default_true", rename = "keepOriginalLinks")]
@@ -428,6 +432,7 @@ async fn start_server(port: u16) -> anyhow::Result<()> {
     info!("Available endpoints:");
     info!("  GET /html?url=<URL>       - Render page as HTML");
     info!("  GET /markdown?url=<URL>   - Convert page to Markdown");
+    info!("  GET /markdown?url=<URL>&converter=kreuzberg&format=json - Structured Markdown conversion");
     info!("  GET /image?url=<URL>      - Screenshot page as PNG");
     info!("  GET /fetch?url=<URL>      - Proxy fetch content");
     info!("  GET /stream?url=<URL>     - Stream content");
@@ -505,6 +510,31 @@ async fn markdown_handler(Query(params): Query<MarkdownQuery>) -> Response {
         Err(e) => return (StatusCode::BAD_REQUEST, e).into_response(),
     };
 
+    let converter = params
+        .converter
+        .as_deref()
+        .unwrap_or("html2md")
+        .to_ascii_lowercase();
+    if converter != "html2md" && converter != "kreuzberg" {
+        return (StatusCode::BAD_REQUEST, "Unsupported `converter` parameter").into_response();
+    }
+
+    let format = params
+        .format
+        .as_deref()
+        .unwrap_or("text")
+        .to_ascii_lowercase();
+    if format != "text" && format != "json" {
+        return (StatusCode::BAD_REQUEST, "Unsupported `format` parameter").into_response();
+    }
+    if format == "json" && converter != "kreuzberg" {
+        return (
+            StatusCode::BAD_REQUEST,
+            "`format=json` is only supported with `converter=kreuzberg`",
+        )
+            .into_response();
+    }
+
     let html = match fetch_html(&url).await {
         Ok(html) => html,
         Err(e) => {
@@ -518,6 +548,40 @@ async fn markdown_handler(Query(params): Query<MarkdownQuery>) -> Response {
         body_selector: params.body_selector,
         ..EnhancedOptions::default()
     };
+
+    if converter == "kreuzberg" {
+        let mut result = match convert_with_kreuzberg_enhanced(&html, Some(&url), &options) {
+            Ok(result) => result,
+            Err(e) => {
+                error!("Failed to convert to Markdown with kreuzberg: {}", e);
+                return (
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    "Error converting to Markdown",
+                )
+                    .into_response();
+            }
+        };
+
+        let mode = if params.embed_images {
+            ImageMode::Embed
+        } else {
+            ImageMode::Default
+        };
+        if let Ok(image_result) = apply_image_mode(&result.content, mode, Some(&url)) {
+            result.content = image_result.markdown;
+        }
+
+        if format == "json" {
+            return axum::Json(result).into_response();
+        }
+        return (
+            StatusCode::OK,
+            [("Content-Type", "text/markdown")],
+            result.content,
+        )
+            .into_response();
+    }
+
     let mut markdown = match convert_html_to_markdown_enhanced(&html, Some(&url), &options) {
         Ok(result) => result.markdown,
         Err(e) => {

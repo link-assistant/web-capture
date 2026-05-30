@@ -41,6 +41,7 @@ pub mod extract_images;
 pub mod figures;
 pub mod gdocs;
 pub mod html;
+pub mod kreuzberg;
 pub mod latex;
 pub mod localize_images;
 pub mod markdown;
@@ -307,6 +308,48 @@ pub fn convert_html_to_markdown_enhanced(
         markdown: md,
         metadata: extracted_metadata,
     })
+}
+
+/// Convert HTML to Markdown using the kreuzberg html-to-markdown library.
+///
+/// Returns a structured result with content, metadata, tables, images, and warnings.
+/// This is a high-performance alternative to `convert_html_to_markdown` using the
+/// same Rust core that powers the kreuzberg ecosystem.
+///
+/// # Arguments
+///
+/// * `html` - The HTML content to convert
+/// * `base_url` - Optional base URL for converting relative URLs to absolute
+///
+/// # Returns
+///
+/// A `KreuzbergResult` with structured conversion output
+///
+/// # Errors
+///
+/// Returns an error if conversion fails
+pub fn convert_with_kreuzberg(
+    html: &str,
+    base_url: Option<&str>,
+) -> Result<kreuzberg::KreuzbergResult> {
+    kreuzberg::convert_with_kreuzberg(html, base_url)
+}
+
+/// Convert HTML to Markdown using kreuzberg after applying enhanced scoping options.
+///
+/// This keeps the alternate converter compatible with the same `contentSelector`
+/// and `bodySelector` controls used by the default enhanced converter.
+///
+/// # Errors
+///
+/// Returns an error if conversion fails.
+pub fn convert_with_kreuzberg_enhanced(
+    html: &str,
+    base_url: Option<&str>,
+    options: &EnhancedOptions,
+) -> Result<kreuzberg::KreuzbergResult> {
+    let scoped_html = scope_html_with_selectors(html, options);
+    kreuzberg::convert_with_kreuzberg(&scoped_html, base_url)
 }
 
 fn normalize_extracted_latex_markdown(markdown: &str) -> String {

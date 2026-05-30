@@ -43,6 +43,22 @@ cd rust
 cargo run -- --serve
 ```
 
+## API Endpoints
+
+Both implementations expose the same API:
+
+| Endpoint                                                  | Description                                                                                                    |
+| --------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| `GET /html?url=<URL>`                                     | Get rendered HTML content                                                                                      |
+| `GET /markdown?url=<URL>`                                 | Get Markdown conversion with the default converter                                                             |
+| `GET /markdown?url=<URL>&converter=kreuzberg`             | High-performance Markdown conversion via [html-to-markdown](https://github.com/kreuzberg-dev/html-to-markdown) |
+| `GET /markdown?url=<URL>&converter=kreuzberg&format=json` | Structured result with metadata, tables, images, and warnings                                                  |
+| `GET /image?url=<URL>`                                    | Get PNG screenshot                                                                                             |
+| `GET /archive?url=<URL>`                                  | Get a ZIP archive with markdown/HTML and images                                                                |
+| `GET /fetch?url=<URL>`                                    | Proxy fetch content                                                                                            |
+| `GET /stream?url=<URL>`                                   | Stream content                                                                                                 |
+| `GET /search?q=<QUERY>`                                   | Capture structured search-provider results                                                                     |
+
 ## CLI Usage
 
 ```bash
@@ -84,7 +100,7 @@ web-capture --serve --port 8080
 | `--embed-images`         |       | Keep images inline as base64 data URIs (self-contained file)                            | `false`               |
 | `--no-extract-images`    |       | Alias for `--embed-images`                                                              | `false`               |
 | `--extract-images[=DIR]` |       | Extract images to `DIR/images/` (or next to the output) and download remote images      | -                     |
-| `--keep-original-links`  |       | Keep remote image URLs as direct links (the default markdown behavior)                   | `false`               |
+| `--keep-original-links`  |       | Keep remote image URLs as direct links (the default markdown behavior)                  | `false`               |
 | `--images-dir`           |       | Subdirectory name for extracted images                                                  | `images`              |
 | `--archive`              |       | Create archive: `zip` (default), `7z`, `tar.gz`, `tar`                                  | -                     |
 | `--extract-latex`        |       | Extract LaTeX formulas                                                                  | `true`                |
@@ -98,11 +114,11 @@ Markdown output supports three image modes, and every capture path (browser or
 API, CLI or server) routes through the same chokepoint so a flag behaves
 identically regardless of how the page was captured:
 
-| Mode                        | Flag                  | Result                                                                                     |
-| --------------------------- | --------------------- | ------------------------------------------------------------------------------------------ |
-| **Direct links** (default)  | _none_ / `--keep-original-links` | Remote images stay as direct `https://…` URLs. Inline base64 (which has no remote URL to restore) is stripped to a placeholder with a warning — never silently kept as a multi-megabyte blob. No `images/` folder. |
-| **Embed**                   | `--embed-images`      | Base64 images are kept inline, producing a single self-contained file.                      |
-| **Extract**                 | `--extract-images[=DIR]` | Inline base64 _and_ remote images are written to `DIR/images/` (defaults to next to the output file) and the markdown is rewritten to reference the local files. |
+| Mode                       | Flag                             | Result                                                                                                                                                                                                             |
+| -------------------------- | -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Direct links** (default) | _none_ / `--keep-original-links` | Remote images stay as direct `https://…` URLs. Inline base64 (which has no remote URL to restore) is stripped to a placeholder with a warning — never silently kept as a multi-megabyte blob. No `images/` folder. |
+| **Embed**                  | `--embed-images`                 | Base64 images are kept inline, producing a single self-contained file.                                                                                                                                             |
+| **Extract**                | `--extract-images[=DIR]`         | Inline base64 _and_ remote images are written to `DIR/images/` (defaults to next to the output file) and the markdown is rewritten to reference the local files.                                                   |
 
 The `--archive` formats always bundle images into the archive's `images/`
 folder regardless of these flags.
@@ -127,20 +143,22 @@ All flags can be controlled via environment variables:
 
 Both implementations expose the same API:
 
-| Endpoint                                          | Description                                               |
-| ------------------------------------------------- | --------------------------------------------------------- |
-| `GET /html?url=<URL>`                             | Get rendered HTML content                                 |
-| `GET /markdown?url=<URL>`                         | Get Markdown (original links kept, base64 stripped)       |
-| `GET /markdown?url=<URL>&embedImages=true`        | Get Markdown with base64 images inline                    |
-| `GET /markdown?url=<URL>&keepOriginalLinks=false` | Get Markdown with all images stripped                     |
-| `GET /image?url=<URL>`                            | Get PNG screenshot                                        |
-| `GET /archive?url=<URL>`                          | ZIP archive with markdown + images extracted to `images/` |
-| `GET /archive?url=<URL>&keepOriginalLinks=true`   | ZIP archive keeping original remote image URLs            |
-| `GET /archive?url=<URL>&embedImages=true`         | ZIP archive with base64 images inline                     |
-| `GET /pdf?url=<URL>`                              | PDF with embedded images                                  |
-| `GET /docx?url=<URL>`                             | DOCX with embedded images                                 |
-| `GET /fetch?url=<URL>`                            | Proxy fetch content                                       |
-| `GET /stream?url=<URL>`                           | Stream content                                            |
+| Endpoint                                                  | Description                                               |
+| --------------------------------------------------------- | --------------------------------------------------------- |
+| `GET /html?url=<URL>`                                     | Get rendered HTML content                                 |
+| `GET /markdown?url=<URL>`                                 | Get Markdown (original links kept, base64 stripped)       |
+| `GET /markdown?url=<URL>&converter=kreuzberg`             | Get Markdown with the high-performance converter          |
+| `GET /markdown?url=<URL>&converter=kreuzberg&format=json` | Get structured Markdown conversion data                   |
+| `GET /markdown?url=<URL>&embedImages=true`                | Get Markdown with base64 images inline                    |
+| `GET /markdown?url=<URL>&keepOriginalLinks=false`         | Get Markdown with all images stripped                     |
+| `GET /image?url=<URL>`                                    | Get PNG screenshot                                        |
+| `GET /archive?url=<URL>`                                  | ZIP archive with markdown + images extracted to `images/` |
+| `GET /archive?url=<URL>&keepOriginalLinks=true`           | ZIP archive keeping original remote image URLs            |
+| `GET /archive?url=<URL>&embedImages=true`                 | ZIP archive with base64 images inline                     |
+| `GET /pdf?url=<URL>`                                      | PDF with embedded images                                  |
+| `GET /docx?url=<URL>`                                     | DOCX with embedded images                                 |
+| `GET /fetch?url=<URL>`                                    | Proxy fetch content                                       |
+| `GET /stream?url=<URL>`                                   | Stream content                                            |
 
 ## Docker
 
@@ -224,6 +242,7 @@ cargo fmt            # Format code
 - **Markdown Conversion**: Clean HTML-to-Markdown with LaTeX extraction, metadata, and code language detection
 - **Image Extraction**: Base64 data URI images extracted to files with content-hash filenames
 - **HTML Rendering**: Fetch and render HTML with JavaScript support via headless browsers
+- **High-Performance Conversion**: Optional [kreuzberg html-to-markdown](https://github.com/kreuzberg-dev/html-to-markdown) backend with structured metadata, table, and image results
 - **Screenshots**: Capture PNG/JPEG screenshots with theme and viewport control
 - **Archives**: ZIP archives with markdown/HTML + locally downloaded images
 - **Google Docs**: Public export, Google Docs REST API, and editor-model capture
@@ -245,8 +264,21 @@ cargo fmt            # Format code
 
 [Unlicense](LICENSE) — This is free and unencumbered software released into the public domain. You are free to copy, modify, publish, use, compile, sell, or distribute this software for any purpose, commercial or non-commercial, and by any means. See [https://unlicense.org](https://unlicense.org) for details.
 
+## Markdown Converters
+
+web-capture supports three HTML-to-Markdown converter backends across the JavaScript and Rust implementations:
+
+| Converter              | Selection             | Throughput   | Structured Results             | Used In             |
+| ---------------------- | --------------------- | ------------ | ------------------------------ | ------------------- |
+| **Turndown** (default) | `converter=turndown`  | ~5-10 MB/s   | No                             | JS implementation   |
+| **html2md** (default)  | `converter=html2md`   | ~20-40 MB/s  | No                             | Rust implementation |
+| **kreuzberg**          | `converter=kreuzberg` | 150-280 MB/s | Yes (metadata, tables, images) | Both JS and Rust    |
+
+The kreuzberg converter is powered by [html-to-markdown](https://github.com/kreuzberg-dev/html-to-markdown) and uses the same Rust core across both implementations, ensuring consistent output. See [integration analysis](docs/html-to-markdown-integration.md) for details.
+
 ## Related Projects
 
 - [browser-commander](https://github.com/link-foundation/browser-commander) - Browser automation library used in Rust implementation
 - [turndown](https://github.com/mixmark-io/turndown) - HTML to Markdown converter used in JS implementation
 - [html2md](https://github.com/nickyc975/html2md-rs) - HTML to Markdown converter used in Rust implementation
+- [html-to-markdown](https://github.com/kreuzberg-dev/html-to-markdown) - High-performance HTML to Markdown converter (kreuzberg), integrated as optional converter

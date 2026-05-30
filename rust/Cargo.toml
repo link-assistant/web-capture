@@ -51,6 +51,7 @@ scraper = "0.21"
 
 # HTML to Markdown conversion
 html2md = "0.2"
+html-to-markdown-rs = { version = "3.5.7", features = ["inline-images", "metadata", "serde"] }
 
 # Command line argument parsing
 clap = { version = "4.5", features = ["derive", "env"] }

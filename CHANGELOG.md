@@ -1,5 +1,18 @@
 # web-capture
 
+## 1.3.0
+
+### Minor Changes
+
+- Integrate [kreuzberg html-to-markdown](https://github.com/kreuzberg-dev/html-to-markdown) (v3.1.0) as high-performance alternative converter
+  - Add `@kreuzberg/html-to-markdown-node` for JS implementation (150-280 MB/s)
+  - Add `html-to-markdown-rs` crate for Rust implementation (same Rust core)
+  - Select via `converter=kreuzberg` query parameter on `/markdown` endpoint
+  - Optional structured JSON results via `format=json` (metadata, tables, warnings)
+  - Built-in HTML sanitization, CommonMark compliant output
+  - Existing Turndown/html2md converters remain as defaults for backward compatibility
+  - Bump minimum Rust version from 1.75 to 1.85
+
 ## 1.2.0
 
 ### Minor Changes
