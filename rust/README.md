@@ -57,6 +57,9 @@ web-capture https://example.com --archive
 # Keep images inline (opt-in)
 web-capture https://example.com --embed-images -o page.md
 
+# Structured search-provider capture (JSON by default)
+web-capture search "formal methods" --provider wikipedia
+
 # Start as API server
 web-capture --serve
 
@@ -71,6 +74,50 @@ web-capture --serve --port 8080
 - **Markdown (all images stripped)**: `GET /markdown?url=<URL>&keepOriginalLinks=false`
 - **HTML**: `GET /html?url=<URL>`
 - **PNG screenshot**: `GET /image?url=<URL>`
+- **Search**: `GET /search?q=<QUERY>&provider=<PROVIDER>&format=json|markdown`
+
+### Search Endpoint
+
+```
+GET /search?q=<QUERY>&provider=<PROVIDER>&format=json|markdown
+```
+
+Captures structured results from a search provider in a normalized,
+machine-readable shape. `wikipedia` (default) uses the CORS-friendly REST API;
+the HTML engines (`duckduckgo`, `google`, `bing`, `brave`) are parsed
+server-side. Blocked or CAPTCHA-gated pages are reported through `diagnostics`.
+
+| Parameter  | Required | Description                                          | Default     |
+| ---------- | -------- | ---------------------------------------------------- | ----------- |
+| `q`        | Yes      | Search query (`query` accepted as an alias)          | -           |
+| `provider` | No       | `wikipedia`, `duckduckgo`, `google`, `bing`, `brave` | `wikipedia` |
+| `limit`    | No       | Maximum number of results                            | `10`        |
+| `format`   | No       | Response format: `json` or `markdown`                | `json`      |
+
+The JSON shape matches the JavaScript implementation:
+
+```json
+{
+  "query": "formal methods",
+  "provider": "wikipedia",
+  "captureMode": "fetch",
+  "capturedAt": "2026-05-18T20:30:00Z",
+  "results": [
+    {
+      "rank": 1,
+      "title": "Formal methods",
+      "url": "https://en.wikipedia.org/wiki/Formal_methods",
+      "snippet": "mathematically rigorous techniques for the specification..."
+    }
+  ],
+  "diagnostics": {
+    "status": 200,
+    "blockedByCors": false,
+    "blockedByCaptcha": false,
+    "sourceUrl": "https://en.wikipedia.org/w/rest.php/v1/search/page?q=formal+methods&limit=10"
+  }
+}
+```
 
 ## CLI Reference
 
@@ -115,6 +162,21 @@ web-capture <url> [options]
 | `--detect-code-language`    |       | Detect code block languages                           | true                  |
 | `--no-detect-code-language` |       | Disable code language detection                       | -                     |
 
+### Search Mode
+
+Capture structured search-provider results. Output defaults to JSON; pass
+`--format markdown` for a human-readable document.
+
+```bash
+web-capture search "<query>" [options]
+```
+
+| Option       | Short | Description                                          | Default     |
+| ------------ | ----- | ---------------------------------------------------- | ----------- |
+| `--provider` |       | `wikipedia`, `duckduckgo`, `google`, `bing`, `brave` | `wikipedia` |
+| `--limit`    |       | Maximum number of results                            | `10`        |
+| `--format`   | `-f`  | Output format: `json` or `markdown`                  | `json`      |
+
 ### Examples
 
 ```bash
@@ -148,6 +210,12 @@ web-capture https://example.com -f png -o screenshot.png
 
 # Pipe to another command
 web-capture https://example.com -o - | grep "title"
+
+# Structured search (JSON by default)
+web-capture search "formal methods"
+
+# Search DuckDuckGo, limit to 5 results, render as Markdown
+web-capture search "formal methods" --provider duckduckgo --limit 5 --format markdown
 ```
 
 ## Docker
