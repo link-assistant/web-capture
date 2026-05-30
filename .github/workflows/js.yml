@@ -183,23 +183,83 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      # The browser downloads occasionally hang after reaching 100% (the
-      # connection never closes), which previously consumed the entire 30-min
-      # job budget and got the run cancelled. Bound each attempt with `timeout`
-      # and retry so a stalled download fails fast instead of hanging the job.
+      # Install the Chromium bundle Playwright needs.
+      #
+      # The live download from cdn.playwright.dev intermittently hangs at 100%
+      # on GitHub-hosted runners — the bytes arrive but the connection never
+      # closes, so `playwright install` blocks forever and the job is cancelled
+      # at its 30-min budget (issue #113 / PR #131). To decouple CI from that
+      # flaky CDN we copy the browser bundle out of Microsoft's official
+      # prebuilt Playwright image (tagged to match the installed Playwright
+      # version) and drop it where Playwright expects it. The image is pulled
+      # from mcr.microsoft.com (Azure), which is reliable on Azure-hosted
+      # runners. We stay on the host runner — rather than running the whole job
+      # inside the container — so the later Docker-based e2e steps keep working.
+      #
+      # `timeout`/retry still wrap both the prebuilt copy and the direct-download
+      # fallback so a stall fails fast and retries instead of hanging the job.
       - name: Install Playwright browsers
         run: |
+          set -o pipefail
+          PW_VERSION="$(node -e "process.stdout.write(require('playwright-core/package.json').version)")"
+          IMAGE="mcr.microsoft.com/playwright:v${PW_VERSION}-noble"
+          DEST="${HOME}/.cache/ms-playwright"
+
+          install_from_prebuilt_image() {
+            echo "::group::Playwright prebuilt image ($IMAGE)"
+            local ok=1
+            if timeout 300 docker pull "$IMAGE"; then
+              cid="$(docker create "$IMAGE")"
+              mkdir -p "$DEST"
+              if docker cp "$cid:/ms-playwright/." "$DEST/"; then ok=0; fi
+              docker rm "$cid" >/dev/null 2>&1 || true
+            fi
+            echo "::endgroup::"
+            return $ok
+          }
+
+          install_from_cdn() {
+            for attempt in 1 2 3; do
+              echo "::group::Playwright install via CDN (attempt $attempt)"
+              if timeout 300 npx playwright install --with-deps chromium; then
+                echo "::endgroup::"
+                return 0
+              fi
+              echo "::endgroup::"
+              echo "Playwright CDN install attempt $attempt failed or timed out; retrying..."
+              sleep 10
+            done
+            return 1
+          }
+
+          echo "Installing Chromium for Playwright $PW_VERSION"
+          if install_from_prebuilt_image; then
+            # System libraries are preinstalled on ubuntu-latest; install-deps is
+            # apt-only (no browser download) and a no-op when they are present.
+            timeout 300 npx playwright install-deps chromium || true
+            # Validate the copied bundle is the build Playwright expects (this
+            # only inspects the local cache; it does not hit the network when the
+            # browser is already present).
+            npx playwright install chromium --dry-run
+            echo "Chromium installed from prebuilt image $IMAGE"
+          else
+            echo "Prebuilt image path failed; falling back to direct CDN download"
+            install_from_cdn || { echo "Playwright install failed (prebuilt + CDN)" >&2; exit 1; }
+          fi
+
+      - name: Install Puppeteer browsers
+        run: |
           for attempt in 1 2 3; do
-            echo "::group::Playwright install (attempt $attempt)"
-            if timeout 300 npx playwright install --with-deps chromium; then
+            echo "::group::Puppeteer install (attempt $attempt)"
+            if timeout 300 npx puppeteer browsers install chrome; then
               echo "::endgroup::"
               exit 0
             fi
             echo "::endgroup::"
-            echo "Playwright install attempt $attempt failed or timed out; retrying..."
+            echo "Puppeteer install attempt $attempt failed or timed out; retrying..."
             sleep 10
           done
-          echo "Playwright install failed after 3 attempts" >&2
+          echo "Puppeteer install failed after 3 attempts" >&2
           exit 1
 
       - name: Install Puppeteer browsers
