@@ -34,6 +34,7 @@
 //! ```
 
 pub mod animation;
+pub mod archive;
 pub mod batch;
 pub mod browser;
 pub mod extract_images;

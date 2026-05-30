@@ -65,7 +65,8 @@
     "markdown-it": "^14.1.1",
     "nock": "^13.5.4",
     "prettier": "^3.6.2",
-    "supertest": "^6.3.4"
+    "supertest": "^6.3.4",
+    "unzipper": "^0.12.3"
   },
   "type": "module",
   "keywords": [

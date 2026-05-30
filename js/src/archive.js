@@ -170,14 +170,17 @@ export async function archiveHandler(req, res) {
       }
 
       if (!embedImages && !keepOriginalLinks) {
-        const b64 = extractBase64ToBuffers(markdown, 'images');
-        markdown = b64.markdown;
-        for (const img of b64.images) {
-          archive.append(img.buffer, { name: `images/${img.filename}` });
-        }
+        appendMarkdownAndImages(archive, markdown);
+      } else {
+        archive.append(markdown, { name: 'document.md' });
       }
 
-      archive.append(markdown, { name: 'document.md' });
+      // document.html — the source the markdown was derived from, for
+      // reference only, so the default archive layout (document.md +
+      // document.html + images/) is identical across capture paths (issue #113).
+      archive.append(prettyPrintHtml(convertRelativeUrls(html, absoluteUrl)), {
+        name: 'document.html',
+      });
     }
 
     // Download and add images if local mode
@@ -205,6 +208,57 @@ export async function archiveHandler(req, res) {
       res.status(500).send('Error creating archive');
     }
   }
+}
+
+/**
+ * Extract base64 images from `markdown` into the archive's `images/` folder and
+ * append the rewritten markdown as `document.md`. Shared by the archive
+ * endpoint and {@link buildArchiveFromHtml} so the default layout stays
+ * identical across capture paths.
+ *
+ * @param {import('archiver').Archiver} archive - The archive being built
+ * @param {string} markdown - Markdown content (may contain base64 data URIs)
+ */
+function appendMarkdownAndImages(archive, markdown) {
+  const { markdown: rewritten, images } = extractBase64ToBuffers(
+    markdown,
+    'images'
+  );
+  for (const img of images) {
+    archive.append(img.buffer, { name: `images/${img.filename}` });
+  }
+  archive.append(rewritten, { name: 'document.md' });
+}
+
+/**
+ * Build a self-contained ZIP archive (as a Buffer) from raw HTML, matching the
+ * default `--format archive` layout contract (issue #113):
+ *
+ *   - `document.md`   — markdown referencing images by relative `images/` path
+ *   - `document.html` — the source HTML the markdown was derived from (reference)
+ *   - `images/`       — every inline base64 image as a separate file
+ *
+ * @param {string} html - Source HTML to convert
+ * @param {string} baseUrl - Base URL for resolving relative links
+ * @returns {Promise<Buffer>} the finalized ZIP archive bytes
+ */
+export async function buildArchiveFromHtml(html, baseUrl) {
+  const archive = archiver('zip', { zlib: { level: 9 } });
+  const chunks = [];
+  archive.on('data', (chunk) => chunks.push(chunk));
+  const finished = new Promise((resolve, reject) => {
+    archive.on('end', resolve);
+    archive.on('error', reject);
+  });
+
+  appendMarkdownAndImages(archive, convertHtmlToMarkdown(html, baseUrl));
+  archive.append(prettyPrintHtml(convertRelativeUrls(html, baseUrl)), {
+    name: 'document.html',
+  });
+
+  await archive.finalize();
+  await finished;
+  return Buffer.concat(chunks);
 }
 
 function guessImageExtension(url) {
