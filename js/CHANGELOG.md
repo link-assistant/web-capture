@@ -1,5 +1,11 @@
 # @link-assistant/web-capture
 
+## 1.8.1
+
+### Patch Changes
+
+- Auto-release unreleased changes
+
 ## 1.8.0
 
 ### Minor Changes
