@@ -183,11 +183,39 @@ jobs:
       - name: Install dependencies
         run: npm install
 
+      # The browser downloads occasionally hang after reaching 100% (the
+      # connection never closes), which previously consumed the entire 30-min
+      # job budget and got the run cancelled. Bound each attempt with `timeout`
+      # and retry so a stalled download fails fast instead of hanging the job.
       - name: Install Playwright browsers
-        run: npx playwright install --with-deps chromium
+        run: |
+          for attempt in 1 2 3; do
+            echo "::group::Playwright install (attempt $attempt)"
+            if timeout 300 npx playwright install --with-deps chromium; then
+              echo "::endgroup::"
+              exit 0
+            fi
+            echo "::endgroup::"
+            echo "Playwright install attempt $attempt failed or timed out; retrying..."
+            sleep 10
+          done
+          echo "Playwright install failed after 3 attempts" >&2
+          exit 1
 
       - name: Install Puppeteer browsers
-        run: npx puppeteer browsers install chrome
+        run: |
+          for attempt in 1 2 3; do
+            echo "::group::Puppeteer install (attempt $attempt)"
+            if timeout 300 npx puppeteer browsers install chrome; then
+              echo "::endgroup::"
+              exit 0
+            fi
+            echo "::endgroup::"
+            echo "Puppeteer install attempt $attempt failed or timed out; retrying..."
+            sleep 10
+          done
+          echo "Puppeteer install failed after 3 attempts" >&2
+          exit 1
 
       - name: Run unit, integration, and e2e process tests
         run: npm test -- --testPathIgnorePatterns="docker.test.js"
