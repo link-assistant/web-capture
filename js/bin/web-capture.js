@@ -40,6 +40,26 @@ const config = makeConfig({
           description: 'URL to capture',
         })
       )
+      .command(
+        'search <query>',
+        'Capture structured search-provider results',
+        (yargs) =>
+          yargs.positional('query', {
+            type: 'string',
+            description: 'Search query',
+          })
+      )
+      .option('provider', {
+        type: 'string',
+        description:
+          'Search provider: wikipedia, duckduckgo, google, bing, brave',
+        default: 'wikipedia',
+      })
+      .option('limit', {
+        type: 'number',
+        description: 'Maximum number of search results',
+        default: 10,
+      })
       .option('serve', {
         alias: 's',
         type: 'boolean',
@@ -1234,10 +1254,44 @@ async function captureUrl(url, options) {
   }
 }
 
+async function runSearch(query) {
+  const { search, formatSearchAsMarkdown } = await import('../src/search.js');
+  // `--format` defaults to `markdown` for capture mode, but search results are
+  // primarily structured JSON. Only honor the format flag when the user passed
+  // it explicitly; otherwise default search output to JSON.
+  const formatPassedExplicitly = process.argv.some(
+    (arg) => arg === '-f' || arg === '--format' || arg.startsWith('--format=')
+  );
+  const format = (
+    formatPassedExplicitly ? config.format : 'json'
+  ).toLowerCase();
+  const result = await search({
+    query,
+    provider: config.provider,
+    limit: config.limit,
+  });
+  if (format === 'markdown' || format === 'md') {
+    console.log(formatSearchAsMarkdown(result));
+  } else {
+    console.log(JSON.stringify(result, null, 2));
+  }
+}
+
 async function main() {
   const url = getUrlArgument();
+  // The `query` key is only present when the `search <query>` command matched.
+  const isSearch = Object.prototype.hasOwnProperty.call(config, 'query');
 
-  if (config.serve) {
+  if (isSearch) {
+    // Search mode
+    const query = typeof config.query === 'string' ? config.query : '';
+    if (!query.trim()) {
+      console.error('Error: Missing search query');
+      console.error('Usage: web-capture search "<query>" [--provider <p>]');
+      process.exit(1);
+    }
+    await runSearch(query);
+  } else if (config.serve) {
     // Server mode
     await startServer(config.port);
   } else if (url) {

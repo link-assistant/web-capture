@@ -34,6 +34,7 @@ use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 use url::Url;
 
 use web_capture::extract_images::{apply_image_mode, ImageMode, PendingRemoteImage};
+use web_capture::search::{format_search_as_markdown, DEFAULT_PROVIDER};
 use web_capture::{
     capture_screenshot, convert_html_to_markdown_enhanced, convert_relative_urls, convert_to_utf8,
     fetch_html, html, render_html, EnhancedOptions,
@@ -48,9 +49,22 @@ use web_capture::{
 )]
 #[allow(clippy::struct_excessive_bools)]
 struct Args {
-    /// URL to capture (required in capture mode)
+    /// URL to capture (required in capture mode). Use the literal `search`
+    /// here to enter structured search mode: `web-capture search <query>`.
     #[arg(index = 1)]
     url: Option<String>,
+
+    /// Search query (used only in `web-capture search <query>` mode)
+    #[arg(index = 2)]
+    query: Option<String>,
+
+    /// Search provider: wikipedia, duckduckgo, google, bing, brave
+    #[arg(long, default_value = "wikipedia")]
+    provider: String,
+
+    /// Maximum number of search results (search mode)
+    #[arg(long, default_value_t = 10)]
+    limit: usize,
 
     /// Start as HTTP API server
     #[arg(short, long)]
@@ -192,6 +206,47 @@ struct MarkdownQuery {
 
 const fn default_true() -> bool {
     true
+}
+
+/// Query parameters for the /search endpoint
+#[derive(Debug, Deserialize)]
+struct SearchQuery {
+    /// Search query (`q`, with `query` accepted as an alias)
+    #[serde(alias = "query")]
+    q: Option<String>,
+    #[serde(default)]
+    provider: Option<String>,
+    #[serde(default)]
+    limit: Option<usize>,
+    #[serde(default)]
+    format: Option<String>,
+}
+
+/// Current UTC time as an RFC 3339 timestamp (e.g. `2026-05-30T12:34:56Z`).
+///
+/// Implemented without a calendar dependency via Howard Hinnant's
+/// days-from-civil algorithm so the crate keeps its lean dependency set.
+fn now_rfc3339() -> String {
+    let secs = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .map_or(0, |d| d.as_secs());
+    let days = (secs / 86_400).cast_signed();
+    let rem = secs % 86_400;
+    let (hour, minute, second) = (rem / 3600, (rem % 3600) / 60, rem % 60);
+
+    // days-from-civil (civil_from_days), epoch shifted to 0000-03-01.
+    let z = days + 719_468;
+    let era = if z >= 0 { z } else { z - 146_096 } / 146_097;
+    let doe = z - era * 146_097; // [0, 146096]
+    let yoe = (doe - doe / 1460 + doe / 36_524 - doe / 146_096) / 365; // [0, 399]
+    let year = yoe + era * 400;
+    let doy = doe - (365 * yoe + yoe / 4 - yoe / 100); // [0, 365]
+    let mp = (5 * doy + 2) / 153; // [0, 11]
+    let day = doy - (153 * mp + 2) / 5 + 1; // [1, 31]
+    let month = if mp < 10 { mp + 3 } else { mp - 9 }; // [1, 12]
+    let year = if month <= 2 { year + 1 } else { year };
+
+    format!("{year:04}-{month:02}-{day:02}T{hour:02}:{minute:02}:{second:02}Z")
 }
 
 /// Resolve the image-handling [`ImageMode`] from CLI flags.
@@ -338,6 +393,9 @@ async fn main() -> anyhow::Result<()> {
     if args.serve {
         // Server mode
         start_server(args.port).await?;
+    } else if args.url.as_deref() == Some("search") {
+        // Structured search mode: `web-capture search <query>`
+        run_search(&args).await?;
     } else if let Some(ref url) = args.url {
         // Capture mode
         capture_url(url, &effective_format, args.output.as_ref(), &args).await?;
@@ -361,6 +419,7 @@ async fn start_server(port: u16) -> anyhow::Result<()> {
         .route("/animation", get(animation_handler))
         .route("/figures", get(figures_handler))
         .route("/themed-image", get(themed_image_handler))
+        .route("/search", get(search_handler))
         .layer(TraceLayer::new_for_http());
 
     let addr = SocketAddr::from(([0, 0, 0, 0], port));
@@ -375,6 +434,7 @@ async fn start_server(port: u16) -> anyhow::Result<()> {
     info!("  GET /animation?url=<URL>  - Capture animation frames");
     info!("  GET /figures?url=<URL>    - Extract figure images");
     info!("  GET /themed-image?url=<URL> - Dual-theme screenshots");
+    info!("  GET /search?q=<QUERY>     - Structured search-provider capture");
     info!("");
     info!("Press Ctrl+C to stop the server");
 
@@ -652,6 +712,73 @@ async fn themed_image_handler(Query(params): Query<UrlQuery>) -> Response {
             (StatusCode::INTERNAL_SERVER_ERROR, e.to_string()).into_response()
         }
     }
+}
+
+/// Structured search-provider capture endpoint handler
+async fn search_handler(Query(params): Query<SearchQuery>) -> Response {
+    let query = params.q.unwrap_or_default();
+    if query.trim().is_empty() {
+        return (StatusCode::BAD_REQUEST, "Missing `q` (query) parameter").into_response();
+    }
+    let provider = params
+        .provider
+        .unwrap_or_else(|| DEFAULT_PROVIDER.to_string());
+    let limit = params.limit.unwrap_or(web_capture::search::DEFAULT_LIMIT);
+    let format = params.format.unwrap_or_else(|| "json".to_string());
+
+    let result = match web_capture::search::search(
+        &query,
+        &provider,
+        limit,
+        "fetch",
+        &now_rfc3339(),
+    )
+    .await
+    {
+        Ok(result) => result,
+        Err(e) => return (StatusCode::BAD_REQUEST, e).into_response(),
+    };
+
+    if format.eq_ignore_ascii_case("markdown") || format.eq_ignore_ascii_case("md") {
+        (
+            StatusCode::OK,
+            [("Content-Type", "text/markdown")],
+            format_search_as_markdown(&result),
+        )
+            .into_response()
+    } else {
+        axum::Json(result).into_response()
+    }
+}
+
+/// Run structured search from the CLI (`web-capture search <query>`).
+async fn run_search(args: &Args) -> anyhow::Result<()> {
+    let Some(query) = args.query.as_deref() else {
+        eprintln!("Error: Missing search query. Usage: web-capture search <query>");
+        std::process::exit(1);
+    };
+
+    // Search defaults to JSON output unless --format/-f was passed explicitly.
+    let format_explicit = std::env::args().any(|arg| {
+        arg == "-f" || arg == "--format" || arg.starts_with("--format=") || arg.starts_with("-f=")
+    });
+    let format = if format_explicit {
+        args.format.clone()
+    } else {
+        "json".to_string()
+    };
+
+    let result =
+        web_capture::search::search(query, &args.provider, args.limit, "fetch", &now_rfc3339())
+            .await
+            .map_err(|e| anyhow::anyhow!(e))?;
+
+    if format.eq_ignore_ascii_case("markdown") || format.eq_ignore_ascii_case("md") {
+        println!("{}", format_search_as_markdown(&result));
+    } else {
+        println!("{}", serde_json::to_string_pretty(&result)?);
+    }
+    Ok(())
 }
 
 /// Capture a URL and save/output the result

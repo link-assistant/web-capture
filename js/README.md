@@ -88,6 +88,9 @@ web-capture https://example.com --extract-images --images-dir assets -o page.md
 # Disable specific features
 web-capture https://example.com --no-extract-latex --no-post-process -o page.md
 
+# Structured search-provider capture (JSON by default)
+web-capture search "formal methods" --provider wikipedia
+
 # Start as API server
 web-capture --serve
 
@@ -232,6 +235,50 @@ GET /stream?url=<URL>
 
 Proxy fetch and streaming proxy endpoints.
 
+### Search Endpoint
+
+```
+GET /search?q=<QUERY>&provider=<PROVIDER>&format=json|markdown
+```
+
+Captures structured results from a search provider and returns them in a
+normalized, machine-readable shape. `wikipedia` (the default) uses the
+CORS-friendly REST API; the HTML engines (`duckduckgo`, `google`, `bing`,
+`brave`) are parsed server-side. Blocked or CAPTCHA-gated pages are reported
+through `diagnostics` instead of failing.
+
+| Parameter  | Required | Description                                          | Default     |
+| ---------- | -------- | ---------------------------------------------------- | ----------- |
+| `q`        | Yes      | Search query (`query` is accepted as an alias)       | -           |
+| `provider` | No       | `wikipedia`, `duckduckgo`, `google`, `bing`, `brave` | `wikipedia` |
+| `limit`    | No       | Maximum number of results                            | `10`        |
+| `format`   | No       | Response format: `json` or `markdown`                | `json`      |
+
+Example response (`format=json`):
+
+```json
+{
+  "query": "formal methods",
+  "provider": "wikipedia",
+  "captureMode": "fetch",
+  "capturedAt": "2026-05-18T20:30:00.000Z",
+  "results": [
+    {
+      "rank": 1,
+      "title": "Formal methods",
+      "url": "https://en.wikipedia.org/wiki/Formal_methods",
+      "snippet": "mathematically rigorous techniques for the specification..."
+    }
+  ],
+  "diagnostics": {
+    "status": 200,
+    "blockedByCors": false,
+    "blockedByCaptcha": false,
+    "sourceUrl": "https://en.wikipedia.org/w/rest.php/v1/search/page?q=formal%20methods&limit=10"
+  }
+}
+```
+
 ## CLI Reference
 
 ### Server Mode
@@ -290,6 +337,45 @@ web-capture <url> [options]
 | `pdf`             | PDF with embedded images                 |
 | `docx`            | Word document with embedded images       |
 | `archive` / `zip` | ZIP archive with markdown + local images |
+
+### Search Mode
+
+```bash
+web-capture search "<query>" [options]
+```
+
+Captures structured search-provider results. Output defaults to JSON; pass
+`--format markdown` for a human-readable document.
+
+```bash
+# Search Wikipedia (default provider), JSON output
+web-capture search "formal methods"
+
+# Search DuckDuckGo, limit to 5 results
+web-capture search "formal methods" --provider duckduckgo --limit 5
+
+# Render the results as Markdown
+web-capture search "formal methods" --format markdown
+```
+
+| Option       | Short | Description                                          | Default     |
+| ------------ | ----- | ---------------------------------------------------- | ----------- |
+| `--provider` |       | `wikipedia`, `duckduckgo`, `google`, `bing`, `brave` | `wikipedia` |
+| `--limit`    |       | Maximum number of results                            | `10`        |
+| `--format`   | `-f`  | Output format: `json` or `markdown`                  | `json`      |
+
+The library API exposes the same contract:
+
+```js
+import { search } from '@link-assistant/web-capture';
+
+const result = await search({
+  query: 'formal methods',
+  provider: 'wikipedia',
+  limit: 5,
+});
+console.log(result.results[0].title);
+```
 
 ## Configuration
 
