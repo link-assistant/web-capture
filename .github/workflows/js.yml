@@ -247,23 +247,28 @@ jobs:
             install_from_cdn || { echo "Playwright install failed (prebuilt + CDN)" >&2; exit 1; }
           fi
 
+      # The GitHub runner image ships an incomplete Chrome cache entry (the
+      # version folder exists but the executable is missing). `puppeteer
+      # browsers install` aborts instantly when it finds such a folder instead
+      # of (re)downloading, so the step failed before ever hitting the network.
+      # Remove any incomplete Chrome install first, then download with
+      # timeout+retry (Chrome for Testing is served from a reliable CDN).
       - name: Install Puppeteer browsers
         run: |
-          for attempt in 1 2 3; do
-            echo "::group::Puppeteer install (attempt $attempt)"
-            if timeout 300 npx puppeteer browsers install chrome; then
-              echo "::endgroup::"
-              exit 0
-            fi
-            echo "::endgroup::"
-            echo "Puppeteer install attempt $attempt failed or timed out; retrying..."
-            sleep 10
-          done
-          echo "Puppeteer install failed after 3 attempts" >&2
-          exit 1
-
-      - name: Install Puppeteer browsers
-        run: |
+          node -e '
+            const fs = require("fs");
+            const path = require("path");
+            const os = require("os");
+            const dir = path.join(os.homedir(), ".cache", "puppeteer", "chrome");
+            if (!fs.existsSync(dir)) process.exit(0);
+            for (const name of fs.readdirSync(dir)) {
+              const exe = path.join(dir, name, "chrome-linux64", "chrome");
+              if (!fs.existsSync(exe)) {
+                fs.rmSync(path.join(dir, name), { recursive: true, force: true });
+                console.log("Removed incomplete Chrome install: " + name);
+              }
+            }
+          '
           for attempt in 1 2 3; do
             echo "::group::Puppeteer install (attempt $attempt)"
             if timeout 300 npx puppeteer browsers install chrome; then
