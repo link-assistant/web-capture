@@ -46,9 +46,9 @@ describe('image-mode contract', () => {
         dir: tmp,
         subdir: 'images',
       });
-      expect(new Set([a.markdown, b.markdown, c.markdown]).size).toBeGreaterThan(
-        1
-      );
+      expect(
+        new Set([a.markdown, b.markdown, c.markdown]).size
+      ).toBeGreaterThan(1);
     }
   });
 });
