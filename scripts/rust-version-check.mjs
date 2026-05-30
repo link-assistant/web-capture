@@ -53,16 +53,11 @@ try {
   const currentVersion = getCargoVersion();
   console.log(`Current version: ${currentVersion}`);
 
-  // Check if tag exists
+  // Check if tag exists using `git tag -l` which is more reliable than `git rev-parse`
+  // (git rev-parse without --verify can give false positives for ambiguous arguments)
   const tagName = `rust-v${currentVersion}`;
-  let tagExists = false;
-
-  try {
-    await $`git rev-parse "${tagName}"`.run({ capture: true });
-    tagExists = true;
-  } catch {
-    tagExists = false;
-  }
+  const tagResult = await $`git tag -l "${tagName}"`.run({ capture: true });
+  const tagExists = tagResult.stdout.trim().length > 0;
 
   if (tagExists) {
     console.log(`Tag ${tagName} already exists`);

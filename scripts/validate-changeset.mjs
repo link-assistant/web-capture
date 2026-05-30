@@ -8,12 +8,16 @@
 
 import { readdirSync, readFileSync } from 'fs';
 import { join } from 'path';
+import { getChangesetDir, parseJsRootConfig, getJsRoot } from './js-paths.mjs';
 
 const PACKAGE_NAME = '@link-assistant/web-capture';
 
+const jsRootConfig = parseJsRootConfig();
+const jsRoot = getJsRoot({ jsRoot: jsRootConfig });
+
 try {
   // Count changeset files (excluding README.md and config.json)
-  const changesetDir = '.changeset';
+  const changesetDir = getChangesetDir({ jsRoot });
   const changesetFiles = readdirSync(changesetDir).filter(
     (file) => file.endsWith('.md') && file !== 'README.md'
   );

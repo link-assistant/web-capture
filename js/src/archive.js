@@ -2,7 +2,7 @@
  * ZIP archive handler.
  *
  * Downloads a web page as a self-contained ZIP archive containing:
- * - article.md or article.html  (document with either remote or local asset links)
+ * - document.md or document.html  (document with either remote or local asset links)
  * - images/     (directory of downloaded images, when localImages=true)
  * - css/        (directory for stylesheets, when documentFormat=html and localImages=true)
  * - js/         (directory for scripts, when documentFormat=html and localImages=true)
@@ -23,8 +23,10 @@ import {
   fetchHtml,
   convertHtmlToMarkdown,
   convertRelativeUrls,
+  prettyPrintHtml,
 } from './lib.js';
 import { retry } from './retry.js';
+import { extractBase64ToBuffers } from './extract-images.js';
 
 export async function archiveHandler(req, res) {
   const url = req.query.url;
@@ -32,7 +34,11 @@ export async function archiveHandler(req, res) {
     return res.status(400).send('Missing `url` parameter');
   }
 
-  const localImages = req.query.localImages !== 'false'; // default true
+  const keepOriginalLinks = req.query.keepOriginalLinks === 'true';
+  const localImages = keepOriginalLinks
+    ? false
+    : req.query.localImages !== 'false';
+  const embedImages = req.query.embedImages === 'true';
   const documentFormat =
     req.query.documentFormat === 'html' ? 'html' : 'markdown';
 
@@ -135,8 +141,8 @@ export async function archiveHandler(req, res) {
         });
       }
 
-      outputHtml = $out.html();
-      archive.append(outputHtml, { name: 'article.html' });
+      outputHtml = prettyPrintHtml($out.html());
+      archive.append(outputHtml, { name: 'document.html' });
 
       // Download and add CSS files
       for (const { url: cssUrl, localPath } of cssFiles) {
@@ -158,13 +164,23 @@ export async function archiveHandler(req, res) {
       let markdown = convertHtmlToMarkdown(html, absoluteUrl);
 
       if (localImages && imageMap.size > 0) {
-        // Rewrite image URLs in markdown to local paths
         for (const [remoteUrl, localPath] of imageMap) {
           markdown = markdown.split(remoteUrl).join(localPath);
         }
       }
 
-      archive.append(markdown, { name: 'article.md' });
+      if (!embedImages && !keepOriginalLinks) {
+        appendMarkdownAndImages(archive, markdown);
+      } else {
+        archive.append(markdown, { name: 'document.md' });
+      }
+
+      // document.html — the source the markdown was derived from, for
+      // reference only, so the default archive layout (document.md +
+      // document.html + images/) is identical across capture paths (issue #113).
+      archive.append(prettyPrintHtml(convertRelativeUrls(html, absoluteUrl)), {
+        name: 'document.html',
+      });
     }
 
     // Download and add images if local mode
@@ -192,6 +208,57 @@ export async function archiveHandler(req, res) {
       res.status(500).send('Error creating archive');
     }
   }
+}
+
+/**
+ * Extract base64 images from `markdown` into the archive's `images/` folder and
+ * append the rewritten markdown as `document.md`. Shared by the archive
+ * endpoint and {@link buildArchiveFromHtml} so the default layout stays
+ * identical across capture paths.
+ *
+ * @param {import('archiver').Archiver} archive - The archive being built
+ * @param {string} markdown - Markdown content (may contain base64 data URIs)
+ */
+function appendMarkdownAndImages(archive, markdown) {
+  const { markdown: rewritten, images } = extractBase64ToBuffers(
+    markdown,
+    'images'
+  );
+  for (const img of images) {
+    archive.append(img.buffer, { name: `images/${img.filename}` });
+  }
+  archive.append(rewritten, { name: 'document.md' });
+}
+
+/**
+ * Build a self-contained ZIP archive (as a Buffer) from raw HTML, matching the
+ * default `--format archive` layout contract (issue #113):
+ *
+ *   - `document.md`   — markdown referencing images by relative `images/` path
+ *   - `document.html` — the source HTML the markdown was derived from (reference)
+ *   - `images/`       — every inline base64 image as a separate file
+ *
+ * @param {string} html - Source HTML to convert
+ * @param {string} baseUrl - Base URL for resolving relative links
+ * @returns {Promise<Buffer>} the finalized ZIP archive bytes
+ */
+export async function buildArchiveFromHtml(html, baseUrl) {
+  const archive = archiver('zip', { zlib: { level: 9 } });
+  const chunks = [];
+  archive.on('data', (chunk) => chunks.push(chunk));
+  const finished = new Promise((resolve, reject) => {
+    archive.on('end', resolve);
+    archive.on('error', reject);
+  });
+
+  appendMarkdownAndImages(archive, convertHtmlToMarkdown(html, baseUrl));
+  archive.append(prettyPrintHtml(convertRelativeUrls(html, baseUrl)), {
+    name: 'document.html',
+  });
+
+  await archive.finalize();
+  await finished;
+  return Buffer.concat(chunks);
 }
 
 function guessImageExtension(url) {

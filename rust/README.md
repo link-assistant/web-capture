@@ -9,8 +9,8 @@
 
 A CLI and microservice to fetch URLs and render them as:
 
+- **Markdown**: Converted from HTML with image extraction (default)
 - **HTML**: Rendered page content
-- **Markdown**: Converted from HTML
 - **PNG screenshot**: Full page capture
 
 This is the Rust implementation of web-capture, providing the same API as the JavaScript version.
@@ -35,14 +35,30 @@ cargo build --release
 ### CLI Usage
 
 ```bash
-# Capture a URL as HTML (output to stdout)
+# Capture a URL as Markdown (default format)
+# Output auto-derived to ./data/web-capture/<host>/<path>/document.md
 web-capture https://example.com
 
-# Capture as Markdown and save to file
-web-capture https://example.com --format markdown --output page.md
+# Capture as Markdown to a specific file
+web-capture https://example.com -o page.md
+
+# Write to stdout explicitly
+web-capture https://example.com -o -
+
+# Capture as HTML
+web-capture https://example.com --format html
 
 # Take a screenshot
-web-capture https://example.com --format png --output screenshot.png
+web-capture https://example.com --format png -o screenshot.png
+
+# Create a ZIP archive
+web-capture https://example.com --archive
+
+# Keep images inline (opt-in)
+web-capture https://example.com --embed-images -o page.md
+
+# Structured search-provider capture (JSON by default)
+web-capture search "formal methods" --provider wikipedia
 
 # Start as API server
 web-capture --serve
@@ -53,9 +69,57 @@ web-capture --serve --port 8080
 
 ### API Endpoints (Server Mode)
 
-- **HTML**: GET /html?url=<URL>
-- **Markdown**: GET /markdown?url=<URL>
-- **PNG screenshot**: GET /image?url=<URL>
+- **Markdown**: `GET /markdown?url=<URL>` (original links kept, base64 stripped by default)
+- **Markdown (kreuzberg)**: `GET /markdown?url=<URL>&converter=kreuzberg`
+- **Markdown (structured JSON)**: `GET /markdown?url=<URL>&converter=kreuzberg&format=json`
+- **Markdown (base64 inline)**: `GET /markdown?url=<URL>&embedImages=true`
+- **Markdown (all images stripped)**: `GET /markdown?url=<URL>&keepOriginalLinks=false`
+- **HTML**: `GET /html?url=<URL>`
+- **PNG screenshot**: `GET /image?url=<URL>`
+- **Search**: `GET /search?q=<QUERY>&provider=<PROVIDER>&format=json|markdown`
+
+### Search Endpoint
+
+```
+GET /search?q=<QUERY>&provider=<PROVIDER>&format=json|markdown
+```
+
+Captures structured results from a search provider in a normalized,
+machine-readable shape. `wikipedia` (default) uses the CORS-friendly REST API;
+the HTML engines (`duckduckgo`, `google`, `bing`, `brave`) are parsed
+server-side. Blocked or CAPTCHA-gated pages are reported through `diagnostics`.
+
+| Parameter  | Required | Description                                          | Default     |
+| ---------- | -------- | ---------------------------------------------------- | ----------- |
+| `q`        | Yes      | Search query (`query` accepted as an alias)          | -           |
+| `provider` | No       | `wikipedia`, `duckduckgo`, `google`, `bing`, `brave` | `wikipedia` |
+| `limit`    | No       | Maximum number of results                            | `10`        |
+| `format`   | No       | Response format: `json` or `markdown`                | `json`      |
+
+The JSON shape matches the JavaScript implementation:
+
+```json
+{
+  "query": "formal methods",
+  "provider": "wikipedia",
+  "captureMode": "fetch",
+  "capturedAt": "2026-05-18T20:30:00Z",
+  "results": [
+    {
+      "rank": 1,
+      "title": "Formal methods",
+      "url": "https://en.wikipedia.org/wiki/Formal_methods",
+      "snippet": "mathematically rigorous techniques for the specification..."
+    }
+  ],
+  "diagnostics": {
+    "status": 200,
+    "blockedByCors": false,
+    "blockedByCaptcha": false,
+    "sourceUrl": "https://en.wikipedia.org/w/rest.php/v1/search/page?q=formal+methods&limit=10"
+  }
+}
+```
 
 ## CLI Reference
 
@@ -80,25 +144,80 @@ Capture a URL directly:
 web-capture <url> [options]
 ```
 
-| Option     | Short | Description                                           | Default                                  |
-| ---------- | ----- | ----------------------------------------------------- | ---------------------------------------- |
-| `--format` | `-f`  | Output format: `html`, `markdown`/`md`, `image`/`png` | `html`                                   |
-| `--output` | `-o`  | Output file path                                      | stdout (text) or auto-generated (images) |
+| Option                      | Short | Description                                           | Default               |
+| --------------------------- | ----- | ----------------------------------------------------- | --------------------- |
+| `--format`                  | `-f`  | Output format: `markdown`/`md`, `html`, `image`/`png` | `markdown`            |
+| `--output`                  | `-o`  | Output file path. Use `-o -` for stdout               | auto-derived from URL |
+| `--capture`                 |       | Capture method: `browser` or `api`                    | `browser`             |
+| `--data-dir`                |       | Base directory for auto-derived output paths          | `./data/web-capture`  |
+| `--embed-images`            |       | Keep images as inline base64 data URIs                | false                 |
+| `--no-extract-images`       |       | Alias for `--embed-images`                            | false                 |
+| `--keep-original-links`     |       | Keep original remote URLs, strip base64               | false                 |
+| `--images-dir`              |       | Subdirectory name for extracted images                | `images`              |
+| `--archive`                 |       | Create archive: `zip`, `7z`, `tar.gz`, `tar`          | -                     |
+| `--extract-latex`           |       | Extract LaTeX formulas                                | true                  |
+| `--no-extract-latex`        |       | Disable LaTeX extraction                              | -                     |
+| `--extract-metadata`        |       | Extract article metadata                              | true                  |
+| `--no-extract-metadata`     |       | Disable metadata extraction                           | -                     |
+| `--post-process`            |       | Apply post-processing                                 | true                  |
+| `--no-post-process`         |       | Disable post-processing                               | -                     |
+| `--detect-code-language`    |       | Detect code block languages                           | true                  |
+| `--no-detect-code-language` |       | Disable code language detection                       | -                     |
+
+### Search Mode
+
+Capture structured search-provider results. Output defaults to JSON; pass
+`--format markdown` for a human-readable document.
+
+```bash
+web-capture search "<query>" [options]
+```
+
+| Option       | Short | Description                                          | Default     |
+| ------------ | ----- | ---------------------------------------------------- | ----------- |
+| `--provider` |       | `wikipedia`, `duckduckgo`, `google`, `bing`, `brave` | `wikipedia` |
+| `--limit`    |       | Maximum number of results                            | `10`        |
+| `--format`   | `-f`  | Output format: `json` or `markdown`                  | `json`      |
 
 ### Examples
 
 ```bash
-# Capture HTML to stdout
+# Capture Markdown (default)
 web-capture https://example.com
 
-# Capture Markdown to file
-web-capture https://example.com -f markdown -o page.md
+# Capture to specific file
+web-capture https://example.com -o page.md
 
-# Take screenshot
+# Write to stdout
+web-capture https://example.com -o -
+
+# HTML format
+web-capture https://example.com -f html -o page.html
+
+# Google Docs live editor model
+web-capture https://docs.google.com/document/d/DOC_ID/edit --capture browser
+
+# Google Docs public export endpoint
+web-capture https://docs.google.com/document/d/DOC_ID/edit --capture api
+
+# Google Docs REST API with OAuth token
+web-capture https://docs.google.com/document/d/DOC_ID/edit --capture api --api-token YOUR_TOKEN
+
+# Tune browser-model quiescence for large or slow documents
+WEB_CAPTURE_GDOCS_STABILITY_MS=2500 WEB_CAPTURE_GDOCS_MAX_WAIT_MS=60000 \
+  web-capture https://docs.google.com/document/d/DOC_ID/edit --capture browser
+
+# Screenshot
 web-capture https://example.com -f png -o screenshot.png
 
-# Pipe HTML to another command
-web-capture https://example.com | grep "title"
+# Pipe to another command
+web-capture https://example.com -o - | grep "title"
+
+# Structured search (JSON by default)
+web-capture search "formal methods"
+
+# Search DuckDuckGo, limit to 5 results, render as Markdown
+web-capture search "formal methods" --provider duckduckgo --limit 5 --format markdown
 ```
 
 ## Docker
@@ -109,13 +228,31 @@ docker build -t web-capture-rust .
 docker run -p 3000:3000 web-capture-rust
 ```
 
+## Configuration
+
+### Environment Variables
+
+| Variable                           | Description                          | Default              |
+| ---------------------------------- | ------------------------------------ | -------------------- |
+| `PORT`                             | Server port                          | `3000`               |
+| `API_TOKEN`                        | API token for authenticated capture  | -                    |
+| `WEB_CAPTURE_DATA_DIR`             | Base directory for output            | `./data/web-capture` |
+| `WEB_CAPTURE_EMBED_IMAGES`         | `0`/`1` — keep images inline         | `0`                  |
+| `WEB_CAPTURE_KEEP_ORIGINAL_LINKS`  | `0`/`1` — keep original remote URLs  | `0`                  |
+| `WEB_CAPTURE_IMAGES_DIR`           | Subdirectory for extracted images    | `images`             |
+| `WEB_CAPTURE_EXTRACT_LATEX`        | `0`/`1` — extract LaTeX              | `1`                  |
+| `WEB_CAPTURE_EXTRACT_METADATA`     | `0`/`1` — extract metadata           | `1`                  |
+| `WEB_CAPTURE_POST_PROCESS`         | `0`/`1` — post-processing            | `1`                  |
+| `WEB_CAPTURE_DETECT_CODE_LANGUAGE` | `0`/`1` — detect code langs          | `1`                  |
+| `RUST_LOG`                         | Log level (e.g. `web_capture=debug`) | `web_capture=info`   |
+
 ## Library Usage
 
 Add to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-web-capture = "0.1"
+web-capture = "0.2"
 ```
 
 ### Example
@@ -139,54 +276,6 @@ async fn main() -> anyhow::Result<()> {
 
     Ok(())
 }
-```
-
-## API Endpoints
-
-### HTML Endpoint
-
-```bash
-GET /html?url=<URL>
-```
-
-Returns the raw HTML content of the specified URL.
-
-**Parameters:**
-
-- `url` (required): The URL to fetch
-
-### Markdown Endpoint
-
-```bash
-GET /markdown?url=<URL>
-```
-
-Converts the HTML content of the specified URL to Markdown format.
-
-### Image Endpoint
-
-```bash
-GET /image?url=<URL>
-```
-
-Returns a PNG screenshot of the specified URL.
-
-**Parameters:**
-
-- `url` (required): The URL to capture
-
-## Configuration
-
-### Environment Variables
-
-```bash
-# Set port via environment variable
-export PORT=8080
-web-capture --serve
-
-# Enable debug logging
-export RUST_LOG=web_capture=debug
-web-capture --serve
 ```
 
 ## Built With

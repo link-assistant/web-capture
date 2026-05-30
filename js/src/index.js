@@ -11,7 +11,7 @@ import { docxHandler } from './docx.js';
 import { animationHandler } from './animation.js';
 import { figuresHandler } from './figures.js';
 import { themedImageHandler } from './themed-image.js';
-import { gdocsHandler } from './gdocs.js';
+import { searchHandler } from './search.js';
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -28,7 +28,7 @@ app.get('/docx', docxHandler);
 app.get('/animation', animationHandler);
 app.get('/figures', figuresHandler);
 app.get('/themed-image', themedImageHandler);
-app.get('/gdocs', gdocsHandler);
+app.get('/search', searchHandler);
 
 // Start the server if this is the main module
 const isMainModule =
@@ -68,3 +68,11 @@ if (isMainModule) {
 }
 
 export { app };
+export {
+  search,
+  searchHandler,
+  parseSearchResults,
+  buildSearchUrl,
+  formatSearchAsMarkdown,
+  SEARCH_PROVIDERS,
+} from './search.js';

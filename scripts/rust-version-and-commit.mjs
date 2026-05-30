@@ -117,8 +117,10 @@ async function main() {
       const commitMessage = `chore(rust): bump version to ${newVersion}`;
       await $`git commit -m "${commitMessage}"`;
 
-      // Push to main
-      await $`git push origin main`;
+      // Push to main with fetch+rebase+retry to tolerate concurrent release
+      // workflows (e.g. JS release) racing to push to main.
+      // See docs/case-studies/issue-94.
+      await $`node ../scripts/safe-git-push.mjs --branch main`;
 
       console.log('Version bump committed and pushed to main');
       setOutput('version_committed', 'true');

@@ -5,11 +5,13 @@
  * Usage: node scripts/rust-publish-crate.mjs
  *
  * Environment variables:
- *   CARGO_REGISTRY_TOKEN: Token for crates.io authentication
+ *   CARGO_REGISTRY_TOKEN: Token for crates.io authentication (preferred)
+ *   CARGO_TOKEN: Fallback token for backwards compatibility
  *
  * Outputs:
  *   published: true if publish succeeded
  *   published_version: The published version
+ *   publish_result: success, already_exists, or failed
  *
  * Uses link-foundation libraries:
  * - use-m: Dynamic package loading without package.json dependencies
@@ -29,19 +31,10 @@ const { $ } = await use('command-stream');
 const MAX_RETRIES = 3;
 const RETRY_DELAY = 10000; // 10 seconds
 
-/**
- * Sleep for specified milliseconds
- * @param {number} ms
- */
 function sleep(ms) {
   return new Promise((resolve) => globalThis.setTimeout(resolve, ms));
 }
 
-/**
- * Append to GitHub Actions output file
- * @param {string} key
- * @param {string} value
- */
 function setOutput(key, value) {
   const outputFile = process.env.GITHUB_OUTPUT;
   if (outputFile) {
@@ -50,9 +43,6 @@ function setOutput(key, value) {
   console.log(`Output: ${key}=${value}`);
 }
 
-/**
- * Extract version from Cargo.toml
- */
 function getCargoVersion() {
   const cargoToml = readFileSync('./Cargo.toml', 'utf8');
   const match = cargoToml.match(/^version\s*=\s*"([^"]+)"/m);
@@ -62,44 +52,121 @@ function getCargoVersion() {
   return match[1];
 }
 
+function getCrateName() {
+  const cargoToml = readFileSync('./Cargo.toml', 'utf8');
+  const match = cargoToml.match(/^name\s*=\s*"([^"]+)"/m);
+  if (!match) {
+    throw new Error('Could not find name in Cargo.toml');
+  }
+  return match[1];
+}
+
+async function checkCratesIo(crateName, version) {
+  try {
+    const response = await fetch(
+      `https://crates.io/api/v1/crates/${crateName}/${version}`
+    );
+    if (response.ok) {
+      return { exists: true };
+    }
+    return { exists: false };
+  } catch {
+    return { exists: false };
+  }
+}
+
 try {
-  // Get current version
+  const crateName = getCrateName();
   const currentVersion = getCargoVersion();
+  console.log(`Crate: ${crateName}`);
   console.log(`Current version to publish: ${currentVersion}`);
 
-  // Check if CARGO_REGISTRY_TOKEN is set
-  if (!process.env.CARGO_REGISTRY_TOKEN) {
-    console.log('CARGO_REGISTRY_TOKEN not set, skipping publish');
+  // Resolve token: CARGO_REGISTRY_TOKEN (cargo's native env var) > CARGO_TOKEN (backwards compat)
+  const token =
+    process.env.CARGO_REGISTRY_TOKEN || process.env.CARGO_TOKEN || '';
+
+  if (!token) {
+    console.error(
+      '::error::Neither CARGO_REGISTRY_TOKEN nor CARGO_TOKEN is set.'
+    );
+    console.error(
+      'Publishing requires a crates.io API token. Configure one of these secrets:'
+    );
+    console.error(
+      '  - CARGO_REGISTRY_TOKEN (preferred, cargo\'s native env var)'
+    );
+    console.error('  - CARGO_TOKEN (backwards compatibility)');
     setOutput('published', 'false');
-    setOutput('skipped', 'true');
+    setOutput('publish_result', 'failed');
+    process.exit(1);
+  }
+
+  console.log(
+    `Token source: ${process.env.CARGO_REGISTRY_TOKEN ? 'CARGO_REGISTRY_TOKEN' : 'CARGO_TOKEN'}`
+  );
+
+  // Pre-check crates.io to see if this version is already published
+  console.log(`Checking crates.io for ${crateName}@${currentVersion}...`);
+  const cratesCheck = await checkCratesIo(crateName, currentVersion);
+  if (cratesCheck.exists) {
+    console.log(
+      `Version ${currentVersion} is already published on crates.io`
+    );
+    setOutput('published', 'true');
+    setOutput('published_version', currentVersion);
+    setOutput('publish_result', 'already_exists');
+    setOutput('already_published', 'true');
     process.exit(0);
   }
 
-  // Publish to crates.io with retry logic
+  // Publish to crates.io with retry logic, passing token explicitly via --token
   for (let i = 1; i <= MAX_RETRIES; i++) {
     console.log(`Publish attempt ${i} of ${MAX_RETRIES}...`);
     try {
-      await $`cargo publish --allow-dirty`;
+      await $`cargo publish --allow-dirty --token ${token}`;
       setOutput('published', 'true');
       setOutput('published_version', currentVersion);
-      console.log(`Published web-capture@${currentVersion} to crates.io`);
+      setOutput('publish_result', 'success');
+      console.log(`Published ${crateName}@${currentVersion} to crates.io`);
       process.exit(0);
     } catch (error) {
-      // Check if the error is because it's already published
-      if (
-        error.message &&
-        error.message.includes('already uploaded')
-      ) {
+      const msg = error.message || '';
+
+      if (msg.includes('already uploaded') || msg.includes('already exists')) {
         console.log(`Version ${currentVersion} is already published`);
         setOutput('published', 'true');
         setOutput('published_version', currentVersion);
+        setOutput('publish_result', 'already_exists');
         setOutput('already_published', 'true');
         process.exit(0);
       }
 
+      if (
+        msg.includes('non-empty token') ||
+        msg.includes('unauthorized') ||
+        msg.includes('authentication')
+      ) {
+        console.error('::error::AUTHENTICATION FAILURE');
+        console.error(
+          'The provided token was rejected by crates.io. Verify:'
+        );
+        console.error(
+          '  1. The token is valid and not expired'
+        );
+        console.error(
+          '  2. The token has publish scope for this crate'
+        );
+        console.error(
+          '  3. The correct secret (CARGO_REGISTRY_TOKEN or CARGO_TOKEN) is configured'
+        );
+        setOutput('published', 'false');
+        setOutput('publish_result', 'failed');
+        process.exit(1);
+      }
+
       if (i < MAX_RETRIES) {
         console.log(
-          `Publish failed: ${error.message}, waiting ${RETRY_DELAY / 1000}s before retry...`
+          `Publish failed: ${msg}, waiting ${RETRY_DELAY / 1000}s before retry...`
         );
         await sleep(RETRY_DELAY);
       }
@@ -107,6 +174,8 @@ try {
   }
 
   console.error(`Failed to publish after ${MAX_RETRIES} attempts`);
+  setOutput('published', 'false');
+  setOutput('publish_result', 'failed');
   process.exit(1);
 } catch (error) {
   console.error('Error:', error.message);

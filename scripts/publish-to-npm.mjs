@@ -2,8 +2,12 @@
 
 /**
  * Publish to npm using OIDC trusted publishing
- * Usage: node scripts/publish-to-npm.mjs [--should-pull]
+ * Usage: node scripts/publish-to-npm.mjs [--should-pull] [--js-root <path>]
  *   should_pull: Optional flag to pull latest changes before publishing (for release job)
+ *
+ * Configuration:
+ * - CLI: --js-root <path> to explicitly set JavaScript root
+ * - Environment: JS_ROOT=<path>
  *
  * IMPORTANT: Update the PACKAGE_NAME constant below to match your package.json
  *
@@ -14,6 +18,13 @@
  */
 
 import { readFileSync, appendFileSync } from 'fs';
+import { fileURLToPath } from 'url';
+import {
+  getJsRoot,
+  getPackageJsonPath,
+  needsCd,
+  parseJsRootConfig,
+} from './js-paths.mjs';
 
 const PACKAGE_NAME = '@link-assistant/web-capture';
 
@@ -29,16 +40,39 @@ const { makeConfig } = await use('lino-arguments');
 // Parse CLI arguments using lino-arguments
 const config = makeConfig({
   yargs: ({ yargs, getenv }) =>
-    yargs.option('should-pull', {
-      type: 'boolean',
-      default: getenv('SHOULD_PULL', false),
-      describe: 'Pull latest changes before publishing',
-    }),
+    yargs
+      .option('should-pull', {
+        type: 'boolean',
+        default: getenv('SHOULD_PULL', false),
+        describe: 'Pull latest changes before publishing',
+      })
+      .option('js-root', {
+        type: 'string',
+        default: getenv('JS_ROOT', ''),
+        describe: 'JavaScript package root directory',
+      }),
 });
 
-const { shouldPull } = config;
+const { shouldPull, jsRoot: jsRootArg } = config;
+const jsRootConfig = jsRootArg || parseJsRootConfig();
+const jsRoot = getJsRoot({ jsRoot: jsRootConfig, verbose: true });
+
 const MAX_RETRIES = 3;
 const RETRY_DELAY = 10000; // 10 seconds
+const VERIFY_RETRIES = 12;
+const VERIFY_RETRY_DELAY = 5000; // 5 seconds
+const originalCwd = process.cwd();
+
+const FAILURE_PATTERNS = [
+  'packages failed to publish',
+  'error occurred while publishing',
+  'npm error code E',
+  'npm error 404',
+  'npm error 401',
+  'npm error 403',
+  'Access token expired',
+  'ENEEDAUTH',
+];
 
 /**
  * Sleep for specified milliseconds
@@ -46,6 +80,13 @@ const RETRY_DELAY = 10000; // 10 seconds
  */
 function sleep(ms) {
   return new Promise((resolve) => globalThis.setTimeout(resolve, ms));
+}
+
+function detectPublishFailure(output) {
+  const lower = output.toLowerCase();
+  for (const p of FAILURE_PATTERNS)
+    if (lower.includes(p.toLowerCase())) return p;
+  return null;
 }
 
 /**
@@ -60,6 +101,41 @@ function setOutput(key, value) {
   }
 }
 
+async function verifyPublishedVersion(version) {
+  return verifyPublishedVersionWithRunner(version, async () =>
+    $`npm view "${PACKAGE_NAME}@${version}" version`.run({
+      capture: true,
+    }),
+    sleep
+  );
+}
+
+export async function verifyPublishedVersionWithRunner(
+  version,
+  runVerify,
+  sleepFn = sleep
+) {
+  for (let attempt = 1; attempt <= VERIFY_RETRIES; attempt++) {
+    console.log(
+      `Verifying publish (attempt ${attempt} of ${VERIFY_RETRIES})...`
+    );
+    const verifyResult = await runVerify();
+
+    if (verifyResult.code === 0 && (verifyResult.stdout || '').trim() === version)
+      return true;
+
+    if (attempt < VERIFY_RETRIES) {
+      const output = `${verifyResult.stdout || ''}\n${verifyResult.stderr || ''}`.trim();
+      if (output) {
+        console.log(`Version not visible on npm yet: ${output}`);
+      }
+      await sleepFn(VERIFY_RETRY_DELAY);
+    }
+  }
+
+  return false;
+}
+
 async function main() {
   try {
     if (shouldPull) {
@@ -68,7 +144,8 @@ async function main() {
     }
 
     // Get current version
-    const packageJson = JSON.parse(readFileSync('./package.json', 'utf8'));
+    const packageJsonPath = getPackageJsonPath({ jsRoot });
+    const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf8'));
     const currentVersion = packageJson.version;
     console.log(`Current version to publish: ${currentVersion}`);
 
@@ -96,11 +173,98 @@ async function main() {
       );
     }
 
-    // Publish to npm using OIDC trusted publishing with retry logic
+    // Publish to npm with retry logic using OIDC trusted publishing
     for (let i = 1; i <= MAX_RETRIES; i++) {
       console.log(`Publish attempt ${i} of ${MAX_RETRIES}...`);
       try {
-        await $`npm run changeset:publish`;
+        console.log('Publishing with OIDC trusted publishing...');
+        console.log(`Node.js version: ${process.version}`);
+        const npmVersionResult = await $`npm --version`.run({ capture: true });
+        console.log(`npm version: ${(npmVersionResult.stdout || '').trim()}`);
+        const publishResult = await $`npm publish --provenance --access public --verbose`.run({
+          capture: true,
+        });
+
+        const combinedOutput = `${publishResult.stdout || ''}\n${publishResult.stderr || ''}`;
+
+        // Detect 404 errors indicating the package doesn't exist on npm yet
+        // (first-time publish requires manual setup of the package on npmjs.org)
+        if (publishResult.code !== 0) {
+          console.error(`\nnpm publish exited with code ${publishResult.code}`);
+          console.error(`--- stdout ---\n${publishResult.stdout || '(empty)'}`);
+          console.error(`--- stderr ---\n${publishResult.stderr || '(empty)'}`);
+        }
+
+        // Check for OIDC token exchange failure in verbose output
+        const oidcTokenFailed = combinedOutput.includes('oidc Failed token exchange') ||
+          combinedOutput.includes('OIDC token exchange error');
+        const oidcTokenSucceeded = combinedOutput.includes('oidc Successfully retrieved and set token');
+
+        if (oidcTokenFailed) {
+          console.error(`\n\u274C OIDC token exchange failed. This usually means the trusted publisher configuration on npmjs.org does not match the workflow.`);
+          console.error(`Check: repository name, workflow filename, and environment must match exactly (case-sensitive).`);
+          console.error(`See: https://docs.npmjs.com/trusted-publishers#troubleshooting\n`);
+        }
+        if (publishResult.code === 0 && !oidcTokenSucceeded && !oidcTokenFailed) {
+          console.log('Note: OIDC token exchange status not detected in output. Publish may have used fallback authentication.');
+        }
+
+        if (
+          publishResult.code !== 0 &&
+          (combinedOutput.includes('E404') ||
+            combinedOutput.includes('Not Found') ||
+            combinedOutput.includes('is not in this registry'))
+        ) {
+          if (oidcTokenFailed) {
+            console.error(`\n\u274C OIDC token exchange failed with 404 for ${PACKAGE_NAME}.`);
+            console.error(`The OIDC handshake was rejected by the npm registry. This is NOT a "package not found" error.`);
+            console.error(`\nCommon causes:`);
+            console.error(`  - Node.js version too old (use Node 24+, not 22 or 20)`);
+            console.error(`  - Trusted publisher config mismatch (repo name, workflow filename, environment)`);
+            console.error(`  - .npmrc file interfering with OIDC (check NPM_CONFIG_USERCONFIG)\n`);
+            process.exit(1);
+          }
+
+          console.error(`\n\u274C OIDC trusted publishing failed with 404 for ${PACKAGE_NAME}.`);
+          console.error(`\nThe first version of a package must be published manually to establish the package on the registry.`);
+          console.error(`After manual publish, configure OIDC trusted publishing on npmjs.org for automated CI/CD releases.\n`);
+          console.error(`To publish manually, run these commands locally:\n`);
+          console.error(`  1. Log in to npm:`);
+          console.error(`     npm login`);
+          console.error(`  2. Navigate to the JS package directory:`);
+          console.error(`     cd js`);
+          console.error(`  3. Publish the package:`);
+          console.error(`     npm publish --access public`);
+          console.error(`  4. Configure OIDC trusted publishing on npmjs.org:`);
+          console.error(`     - Go to https://www.npmjs.com/package/${PACKAGE_NAME}/access`);
+          console.error(`     - Under "Publishing access", add a trusted publisher`);
+          console.error(`     - Set repository to: ${process.env.GITHUB_REPOSITORY || 'link-assistant/web-capture'}`);
+          console.error(`     - Set workflow to: js.yml`);
+          console.error(`     - Set environment to: (leave empty or set to your environment name)\n`);
+          process.exit(1);
+        }
+
+        const failurePattern = detectPublishFailure(combinedOutput);
+        if (failurePattern) {
+          console.error(
+            `Detected publish failure pattern: "${failurePattern}"`
+          );
+        }
+
+        if (publishResult.code !== 0) {
+          throw new Error(`npm publish failed with exit code ${publishResult.code}: ${combinedOutput}`);
+        }
+
+        // npm metadata can lag briefly after a successful publish.
+        // Keep verification retries separate from publish retries so we don't
+        // attempt to publish the same version again while the registry catches up.
+        const published = await verifyPublishedVersion(currentVersion);
+        if (!published) {
+          throw new Error(
+            `Publish verification failed: version ${currentVersion} not found on npm after ${VERIFY_RETRIES} checks`
+          );
+        }
+
         setOutput('published', 'true');
         setOutput('published_version', currentVersion);
         console.log(
@@ -125,4 +289,7 @@ async function main() {
   }
 }
 
-main();
+const entrypoint = process.argv[1] ? fileURLToPath(import.meta.url) === process.argv[1] : false;
+if (entrypoint) {
+  main();
+}

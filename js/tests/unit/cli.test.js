@@ -1,7 +1,10 @@
 // Unit tests for CLI argument parsing and functionality
 import { spawn } from 'child_process';
+import http from 'node:http';
+import { mkdtempSync, rmSync, writeFileSync } from 'fs';
 import { fileURLToPath } from 'url';
-import { dirname, resolve } from 'path';
+import { dirname, join, resolve } from 'path';
+import packageJson from '../../package.json' with { type: 'json' };
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -30,6 +33,38 @@ function runCli(args, options = {}) {
     });
 
     proc.on('error', reject);
+  });
+}
+
+function startFixtureServer() {
+  return new Promise((resolve, reject) => {
+    const server = http.createServer((req, res) => {
+      res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+      res.end(
+        '<!doctype html><html><body><h1>Issue 68</h1><p>Captured from positional URL.</p></body></html>'
+      );
+    });
+
+    server.on('error', reject);
+    server.listen(0, '127.0.0.1', () => {
+      const { port } = server.address();
+      resolve({
+        server,
+        url: `http://127.0.0.1:${port}/article`,
+      });
+    });
+  });
+}
+
+function stopFixtureServer(server) {
+  return new Promise((resolve, reject) => {
+    server.close((err) => {
+      if (err) {
+        reject(err);
+        return;
+      }
+      resolve();
+    });
   });
 }
 
@@ -75,15 +110,86 @@ describe('CLI', () => {
       // yargs outputs just the version number
       expect(result.stdout).toMatch(/\d+\.\d+\.\d+/);
     });
+
+    test('shows web-capture version when run from another npm project', async () => {
+      const callerProjectDir = mkdtempSync(join(process.cwd(), 'caller-'));
+      writeFileSync(
+        join(callerProjectDir, 'package.json'),
+        JSON.stringify({
+          name: 'caller-project',
+          version: '1.0.0',
+        })
+      );
+
+      try {
+        const result = await runCli(['--version'], { cwd: callerProjectDir });
+
+        expect(result.code).toBe(0);
+        expect(result.stdout.trim()).toBe(packageJson.version);
+      } finally {
+        rmSync(callerProjectDir, { recursive: true, force: true });
+      }
+    });
   });
 
   describe('URL validation', () => {
-    test('rejects invalid URL', async () => {
-      const result = await runCli(['not-a-valid-url-without-dots']);
-      // Should fail with invalid URL or show help due to strict mode
+    test('accepts a URL as a positional argument', async () => {
+      const { server, url } = await startFixtureServer();
+
+      try {
+        const result = await runCli([
+          url,
+          '--format',
+          'markdown',
+          '--output',
+          '-',
+        ]);
+
+        expect(result.code).toBe(0);
+        expect(result.stderr).not.toContain('Unknown argument');
+        expect(result.stdout).toContain('Issue 68');
+        expect(result.stdout).toContain('Captured from positional URL.');
+      } finally {
+        await stopFixtureServer(server);
+      }
+    }, 15000);
+
+    test('accepts a URL after the -- argument separator', async () => {
+      const { server, url } = await startFixtureServer();
+
+      try {
+        const result = await runCli([
+          '--format',
+          'markdown',
+          '--output',
+          '-',
+          '--',
+          url,
+        ]);
+
+        expect(result.code).toBe(0);
+        expect(result.stderr).not.toContain('Missing URL');
+        expect(result.stdout).toContain('Issue 68');
+      } finally {
+        await stopFixtureServer(server);
+      }
+    }, 15000);
+
+    test('rejects unknown options', async () => {
+      const result = await runCli([
+        '--unknown-option-for-issue-68',
+        'https://example.com',
+      ]);
+
       expect(result.code).toBe(1);
-      // Either an error message or help output (from yargs strict mode)
-      expect(result.stdout.length + result.stderr.length).toBeGreaterThan(0);
+      expect(result.stderr).toContain('Unknown argument');
+    });
+
+    test('rejects invalid URL', async () => {
+      const result = await runCli(['http://[invalid-url']);
+      // Should fail before trying to capture.
+      expect(result.code).toBe(1);
+      expect(result.stderr).toContain('Invalid URL');
     }, 15000);
   });
 
@@ -138,6 +244,7 @@ describe('CLI', () => {
       expect(result.stdout).toContain('/html');
       expect(result.stdout).toContain('/markdown');
       expect(result.stdout).toContain('/image');
+      expect(result.stdout).not.toContain('/gdocs');
     });
   });
 

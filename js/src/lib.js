@@ -52,6 +52,17 @@ export function convertHtmlToMarkdown(html, baseUrl) {
     }
   });
 
+  // Preserve hierarchical heading numbering in source text (e.g. 13, 13.1).
+  // 1) <ol><li><hN>13. Foo</hN></li></ol> → <ol start="13"><li><hN>Foo</hN></li></ol>
+  //    Then Turndown emits "13.  #### Foo" instead of restarting at "1.".
+  // 2) <hN>13.1 Bar</hN> (sub-numbering with decimal) → <p><strong>13.1 Bar</strong></p>
+  //    Demoting avoids ATX heading prefix, leaving the sub-number on a clean line.
+  preserveLeadingHeadingNumbering($);
+
+  // Number consecutive top-level <ol>s continuously across the document
+  // (1, 2, 3 ... N) so JS and Rust agree. <ol start="N"> resets the counter.
+  applyContinuousOrderedListNumbering($);
+
   // Remove <a> tags with no direct text content (including only whitespace or only child elements)
   $('a').each(function () {
     // Get all text nodes directly under this <a>
@@ -153,6 +164,10 @@ export function convertHtmlToMarkdown(html, baseUrl) {
     $table.replaceWith($newTable);
   });
 
+  // Hoist <br>s out of inline edges so Turndown's flanking-whitespace trim
+  // does not eat the hard break. See liftBrFromInlineEdges for details.
+  liftBrFromInlineEdges($);
+
   // Convert cleaned HTML to Markdown
   const turndown = new TurndownService({
     headingStyle: 'atx',
@@ -166,8 +181,248 @@ export function convertHtmlToMarkdown(html, baseUrl) {
     style: false,
   });
   turndown.use(turndownPluginGfm.gfm);
+  preserveTableCellLineBreaks(turndown);
   // Decode HTML entities to unicode after markdown conversion
-  return he.decode(turndown.turndown($.html()));
+  // Preserve non-breaking spaces as &nbsp; entities for clear marking
+  return coalesceBrRunsToParagraphBreak(
+    he.decode(turndown.turndown($.html())).replace(/\u00A0/g, '&nbsp;')
+  );
+}
+
+// Coalesce runs of CommonMark hard breaks (`  \n`) into a single paragraph
+// break. Google Docs export wraps every visual line break in `<br>`, including
+// `<br><br>` at paragraph boundaries; Turndown faithfully emits two trailing-
+// two-space-newline pairs for that, which renders as `<br><br>` joined inside
+// one `<p>` instead of two paragraphs. Two or more adjacent hard breaks always
+// mean "paragraph break" in the source HTML, so collapse them to `\n\n`.
+function coalesceBrRunsToParagraphBreak(markdown) {
+  return markdown.replace(/(?: {2,}\n){2,}/g, '\n\n');
+}
+
+// Lift <br> nodes out of inline parents when they sit at the leading or
+// trailing edge.
+//
+// Turndown calls `content.trim()` on the inner markdown of any inline element
+// whose `flankingWhitespace` is non-empty (turndown.cjs.js:902), which strips
+// the `  \n` hard break that the <br> rule emits. Google Docs export-html
+// commonly produces `<strong>X</strong><span> Y.<br></span><strong>Z</strong>`
+// — the trailing <br> inside a leading-space <span> gets `.trim()`-ed away,
+// so X/Y/Z collapse onto one line.
+//
+// Hoisting trailing/leading <br>s out of their inline wrapper sidesteps the
+// trim entirely. The hard break then attaches at the parent level, which
+// Turndown handles correctly.
+function liftBrFromInlineEdges($) {
+  const inlineParents = new Set([
+    'span',
+    'a',
+    'strong',
+    'b',
+    'em',
+    'i',
+    'u',
+    's',
+    'del',
+    'ins',
+    'sub',
+    'sup',
+    'mark',
+    'small',
+    'q',
+    'cite',
+    'code',
+    'abbr',
+    'time',
+    'kbd',
+    'samp',
+    'var',
+    'font',
+  ]);
+
+  // Hoist <br>s repeatedly until none sit at an inline edge — this handles
+  // nested wrappers like `<span><em>foo<br></em></span>`.
+  let changed = true;
+  while (changed) {
+    changed = false;
+    $('br').each(function () {
+      const el = this;
+      const parent = el.parent;
+      if (!parent || !inlineParents.has(parent.tagName)) {
+        return;
+      }
+      const isFirst = parent.children[0] === el;
+      const isLast = parent.children[parent.children.length - 1] === el;
+      if (!isFirst && !isLast) {
+        return;
+      }
+      if (isLast) {
+        $(parent).after(el);
+      } else {
+        $(parent).before(el);
+      }
+      changed = true;
+    });
+  }
+}
+
+function preserveLeadingHeadingNumbering($) {
+  // Hoist the OL counter onto a heading inside its first <li>.
+  // Example: <ol><li><h4>13. Foo</h4></li></ol> → <ol start="13"><li><h4>Foo</h4></li></ol>
+  $('ol > li').each(function () {
+    const $li = $(this);
+    const $heading = $li.children('h1, h2, h3, h4, h5, h6').first();
+    if (!$heading.length) {
+      return;
+    }
+    // Only act when the <li> has just one heading child and no other meaningful text.
+    if ($li.children().length !== 1) {
+      return;
+    }
+    const text = $heading.text();
+    const m = text.match(/^\s*(\d+)\.\s+(.*)$/s);
+    if (!m) {
+      return;
+    }
+    const [, num, rest] = m;
+    const $ol = $li.parent();
+    if ($ol.children('li').length !== 1) {
+      return;
+    }
+    if (!$ol.attr('start')) {
+      $ol.attr('start', num);
+    }
+    stripLeadingTextFromHeading($, $heading, m[0].length - rest.length);
+  });
+
+  // Demote <hN> with sub-numbering text (e.g. "13.1 Foo") to a bold paragraph.
+  // Avoids emitting `##### 13.1 Foo` (which collides with renderers that strip
+  // numbering or blockquote-wrap subsections downstream).
+  $('h1, h2, h3, h4, h5, h6').each(function () {
+    const $h = $(this);
+    const text = $h.text();
+    if (!/^\s*\d+\.\d+/.test(text)) {
+      return;
+    }
+    const inner = $h.html() || '';
+    const $p = $('<p></p>');
+    if (/^\s*<strong[\s>]/i.test(inner)) {
+      $p.html(inner);
+    } else {
+      $p.html(`<strong>${inner}</strong>`);
+    }
+    $h.replaceWith($p);
+  });
+}
+
+// Walk every top-level <ol> in document order and assign a `start` attribute
+// so consecutive lists number continuously (1, 2, 3, ... N). An explicit
+// `start="N"` resets the running counter to N and is preserved.
+//
+// Top-level here means "not inside another <ol> or <ul>" — nested ordered
+// lists keep their own numbering and Turndown's per-list start handling.
+function applyContinuousOrderedListNumbering($) {
+  let counter = 1;
+  $('ol').each(function () {
+    if ($(this).parents('ol, ul').length > 0) {
+      return;
+    }
+    const explicitStart = parseInt($(this).attr('start') ?? '', 10);
+    if (Number.isFinite(explicitStart)) {
+      counter = explicitStart;
+    } else {
+      $(this).attr('start', String(counter));
+    }
+    counter += $(this).children('li').length;
+  });
+}
+
+function stripLeadingTextFromHeading($, $heading, prefixLen) {
+  // Walk text nodes from the start of the heading and remove prefixLen characters.
+  let remaining = prefixLen;
+  const stack = [$heading.get(0)];
+  while (stack.length && remaining > 0) {
+    const node = stack.shift();
+    const children = node.children || [];
+    for (const child of children) {
+      if (remaining <= 0) {
+        break;
+      }
+      if (child.type === 'text') {
+        const data = child.data || '';
+        if (data.length <= remaining) {
+          remaining -= data.length;
+          child.data = '';
+        } else {
+          child.data = data.slice(remaining);
+          remaining = 0;
+        }
+      } else {
+        stack.push(child);
+      }
+    }
+  }
+  // Trim leading whitespace from the first non-empty text node.
+  const walk = (node) => {
+    const children = node.children || [];
+    for (const child of children) {
+      if (child.type === 'text') {
+        if (child.data) {
+          child.data = child.data.replace(/^\s+/, '');
+          if (child.data) {
+            return true;
+          }
+        }
+      } else if (walk(child)) {
+        return true;
+      }
+    }
+    return false;
+  };
+  walk($heading.get(0));
+}
+
+function preserveTableCellLineBreaks(turndown) {
+  turndown.addRule('tableCellLineBreak', {
+    filter(node) {
+      return node.nodeName === 'BR' && hasAncestorNode(node, ['TD', 'TH']);
+    },
+    replacement() {
+      return '<br>';
+    },
+  });
+}
+
+function hasAncestorNode(node, nodeNames) {
+  let current = node.parentNode;
+  while (current) {
+    if (nodeNames.includes(current.nodeName)) {
+      return true;
+    }
+    current = current.parentNode;
+  }
+  return false;
+}
+
+function selectedHtml($, selector) {
+  if (!selector) {
+    return null;
+  }
+  const $selected = $(selector).first();
+  return $selected.length ? $.html($selected) : null;
+}
+
+export function scopeHtmlForMarkdown(html, options = {}) {
+  const { contentSelector, bodySelector } = options;
+  const $ = cheerio.load(html);
+  const bodyHtml = selectedHtml($, bodySelector);
+  const contentHtml = selectedHtml($, contentSelector);
+  if (!bodyHtml && !contentHtml) {
+    return html;
+  }
+
+  const titleSelector = contentSelector ? `${contentSelector} h1, h1` : 'h1';
+  const titleHtml = bodyHtml ? selectedHtml($, titleSelector) : null;
+  return [titleHtml, bodyHtml || contentHtml].filter(Boolean).join('\n');
 }
 
 // Convert relative URLs to absolute URLs in HTML content
@@ -311,6 +566,9 @@ export function convertRelativeUrls(html, baseUrl) {
  * @param {boolean} [options.extractMetadata=true] - Extract article metadata
  * @param {boolean} [options.postProcess=true] - Apply post-processing pipeline
  * @param {boolean} [options.detectCodeLanguage=true] - Detect/correct code languages
+ * @param {boolean} [options.preserveCodeWhitespace=false] - Keep original whitespace inside code blocks
+ * @param {string} [options.contentSelector] - CSS selector to scope Markdown conversion
+ * @param {string} [options.bodySelector] - CSS selector appended after the selected article title
  * @returns {Object} Result with { markdown, metadata }
  */
 export function convertHtmlToMarkdownEnhanced(html, baseUrl, options = {}) {
@@ -319,6 +577,9 @@ export function convertHtmlToMarkdownEnhanced(html, baseUrl, options = {}) {
     extractMetadata: shouldExtractMetadata = true,
     postProcess = true,
     detectCodeLanguage = true,
+    preserveCodeWhitespace = false,
+    contentSelector,
+    bodySelector,
   } = options;
 
   // Ensure all URLs are absolute before Markdown conversion
@@ -326,13 +587,16 @@ export function convertHtmlToMarkdownEnhanced(html, baseUrl, options = {}) {
     html = convertRelativeUrls(html, baseUrl);
   }
 
-  const $ = cheerio.load(html);
+  let $ = cheerio.load(html);
 
   // Extract metadata before cleaning
   let metadata = null;
   if (shouldExtractMetadata) {
     metadata = extractMetadata($);
   }
+
+  html = scopeHtmlForMarkdown(html, { contentSelector, bodySelector });
+  $ = cheerio.load(html);
 
   // Remove unwanted elements
   $('style, script, noscript').remove();
@@ -353,6 +617,12 @@ export function convertHtmlToMarkdownEnhanced(html, baseUrl, options = {}) {
       $(this).remove();
     }
   });
+
+  // Preserve hierarchical heading numbering (see convertHtmlToMarkdown).
+  preserveLeadingHeadingNumbering($);
+
+  // Continuous numbering across consecutive top-level <ol>s (see convertHtmlToMarkdown).
+  applyContinuousOrderedListNumbering($);
 
   // Remove empty links (same logic as convertHtmlToMarkdown)
   $('a').each(function () {
@@ -421,7 +691,7 @@ export function convertHtmlToMarkdownEnhanced(html, baseUrl, options = {}) {
   // Handle code language detection/correction
   if (detectCodeLanguage) {
     $('pre code').each(function () {
-      const codeText = $(this).text().trim();
+      const codeText = $(this).text();
       const language =
         $(this)
           .attr('class')
@@ -440,6 +710,12 @@ export function convertHtmlToMarkdownEnhanced(html, baseUrl, options = {}) {
       ) {
         $(this).removeClass(`language-${language}`).addClass('language-coq');
       }
+    });
+  }
+
+  if (preserveCodeWhitespace) {
+    $('pre code').each(function () {
+      $(this).text($(this).text().replace(/\r\n?/g, '\n'));
     });
   }
 
@@ -487,6 +763,9 @@ export function convertHtmlToMarkdownEnhanced(html, baseUrl, options = {}) {
     $table.replaceWith($newTable);
   });
 
+  // Hoist <br>s out of inline edges (see liftBrFromInlineEdges).
+  liftBrFromInlineEdges($);
+
   // Convert to Markdown using Turndown
   const turndown = new TurndownService({
     headingStyle: 'atx',
@@ -500,9 +779,13 @@ export function convertHtmlToMarkdownEnhanced(html, baseUrl, options = {}) {
     style: false,
   });
   turndown.use(turndownPluginGfm.gfm);
+  preserveTableCellLineBreaks(turndown);
 
   // Decode HTML entities to unicode after markdown conversion
-  let markdown = he.decode(turndown.turndown($.html()));
+  // Normalize non-breaking spaces to regular spaces in Markdown text
+  let markdown = coalesceBrRunsToParagraphBreak(
+    he.decode(turndown.turndown($.html())).replace(/\u00A0/g, ' ')
+  );
 
   // Apply post-processing
   if (postProcess) {
@@ -552,4 +835,57 @@ export function ensureUtf8(html) {
     html = html.replace(/<head[^>]*>/i, '$&<meta charset="utf-8">');
   }
   return html;
+}
+
+const VOID_TAGS = new Set([
+  'area',
+  'base',
+  'br',
+  'col',
+  'embed',
+  'hr',
+  'img',
+  'input',
+  'link',
+  'meta',
+  'param',
+  'source',
+  'track',
+  'wbr',
+]);
+
+export function prettyPrintHtml(html) {
+  const tagRe = /(<\/?[a-zA-Z][^>]*?>)/g;
+  const parts = html.split(tagRe).filter(Boolean);
+  let indent = 0;
+  const indentStr = '  ';
+  const lines = [];
+
+  for (const part of parts) {
+    const isTag = part.startsWith('<');
+    if (!isTag) {
+      const text = part.trim();
+      if (text) {
+        lines.push(indentStr.repeat(indent) + text);
+      }
+      continue;
+    }
+    const isClosing = part.startsWith('</');
+    const tagMatch = part.match(/^<\/?([a-zA-Z][a-zA-Z0-9]*)/);
+    const tagName = tagMatch ? tagMatch[1].toLowerCase() : '';
+    const isVoid = VOID_TAGS.has(tagName);
+    const isSelfClosing = part.endsWith('/>');
+
+    if (isClosing) {
+      indent = Math.max(0, indent - 1);
+      lines.push(indentStr.repeat(indent) + part);
+    } else if (isVoid || isSelfClosing) {
+      lines.push(indentStr.repeat(indent) + part);
+    } else {
+      lines.push(indentStr.repeat(indent) + part);
+      indent++;
+    }
+  }
+
+  return `${lines.join('\n')}\n`;
 }

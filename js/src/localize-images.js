@@ -24,7 +24,8 @@ import { retry } from './retry.js';
  * @returns {Object[]} Array of {fullMatch, altText, url}
  */
 export function extractImageReferences(markdownText) {
-  const imageRegex = /!\[([^\]]*)\]\((https?:\/\/[^)]+)\)/g;
+  const imageRegex =
+    /!\[([^\]]*)\]\((https?:\/\/[^\s)]+)(?:\s+["'][^"']*["'])?\)/g;
   const images = [];
   let match;
 
@@ -74,6 +75,18 @@ export function generateLocalFilename(url, index) {
 }
 
 /**
+ * Generate a stable figure-numbered filename.
+ *
+ * @param {string} url - Image URL
+ * @param {number} index - Zero-based index
+ * @returns {string} Local filename (e.g., 'figure-1.png')
+ */
+export function generateFigureFilename(url, index) {
+  const ext = getExtensionFromUrl(url);
+  return `figure-${index + 1}${ext}`;
+}
+
+/**
  * Localize images in markdown text by downloading external images
  * and replacing URLs with local paths.
  *
@@ -83,6 +96,7 @@ export function generateLocalFilename(url, index) {
  * @param {boolean} [options.dryRun=false] - Only report what would be done
  * @param {Function} [options.onProgress] - Callback(index, total, status, url)
  * @param {string[]} [options.excludeDomains] - Domains to skip (already local)
+ * @param {Function} [options.filenameGenerator] - Callback(url, index, image) for local filenames
  * @returns {Promise<Object>} Result with updated markdown and metadata
  */
 export async function localizeImages(markdownText, options = {}) {
@@ -91,6 +105,7 @@ export async function localizeImages(markdownText, options = {}) {
     dryRun = false,
     onProgress,
     excludeDomains = [],
+    filenameGenerator = generateLocalFilename,
   } = options;
 
   const allImages = extractImageReferences(markdownText);
@@ -128,7 +143,7 @@ export async function localizeImages(markdownText, options = {}) {
 
   for (let i = 0; i < externalImages.length; i++) {
     const image = externalImages[i];
-    const localFilename = generateLocalFilename(image.url, i);
+    const localFilename = filenameGenerator(image.url, i, image);
     const relativePath = `${imagesDir}/${localFilename}`;
 
     if (onProgress) {

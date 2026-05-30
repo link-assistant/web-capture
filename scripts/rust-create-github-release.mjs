@@ -101,7 +101,7 @@ try {
   // This avoids shell escaping issues
   const payload = {
     tag_name: tag,
-    name: `Rust v${version}`,
+    name: `[Rust] v${version}`,
     body: releaseNotes,
   };
 

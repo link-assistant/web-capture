@@ -8,8 +8,8 @@
 
 A CLI and microservice to fetch URLs and render them as:
 
+- **Markdown**: Converted from HTML with image extraction (default)
 - **HTML**: Rendered page content
-- **Markdown**: Converted from HTML
 - **PNG/JPEG screenshot**: Viewport or full-page capture with theme support
 - **ZIP archive**: Markdown + locally downloaded images
 - **PDF**: Print-quality document with embedded images
@@ -28,8 +28,6 @@ npm install -g @link-assistant/web-capture
 ```bash
 cd js
 npm install
-# or
-yarn install
 ```
 
 ## Quick Start
@@ -37,32 +35,61 @@ yarn install
 ### CLI Usage
 
 ```bash
-# Capture a URL as HTML (output to stdout)
+# Capture a URL as Markdown (default format)
+# Output auto-derived to ./data/web-capture/<host>/<path>/document.md
 web-capture https://example.com
 
-# Capture as Markdown and save to file
-web-capture https://example.com --format markdown --output page.md
+# Capture as Markdown to a specific file
+web-capture https://example.com -o page.md
+
+# Write to stdout explicitly
+web-capture https://example.com -o -
+
+# Capture as HTML
+web-capture https://example.com --format html -o page.html
 
 # Take a PNG screenshot
-web-capture https://example.com --format png --output screenshot.png
+web-capture https://example.com --format png -o screenshot.png
 
 # Take a JPEG screenshot with custom quality
-web-capture https://example.com --format jpeg --quality 60 --output screenshot.jpg
+web-capture https://example.com --format jpeg --quality 60 -o screenshot.jpg
 
 # Dark theme full-page screenshot
-web-capture https://example.com --format png --theme dark --fullPage --output dark.png
+web-capture https://example.com --format png --theme dark --fullPage -o dark.png
 
 # Custom viewport size
 web-capture https://example.com --format png --width 1920 --height 1080 -o wide.png
 
 # Download as PDF
-web-capture https://example.com --format pdf --output page.pdf
+web-capture https://example.com --format pdf -o page.pdf
 
 # Download as DOCX
-web-capture https://example.com --format docx --output page.docx
+web-capture https://example.com --format docx -o page.docx
 
-# Download as ZIP archive with local images
-web-capture https://example.com --format archive --output site.zip
+# Create a ZIP archive (default: zip format)
+web-capture https://example.com --archive
+
+# Create a ZIP archive with specific format
+web-capture https://example.com --archive zip -o site.zip
+web-capture https://example.com --archive tar.gz -o site.tar.gz
+
+# Default markdown keeps remote image URLs as direct links
+web-capture https://example.com -o page.md
+
+# Keep images inline as base64 (self-contained file, opt-in)
+web-capture https://example.com --embed-images -o page.md
+
+# Extract images (inline base64 + remote) to a local images/ folder
+web-capture https://example.com --extract-images -o page.md
+
+# Custom images directory
+web-capture https://example.com --extract-images --images-dir assets -o page.md
+
+# Disable specific features
+web-capture https://example.com --no-extract-latex --no-post-process -o page.md
+
+# Structured search-provider capture (JSON by default)
+web-capture search "formal methods" --provider wikipedia
 
 # Start as API server
 web-capture --serve
@@ -71,35 +98,23 @@ web-capture --serve
 web-capture --serve --port 8080
 ```
 
-### Downloading Habr Articles
-
-The service is tested against real Habr.com articles. Here are examples for each format:
+### Google Docs
 
 ```bash
-# Markdown (default: remote image links)
-web-capture https://habr.com/en/articles/895896/ -f markdown -o article.md
+# Capture the live editor model as Markdown (default --capture browser)
+web-capture https://docs.google.com/document/d/DOC_ID/edit --capture browser
 
-# ZIP archive with local images (markdown format, default)
-web-capture https://habr.com/en/articles/895896/ -f archive -o article.zip
+# Capture via the public export endpoint
+web-capture https://docs.google.com/document/d/DOC_ID/edit --capture api
 
-# ZIP archive with local images (HTML format with CSS)
-web-capture https://habr.com/en/articles/895896/ -f archive --documentFormat html -o article-html.zip
-
-# Light theme full-page PNG
-web-capture https://habr.com/en/articles/895896/ -f png --theme light --fullPage -o light.png
-
-# Dark theme full-page PNG
-web-capture https://habr.com/en/articles/895896/ -f png --theme dark --fullPage -o dark.png
-
-# JPEG with 90% quality
-web-capture https://habr.com/en/articles/895896/ -f jpeg --quality 90 -o article.jpg
-
-# PDF with dark theme
-web-capture https://habr.com/en/articles/895896/ -f pdf --theme dark -o article.pdf
-
-# DOCX with embedded images
-web-capture https://habr.com/en/articles/895896/ -f docx -o article.docx
+# Capture via the Google Docs REST API
+web-capture https://docs.google.com/document/d/DOC_ID/edit --capture api --apiToken YOUR_TOKEN
 ```
+
+Browser-model capture waits until `DOCS_modelChunk` data stops changing before
+parsing. For very large or slow documents, tune the wait with
+`WEB_CAPTURE_GDOCS_STABILITY_MS` (default `1500`) and
+`WEB_CAPTURE_GDOCS_MAX_WAIT_MS` (default `30000`).
 
 ## API Endpoints (Server Mode)
 
@@ -124,11 +139,15 @@ Returns the raw HTML content of the specified URL.
 GET /markdown?url=<URL>
 ```
 
-Converts the HTML content of the specified URL to Markdown format.
+Converts the HTML content of the specified URL to Markdown format. By default, original remote image URLs are preserved and base64 data URIs are stripped (clean single-file output). Use `keepOriginalLinks=false` to strip all images, or `embedImages=true` to keep base64 images inline.
 
-| Parameter | Required | Description  | Default |
-| --------- | -------- | ------------ | ------- |
-| `url`     | Yes      | URL to fetch | -       |
+| Parameter           | Required | Description                                                               | Default  |
+| ------------------- | -------- | ------------------------------------------------------------------------- | -------- |
+| `url`               | Yes      | URL to fetch                                                              | -        |
+| `converter`         | No       | Converter: `turndown` or `kreuzberg`                                      | turndown |
+| `format`            | No       | Response format: `text` or `json` (`json` requires `converter=kreuzberg`) | text     |
+| `embedImages`       | No       | Keep base64 images inline (`true`/`false`)                                | `false`  |
+| `keepOriginalLinks` | No       | Keep original remote URLs, strip base64                                   | `true`   |
 
 ### Image Endpoint
 
@@ -156,19 +175,21 @@ Returns a screenshot of the specified URL.
 GET /archive?url=<URL>&localImages=true&documentFormat=markdown
 ```
 
-Returns a ZIP archive containing either `article.md` or `article.html` and asset directories (`images/`, `css/`).
+Returns a ZIP archive containing either `document.md` or `document.html` and asset directories (`images/`, `css/`).
 
-| Parameter        | Required | Description                              | Default    |
-| ---------------- | -------- | ---------------------------------------- | ---------- |
-| `url`            | Yes      | URL to archive                           | -          |
-| `localImages`    | No       | Download images locally into the archive | true       |
-| `documentFormat` | No       | Document format: `markdown` or `html`    | `markdown` |
+| Parameter           | Required | Description                                  | Default    |
+| ------------------- | -------- | -------------------------------------------- | ---------- |
+| `url`               | Yes      | URL to archive                               | -          |
+| `localImages`       | No       | Download images locally into the archive     | `true`     |
+| `documentFormat`    | No       | Document format: `markdown` or `html`        | `markdown` |
+| `embedImages`       | No       | Keep base64 images inline in the document    | `false`    |
+| `keepOriginalLinks` | No       | Keep original remote URLs (skip downloading) | `false`    |
 
 **Archive structure** (with `localImages=true`):
 
 ```
 archive.zip
-├── article.md        # or article.html when documentFormat=html
+├── document.md       # or document.html when documentFormat=html
 ├── images/
 │   ├── image-1.png
 │   ├── image-2.jpg
@@ -216,6 +237,50 @@ GET /stream?url=<URL>
 
 Proxy fetch and streaming proxy endpoints.
 
+### Search Endpoint
+
+```
+GET /search?q=<QUERY>&provider=<PROVIDER>&format=json|markdown
+```
+
+Captures structured results from a search provider and returns them in a
+normalized, machine-readable shape. `wikipedia` (the default) uses the
+CORS-friendly REST API; the HTML engines (`duckduckgo`, `google`, `bing`,
+`brave`) are parsed server-side. Blocked or CAPTCHA-gated pages are reported
+through `diagnostics` instead of failing.
+
+| Parameter  | Required | Description                                          | Default     |
+| ---------- | -------- | ---------------------------------------------------- | ----------- |
+| `q`        | Yes      | Search query (`query` is accepted as an alias)       | -           |
+| `provider` | No       | `wikipedia`, `duckduckgo`, `google`, `bing`, `brave` | `wikipedia` |
+| `limit`    | No       | Maximum number of results                            | `10`        |
+| `format`   | No       | Response format: `json` or `markdown`                | `json`      |
+
+Example response (`format=json`):
+
+```json
+{
+  "query": "formal methods",
+  "provider": "wikipedia",
+  "captureMode": "fetch",
+  "capturedAt": "2026-05-18T20:30:00.000Z",
+  "results": [
+    {
+      "rank": 1,
+      "title": "Formal methods",
+      "url": "https://en.wikipedia.org/wiki/Formal_methods",
+      "snippet": "mathematically rigorous techniques for the specification..."
+    }
+  ],
+  "diagnostics": {
+    "status": 200,
+    "blockedByCors": false,
+    "blockedByCaptcha": false,
+    "sourceUrl": "https://en.wikipedia.org/w/rest.php/v1/search/page?q=formal%20methods&limit=10"
+  }
+}
+```
+
 ## CLI Reference
 
 ### Server Mode
@@ -235,30 +300,84 @@ web-capture --serve [--port <port>]
 web-capture <url> [options]
 ```
 
-| Option             | Short | Description                                    | Default                                  |
-| ------------------ | ----- | ---------------------------------------------- | ---------------------------------------- |
-| `--format`         | `-f`  | Output format (see below)                      | `html`                                   |
-| `--output`         | `-o`  | Output file path                               | stdout (text) or auto-generated (images) |
-| `--engine`         | `-e`  | Browser engine: `puppeteer`, `playwright`      | `puppeteer` (or BROWSER_ENGINE env)      |
-| `--theme`          | `-t`  | Color scheme: `light`, `dark`, `no-preference` | browser default                          |
-| `--width`          |       | Viewport width in pixels                       | 1280                                     |
-| `--height`         |       | Viewport height in pixels                      | 800                                      |
-| `--quality`        |       | JPEG quality 0-100                             | 80                                       |
-| `--fullPage`       |       | Capture full scrollable page                   | false                                    |
-| `--localImages`    |       | Download images locally in archive mode        | true                                     |
-| `--documentFormat` |       | Document format in archive: `markdown`, `html` | `markdown`                               |
+| Option                      | Short | Description                                       | Default                             |
+| --------------------------- | ----- | ------------------------------------------------- | ----------------------------------- |
+| `--format`                  | `-f`  | Output format (see below)                         | `markdown`                          |
+| `--output`                  | `-o`  | Output file path. Use `-o -` for stdout           | auto-derived from URL               |
+| `--data-dir`                |       | Base directory for auto-derived output paths      | `./data/web-capture`                |
+| `--engine`                  | `-e`  | Browser engine: `puppeteer`, `playwright`         | `puppeteer` (or BROWSER_ENGINE env) |
+| `--theme`                   | `-t`  | Color scheme: `light`, `dark`, `no-preference`    | browser default                     |
+| `--width`                   |       | Viewport width in pixels                          | 1280                                |
+| `--height`                  |       | Viewport height in pixels                         | 800                                 |
+| `--quality`                 |       | JPEG quality 0-100                                | 80                                  |
+| `--fullPage`                |       | Capture full scrollable page                      | false                               |
+| `--embed-images`            |       | Keep images inline as base64 (self-contained)     | false                               |
+| `--no-extract-images`       |       | Alias for `--embed-images`                        | false                               |
+| `--extract-images[=DIR]`    |       | Extract images to `DIR/images/` + download remote | -                                   |
+| `--keep-original-links`     |       | Keep remote URLs as direct links (the default)    | false                               |
+| `--images-dir`              |       | Subdirectory name for extracted images            | `images`                            |
+| `--archive`                 |       | Create archive: `zip`, `7z`, `tar.gz`, `tar`      | -                                   |
+| `--document-format`         |       | Document format in archive: `markdown`, `html`    | `markdown`                          |
+| `--localImages`             |       | Download images locally in archive mode           | true                                |
+| `--extract-latex`           |       | Extract LaTeX formulas                            | true                                |
+| `--no-extract-latex`        |       | Disable LaTeX extraction                          | -                                   |
+| `--extract-metadata`        |       | Extract article metadata                          | true                                |
+| `--no-extract-metadata`     |       | Disable metadata extraction                       | -                                   |
+| `--post-process`            |       | Apply post-processing                             | true                                |
+| `--no-post-process`         |       | Disable post-processing                           | -                                   |
+| `--detect-code-language`    |       | Detect code block languages                       | true                                |
+| `--no-detect-code-language` |       | Disable code language detection                   | -                                   |
 
 **Supported formats:**
 
 | Format            | Description                              |
 | ----------------- | ---------------------------------------- |
-| `html`            | Rendered HTML (default)                  |
-| `markdown` / `md` | Markdown conversion                      |
+| `markdown` / `md` | Markdown conversion (default)            |
+| `html`            | Rendered HTML                            |
 | `image` / `png`   | PNG screenshot (lossless)                |
 | `jpeg`            | JPEG screenshot (configurable quality)   |
 | `pdf`             | PDF with embedded images                 |
 | `docx`            | Word document with embedded images       |
 | `archive` / `zip` | ZIP archive with markdown + local images |
+
+### Search Mode
+
+```bash
+web-capture search "<query>" [options]
+```
+
+Captures structured search-provider results. Output defaults to JSON; pass
+`--format markdown` for a human-readable document.
+
+```bash
+# Search Wikipedia (default provider), JSON output
+web-capture search "formal methods"
+
+# Search DuckDuckGo, limit to 5 results
+web-capture search "formal methods" --provider duckduckgo --limit 5
+
+# Render the results as Markdown
+web-capture search "formal methods" --format markdown
+```
+
+| Option       | Short | Description                                          | Default     |
+| ------------ | ----- | ---------------------------------------------------- | ----------- |
+| `--provider` |       | `wikipedia`, `duckduckgo`, `google`, `bing`, `brave` | `wikipedia` |
+| `--limit`    |       | Maximum number of results                            | `10`        |
+| `--format`   | `-f`  | Output format: `json` or `markdown`                  | `json`      |
+
+The library API exposes the same contract:
+
+```js
+import { search } from '@link-assistant/web-capture';
+
+const result = await search({
+  query: 'formal methods',
+  provider: 'wikipedia',
+  limit: 5,
+});
+console.log(result.results[0].title);
+```
 
 ## Configuration
 
@@ -271,15 +390,19 @@ Configuration values are resolved with the following priority (highest to lowest
 
 ### Environment Variables
 
-```bash
-# Set port via environment variable
-export PORT=8080
-web-capture --serve
-
-# Set browser engine
-export BROWSER_ENGINE=playwright
-web-capture https://example.com --format png
-```
+| Variable                           | Description                         | Default              |
+| ---------------------------------- | ----------------------------------- | -------------------- |
+| `PORT`                             | Server port                         | `3000`               |
+| `BROWSER_ENGINE`                   | Browser engine                      | `puppeteer`          |
+| `API_TOKEN`                        | API token for authenticated capture | -                    |
+| `WEB_CAPTURE_DATA_DIR`             | Base directory for output           | `./data/web-capture` |
+| `WEB_CAPTURE_EMBED_IMAGES`         | `0`/`1` — keep images inline        | `0`                  |
+| `WEB_CAPTURE_KEEP_ORIGINAL_LINKS`  | `0`/`1` — keep original remote URLs | `0`                  |
+| `WEB_CAPTURE_IMAGES_DIR`           | Subdirectory for extracted images   | `images`             |
+| `WEB_CAPTURE_EXTRACT_LATEX`        | `0`/`1` — extract LaTeX             | `1`                  |
+| `WEB_CAPTURE_EXTRACT_METADATA`     | `0`/`1` — extract metadata          | `1`                  |
+| `WEB_CAPTURE_POST_PROCESS`         | `0`/`1` — post-processing           | `1`                  |
+| `WEB_CAPTURE_DETECT_CODE_LANGUAGE` | `0`/`1` — detect code langs         | `1`                  |
 
 ## Browser Engine Support
 

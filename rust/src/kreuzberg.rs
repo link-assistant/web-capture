@@ -4,7 +4,7 @@
 //! `html-to-markdown-rs` crate (Rust-powered, 150-280 MB/s).
 //!
 //! This converter is available as an alternative to the default `html2md`-based
-//! converter, providing structured results with metadata extraction.
+//! converter, providing structured results with metadata, table, and image extraction.
 //!
 //! # References
 //!
@@ -13,6 +13,7 @@
 
 use crate::html::convert_relative_urls;
 use crate::Result;
+use base64::{engine::general_purpose::STANDARD, Engine as _};
 use serde::{Deserialize, Serialize};
 use tracing::{debug, info};
 
@@ -25,13 +26,15 @@ pub struct KreuzbergResult {
     pub metadata: Option<serde_json::Value>,
     /// Extracted table data.
     pub tables: Vec<serde_json::Value>,
+    /// Extracted inline image data.
+    pub images: Vec<serde_json::Value>,
     /// Non-fatal conversion warnings.
     pub warnings: Vec<String>,
 }
 
 /// Convert HTML to Markdown using the kreuzberg html-to-markdown library.
 ///
-/// Returns a structured result with content, metadata, tables, and warnings.
+/// Returns a structured result with content, metadata, tables, images, and warnings.
 ///
 /// # Arguments
 ///
@@ -56,6 +59,7 @@ pub fn convert_with_kreuzberg(html: &str, base_url: Option<&str>) -> Result<Kreu
 
     let options = html_to_markdown_rs::ConversionOptions {
         extract_metadata: true,
+        extract_images: true,
         ..html_to_markdown_rs::ConversionOptions::default()
     };
 
@@ -76,13 +80,17 @@ pub fn convert_with_kreuzberg(html: &str, base_url: Option<&str>) -> Result<Kreu
         .filter_map(|t| serde_json::to_value(t).ok())
         .collect();
 
+    // Convert inline image payloads into a JSON-compatible structure.
+    let images: Vec<serde_json::Value> = result.images.iter().map(inline_image_to_json).collect();
+
     // Convert warnings to strings
     let warnings: Vec<String> = result.warnings.iter().map(|w| w.message.clone()).collect();
 
     debug!(
-        "Kreuzberg conversion complete: {} bytes content, {} tables, {} warnings",
+        "Kreuzberg conversion complete: {} bytes content, {} tables, {} images, {} warnings",
         content.len(),
         tables.len(),
+        images.len(),
         warnings.len()
     );
 
@@ -90,6 +98,26 @@ pub fn convert_with_kreuzberg(html: &str, base_url: Option<&str>) -> Result<Kreu
         content,
         metadata,
         tables,
+        images,
         warnings,
+    })
+}
+
+fn inline_image_to_json(image: &html_to_markdown_rs::InlineImage) -> serde_json::Value {
+    let dimensions = image.dimensions.map(|(width, height)| {
+        serde_json::json!({
+            "width": width,
+            "height": height,
+        })
+    });
+
+    serde_json::json!({
+        "data": STANDARD.encode(&image.data),
+        "format": image.format.to_string(),
+        "filename": image.filename.as_deref(),
+        "description": image.description.as_deref(),
+        "dimensions": dimensions,
+        "source": image.source.to_string(),
+        "attributes": &image.attributes,
     })
 }

@@ -11,6 +11,8 @@
  * @see https://github.com/kreuzberg-dev/html-to-markdown
  */
 
+import { convertRelativeUrls } from './lib.js';
+
 let _initPromise = null;
 let _convert = null;
 
@@ -23,7 +25,7 @@ async function ensureLoaded() {
   }
   _initPromise = import('@kreuzberg/html-to-markdown-node')
     .then((mod) => {
-      _convert = mod.convert;
+      _convert = mod.convert || mod.default?.convert || null;
       return _convert;
     })
     .catch(() => {
@@ -31,6 +33,26 @@ async function ensureLoaded() {
       return null;
     });
   return await _initPromise;
+}
+
+function toSnakeCase(key) {
+  return key.replace(/[A-Z]/g, (match) => `_${match.toLowerCase()}`);
+}
+
+function normalizeStructuredKeys(value) {
+  if (Array.isArray(value)) {
+    return value.map(normalizeStructuredKeys);
+  }
+  if (!value || typeof value !== 'object') {
+    return value;
+  }
+
+  return Object.fromEntries(
+    Object.entries(value).map(([key, entry]) => [
+      toSnakeCase(key),
+      normalizeStructuredKeys(entry),
+    ])
+  );
 }
 
 /**
@@ -50,6 +72,7 @@ export async function isKreuzbergAvailable() {
  *
  * @param {string} html - HTML content to convert
  * @param {Object} [options] - Conversion options
+ * @param {string} [options.baseUrl] - Base URL for resolving relative URLs
  * @param {string} [options.headingStyle='Atx'] - Heading style ('Atx' or 'Setext')
  * @param {string} [options.bulletListMarker] - Bullet character ('-', '*', '+')
  * @param {string} [options.codeBlockStyle] - Code block style ('Fenced' or 'Indented')
@@ -75,8 +98,12 @@ export async function convertWithKreuzberg(html, options = {}) {
     codeBlockStyle: 'Backticks',
     ...options,
   };
+  delete convertOptions.baseUrl;
 
-  const result = convert(html, convertOptions);
+  const processedHtml = options.baseUrl
+    ? convertRelativeUrls(html, options.baseUrl)
+    : html;
+  const result = convert(processedHtml, convertOptions);
 
   // Parse the metadata JSON string into an object
   let metadata = null;
@@ -93,9 +120,9 @@ export async function convertWithKreuzberg(html, options = {}) {
 
   return {
     content: result.content || '',
-    metadata,
-    tables: result.tables || [],
-    images: result.images || [],
+    metadata: normalizeStructuredKeys(metadata),
+    tables: normalizeStructuredKeys(result.tables || []),
+    images: normalizeStructuredKeys(result.images || []),
     warnings: result.warnings || [],
   };
 }

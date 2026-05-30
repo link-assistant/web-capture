@@ -50,8 +50,9 @@ export function postProcessMarkdown(markdown, options = {}) {
     result = applyBoldFormattingFixes(result);
   }
 
-  // Fix double spaces (but not in code blocks)
-  result = result.replace(/([^\n`]) +/g, (match, char) => `${char} `);
+  // Fix double spaces (but not in code blocks, and preserve CommonMark hard
+  // breaks which require two trailing spaces before a newline).
+  result = result.replace(/([^\n`]) +(?!\n)/g, (match, char) => `${char} `);
 
   // Clean up extra spaces around em-dashes
   result = result.replace(/\s+—\s+/g, ' — ');
@@ -71,10 +72,8 @@ export function postProcessMarkdown(markdown, options = {}) {
 export function applyUnicodeNormalization(text) {
   let result = text;
 
-  // Replace non-breaking spaces (U+00A0) with regular spaces.
-  // GitHub's math renderer doesn't recognize \xa0 as a word boundary
-  // for inline math $...$ delimiters.
-  result = result.replace(/\u00A0/g, ' ');
+  // Preserve non-breaking spaces as &nbsp; entities for clear marking
+  result = result.replace(/\u00A0/g, '&nbsp;');
 
   // Normalize curly quotes to straight quotes
   result = result.replace(/[\u2018\u2019]/g, "'");

@@ -1,0 +1,936 @@
+    Updating crates.io index
+ Downloading crates ...
+  Downloaded anstyle-query v1.1.5
+  Downloaded anstyle-parse v1.0.0
+  Downloaded cookie v0.16.2
+  Downloaded event-listener-strategy v0.5.4
+  Downloaded futures-sink v0.3.32
+  Downloaded futures-channel v0.3.32
+  Downloaded futures-executor v0.3.32
+  Downloaded foreign-types v0.3.2
+  Downloaded cfg-if v1.0.4
+  Downloaded futures-macro v0.3.32
+  Downloaded generic-array v0.14.7
+  Downloaded futures-io v0.3.32
+  Downloaded foreign-types-shared v0.1.1
+  Downloaded getopts v0.2.24
+  Downloaded futures-lite v2.6.1
+  Downloaded is_terminal_polyfill v1.70.2
+  Downloaded flate2 v1.1.9
+  Downloaded ipnet v2.12.0
+  Downloaded ctor v0.4.3
+  Downloaded psl-types v2.0.11
+  Downloaded serde_urlencoded v0.7.1
+  Downloaded ego-tree v0.9.0
+  Downloaded match_token v0.1.0
+  Downloaded dtoa v1.0.11
+  Downloaded powerfmt v0.2.0
+  Downloaded rand_core v0.6.4
+  Downloaded deranged v0.5.8
+  Downloaded phf_generator v0.11.3
+  Downloaded cssparser-macros v0.6.1
+  Downloaded siphasher v1.0.2
+  Downloaded string_cache_codegen v0.5.4
+  Downloaded scopeguard v1.2.0
+  Downloaded servo_arc v0.4.3
+  Downloaded sha1 v0.10.6
+  Downloaded stable_deref_trait v1.2.1
+  Downloaded option-ext v0.2.0
+  Downloaded http-body v1.0.1
+  Downloaded new_debug_unreachable v1.0.6
+  Downloaded crc32fast v1.5.0
+  Downloaded tokio-macros v2.7.0
+  Downloaded async-lock v3.4.2
+  Downloaded parking v2.2.1
+  Downloaded tower-service v0.3.3
+  Downloaded tower-layer v0.3.3
+  Downloaded bytes v1.11.1
+  Downloaded string_cache v0.8.9
+  Downloaded hyper-tls v0.6.0
+  Downloaded precomputed-hash v0.1.1
+  Downloaded untrusted v0.9.0
+  Downloaded potential_utf v0.1.5
+  Downloaded version_check v0.9.5
+  Downloaded want v0.3.1
+  Downloaded pin-utils v0.1.0
+  Downloaded strsim v0.11.1
+  Downloaded thiserror-impl v2.0.18
+  Downloaded thread_local v1.1.9
+  Downloaded zerofrom-derive v0.1.7
+  Downloaded try-lock v0.2.5
+  Downloaded thiserror-impl v1.0.69
+  Downloaded tracing-log v0.2.0
+  Downloaded ryu v1.0.23
+  Downloaded markup5ever_rcdom v0.3.0
+  Downloaded thiserror v1.0.69
+  Downloaded selectors v0.26.0
+  Downloaded yoke-derive v0.8.2
+  Downloaded zeroize v1.8.2
+  Downloaded zmij v1.0.21
+  Downloaded utf8parse v0.2.2
+  Downloaded smallvec v1.15.1
+  Downloaded socket2 v0.6.3
+  Downloaded sharded-slab v0.1.7
+  Downloaded zerofrom v0.1.7
+  Downloaded base64 v0.21.7
+  Downloaded tracing-core v0.1.36
+  Downloaded tracing-attributes v0.1.31
+  Downloaded unicode-ident v1.0.24
+  Downloaded rustls-webpki v0.103.11
+  Downloaded zopfli v0.8.3
+  Downloaded matchit v0.8.4
+  Downloaded serde v1.0.228
+  Downloaded markup5ever v0.12.1
+  Downloaded lock_api v0.4.14
+  Downloaded litrs v1.0.0
+  Downloaded url v2.5.8
+  Downloaded tower v0.5.3
+  Downloaded zerovec-derive v0.11.3
+  Downloaded pin-project-lite v0.2.17
+  Downloaded unicode-segmentation v1.13.2
+  Downloaded tinystr v0.8.3
+  Downloaded tokio-rustls v0.26.4
+  Downloaded serde_json v1.0.149
+  Downloaded zerovec v0.11.6
+  Downloaded clap_builder v4.6.0
+  Downloaded icu_normalizer v2.2.0
+  Downloaded polling v3.11.0
+  Downloaded serde_derive v1.0.228
+  Downloaded proc-macro2 v1.0.106
+  Downloaded icu_locale_core v2.2.0
+  Downloaded zlib-rs v0.6.3
+  Downloaded syn v1.0.109
+  Downloaded time v0.3.47
+  Downloaded unicode-width v0.2.2
+  Downloaded syn v2.0.117
+  Downloaded zerotrie v0.2.4
+  Downloaded rustls v0.23.38
+  Downloaded zip v4.6.1
+  Downloaded rustix v0.38.44
+  Downloaded rustix v1.1.4
+  Downloaded iri-string v0.7.12
+  Downloaded h2 v0.4.13
+  Downloaded tracing v0.1.44
+  Downloaded vcpkg v0.2.15
+  Downloaded chromiumoxide_cdp v0.7.0
+  Downloaded regex-automata v0.4.14
+  Downloaded openssl v0.10.77
+  Downloaded icu_properties_data v2.2.0
+  Downloaded hashbrown v0.17.0
+  Downloaded lino-arguments v0.3.0
+  Downloaded idna v1.1.0
+  Downloaded hyper v1.9.0
+  Downloaded brotli v8.0.2
+  Downloaded regex-syntax v0.8.10
+  Downloaded indexmap v2.14.0
+  Downloaded futures-util v0.3.32
+  Downloaded zerocopy v0.8.48
+  Downloaded mio v1.2.0
+  Downloaded memchr v2.8.0
+  Downloaded http v1.4.0
+  Downloaded icu_collections v2.2.0
+  Downloaded hyper-util v0.1.20
+  Downloaded http v0.2.12
+  Downloaded typenum v1.19.0
+  Downloaded rand v0.8.5
+  Downloaded publicsuffix v2.3.0
+  Downloaded openssl-sys v0.9.113
+  Downloaded encoding_rs v0.8.35
+  Downloaded miniz_oxide v0.8.9
+  Downloaded html5ever v0.27.0
+  Downloaded tungstenite v0.23.0
+  Downloaded ring v0.17.14
+  Downloaded fantoccini v0.21.5
+  Downloaded chromiumoxide_types v0.7.0
+  Downloaded tracing-subscriber v0.3.23
+  Downloaded libc v0.2.184
+  Downloaded icu_normalizer_data v2.2.0
+  Downloaded tokio v1.51.1
+  Downloaded html5ever v0.29.1
+  Downloaded axum v0.8.8
+  Downloaded getrandom v0.3.4
+  Downloaded brotli-decompressor v5.0.0
+  Downloaded async-std v1.13.2
+  Downloaded tower-http v0.6.8
+  Downloaded tokio-util v0.7.18
+  Downloaded regex v1.12.3
+  Downloaded log v0.4.29
+  Downloaded icu_provider v2.2.0
+  Downloaded icu_properties v2.2.0
+  Downloaded tendril v0.4.3
+  Downloaded html2md v0.2.15
+  Downloaded once_cell v1.21.4
+  Downloaded reqwest v0.12.28
+  Downloaded markup5ever v0.14.1
+  Downloaded httparse v1.10.1
+  Downloaded getrandom v0.2.17
+  Downloaded phf_macros v0.11.3
+  Downloaded parking_lot_core v0.9.12
+  Downloaded parking_lot v0.12.5
+  Downloaded bumpalo v3.20.2
+  Downloaded litemap v0.8.2
+  Downloaded tokio-native-tls v0.3.1
+  Downloaded synstructure v0.13.2
+  Downloaded native-tls v0.2.18
+  Downloaded chromiumoxide v0.7.0
+  Downloaded quote v1.0.45
+  Downloaded ppv-lite86 v0.2.21
+  Downloaded async-compression v0.4.41
+  Downloaded yoke v0.8.2
+  Downloaded xml5ever v0.18.1
+  Downloaded value-bag v1.12.0
+  Downloaded utf8-width v0.1.8
+  Downloaded serde_core v1.0.228
+  Downloaded cc v1.2.60
+  Downloaded pkg-config v0.3.33
+  Downloaded phf v0.11.3
+  Downloaded utf8_iter v1.0.4
+  Downloaded derive_more v0.99.20
+  Downloaded utf-8 v0.7.6
+  Downloaded nu-ansi-term v0.50.3
+  Downloaded time-macros v0.2.27
+  Downloaded writeable v0.6.3
+  Downloaded which v6.0.3
+  Downloaded webdriver v0.50.0
+  Downloaded kv-log-macro v1.0.7
+  Downloaded hyper-rustls v0.27.8
+  Downloaded http-body-util v0.1.3
+  Downloaded html-escape v0.2.13
+  Downloaded clap v4.6.0
+  Downloaded browser-commander v0.9.1
+  Downloaded piper v0.2.5
+  Downloaded thiserror v2.0.18
+  Downloaded sync_wrapper v1.0.2
+  Downloaded cssparser v0.34.0
+  Downloaded async-tungstenite v0.27.0
+  Downloaded phf_codegen v0.11.3
+  Downloaded percent-encoding v2.3.2
+  Downloaded openssl-macros v0.1.1
+  Downloaded async-io v2.6.0
+  Downloaded futures v0.3.32
+  Downloaded slab v0.4.12
+  Downloaded simd-adler32 v0.3.9
+  Downloaded signal-hook-registry v1.4.8
+  Downloaded linux-raw-sys v0.4.15
+  Downloaded shlex v1.3.0
+  Downloaded serde_path_to_error v0.1.20
+  Downloaded scraper v0.21.0
+  Downloaded rustls-pki-types v1.14.0
+  Downloaded phf_shared v0.11.3
+  Downloaded openssl-probe v0.2.1
+  Downloaded num-conv v0.2.1
+  Downloaded mime v0.3.17
+  Downloaded anyhow v1.0.102
+  Downloaded time-core v0.1.8
+  Downloaded subtle v2.6.1
+  Downloaded async-task v4.7.1
+  Downloaded mac v0.1.1
+  Downloaded lazy_static v1.5.0
+  Downloaded clap_derive v4.6.0
+  Downloaded itoa v1.0.18
+  Downloaded heck v0.4.1
+  Downloaded home v0.5.12
+  Downloaded document-features v0.2.12
+  Downloaded bitflags v2.11.0
+  Downloaded chromiumoxide_pdl v0.7.0
+  Downloaded dotenvy v0.15.7
+  Downloaded digest v0.10.7
+  Downloaded compression-codecs v0.4.37
+  Downloaded blocking v1.6.2
+  Downloaded autocfg v1.5.0
+  Downloaded async-channel v2.5.0
+  Downloaded rand_chacha v0.3.1
+  Downloaded matchers v0.2.0
+  Downloaded lino-env v0.1.0
+  Downloaded idna_adapter v1.2.1
+  Downloaded dtor-proc-macro v0.0.5
+  Downloaded cpufeatures v0.2.17
+  Downloaded crossbeam-utils v0.8.21
+  Downloaded async-process v2.5.0
+  Downloaded httpdate v1.0.3
+  Downloaded heck v0.5.0
+  Downloaded find-msvc-tools v0.1.9
+  Downloaded dtoa-short v0.3.5
+  Downloaded displaydoc v0.2.5
+  Downloaded dirs v5.0.1
+  Downloaded crypto-common v0.1.7
+  Downloaded concurrent-queue v2.5.0
+  Downloaded base64 v0.22.1
+  Downloaded async-signal v0.2.14
+  Downloaded fastrand v2.4.1
+  Downloaded dtor v0.0.6
+  Downloaded futures-timer v3.0.3
+  Downloaded compression-core v0.4.31
+  Downloaded dunce v1.0.5
+  Downloaded dirs-sys v0.4.1
+  Downloaded async-global-executor v2.4.1
+  Downloaded linux-raw-sys v0.12.1
+  Downloaded form_urlencoded v1.2.2
+  Downloaded fnv v1.0.7
+  Downloaded fxhash v0.2.1
+  Downloaded futures-task v0.3.32
+  Downloaded data-encoding v2.10.0
+  Downloaded ctor-proc-macro v0.0.6
+  Downloaded cookie_store v0.22.1
+  Downloaded block-buffer v0.10.4
+  Downloaded async-channel v1.9.0
+  Downloaded cookie v0.18.1
+  Downloaded colorchoice v1.0.5
+  Downloaded clap_lex v1.1.0
+  Downloaded futures-core v0.3.32
+  Downloaded atomic-waker v1.1.2
+  Downloaded async-trait v0.1.89
+  Downloaded async-executor v1.14.0
+  Downloaded futf v0.1.5
+  Downloaded either v1.15.0
+  Downloaded async-attributes v1.1.2
+  Downloaded event-listener v2.5.3
+  Downloaded errno v0.3.14
+  Downloaded byteorder v1.5.0
+  Downloaded event-listener v5.4.1
+  Downloaded equivalent v1.0.2
+  Downloaded axum-core v0.5.6
+  Downloaded aho-corasick v1.1.4
+  Downloaded anstyle v1.0.14
+  Downloaded anstream v1.0.0
+  Downloaded ahash v0.8.12
+  Downloaded adler2 v2.0.1
+  Downloaded alloc-stdlib v0.2.2
+  Downloaded alloc-no-stdlib v2.0.4
+   Compiling proc-macro2 v1.0.106
+   Compiling quote v1.0.45
+   Compiling unicode-ident v1.0.24
+   Compiling cfg-if v1.0.4
+   Compiling libc v0.2.184
+   Compiling serde_core v1.0.228
+   Compiling serde v1.0.228
+   Compiling smallvec v1.15.1
+   Compiling pin-project-lite v0.2.17
+   Compiling value-bag v1.12.0
+   Compiling itoa v1.0.18
+   Compiling futures-core v0.3.32
+   Compiling memchr v2.8.0
+   Compiling log v0.4.29
+   Compiling parking_lot_core v0.9.12
+   Compiling scopeguard v1.2.0
+   Compiling lock_api v0.4.14
+   Compiling syn v2.0.117
+   Compiling once_cell v1.21.4
+   Compiling version_check v0.9.5
+   Compiling siphasher v1.0.2
+   Compiling stable_deref_trait v1.2.1
+   Compiling rand_core v0.6.4
+   Compiling parking_lot v0.12.5
+   Compiling phf_shared v0.11.3
+   Compiling futures-io v0.3.32
+   Compiling rand v0.8.5
+   Compiling bitflags v2.11.0
+   Compiling slab v0.4.12
+   Compiling errno v0.3.14
+   Compiling crossbeam-utils v0.8.21
+   Compiling signal-hook-registry v1.4.8
+   Compiling futures-sink v0.3.32
+   Compiling phf_generator v0.11.3
+   Compiling mio v1.2.0
+   Compiling socket2 v0.6.3
+   Compiling phf_codegen v0.11.3
+   Compiling tracing-core v0.1.36
+   Compiling concurrent-queue v2.5.0
+   Compiling parking v2.2.1
+   Compiling futures-channel v0.3.32
+   Compiling litemap v0.8.2
+   Compiling atomic-waker v1.1.2
+   Compiling shlex v1.3.0
+   Compiling find-msvc-tools v0.1.9
+   Compiling writeable v0.6.3
+   Compiling percent-encoding v2.3.2
+   Compiling utf8_iter v1.0.4
+   Compiling zmij v1.0.21
+   Compiling cc v1.2.60
+   Compiling pkg-config v0.3.33
+   Compiling icu_normalizer_data v2.2.0
+   Compiling futures-task v0.3.32
+   Compiling utf-8 v0.7.6
+   Compiling vcpkg v0.2.15
+   Compiling icu_properties_data v2.2.0
+   Compiling string_cache_codegen v0.5.4
+   Compiling new_debug_unreachable v1.0.6
+   Compiling serde_json v1.0.149
+   Compiling httparse v1.10.1
+   Compiling fastrand v2.4.1
+   Compiling hashbrown v0.17.0
+   Compiling typenum v1.19.0
+   Compiling rustix v1.1.4
+   Compiling zerocopy v0.8.48
+   Compiling equivalent v1.0.2
+   Compiling fnv v1.0.7
+   Compiling crc32fast v1.5.0
+   Compiling openssl-sys v0.9.113
+   Compiling indexmap v2.14.0
+   Compiling futures-lite v2.6.1
+   Compiling synstructure v0.13.2
+   Compiling event-listener v5.4.1
+   Compiling generic-array v0.14.7
+   Compiling precomputed-hash v0.1.1
+   Compiling tower-service v0.3.3
+   Compiling powerfmt v0.2.0
+   Compiling linux-raw-sys v0.12.1
+   Compiling mac v0.1.1
+   Compiling num-conv v0.2.1
+   Compiling autocfg v1.5.0
+   Compiling simd-adler32 v0.3.9
+   Compiling time-core v0.1.8
+   Compiling time-macros v0.2.27
+   Compiling deranged v0.5.8
+   Compiling async-io v2.6.0
+   Compiling futf v0.1.5
+   Compiling event-listener-strategy v0.5.4
+   Compiling serde_derive v1.0.228
+   Compiling zerofrom-derive v0.1.7
+   Compiling yoke-derive v0.8.2
+   Compiling zerovec-derive v0.11.3
+   Compiling displaydoc v0.2.5
+   Compiling tokio-macros v2.7.0
+   Compiling tracing-attributes v0.1.31
+   Compiling zerofrom v0.1.7
+   Compiling yoke v0.8.2
+   Compiling futures-macro v0.3.32
+   Compiling phf_macros v0.11.3
+   Compiling zerotrie v0.2.4
+   Compiling zerovec v0.11.6
+   Compiling phf v0.11.3
+   Compiling futures-util v0.3.32
+   Compiling tracing v0.1.44
+   Compiling tinystr v0.8.3
+   Compiling icu_locale_core v2.2.0
+   Compiling potential_utf v0.1.5
+   Compiling icu_collections v2.2.0
+   Compiling bytes v1.11.1
+   Compiling icu_provider v2.2.0
+   Compiling http v1.4.0
+   Compiling tokio v1.51.1
+   Compiling icu_normalizer v2.2.0
+   Compiling http-body v1.0.1
+   Compiling icu_properties v2.2.0
+   Compiling form_urlencoded v1.2.2
+   Compiling aho-corasick v1.1.4
+   Compiling alloc-no-stdlib v2.0.4
+   Compiling thiserror v1.0.69
+   Compiling foreign-types-shared v0.1.1
+   Compiling openssl v0.10.77
+   Compiling regex-syntax v0.8.10
+   Compiling try-lock v0.2.5
+   Compiling adler2 v2.0.1
+   Compiling idna_adapter v1.2.1
+   Compiling idna v1.1.0
+   Compiling miniz_oxide v0.8.9
+   Compiling want v0.3.1
+   Compiling foreign-types v0.3.2
+   Compiling alloc-stdlib v0.2.2
+   Compiling polling v3.11.0
+   Compiling http-body-util v0.1.3
+   Compiling string_cache v0.8.9
+   Compiling time v0.3.47
+   Compiling thiserror-impl v1.0.69
+   Compiling regex-automata v0.4.14
+   Compiling openssl-macros v0.1.1
+   Compiling tendril v0.4.3
+   Compiling native-tls v0.2.18
+   Compiling zlib-rs v0.6.3
+   Compiling httpdate v1.0.3
+   Compiling tokio-util v0.7.18
+   Compiling async-task v4.7.1
+   Compiling h2 v0.4.13
+   Compiling brotli-decompressor v5.0.0
+   Compiling async-channel v2.5.0
+   Compiling flate2 v1.1.9
+   Compiling cookie v0.18.1
+   Compiling getrandom v0.2.17
+   Compiling sync_wrapper v1.0.2
+   Compiling openssl-probe v0.2.1
+   Compiling ipnet v2.12.0
+   Compiling syn v1.0.109
+   Compiling byteorder v1.5.0
+   Compiling base64 v0.22.1
+   Compiling tower-layer v0.3.3
+   Compiling brotli v8.0.2
+   Compiling block-buffer v0.10.4
+   Compiling crypto-common v0.1.7
+   Compiling url v2.5.8
+   Compiling ppv-lite86 v0.2.21
+   Compiling hyper v1.9.0
+   Compiling async-lock v3.4.2
+   Compiling piper v0.2.5
+   Compiling markup5ever v0.12.1
+   Compiling mime v0.3.17
+   Compiling compression-core v0.4.31
+   Compiling blocking v1.6.2
+   Compiling rand_chacha v0.3.1
+   Compiling digest v0.10.7
+   Compiling tokio-native-tls v0.3.1
+   Compiling hyper-util v0.1.20
+   Compiling tower v0.5.3
+   Compiling regex v1.12.3
+   Compiling async-signal v0.2.14
+   Compiling async-executor v1.14.0
+   Compiling cookie v0.16.2
+   Compiling compression-codecs v0.4.37
+   Compiling ryu v1.0.23
+   Compiling event-listener v2.5.3
+   Compiling cpufeatures v0.2.17
+   Compiling psl-types v2.0.11
+   Compiling rustix v0.38.44
+   Compiling utf8parse v0.2.2
+   Compiling litrs v1.0.0
+   Compiling either v1.15.0
+   Compiling anstyle-parse v1.0.0
+   Compiling publicsuffix v2.3.0
+   Compiling hyper-tls v0.6.0
+   Compiling sha1 v0.10.6
+   Compiling document-features v0.2.12
+   Compiling async-compression v0.4.41
+   Compiling async-channel v1.9.0
+   Compiling serde_urlencoded v0.7.1
+   Compiling async-global-executor v2.4.1
+   Compiling async-process v2.5.0
+   Compiling chromiumoxide_types v0.7.0
+   Compiling html5ever v0.27.0
+   Compiling markup5ever v0.14.1
+   Compiling kv-log-macro v1.0.7
+   Compiling is_terminal_polyfill v1.70.2
+   Compiling dtoa v1.0.11
+   Compiling zeroize v1.8.2
+   Compiling heck v0.4.1
+   Compiling linux-raw-sys v0.4.15
+   Compiling async-attributes v1.1.2
+   Compiling pin-utils v0.1.0
+   Compiling getrandom v0.3.4
+   Compiling colorchoice v1.0.5
+   Compiling iri-string v0.7.12
+   Compiling anstyle-query v1.1.5
+   Compiling lazy_static v1.5.0
+   Compiling anstyle v1.0.14
+   Compiling data-encoding v2.10.0
+   Compiling async-std v1.13.2
+   Compiling anstream v1.0.0
+   Compiling chromiumoxide_pdl v0.7.0
+   Compiling tungstenite v0.23.0
+   Compiling rustls-pki-types v1.14.0
+   Compiling tower-http v0.6.8
+   Compiling dtoa-short v0.3.5
+   Compiling cookie_store v0.22.1
+   Compiling futures-executor v0.3.32
+   Compiling http v0.2.12
+   Compiling cssparser-macros v0.6.1
+   Compiling selectors v0.26.0
+   Compiling ahash v0.8.12
+   Compiling encoding_rs v0.8.35
+   Compiling option-ext v0.2.0
+   Compiling home v0.5.12
+   Compiling anyhow v1.0.102
+   Compiling unicode-segmentation v1.13.2
+   Compiling strsim v0.11.1
+   Compiling clap_lex v1.1.0
+   Compiling heck v0.5.0
+   Compiling dtor-proc-macro v0.0.5
+   Compiling base64 v0.21.7
+   Compiling clap_derive v4.6.0
+   Compiling clap_builder v4.6.0
+   Compiling dtor v0.0.6
+   Compiling reqwest v0.12.28
+   Compiling webdriver v0.50.0
+   Compiling which v6.0.3
+   Compiling dirs-sys v0.4.1
+   Compiling cssparser v0.34.0
+   Compiling async-tungstenite v0.27.0
+   Compiling futures v0.3.32
+   Compiling chromiumoxide_cdp v0.7.0
+   Compiling sharded-slab v0.1.7
+   Compiling xml5ever v0.18.1
+   Compiling fxhash v0.2.1
+   Compiling matchers v0.2.0
+   Compiling match_token v0.1.0
+   Compiling derive_more v0.99.20
+   Compiling tracing-log v0.2.0
+   Compiling servo_arc v0.4.3
+   Compiling thread_local v1.1.9
+   Compiling unicode-width v0.2.2
+   Compiling bumpalo v3.20.2
+   Compiling thiserror v2.0.18
+   Compiling dunce v1.0.5
+   Compiling ctor-proc-macro v0.0.6
+   Compiling futures-timer v3.0.3
+   Compiling nu-ansi-term v0.50.3
+   Compiling ctor v0.4.3
+   Compiling tracing-subscriber v0.3.23
+   Compiling zopfli v0.8.3
+   Compiling getopts v0.2.24
+   Compiling html5ever v0.29.1
+   Compiling markup5ever_rcdom v0.3.0
+   Compiling clap v4.6.0
+   Compiling fantoccini v0.21.5
+   Compiling dirs v5.0.1
+   Compiling axum-core v0.5.6
+   Compiling async-trait v0.1.89
+   Compiling thiserror-impl v2.0.18
+   Compiling serde_path_to_error v0.1.20
+   Compiling lino-env v0.1.0
+   Compiling matchit v0.8.4
+   Compiling ego-tree v0.9.0
+   Compiling utf8-width v0.1.8
+   Compiling dotenvy v0.15.7
+   Compiling html-escape v0.2.13
+   Compiling scraper v0.21.0
+   Compiling axum v0.8.8
+   Compiling html2md v0.2.15
+   Compiling lino-arguments v0.3.0
+   Compiling zip v4.6.1
+   Compiling chromiumoxide v0.7.0
+   Compiling browser-commander v0.9.1
+   Compiling web-capture v0.3.3 (/tmp/gh-issue-solver-1776760404302/rust)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 1m 20s
+     Running `rust/target/debug/web-capture 'https://example.com' --capture browser -f markdown --verbose`
+2026-04-21T08:37:52.339864Z DEBUG web_capture: starting capture url=https://example.com format=markdown capture=browser has_api_token=false
+2026-04-21T08:37:52.340735Z  INFO web_capture::browser: Rendering HTML for URL: https://example.com
+2026-04-21T08:37:53.606707Z  INFO web_capture::browser: Successfully rendered HTML (530 bytes)
+2026-04-21T08:37:53.617908Z  INFO web_capture::markdown: Converting HTML to Markdown
+2026-04-21T08:37:53.618000Z DEBUG web_capture::html: Converting relative URLs to absolute using base: https://example.com
+2026-04-21T08:37:53.630674Z DEBUG web_capture::html: URL conversion complete
+2026-04-21T08:37:53.630742Z DEBUG web_capture::markdown: Cleaning HTML for Markdown conversion
+2026-04-21T08:37:53.630927Z DEBUG html5ever::tree_builder: processing CharacterTokens(NotSplit, Tendril<UTF8>(inline: \"\\n\")) in insertion mode BeforeHtml
+2026-04-21T08:37:53.630945Z DEBUG html5ever::tree_builder: processing CharacterTokens(Whitespace, Tendril<UTF8>(inline: \"\\n\")) in insertion mode BeforeHtml
+2026-04-21T08:37:53.630999Z DEBUG html5ever::tree_builder: processing TagToken(Tag { kind: StartTag, name: Atom(\'html\' type=inline), self_closing: false, attrs: [Attribute { name: QualName { prefix: None, ns: Atom(\'\' type=static), local: Atom(\'lang\' type=inline) }, value: Tendril<UTF8>(inline: \"en\") }] }) in insertion mode BeforeHtml
+2026-04-21T08:37:53.631067Z DEBUG html5ever::tree_builder: processing TagToken(Tag { kind: StartTag, name: Atom(\'head\' type=inline), self_closing: false, attrs: [] }) in insertion mode BeforeHead
+2026-04-21T08:37:53.631089Z DEBUG html5ever::tree_builder: processing TagToken(Tag { kind: StartTag, name: Atom(\'title\' type=inline), self_closing: false, attrs: [] }) in insertion mode InHead
+2026-04-21T08:37:53.631123Z DEBUG html5ever::tree_builder: processing CharacterTokens(NotSplit, Tendril<UTF8>(shared: \"Example Domain\")) in insertion mode Text
+2026-04-21T08:37:53.631143Z DEBUG html5ever::tree_builder: processing TagToken(Tag { kind: EndTag, name: Atom(\'title\' type=inline), self_closing: false, attrs: [] }) in insertion mode Text
+2026-04-21T08:37:53.631188Z DEBUG html5ever::tree_builder: processing TagToken(Tag { kind: StartTag, name: Atom(\'meta\' type=inline), self_closing: false, attrs: [Attribute { name: QualName { prefix: None, ns: Atom(\'\' type=static), local: Atom(\'name\' type=inline) }, value: Tendril<UTF8>(inline: \"viewport\") }, Attribute { name: QualName { prefix: None, ns: Atom(\'\' type=static), local: Atom(\'content\' type=inline) }, value: Tendril<UTF8>(owned: \"width=device-width, initial-scale=1\") }] }) in insertion mode InHead
+2026-04-21T08:37:53.631213Z DEBUG html5ever::tree_builder: processing TagToken(Tag { kind: StartTag, name: Atom(\'style\' type=inline), self_closing: false, attrs: [] }) in insertion mode InHead
+2026-04-21T08:37:53.631236Z DEBUG html5ever::tree_builder: processing CharacterTokens(NotSplit, Tendril<UTF8>(shared: \"body{background:#eee;width:60vw;margin:15vh auto;font-family:system-ui,sans-serif}h1{font-size:1.5em}div{opacity:0.8}a:link,a:visited{color:#348}\")) in insertion mode Text
+2026-04-21T08:37:53.631254Z DEBUG html5ever::tree_builder: processing TagToken(Tag { kind: EndTag, name: Atom(\'style\' type=inline), self_closing: false, attrs: [] }) in insertion mode Text
+2026-04-21T08:37:53.631269Z DEBUG html5ever::tree_builder: processing TagToken(Tag { kind: EndTag, name: Atom(\'head\' type=inline), self_closing: false, attrs: [] }) in insertion mode InHead
+2026-04-21T08:37:53.631284Z DEBUG html5ever::tree_builder: processing TagToken(Tag { kind: StartTag, name: Atom(\'body\' type=inline), self_closing: false, attrs: [] }) in insertion mode AfterHead
+2026-04-21T08:37:53.631299Z DEBUG html5ever::tree_builder: processing TagToken(Tag { kind: StartTag, name: Atom(\'div\' type=inline), self_closing: false, attrs: [] }) in insertion mode InBody
+2026-04-21T08:37:53.631319Z DEBUG html5ever::tree_builder: processing TagToken(Tag { kind: StartTag, name: Atom(\'h1\' type=inline), self_closing: false, attrs: [] }) in insertion mode InBody
+2026-04-21T08:37:53.631333Z DEBUG html5ever::tree_builder: processing CharacterTokens(NotSplit, Tendril<UTF8>(shared: \"Example Domain\")) in insertion mode InBody
+2026-04-21T08:37:53.631349Z DEBUG html5ever::tree_builder: processing TagToken(Tag { kind: EndTag, name: Atom(\'h1\' type=inline), self_closing: false, attrs: [] }) in insertion mode InBody
+2026-04-21T08:37:53.631365Z DEBUG html5ever::tree_builder: processing TagToken(Tag { kind: StartTag, name: Atom(\'p\' type=inline), self_closing: false, attrs: [] }) in insertion mode InBody
+2026-04-21T08:37:53.631385Z DEBUG html5ever::tree_builder: processing CharacterTokens(NotSplit, Tendril<UTF8>(shared: \"This domain is for use in documentation examples without needing permission. Avoid use in operations.\")) in insertion mode InBody
+2026-04-21T08:37:53.631400Z DEBUG html5ever::tree_builder: processing TagToken(Tag { kind: EndTag, name: Atom(\'p\' type=inline), self_closing: false, attrs: [] }) in insertion mode InBody
+2026-04-21T08:37:53.631415Z DEBUG html5ever::tree_builder: processing TagToken(Tag { kind: StartTag, name: Atom(\'p\' type=inline), self_closing: false, attrs: [] }) in insertion mode InBody
+2026-04-21T08:37:53.631443Z DEBUG html5ever::tree_builder: processing TagToken(Tag { kind: StartTag, name: Atom(\'a\' type=inline), self_closing: false, attrs: [Attribute { name: QualName { prefix: None, ns: Atom(\'\' type=static), local: Atom(\'href\' type=inline) }, value: Tendril<UTF8>(owned: \"https://iana.org/domains/example\") }] }) in insertion mode InBody
+2026-04-21T08:37:53.631462Z DEBUG html5ever::tree_builder: processing CharacterTokens(NotSplit, Tendril<UTF8>(shared: \"Learn more\")) in insertion mode InBody
+2026-04-21T08:37:53.631493Z DEBUG html5ever::tree_builder: processing TagToken(Tag { kind: EndTag, name: Atom(\'a\' type=inline), self_closing: false, attrs: [] }) in insertion mode InBody
+2026-04-21T08:37:53.631516Z DEBUG html5ever::tree_builder: processing TagToken(Tag { kind: EndTag, name: Atom(\'p\' type=inline), self_closing: false, attrs: [] }) in insertion mode InBody
+2026-04-21T08:37:53.631531Z DEBUG html5ever::tree_builder: processing TagToken(Tag { kind: EndTag, name: Atom(\'div\' type=inline), self_closing: false, attrs: [] }) in insertion mode InBody
+2026-04-21T08:37:53.631544Z DEBUG html5ever::tree_builder: processing CharacterTokens(NotSplit, Tendril<UTF8>(inline: \"\\n\")) in insertion mode InBody
+2026-04-21T08:37:53.631559Z DEBUG html5ever::tree_builder: processing TagToken(Tag { kind: EndTag, name: Atom(\'body\' type=inline), self_closing: false, attrs: [] }) in insertion mode InBody
+2026-04-21T08:37:53.631575Z DEBUG html5ever::tree_builder: processing TagToken(Tag { kind: EndTag, name: Atom(\'html\' type=inline), self_closing: false, attrs: [] }) in insertion mode AfterBody
+2026-04-21T08:37:53.631587Z DEBUG html5ever::tree_builder: processing CharacterTokens(NotSplit, Tendril<UTF8>(inline: \"\\n\")) in insertion mode AfterAfterBody
+2026-04-21T08:37:53.631598Z DEBUG html5ever::tree_builder: processing CharacterTokens(Whitespace, Tendril<UTF8>(inline: \"\\n\")) in insertion mode AfterAfterBody
+2026-04-21T08:37:53.631613Z DEBUG html5ever::tree_builder: processing CharacterTokens(Whitespace, Tendril<UTF8>(inline: \"\\n\")) in insertion mode InBody
+2026-04-21T08:37:53.631621Z DEBUG html5ever::tokenizer: processing EOF in state Data
+2026-04-21T08:37:53.631628Z DEBUG html5ever::tree_builder: processing EOFToken in insertion mode AfterAfterBody
+2026-04-21T08:37:53.631686Z DEBUG selectors::matching: Matching complex selector script for <html lang="en">
+2026-04-21T08:37:53.631701Z DEBUG selectors::matching: Matching complex selector script for <head>
+2026-04-21T08:37:53.631707Z DEBUG selectors::matching: Matching complex selector script for <title>
+2026-04-21T08:37:53.631712Z DEBUG selectors::matching: Matching complex selector script for <meta content="width=device-width, initial-scale=1" name="viewport">
+2026-04-21T08:37:53.631719Z DEBUG selectors::matching: Matching complex selector script for <style>
+2026-04-21T08:37:53.631724Z DEBUG selectors::matching: Matching complex selector script for <body>
+2026-04-21T08:37:53.631730Z DEBUG selectors::matching: Matching complex selector script for <div>
+2026-04-21T08:37:53.631735Z DEBUG selectors::matching: Matching complex selector script for <h1>
+2026-04-21T08:37:53.631740Z DEBUG selectors::matching: Matching complex selector script for <p>
+2026-04-21T08:37:53.631746Z DEBUG selectors::matching: Matching complex selector script for <p>
+2026-04-21T08:37:53.631751Z DEBUG selectors::matching: Matching complex selector script for <a href="https://iana.org/domains/example">
+2026-04-21T08:37:53.631763Z DEBUG selectors::matching: Matching complex selector style for <html lang="en">
+2026-04-21T08:37:53.631769Z DEBUG selectors::matching: Matching complex selector style for <head>
+2026-04-21T08:37:53.631775Z DEBUG selectors::matching: Matching complex selector style for <title>
+2026-04-21T08:37:53.631780Z DEBUG selectors::matching: Matching complex selector style for <meta content="width=device-width, initial-scale=1" name="viewport">
+2026-04-21T08:37:53.631787Z DEBUG selectors::matching: Matching complex selector style for <style>
+2026-04-21T08:37:53.631825Z DEBUG selectors::matching: Matching complex selector style for <body>
+2026-04-21T08:37:53.631830Z DEBUG selectors::matching: Matching complex selector style for <div>
+2026-04-21T08:37:53.631836Z DEBUG selectors::matching: Matching complex selector style for <h1>
+2026-04-21T08:37:53.631841Z DEBUG selectors::matching: Matching complex selector style for <p>
+2026-04-21T08:37:53.631846Z DEBUG selectors::matching: Matching complex selector style for <p>
+2026-04-21T08:37:53.631851Z DEBUG selectors::matching: Matching complex selector style for <a href="https://iana.org/domains/example">
+2026-04-21T08:37:53.631868Z DEBUG selectors::matching: Matching complex selector noscript for <html lang="en">
+2026-04-21T08:37:53.631874Z DEBUG selectors::matching: Matching complex selector noscript for <head>
+2026-04-21T08:37:53.631880Z DEBUG selectors::matching: Matching complex selector noscript for <title>
+2026-04-21T08:37:53.631885Z DEBUG selectors::matching: Matching complex selector noscript for <meta content="width=device-width, initial-scale=1" name="viewport">
+2026-04-21T08:37:53.631892Z DEBUG selectors::matching: Matching complex selector noscript for <style>
+2026-04-21T08:37:53.631897Z DEBUG selectors::matching: Matching complex selector noscript for <body>
+2026-04-21T08:37:53.631903Z DEBUG selectors::matching: Matching complex selector noscript for <div>
+2026-04-21T08:37:53.631908Z DEBUG selectors::matching: Matching complex selector noscript for <h1>
+2026-04-21T08:37:53.631913Z DEBUG selectors::matching: Matching complex selector noscript for <p>
+2026-04-21T08:37:53.631919Z DEBUG selectors::matching: Matching complex selector noscript for <p>
+2026-04-21T08:37:53.631924Z DEBUG selectors::matching: Matching complex selector noscript for <a href="https://iana.org/domains/example">
+2026-04-21T08:37:53.638130Z DEBUG html5ever::tree_builder: processing CharacterTokens(NotSplit, Tendril<UTF8>(inline: \"\\n\")) in insertion mode BeforeHtml
+2026-04-21T08:37:53.638174Z DEBUG html5ever::tree_builder: processing CharacterTokens(Whitespace, Tendril<UTF8>(inline: \"\\n\")) in insertion mode BeforeHtml
+2026-04-21T08:37:53.638216Z DEBUG html5ever::tree_builder: processing TagToken(Tag { kind: StartTag, name: Atom(\'html\' type=inline), self_closing: false, attrs: [Attribute { name: QualName { prefix: None, ns: Atom(\'\' type=static), local: Atom(\'lang\' type=inline) }, value: Tendril<UTF8>(inline: \"en\") }] }) in insertion mode BeforeHtml
+2026-04-21T08:37:53.638236Z DEBUG html5ever::tree_builder: processing TagToken(Tag { kind: StartTag, name: Atom(\'head\' type=inline), self_closing: false, attrs: [] }) in insertion mode BeforeHead
+2026-04-21T08:37:53.638257Z DEBUG html5ever::tree_builder: processing TagToken(Tag { kind: StartTag, name: Atom(\'title\' type=inline), self_closing: false, attrs: [] }) in insertion mode InHead
+2026-04-21T08:37:53.638271Z DEBUG html5ever::tree_builder: processing CharacterTokens(NotSplit, Tendril<UTF8>(shared: \"Example Domain\")) in insertion mode Text
+2026-04-21T08:37:53.638289Z DEBUG html5ever::tree_builder: processing TagToken(Tag { kind: EndTag, name: Atom(\'title\' type=inline), self_closing: false, attrs: [] }) in insertion mode Text
+2026-04-21T08:37:53.638333Z DEBUG html5ever::tree_builder: processing TagToken(Tag { kind: StartTag, name: Atom(\'meta\' type=inline), self_closing: false, attrs: [Attribute { name: QualName { prefix: None, ns: Atom(\'\' type=static), local: Atom(\'name\' type=inline) }, value: Tendril<UTF8>(inline: \"viewport\") }, Attribute { name: QualName { prefix: None, ns: Atom(\'\' type=static), local: Atom(\'content\' type=inline) }, value: Tendril<UTF8>(owned: \"width=device-width, initial-scale=1\") }] }) in insertion mode InHead
+2026-04-21T08:37:53.638355Z DEBUG html5ever::tree_builder: processing TagToken(Tag { kind: EndTag, name: Atom(\'head\' type=inline), self_closing: false, attrs: [] }) in insertion mode InHead
+2026-04-21T08:37:53.638371Z DEBUG html5ever::tree_builder: processing TagToken(Tag { kind: StartTag, name: Atom(\'body\' type=inline), self_closing: false, attrs: [] }) in insertion mode AfterHead
+2026-04-21T08:37:53.638386Z DEBUG html5ever::tree_builder: processing TagToken(Tag { kind: StartTag, name: Atom(\'div\' type=inline), self_closing: false, attrs: [] }) in insertion mode InBody
+2026-04-21T08:37:53.638404Z DEBUG html5ever::tree_builder: processing TagToken(Tag { kind: StartTag, name: Atom(\'h1\' type=inline), self_closing: false, attrs: [] }) in insertion mode InBody
+2026-04-21T08:37:53.638417Z DEBUG html5ever::tree_builder: processing CharacterTokens(NotSplit, Tendril<UTF8>(shared: \"Example Domain\")) in insertion mode InBody
+2026-04-21T08:37:53.638441Z DEBUG html5ever::tree_builder: processing TagToken(Tag { kind: EndTag, name: Atom(\'h1\' type=inline), self_closing: false, attrs: [] }) in insertion mode InBody
+2026-04-21T08:37:53.638457Z DEBUG html5ever::tree_builder: processing TagToken(Tag { kind: StartTag, name: Atom(\'p\' type=inline), self_closing: false, attrs: [] }) in insertion mode InBody
+2026-04-21T08:37:53.638476Z DEBUG html5ever::tree_builder: processing CharacterTokens(NotSplit, Tendril<UTF8>(shared: \"This domain is for use in documentation examples without needing permission. Avoid use in operations.\")) in insertion mode InBody
+2026-04-21T08:37:53.638509Z DEBUG html5ever::tree_builder: processing TagToken(Tag { kind: EndTag, name: Atom(\'p\' type=inline), self_closing: false, attrs: [] }) in insertion mode InBody
+2026-04-21T08:37:53.638524Z DEBUG html5ever::tree_builder: processing TagToken(Tag { kind: StartTag, name: Atom(\'p\' type=inline), self_closing: false, attrs: [] }) in insertion mode InBody
+2026-04-21T08:37:53.638552Z DEBUG html5ever::tree_builder: processing TagToken(Tag { kind: StartTag, name: Atom(\'a\' type=inline), self_closing: false, attrs: [Attribute { name: QualName { prefix: None, ns: Atom(\'\' type=static), local: Atom(\'href\' type=inline) }, value: Tendril<UTF8>(owned: \"https://iana.org/domains/example\") }] }) in insertion mode InBody
+2026-04-21T08:37:53.638570Z DEBUG html5ever::tree_builder: processing CharacterTokens(NotSplit, Tendril<UTF8>(shared: \"Learn more\")) in insertion mode InBody
+2026-04-21T08:37:53.638585Z DEBUG html5ever::tree_builder: processing TagToken(Tag { kind: EndTag, name: Atom(\'a\' type=inline), self_closing: false, attrs: [] }) in insertion mode InBody
+2026-04-21T08:37:53.638605Z DEBUG html5ever::tree_builder: processing TagToken(Tag { kind: EndTag, name: Atom(\'p\' type=inline), self_closing: false, attrs: [] }) in insertion mode InBody
+2026-04-21T08:37:53.638620Z DEBUG html5ever::tree_builder: processing TagToken(Tag { kind: EndTag, name: Atom(\'div\' type=inline), self_closing: false, attrs: [] }) in insertion mode InBody
+2026-04-21T08:37:53.638632Z DEBUG html5ever::tree_builder: processing CharacterTokens(NotSplit, Tendril<UTF8>(inline: \"\\n\")) in insertion mode InBody
+2026-04-21T08:37:53.638648Z DEBUG html5ever::tree_builder: processing TagToken(Tag { kind: EndTag, name: Atom(\'body\' type=inline), self_closing: false, attrs: [] }) in insertion mode InBody
+2026-04-21T08:37:53.638663Z DEBUG html5ever::tree_builder: processing TagToken(Tag { kind: EndTag, name: Atom(\'html\' type=inline), self_closing: false, attrs: [] }) in insertion mode AfterBody
+2026-04-21T08:37:53.638675Z DEBUG html5ever::tree_builder: processing CharacterTokens(NotSplit, Tendril<UTF8>(inline: \"\\n\")) in insertion mode AfterAfterBody
+2026-04-21T08:37:53.638686Z DEBUG html5ever::tree_builder: processing CharacterTokens(Whitespace, Tendril<UTF8>(inline: \"\\n\")) in insertion mode AfterAfterBody
+2026-04-21T08:37:53.638696Z DEBUG html5ever::tree_builder: processing CharacterTokens(Whitespace, Tendril<UTF8>(inline: \"\\n\")) in insertion mode InBody
+2026-04-21T08:37:53.638706Z DEBUG html5ever::tokenizer: processing EOF in state Data
+2026-04-21T08:37:53.638712Z DEBUG html5ever::tree_builder: processing EOFToken in insertion mode AfterAfterBody
+2026-04-21T08:37:53.647905Z DEBUG web_capture::markdown: Cleaning Markdown output
+2026-04-21T08:37:53.647948Z  INFO web_capture::markdown: Successfully converted to Markdown (193 bytes)
+2026-04-21T08:37:53.648031Z DEBUG html5ever::tree_builder: processing CharacterTokens(NotSplit, Tendril<UTF8>(inline: \"\\n\")) in insertion mode BeforeHtml
+2026-04-21T08:37:53.648045Z DEBUG html5ever::tree_builder: processing CharacterTokens(Whitespace, Tendril<UTF8>(inline: \"\\n\")) in insertion mode BeforeHtml
+2026-04-21T08:37:53.648085Z DEBUG html5ever::tree_builder: processing TagToken(Tag { kind: StartTag, name: Atom(\'html\' type=inline), self_closing: false, attrs: [Attribute { name: QualName { prefix: None, ns: Atom(\'\' type=static), local: Atom(\'lang\' type=inline) }, value: Tendril<UTF8>(inline: \"en\") }] }) in insertion mode BeforeHtml
+2026-04-21T08:37:53.648127Z DEBUG html5ever::tree_builder: processing TagToken(Tag { kind: StartTag, name: Atom(\'head\' type=inline), self_closing: false, attrs: [] }) in insertion mode BeforeHead
+2026-04-21T08:37:53.648146Z DEBUG html5ever::tree_builder: processing TagToken(Tag { kind: StartTag, name: Atom(\'title\' type=inline), self_closing: false, attrs: [] }) in insertion mode InHead
+2026-04-21T08:37:53.648161Z DEBUG html5ever::tree_builder: processing CharacterTokens(NotSplit, Tendril<UTF8>(shared: \"Example Domain\")) in insertion mode Text
+2026-04-21T08:37:53.648179Z DEBUG html5ever::tree_builder: processing TagToken(Tag { kind: EndTag, name: Atom(\'title\' type=inline), self_closing: false, attrs: [] }) in insertion mode Text
+2026-04-21T08:37:53.648223Z DEBUG html5ever::tree_builder: processing TagToken(Tag { kind: StartTag, name: Atom(\'meta\' type=inline), self_closing: false, attrs: [Attribute { name: QualName { prefix: None, ns: Atom(\'\' type=static), local: Atom(\'name\' type=inline) }, value: Tendril<UTF8>(inline: \"viewport\") }, Attribute { name: QualName { prefix: None, ns: Atom(\'\' type=static), local: Atom(\'content\' type=inline) }, value: Tendril<UTF8>(owned: \"width=device-width, initial-scale=1\") }] }) in insertion mode InHead
+2026-04-21T08:37:53.648246Z DEBUG html5ever::tree_builder: processing TagToken(Tag { kind: StartTag, name: Atom(\'style\' type=inline), self_closing: false, attrs: [] }) in insertion mode InHead
+2026-04-21T08:37:53.648268Z DEBUG html5ever::tree_builder: processing CharacterTokens(NotSplit, Tendril<UTF8>(shared: \"body{background:#eee;width:60vw;margin:15vh auto;font-family:system-ui,sans-serif}h1{font-size:1.5em}div{opacity:0.8}a:link,a:visited{color:#348}\")) in insertion mode Text
+2026-04-21T08:37:53.648286Z DEBUG html5ever::tree_builder: processing TagToken(Tag { kind: EndTag, name: Atom(\'style\' type=inline), self_closing: false, attrs: [] }) in insertion mode Text
+2026-04-21T08:37:53.648301Z DEBUG html5ever::tree_builder: processing TagToken(Tag { kind: EndTag, name: Atom(\'head\' type=inline), self_closing: false, attrs: [] }) in insertion mode InHead
+2026-04-21T08:37:53.648316Z DEBUG html5ever::tree_builder: processing TagToken(Tag { kind: StartTag, name: Atom(\'body\' type=inline), self_closing: false, attrs: [] }) in insertion mode AfterHead
+2026-04-21T08:37:53.648332Z DEBUG html5ever::tree_builder: processing TagToken(Tag { kind: StartTag, name: Atom(\'div\' type=inline), self_closing: false, attrs: [] }) in insertion mode InBody
+2026-04-21T08:37:53.648350Z DEBUG html5ever::tree_builder: processing TagToken(Tag { kind: StartTag, name: Atom(\'h1\' type=inline), self_closing: false, attrs: [] }) in insertion mode InBody
+2026-04-21T08:37:53.648363Z DEBUG html5ever::tree_builder: processing CharacterTokens(NotSplit, Tendril<UTF8>(shared: \"Example Domain\")) in insertion mode InBody
+2026-04-21T08:37:53.648379Z DEBUG html5ever::tree_builder: processing TagToken(Tag { kind: EndTag, name: Atom(\'h1\' type=inline), self_closing: false, attrs: [] }) in insertion mode InBody
+2026-04-21T08:37:53.648395Z DEBUG html5ever::tree_builder: processing TagToken(Tag { kind: StartTag, name: Atom(\'p\' type=inline), self_closing: false, attrs: [] }) in insertion mode InBody
+2026-04-21T08:37:53.648413Z DEBUG html5ever::tree_builder: processing CharacterTokens(NotSplit, Tendril<UTF8>(shared: \"This domain is for use in documentation examples without needing permission. Avoid use in operations.\")) in insertion mode InBody
+2026-04-21T08:37:53.648428Z DEBUG html5ever::tree_builder: processing TagToken(Tag { kind: EndTag, name: Atom(\'p\' type=inline), self_closing: false, attrs: [] }) in insertion mode InBody
+2026-04-21T08:37:53.648444Z DEBUG html5ever::tree_builder: processing TagToken(Tag { kind: StartTag, name: Atom(\'p\' type=inline), self_closing: false, attrs: [] }) in insertion mode InBody
+2026-04-21T08:37:53.648472Z DEBUG html5ever::tree_builder: processing TagToken(Tag { kind: StartTag, name: Atom(\'a\' type=inline), self_closing: false, attrs: [Attribute { name: QualName { prefix: None, ns: Atom(\'\' type=static), local: Atom(\'href\' type=inline) }, value: Tendril<UTF8>(owned: \"https://iana.org/domains/example\") }] }) in insertion mode InBody
+2026-04-21T08:37:53.648506Z DEBUG html5ever::tree_builder: processing CharacterTokens(NotSplit, Tendril<UTF8>(shared: \"Learn more\")) in insertion mode InBody
+2026-04-21T08:37:53.648521Z DEBUG html5ever::tree_builder: processing TagToken(Tag { kind: EndTag, name: Atom(\'a\' type=inline), self_closing: false, attrs: [] }) in insertion mode InBody
+2026-04-21T08:37:53.648542Z DEBUG html5ever::tree_builder: processing TagToken(Tag { kind: EndTag, name: Atom(\'p\' type=inline), self_closing: false, attrs: [] }) in insertion mode InBody
+2026-04-21T08:37:53.648557Z DEBUG html5ever::tree_builder: processing TagToken(Tag { kind: EndTag, name: Atom(\'div\' type=inline), self_closing: false, attrs: [] }) in insertion mode InBody
+2026-04-21T08:37:53.648569Z DEBUG html5ever::tree_builder: processing CharacterTokens(NotSplit, Tendril<UTF8>(inline: \"\\n\")) in insertion mode InBody
+2026-04-21T08:37:53.648584Z DEBUG html5ever::tree_builder: processing TagToken(Tag { kind: EndTag, name: Atom(\'body\' type=inline), self_closing: false, attrs: [] }) in insertion mode InBody
+2026-04-21T08:37:53.648600Z DEBUG html5ever::tree_builder: processing TagToken(Tag { kind: EndTag, name: Atom(\'html\' type=inline), self_closing: false, attrs: [] }) in insertion mode AfterBody
+2026-04-21T08:37:53.648612Z DEBUG html5ever::tree_builder: processing CharacterTokens(NotSplit, Tendril<UTF8>(inline: \"\\n\")) in insertion mode AfterAfterBody
+2026-04-21T08:37:53.648623Z DEBUG html5ever::tree_builder: processing CharacterTokens(Whitespace, Tendril<UTF8>(inline: \"\\n\")) in insertion mode AfterAfterBody
+2026-04-21T08:37:53.648633Z DEBUG html5ever::tree_builder: processing CharacterTokens(Whitespace, Tendril<UTF8>(inline: \"\\n\")) in insertion mode InBody
+2026-04-21T08:37:53.648641Z DEBUG html5ever::tokenizer: processing EOF in state Data
+2026-04-21T08:37:53.648647Z DEBUG html5ever::tree_builder: processing EOFToken in insertion mode AfterAfterBody
+2026-04-21T08:37:53.648753Z DEBUG selectors::matching: Matching complex selector .tm-user-info__username for <html lang="en">
+2026-04-21T08:37:53.648767Z DEBUG selectors::matching: Matching complex selector .tm-user-info__username for <head>
+2026-04-21T08:37:53.648773Z DEBUG selectors::matching: Matching complex selector .tm-user-info__username for <title>
+2026-04-21T08:37:53.648779Z DEBUG selectors::matching: Matching complex selector .tm-user-info__username for <meta name="viewport" content="width=device-width, initial-scale=1">
+2026-04-21T08:37:53.648786Z DEBUG selectors::matching: Matching complex selector .tm-user-info__username for <style>
+2026-04-21T08:37:53.648792Z DEBUG selectors::matching: Matching complex selector .tm-user-info__username for <body>
+2026-04-21T08:37:53.648797Z DEBUG selectors::matching: Matching complex selector .tm-user-info__username for <div>
+2026-04-21T08:37:53.648803Z DEBUG selectors::matching: Matching complex selector .tm-user-info__username for <h1>
+2026-04-21T08:37:53.648809Z DEBUG selectors::matching: Matching complex selector .tm-user-info__username for <p>
+2026-04-21T08:37:53.648815Z DEBUG selectors::matching: Matching complex selector .tm-user-info__username for <p>
+2026-04-21T08:37:53.648820Z DEBUG selectors::matching: Matching complex selector .tm-user-info__username for <a href="https://iana.org/domains/example">
+2026-04-21T08:37:53.648836Z DEBUG selectors::matching: Matching complex selector .tm-user-info__username for <html lang="en">
+2026-04-21T08:37:53.648842Z DEBUG selectors::matching: Matching complex selector .tm-user-info__username for <head>
+2026-04-21T08:37:53.648848Z DEBUG selectors::matching: Matching complex selector .tm-user-info__username for <title>
+2026-04-21T08:37:53.648854Z DEBUG selectors::matching: Matching complex selector .tm-user-info__username for <meta name="viewport" content="width=device-width, initial-scale=1">
+2026-04-21T08:37:53.648865Z DEBUG selectors::matching: Matching complex selector .tm-user-info__username for <style>
+2026-04-21T08:37:53.648870Z DEBUG selectors::matching: Matching complex selector .tm-user-info__username for <body>
+2026-04-21T08:37:53.648876Z DEBUG selectors::matching: Matching complex selector .tm-user-info__username for <div>
+2026-04-21T08:37:53.648882Z DEBUG selectors::matching: Matching complex selector .tm-user-info__username for <h1>
+2026-04-21T08:37:53.648887Z DEBUG selectors::matching: Matching complex selector .tm-user-info__username for <p>
+2026-04-21T08:37:53.648893Z DEBUG selectors::matching: Matching complex selector .tm-user-info__username for <p>
+2026-04-21T08:37:53.648898Z DEBUG selectors::matching: Matching complex selector .tm-user-info__username for <a href="https://iana.org/domains/example">
+2026-04-21T08:37:53.648918Z DEBUG selectors::matching: Matching complex selector [datetime]time for <html lang="en">
+2026-04-21T08:37:53.648925Z DEBUG selectors::matching: Matching complex selector [datetime]time for <head>
+2026-04-21T08:37:53.648931Z DEBUG selectors::matching: Matching complex selector [datetime]time for <title>
+2026-04-21T08:37:53.648936Z DEBUG selectors::matching: Matching complex selector [datetime]time for <meta name="viewport" content="width=device-width, initial-scale=1">
+2026-04-21T08:37:53.648943Z DEBUG selectors::matching: Matching complex selector [datetime]time for <style>
+2026-04-21T08:37:53.648948Z DEBUG selectors::matching: Matching complex selector [datetime]time for <body>
+2026-04-21T08:37:53.648954Z DEBUG selectors::matching: Matching complex selector [datetime]time for <div>
+2026-04-21T08:37:53.648960Z DEBUG selectors::matching: Matching complex selector [datetime]time for <h1>
+2026-04-21T08:37:53.648965Z DEBUG selectors::matching: Matching complex selector [datetime]time for <p>
+2026-04-21T08:37:53.648971Z DEBUG selectors::matching: Matching complex selector [datetime]time for <p>
+2026-04-21T08:37:53.648976Z DEBUG selectors::matching: Matching complex selector [datetime]time for <a href="https://iana.org/domains/example">
+2026-04-21T08:37:53.648986Z DEBUG selectors::matching: Matching complex selector [datetime]time for <html lang="en">
+2026-04-21T08:37:53.648992Z DEBUG selectors::matching: Matching complex selector [datetime]time for <head>
+2026-04-21T08:37:53.648998Z DEBUG selectors::matching: Matching complex selector [datetime]time for <title>
+2026-04-21T08:37:53.649003Z DEBUG selectors::matching: Matching complex selector [datetime]time for <meta name="viewport" content="width=device-width, initial-scale=1">
+2026-04-21T08:37:53.649010Z DEBUG selectors::matching: Matching complex selector [datetime]time for <style>
+2026-04-21T08:37:53.649024Z DEBUG selectors::matching: Matching complex selector [datetime]time for <body>
+2026-04-21T08:37:53.649030Z DEBUG selectors::matching: Matching complex selector [datetime]time for <div>
+2026-04-21T08:37:53.649035Z DEBUG selectors::matching: Matching complex selector [datetime]time for <h1>
+2026-04-21T08:37:53.649041Z DEBUG selectors::matching: Matching complex selector [datetime]time for <p>
+2026-04-21T08:37:53.649046Z DEBUG selectors::matching: Matching complex selector [datetime]time for <p>
+2026-04-21T08:37:53.649052Z DEBUG selectors::matching: Matching complex selector [datetime]time for <a href="https://iana.org/domains/example">
+2026-04-21T08:37:53.649062Z DEBUG selectors::matching: Matching complex selector .tm-article-reading-time__label for <html lang="en">
+2026-04-21T08:37:53.649068Z DEBUG selectors::matching: Matching complex selector .tm-article-reading-time__label for <head>
+2026-04-21T08:37:53.649074Z DEBUG selectors::matching: Matching complex selector .tm-article-reading-time__label for <title>
+2026-04-21T08:37:53.649080Z DEBUG selectors::matching: Matching complex selector .tm-article-reading-time__label for <meta name="viewport" content="width=device-width, initial-scale=1">
+2026-04-21T08:37:53.649087Z DEBUG selectors::matching: Matching complex selector .tm-article-reading-time__label for <style>
+2026-04-21T08:37:53.649095Z DEBUG selectors::matching: Matching complex selector .tm-article-reading-time__label for <body>
+2026-04-21T08:37:53.649101Z DEBUG selectors::matching: Matching complex selector .tm-article-reading-time__label for <div>
+2026-04-21T08:37:53.649107Z DEBUG selectors::matching: Matching complex selector .tm-article-reading-time__label for <h1>
+2026-04-21T08:37:53.649112Z DEBUG selectors::matching: Matching complex selector .tm-article-reading-time__label for <p>
+2026-04-21T08:37:53.649118Z DEBUG selectors::matching: Matching complex selector .tm-article-reading-time__label for <p>
+2026-04-21T08:37:53.649124Z DEBUG selectors::matching: Matching complex selector .tm-article-reading-time__label for <a href="https://iana.org/domains/example">
+2026-04-21T08:37:53.649134Z DEBUG selectors::matching: Matching complex selector .tm-article-complexity__label for <html lang="en">
+2026-04-21T08:37:53.649140Z DEBUG selectors::matching: Matching complex selector .tm-article-complexity__label for <head>
+2026-04-21T08:37:53.649146Z DEBUG selectors::matching: Matching complex selector .tm-article-complexity__label for <title>
+2026-04-21T08:37:53.649152Z DEBUG selectors::matching: Matching complex selector .tm-article-complexity__label for <meta name="viewport" content="width=device-width, initial-scale=1">
+2026-04-21T08:37:53.649159Z DEBUG selectors::matching: Matching complex selector .tm-article-complexity__label for <style>
+2026-04-21T08:37:53.649165Z DEBUG selectors::matching: Matching complex selector .tm-article-complexity__label for <body>
+2026-04-21T08:37:53.649171Z DEBUG selectors::matching: Matching complex selector .tm-article-complexity__label for <div>
+2026-04-21T08:37:53.649176Z DEBUG selectors::matching: Matching complex selector .tm-article-complexity__label for <h1>
+2026-04-21T08:37:53.649182Z DEBUG selectors::matching: Matching complex selector .tm-article-complexity__label for <p>
+2026-04-21T08:37:53.649188Z DEBUG selectors::matching: Matching complex selector .tm-article-complexity__label for <p>
+2026-04-21T08:37:53.649193Z DEBUG selectors::matching: Matching complex selector .tm-article-complexity__label for <a href="https://iana.org/domains/example">
+2026-04-21T08:37:53.649203Z DEBUG selectors::matching: Matching complex selector .tm-icon-counter__value for <html lang="en">
+2026-04-21T08:37:53.649209Z DEBUG selectors::matching: Matching complex selector .tm-icon-counter__value for <head>
+2026-04-21T08:37:53.649215Z DEBUG selectors::matching: Matching complex selector .tm-icon-counter__value for <title>
+2026-04-21T08:37:53.649220Z DEBUG selectors::matching: Matching complex selector .tm-icon-counter__value for <meta name="viewport" content="width=device-width, initial-scale=1">
+2026-04-21T08:37:53.649227Z DEBUG selectors::matching: Matching complex selector .tm-icon-counter__value for <style>
+2026-04-21T08:37:53.649233Z DEBUG selectors::matching: Matching complex selector .tm-icon-counter__value for <body>
+2026-04-21T08:37:53.649239Z DEBUG selectors::matching: Matching complex selector .tm-icon-counter__value for <div>
+2026-04-21T08:37:53.649244Z DEBUG selectors::matching: Matching complex selector .tm-icon-counter__value for <h1>
+2026-04-21T08:37:53.649250Z DEBUG selectors::matching: Matching complex selector .tm-icon-counter__value for <p>
+2026-04-21T08:37:53.649256Z DEBUG selectors::matching: Matching complex selector .tm-icon-counter__value for <p>
+2026-04-21T08:37:53.649261Z DEBUG selectors::matching: Matching complex selector .tm-icon-counter__value for <a href="https://iana.org/domains/example">
+2026-04-21T08:37:53.649272Z DEBUG selectors::matching: Matching complex selector .tm-publication-hub__link for <html lang="en">
+2026-04-21T08:37:53.649278Z DEBUG selectors::matching: Matching complex selector .tm-publication-hub__link for <head>
+2026-04-21T08:37:53.649283Z DEBUG selectors::matching: Matching complex selector .tm-publication-hub__link for <title>
+2026-04-21T08:37:53.649289Z DEBUG selectors::matching: Matching complex selector .tm-publication-hub__link for <meta name="viewport" content="width=device-width, initial-scale=1">
+2026-04-21T08:37:53.649299Z DEBUG selectors::matching: Matching complex selector .tm-publication-hub__link for <style>
+2026-04-21T08:37:53.649305Z DEBUG selectors::matching: Matching complex selector .tm-publication-hub__link for <body>
+2026-04-21T08:37:53.649310Z DEBUG selectors::matching: Matching complex selector .tm-publication-hub__link for <div>
+2026-04-21T08:37:53.649316Z DEBUG selectors::matching: Matching complex selector .tm-publication-hub__link for <h1>
+2026-04-21T08:37:53.649321Z DEBUG selectors::matching: Matching complex selector .tm-publication-hub__link for <p>
+2026-04-21T08:37:53.649327Z DEBUG selectors::matching: Matching complex selector .tm-publication-hub__link for <p>
+2026-04-21T08:37:53.649333Z DEBUG selectors::matching: Matching complex selector .tm-publication-hub__link for <a href="https://iana.org/domains/example">
+2026-04-21T08:37:53.649351Z DEBUG selectors::matching: Matching complex selector [name="keywords"]meta for <html lang="en">
+2026-04-21T08:37:53.649359Z DEBUG selectors::matching: Matching complex selector [name="keywords"]meta for <head>
+2026-04-21T08:37:53.649365Z DEBUG selectors::matching: Matching complex selector [name="keywords"]meta for <title>
+2026-04-21T08:37:53.649371Z DEBUG selectors::matching: Matching complex selector [name="keywords"]meta for <meta name="viewport" content="width=device-width, initial-scale=1">
+2026-04-21T08:37:53.649381Z DEBUG selectors::matching: Matching complex selector [name="keywords"]meta for <style>
+2026-04-21T08:37:53.649386Z DEBUG selectors::matching: Matching complex selector [name="keywords"]meta for <body>
+2026-04-21T08:37:53.649392Z DEBUG selectors::matching: Matching complex selector [name="keywords"]meta for <div>
+2026-04-21T08:37:53.649398Z DEBUG selectors::matching: Matching complex selector [name="keywords"]meta for <h1>
+2026-04-21T08:37:53.649404Z DEBUG selectors::matching: Matching complex selector [name="keywords"]meta for <p>
+2026-04-21T08:37:53.649410Z DEBUG selectors::matching: Matching complex selector [name="keywords"]meta for <p>
+2026-04-21T08:37:53.649415Z DEBUG selectors::matching: Matching complex selector [name="keywords"]meta for <a href="https://iana.org/domains/example">
+2026-04-21T08:37:53.649435Z DEBUG selectors::matching: Matching complex selector .tm-article-body__tags-item a for <html lang="en">
+2026-04-21T08:37:53.649442Z DEBUG selectors::matching: Matching complex selector .tm-tags-list__link for <html lang="en">
+2026-04-21T08:37:53.649448Z DEBUG selectors::matching: Matching complex selector .tm-article-body__tags-item a for <head>
+2026-04-21T08:37:53.649453Z DEBUG selectors::matching: Matching complex selector .tm-tags-list__link for <head>
+2026-04-21T08:37:53.649459Z DEBUG selectors::matching: Matching complex selector .tm-article-body__tags-item a for <title>
+2026-04-21T08:37:53.649465Z DEBUG selectors::matching: Matching complex selector .tm-tags-list__link for <title>
+2026-04-21T08:37:53.649470Z DEBUG selectors::matching: Matching complex selector .tm-article-body__tags-item a for <meta name="viewport" content="width=device-width, initial-scale=1">
+2026-04-21T08:37:53.649486Z DEBUG selectors::matching: Matching complex selector .tm-tags-list__link for <meta name="viewport" content="width=device-width, initial-scale=1">
+2026-04-21T08:37:53.649495Z DEBUG selectors::matching: Matching complex selector .tm-article-body__tags-item a for <style>
+2026-04-21T08:37:53.649501Z DEBUG selectors::matching: Matching complex selector .tm-tags-list__link for <style>
+2026-04-21T08:37:53.649507Z DEBUG selectors::matching: Matching complex selector .tm-article-body__tags-item a for <body>
+2026-04-21T08:37:53.649512Z DEBUG selectors::matching: Matching complex selector .tm-tags-list__link for <body>
+2026-04-21T08:37:53.649518Z DEBUG selectors::matching: Matching complex selector .tm-article-body__tags-item a for <div>
+2026-04-21T08:37:53.649524Z DEBUG selectors::matching: Matching complex selector .tm-tags-list__link for <div>
+2026-04-21T08:37:53.649532Z DEBUG selectors::matching: Matching complex selector .tm-article-body__tags-item a for <h1>
+2026-04-21T08:37:53.649538Z DEBUG selectors::matching: Matching complex selector .tm-tags-list__link for <h1>
+2026-04-21T08:37:53.649546Z DEBUG selectors::matching: Matching complex selector .tm-article-body__tags-item a for <p>
+2026-04-21T08:37:53.649561Z DEBUG selectors::matching: Matching complex selector .tm-tags-list__link for <p>
+2026-04-21T08:37:53.649572Z DEBUG selectors::matching: Matching complex selector .tm-article-body__tags-item a for <p>
+2026-04-21T08:37:53.649580Z DEBUG selectors::matching: Matching complex selector .tm-tags-list__link for <p>
+2026-04-21T08:37:53.649588Z DEBUG selectors::matching: Matching complex selector .tm-article-body__tags-item a for <a href="https://iana.org/domains/example">
+2026-04-21T08:37:53.649600Z DEBUG selectors::matching: Matching complex selector .tm-article-body__tags-item for <p>
+2026-04-21T08:37:53.649607Z DEBUG selectors::matching: Matching complex selector .tm-article-body__tags-item for <div>
+2026-04-21T08:37:53.649615Z DEBUG selectors::matching: Matching complex selector .tm-article-body__tags-item for <body>
+2026-04-21T08:37:53.649623Z DEBUG selectors::matching: Matching complex selector .tm-article-body__tags-item for <html lang="en">
+2026-04-21T08:37:53.649631Z DEBUG selectors::matching: Matching complex selector .tm-tags-list__link for <a href="https://iana.org/domains/example">
+2026-04-21T08:37:53.649660Z DEBUG selectors::matching: Matching complex selector .tm-publication-label_variant-translation for <html lang="en">
+2026-04-21T08:37:53.649669Z DEBUG selectors::matching: Matching complex selector .tm-publication-label_variant-translation for <head>
+2026-04-21T08:37:53.649676Z DEBUG selectors::matching: Matching complex selector .tm-publication-label_variant-translation for <title>
+2026-04-21T08:37:53.649685Z DEBUG selectors::matching: Matching complex selector .tm-publication-label_variant-translation for <meta name="viewport" content="width=device-width, initial-scale=1">
+2026-04-21T08:37:53.649695Z DEBUG selectors::matching: Matching complex selector .tm-publication-label_variant-translation for <style>
+2026-04-21T08:37:53.649703Z DEBUG selectors::matching: Matching complex selector .tm-publication-label_variant-translation for <body>
+2026-04-21T08:37:53.649711Z DEBUG selectors::matching: Matching complex selector .tm-publication-label_variant-translation for <div>
+2026-04-21T08:37:53.649719Z DEBUG selectors::matching: Matching complex selector .tm-publication-label_variant-translation for <h1>
+2026-04-21T08:37:53.649727Z DEBUG selectors::matching: Matching complex selector .tm-publication-label_variant-translation for <p>
+2026-04-21T08:37:53.649734Z DEBUG selectors::matching: Matching complex selector .tm-publication-label_variant-translation for <p>
+2026-04-21T08:37:53.649742Z DEBUG selectors::matching: Matching complex selector .tm-publication-label_variant-translation for <a href="https://iana.org/domains/example">
+2026-04-21T08:37:53.649760Z DEBUG selectors::matching: Matching complex selector .tm-article-presenter__origin-link for <html lang="en">
+2026-04-21T08:37:53.649768Z DEBUG selectors::matching: Matching complex selector .tm-article-presenter__origin-link for <head>
+2026-04-21T08:37:53.649776Z DEBUG selectors::matching: Matching complex selector .tm-article-presenter__origin-link for <title>
+2026-04-21T08:37:53.649784Z DEBUG selectors::matching: Matching complex selector .tm-article-presenter__origin-link for <meta name="viewport" content="width=device-width, initial-scale=1">
+2026-04-21T08:37:53.649794Z DEBUG selectors::matching: Matching complex selector .tm-article-presenter__origin-link for <style>
+2026-04-21T08:37:53.649802Z DEBUG selectors::matching: Matching complex selector .tm-article-presenter__origin-link for <body>
+2026-04-21T08:37:53.649810Z DEBUG selectors::matching: Matching complex selector .tm-article-presenter__origin-link for <div>
+2026-04-21T08:37:53.649817Z DEBUG selectors::matching: Matching complex selector .tm-article-presenter__origin-link for <h1>
+2026-04-21T08:37:53.649833Z DEBUG selectors::matching: Matching complex selector .tm-article-presenter__origin-link for <p>
+2026-04-21T08:37:53.649841Z DEBUG selectors::matching: Matching complex selector .tm-article-presenter__origin-link for <p>
+2026-04-21T08:37:53.649849Z DEBUG selectors::matching: Matching complex selector .tm-article-presenter__origin-link for <a href="https://iana.org/domains/example">
+2026-04-21T08:37:53.649874Z DEBUG selectors::matching: Matching complex selector [type="application/ld+json"]script for <html lang="en">
+2026-04-21T08:37:53.649885Z DEBUG selectors::matching: Matching complex selector [type="application/ld+json"]script for <head>
+2026-04-21T08:37:53.649894Z DEBUG selectors::matching: Matching complex selector [type="application/ld+json"]script for <title>
+2026-04-21T08:37:53.649903Z DEBUG selectors::matching: Matching complex selector [type="application/ld+json"]script for <meta name="viewport" content="width=device-width, initial-scale=1">
+2026-04-21T08:37:53.649913Z DEBUG selectors::matching: Matching complex selector [type="application/ld+json"]script for <style>
+2026-04-21T08:37:53.649921Z DEBUG selectors::matching: Matching complex selector [type="application/ld+json"]script for <body>
+2026-04-21T08:37:53.649929Z DEBUG selectors::matching: Matching complex selector [type="application/ld+json"]script for <div>
+2026-04-21T08:37:53.649937Z DEBUG selectors::matching: Matching complex selector [type="application/ld+json"]script for <h1>
+2026-04-21T08:37:53.649945Z DEBUG selectors::matching: Matching complex selector [type="application/ld+json"]script for <p>
+2026-04-21T08:37:53.649953Z DEBUG selectors::matching: Matching complex selector [type="application/ld+json"]script for <p>
+2026-04-21T08:37:53.649962Z DEBUG selectors::matching: Matching complex selector [type="application/ld+json"]script for <a href="https://iana.org/domains/example">
+2026-04-21T08:37:53.649979Z DEBUG selectors::matching: Matching complex selector .tm-votes-meter__value for <html lang="en">
+2026-04-21T08:37:53.649987Z DEBUG selectors::matching: Matching complex selector .tm-votes-meter__value for <head>
+2026-04-21T08:37:53.649995Z DEBUG selectors::matching: Matching complex selector .tm-votes-meter__value for <title>
+2026-04-21T08:37:53.650003Z DEBUG selectors::matching: Matching complex selector .tm-votes-meter__value for <meta name="viewport" content="width=device-width, initial-scale=1">
+2026-04-21T08:37:53.650021Z DEBUG selectors::matching: Matching complex selector .tm-votes-meter__value for <style>
+2026-04-21T08:37:53.650029Z DEBUG selectors::matching: Matching complex selector .tm-votes-meter__value for <body>
+2026-04-21T08:37:53.650036Z DEBUG selectors::matching: Matching complex selector .tm-votes-meter__value for <div>
+2026-04-21T08:37:53.650044Z DEBUG selectors::matching: Matching complex selector .tm-votes-meter__value for <h1>
+2026-04-21T08:37:53.650051Z DEBUG selectors::matching: Matching complex selector .tm-votes-meter__value for <p>
+2026-04-21T08:37:53.650059Z DEBUG selectors::matching: Matching complex selector .tm-votes-meter__value for <p>
+2026-04-21T08:37:53.650066Z DEBUG selectors::matching: Matching complex selector .tm-votes-meter__value for <a href="https://iana.org/domains/example">
+2026-04-21T08:37:53.650086Z DEBUG selectors::matching: Matching complex selector .tm-article-comments-counter-link__value for <html lang="en">
+2026-04-21T08:37:53.650095Z DEBUG selectors::matching: Matching complex selector .tm-article-comments-counter-link__value for <head>
+2026-04-21T08:37:53.650103Z DEBUG selectors::matching: Matching complex selector .tm-article-comments-counter-link__value for <title>
+2026-04-21T08:37:53.650111Z DEBUG selectors::matching: Matching complex selector .tm-article-comments-counter-link__value for <meta name="viewport" content="width=device-width, initial-scale=1">
+2026-04-21T08:37:53.650121Z DEBUG selectors::matching: Matching complex selector .tm-article-comments-counter-link__value for <style>
+2026-04-21T08:37:53.650136Z DEBUG selectors::matching: Matching complex selector .tm-article-comments-counter-link__value for <body>
+2026-04-21T08:37:53.650144Z DEBUG selectors::matching: Matching complex selector .tm-article-comments-counter-link__value for <div>
+2026-04-21T08:37:53.650152Z DEBUG selectors::matching: Matching complex selector .tm-article-comments-counter-link__value for <h1>
+2026-04-21T08:37:53.650160Z DEBUG selectors::matching: Matching complex selector .tm-article-comments-counter-link__value for <p>
+2026-04-21T08:37:53.650168Z DEBUG selectors::matching: Matching complex selector .tm-article-comments-counter-link__value for <p>
+2026-04-21T08:37:53.650175Z DEBUG selectors::matching: Matching complex selector .tm-article-comments-counter-link__value for <a href="https://iana.org/domains/example">
+2026-04-21T08:37:53.650192Z DEBUG selectors::matching: Matching complex selector .bookmarks-button__counter for <html lang="en">
+2026-04-21T08:37:53.650201Z DEBUG selectors::matching: Matching complex selector .bookmarks-button__counter for <head>
+2026-04-21T08:37:53.650208Z DEBUG selectors::matching: Matching complex selector .bookmarks-button__counter for <title>
+2026-04-21T08:37:53.650216Z DEBUG selectors::matching: Matching complex selector .bookmarks-button__counter for <meta name="viewport" content="width=device-width, initial-scale=1">
+2026-04-21T08:37:53.650226Z DEBUG selectors::matching: Matching complex selector .bookmarks-button__counter for <style>
+2026-04-21T08:37:53.650234Z DEBUG selectors::matching: Matching complex selector .bookmarks-button__counter for <body>
+2026-04-21T08:37:53.650242Z DEBUG selectors::matching: Matching complex selector .bookmarks-button__counter for <div>
+2026-04-21T08:37:53.650249Z DEBUG selectors::matching: Matching complex selector .bookmarks-button__counter for <h1>
+2026-04-21T08:37:53.650257Z DEBUG selectors::matching: Matching complex selector .bookmarks-button__counter for <p>
+2026-04-21T08:37:53.650265Z DEBUG selectors::matching: Matching complex selector .bookmarks-button__counter for <p>
+2026-04-21T08:37:53.650273Z DEBUG selectors::matching: Matching complex selector .bookmarks-button__counter for <a href="https://iana.org/domains/example">
+2026-04-21T08:37:53.650289Z DEBUG selectors::matching: Matching complex selector .tm-karma__votes for <html lang="en">
+2026-04-21T08:37:53.650297Z DEBUG selectors::matching: Matching complex selector .tm-karma__votes for <head>
+2026-04-21T08:37:53.650305Z DEBUG selectors::matching: Matching complex selector .tm-karma__votes for <title>
+2026-04-21T08:37:53.650312Z DEBUG selectors::matching: Matching complex selector .tm-karma__votes for <meta name="viewport" content="width=device-width, initial-scale=1">
+2026-04-21T08:37:53.650322Z DEBUG selectors::matching: Matching complex selector .tm-karma__votes for <style>
+2026-04-21T08:37:53.650329Z DEBUG selectors::matching: Matching complex selector .tm-karma__votes for <body>
+2026-04-21T08:37:53.650337Z DEBUG selectors::matching: Matching complex selector .tm-karma__votes for <div>
+2026-04-21T08:37:53.650344Z DEBUG selectors::matching: Matching complex selector .tm-karma__votes for <h1>
+2026-04-21T08:37:53.650351Z DEBUG selectors::matching: Matching complex selector .tm-karma__votes for <p>
+2026-04-21T08:37:53.650358Z DEBUG selectors::matching: Matching complex selector .tm-karma__votes for <p>
+2026-04-21T08:37:53.650366Z DEBUG selectors::matching: Matching complex selector .tm-karma__votes for <a href="https://iana.org/domains/example">
+Markdown saved to: ./data/web-capture/example.com/document.md

@@ -9,7 +9,9 @@
 import { jest } from '@jest/globals';
 import request from 'supertest';
 import nock from 'nock';
+import unzipper from 'unzipper';
 import { app } from '../../src/index.js';
+import { isKreuzbergAvailable } from '../../src/kreuzberg.js';
 
 jest.setTimeout(60000);
 
@@ -28,6 +30,17 @@ afterEach(() => {
 });
 
 describe('API Endpoint Tests', () => {
+  describe('unsupported routes', () => {
+    it('does not expose /gdocs as an output-format endpoint', async () => {
+      await request(app)
+        .get('/gdocs')
+        .query({
+          url: 'https://docs.google.com/document/d/test-doc/edit',
+        })
+        .expect(404);
+    });
+  });
+
   describe('GET /image', () => {
     it('rejects invalid format', async () => {
       await request(app)
@@ -55,6 +68,68 @@ describe('API Endpoint Tests', () => {
       expect(res.headers['content-type']).toMatch(/text\/markdown/);
       expect(res.text).toContain('Test Page');
       expect(res.text).toContain('Hello world');
+    });
+
+    it('rejects unsupported converter names', async () => {
+      await request(app)
+        .get('/markdown')
+        .query({
+          url: 'https://example.com/md-test',
+          converter: 'unknown',
+        })
+        .expect(400);
+    });
+
+    it('rejects JSON format without the kreuzberg converter', async () => {
+      await request(app)
+        .get('/markdown')
+        .query({
+          url: 'https://example.com/md-test',
+          format: 'json',
+        })
+        .expect(400);
+    });
+
+    it('returns structured kreuzberg JSON with selectors and absolute links', async () => {
+      if (!(await isKreuzbergAvailable())) {
+        return;
+      }
+
+      nock('https://example.com')
+        .get('/kreuzberg-json')
+        .reply(
+          200,
+          `<!DOCTYPE html><html><body>
+            <main>
+              <h1>Article Title</h1>
+              <nav>Navigation</nav>
+              <article><p>Wanted body with <a href="/about">relative link</a>.</p></article>
+            </main>
+          </body></html>`,
+          { 'content-type': 'text/html' }
+        );
+
+      const res = await request(app)
+        .get('/markdown')
+        .query({
+          url: 'https://example.com/kreuzberg-json',
+          converter: 'kreuzberg',
+          format: 'json',
+          contentSelector: 'main',
+          bodySelector: 'article',
+        })
+        .expect(200);
+
+      expect(res.headers['content-type']).toMatch(/application\/json/);
+      expect(res.body).toHaveProperty('content');
+      expect(res.body).toHaveProperty('metadata');
+      expect(res.body).toHaveProperty('tables');
+      expect(res.body).toHaveProperty('images');
+      expect(res.body).toHaveProperty('warnings');
+      expect(res.body.content).toContain('Article Title');
+      expect(res.body.content).toContain('Wanted body');
+      expect(res.body.content).toContain('https://example.com/about');
+      expect(res.body.content).not.toContain('Navigation');
     });
   });
 
@@ -84,6 +159,14 @@ describe('API Endpoint Tests', () => {
       // ZIP signature: PK (0x50 0x4B)
       expect(res.body[0]).toBe(0x50);
       expect(res.body[1]).toBe(0x4b);
+
+      // Default archive layout contract (issue #113): the markdown archive must
+      // bundle document.md AND document.html for reference.
+      const dir = await unzipper.Open.buffer(res.body);
+      const names = dir.files.map((f) => f.path);
+      expect(names).toEqual(
+        expect.arrayContaining(['document.md', 'document.html'])
+      );
     });
 
     it('returns a ZIP archive with HTML format', async () => {

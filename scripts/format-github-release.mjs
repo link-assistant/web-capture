@@ -54,7 +54,7 @@ if (!version || !repository || !commitSha) {
   process.exit(1);
 }
 
-const tag = `v${version}`;
+const tag = `js-v${version}`;
 
 try {
   // Get the release ID for this version

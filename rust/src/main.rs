@@ -26,16 +26,18 @@ use axum::{
 use clap::Parser;
 use serde::Deserialize;
 use std::net::SocketAddr;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use tokio::fs;
 use tower_http::trace::TraceLayer;
-use tracing::{error, info};
+use tracing::{debug, error, info};
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 use url::Url;
 
+use web_capture::extract_images::{apply_image_mode, ImageMode, PendingRemoteImage};
+use web_capture::search::{format_search_as_markdown, DEFAULT_PROVIDER};
 use web_capture::{
-    capture_screenshot, convert_html_to_markdown, convert_html_to_markdown_enhanced,
-    convert_relative_urls, convert_to_utf8, fetch_html, html, render_html, EnhancedOptions,
+    capture_screenshot, convert_html_to_markdown_enhanced, convert_relative_urls, convert_to_utf8,
+    convert_with_kreuzberg_enhanced, fetch_html, html, render_html, EnhancedOptions,
 };
 
 /// CLI arguments
@@ -47,9 +49,22 @@ use web_capture::{
 )]
 #[allow(clippy::struct_excessive_bools)]
 struct Args {
-    /// URL to capture (required in capture mode)
+    /// URL to capture (required in capture mode). Use the literal `search`
+    /// here to enter structured search mode: `web-capture search <query>`.
     #[arg(index = 1)]
     url: Option<String>,
+
+    /// Search query (used only in `web-capture search <query>` mode)
+    #[arg(index = 2)]
+    query: Option<String>,
+
+    /// Search provider: wikipedia, duckduckgo, google, bing, brave
+    #[arg(long, default_value = "wikipedia")]
+    provider: String,
+
+    /// Maximum number of search results (search mode)
+    #[arg(long, default_value_t = 10)]
+    limit: usize,
 
     /// Start as HTTP API server
     #[arg(short, long)]
@@ -59,33 +74,84 @@ struct Args {
     #[arg(short, long, default_value = "3000", env = "PORT")]
     port: u16,
 
-    /// Output format: html, markdown/md, image/png
-    #[arg(short, long, default_value = "html")]
+    /// Output format: markdown/md, html, image/png
+    #[arg(short, long, default_value = "markdown")]
     format: String,
 
     /// Output file path (default: stdout for text, auto-generated for images)
     #[arg(short, long)]
     output: Option<PathBuf>,
 
-    /// Use enhanced markdown conversion with LaTeX extraction, metadata, and post-processing
-    #[arg(long, default_value_t = false)]
-    enhanced: bool,
-
-    /// Extract LaTeX formulas from img.formula, `KaTeX`, `MathJax` (default: true when --enhanced)
-    #[arg(long, default_value_t = true)]
+    /// Extract LaTeX formulas from img.formula, `KaTeX`, `MathJax` (default: true).
+    /// Use --no-extract-latex to disable.
+    #[arg(long, default_value_t = true, env = "WEB_CAPTURE_EXTRACT_LATEX")]
     extract_latex: bool,
 
-    /// Extract article metadata (author, date, hubs, tags) (default: true when --enhanced)
-    #[arg(long, default_value_t = true)]
+    /// Extract article metadata (author, date, hubs, tags) (default: true).
+    /// Use --no-extract-metadata to disable.
+    #[arg(long, default_value_t = true, env = "WEB_CAPTURE_EXTRACT_METADATA")]
     extract_metadata: bool,
 
-    /// Apply post-processing (unicode normalization, LaTeX spacing) (default: true when --enhanced)
-    #[arg(long, default_value_t = true)]
+    /// Apply post-processing (unicode normalization, LaTeX spacing) (default: true).
+    /// Use --no-post-process to disable.
+    #[arg(long, default_value_t = true, env = "WEB_CAPTURE_POST_PROCESS")]
     post_process: bool,
 
-    /// Detect and correct code block languages (default: true when --enhanced)
-    #[arg(long, default_value_t = true)]
+    /// Detect and correct code block languages (default: true).
+    /// Use --no-detect-code-language to disable.
+    #[arg(long, default_value_t = true, env = "WEB_CAPTURE_DETECT_CODE_LANGUAGE")]
     detect_code_language: bool,
+
+    /// CSS selector used to scope markdown conversion while preserving full-page metadata extraction.
+    #[arg(long, env = "WEB_CAPTURE_CONTENT_SELECTOR")]
+    content_selector: Option<String>,
+
+    /// CSS selector for article body markdown; prepends the selected article title when available.
+    #[arg(long, env = "WEB_CAPTURE_BODY_SELECTOR")]
+    body_selector: Option<String>,
+
+    /// Keep images inline as base64 data URIs, producing a single self-contained
+    /// file (default: false). By default markdown keeps remote images as direct
+    /// links; use --extract-images to save them as local files instead.
+    #[arg(long, default_value_t = false, env = "WEB_CAPTURE_EMBED_IMAGES")]
+    embed_images: bool,
+
+    /// Directory name for extracted images, relative to output file (default: images)
+    #[arg(long, default_value = "images", env = "WEB_CAPTURE_IMAGES_DIR")]
+    images_dir: String,
+
+    /// Base directory for auto-derived output paths when -o is omitted (default: ./data/web-capture)
+    #[arg(
+        long,
+        default_value = "./data/web-capture",
+        env = "WEB_CAPTURE_DATA_DIR"
+    )]
+    data_dir: String,
+
+    /// Create archive output. Formats: zip (default), 7z, tar.gz (alias gz), tar
+    #[arg(long, num_args = 0..=1, default_missing_value = "zip")]
+    archive: Option<String>,
+
+    /// Disable HTML pretty-printing (output minified HTML instead of indented).
+    #[arg(long, default_value_t = false, env = "WEB_CAPTURE_NO_PRETTY_HTML")]
+    no_pretty_html: bool,
+
+    /// Alias for --embed-images: keep images inline as base64
+    #[arg(long, default_value_t = false)]
+    no_extract_images: bool,
+
+    /// Keep remote image URLs as direct links — this is the default markdown
+    /// behavior, kept as an explicit alias for back-compat. Base64 data URIs are
+    /// stripped (no original URL to restore).
+    #[arg(long, default_value_t = false, env = "WEB_CAPTURE_KEEP_ORIGINAL_LINKS")]
+    keep_original_links: bool,
+
+    /// Extract images to local files: base64 data URIs and remote images are
+    /// saved under <DIR>/<images-dir>/ and the markdown is rewritten to point at
+    /// them. Without a value, the output file's directory is used. Default
+    /// markdown keeps images as direct remote links instead.
+    #[arg(long, num_args = 0..=1, default_missing_value = "", env = "WEB_CAPTURE_EXTRACT_IMAGES")]
+    extract_images: Option<String>,
 
     /// Capture both light and dark theme screenshots
     #[arg(long, default_value_t = false)]
@@ -123,34 +189,220 @@ struct UrlQuery {
     url: String,
 }
 
-/// Query parameters for Google Docs endpoint
+/// Query parameters for /markdown endpoint
 #[derive(Debug, Deserialize)]
-struct GDocsQuery {
+#[allow(dead_code)]
+struct MarkdownQuery {
     url: String,
+    #[serde(default)]
+    converter: Option<String>,
+    #[serde(default)]
     format: Option<String>,
-    #[serde(rename = "apiToken")]
-    api_token: Option<String>,
+    #[serde(default, rename = "embedImages")]
+    embed_images: bool,
+    #[serde(default = "default_true", rename = "keepOriginalLinks")]
+    keep_original_links: bool,
+    #[serde(default, rename = "contentSelector")]
+    content_selector: Option<String>,
+    #[serde(default, rename = "bodySelector")]
+    body_selector: Option<String>,
+}
+
+const fn default_true() -> bool {
+    true
+}
+
+/// Query parameters for the /search endpoint
+#[derive(Debug, Deserialize)]
+struct SearchQuery {
+    /// Search query (`q`, with `query` accepted as an alias)
+    #[serde(alias = "query")]
+    q: Option<String>,
+    #[serde(default)]
+    provider: Option<String>,
+    #[serde(default)]
+    limit: Option<usize>,
+    #[serde(default)]
+    format: Option<String>,
+}
+
+/// Current UTC time as an RFC 3339 timestamp (e.g. `2026-05-30T12:34:56Z`).
+///
+/// Implemented without a calendar dependency via Howard Hinnant's
+/// days-from-civil algorithm so the crate keeps its lean dependency set.
+fn now_rfc3339() -> String {
+    let secs = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .map_or(0, |d| d.as_secs());
+    let days = (secs / 86_400).cast_signed();
+    let rem = secs % 86_400;
+    let (hour, minute, second) = (rem / 3600, (rem % 3600) / 60, rem % 60);
+
+    // days-from-civil (civil_from_days), epoch shifted to 0000-03-01.
+    let z = days + 719_468;
+    let era = if z >= 0 { z } else { z - 146_096 } / 146_097;
+    let doe = z - era * 146_097; // [0, 146096]
+    let yoe = (doe - doe / 1460 + doe / 36_524 - doe / 146_096) / 365; // [0, 399]
+    let year = yoe + era * 400;
+    let doy = doe - (365 * yoe + yoe / 4 - yoe / 100); // [0, 365]
+    let mp = (5 * doy + 2) / 153; // [0, 11]
+    let day = doy - (153 * mp + 2) / 5 + 1; // [1, 31]
+    let month = if mp < 10 { mp + 3 } else { mp - 9 }; // [1, 12]
+    let year = if month <= 2 { year + 1 } else { year };
+
+    format!("{year:04}-{month:02}-{day:02}T{hour:02}:{minute:02}:{second:02}Z")
+}
+
+/// Resolve the image-handling [`ImageMode`] from CLI flags.
+///
+/// Precedence: `--embed-images` (and its `--no-extract-images` alias) >
+/// `--extract-images` > the default contract (keep remote links, strip inline
+/// base64). `--keep-original-links` falls through to the default, which is its
+/// documented behaviour.
+fn resolve_image_mode(args: &Args, output_dir: &Path) -> ImageMode {
+    if args.embed_images {
+        ImageMode::Embed
+    } else if let Some(dir) = args.extract_images.as_ref() {
+        let base = if dir.is_empty() {
+            output_dir.to_path_buf()
+        } else {
+            PathBuf::from(dir)
+        };
+        ImageMode::Extract {
+            dir: base,
+            subdir: args.images_dir.clone(),
+        }
+    } else {
+        ImageMode::Default
+    }
+}
+
+/// Apply the resolved image mode to markdown destined for a file, downloading
+/// any remote images that an Extract mode localized. Returns the rewritten
+/// markdown.
+async fn process_output_markdown(
+    markdown: String,
+    args: &Args,
+    output_path: &Path,
+    label: &str,
+) -> anyhow::Result<String> {
+    let output_dir = output_path.parent().unwrap_or_else(|| Path::new("."));
+    let mode = resolve_image_mode(args, output_dir);
+    let extract_dir = match &mode {
+        ImageMode::Extract { dir, .. } => Some(dir.clone()),
+        _ => None,
+    };
+    let result = apply_image_mode(&markdown, mode, None)?;
+    let mut md = result.markdown;
+    if result.extracted > 0 {
+        eprintln!(
+            "Extracted {} images to {}/ ({label})",
+            result.extracted, args.images_dir
+        );
+    }
+    if result.stripped > 0 {
+        eprintln!(
+            "Stripped {} inline base64 image(s) ({label}); \
+             use --extract-images to save files or --embed-images to keep them inline",
+            result.stripped
+        );
+    }
+    if let Some(dir) = extract_dir {
+        if !result.pending_remote.is_empty() {
+            let images_path = dir.join(&args.images_dir);
+            md =
+                download_pending_remote(md, &result.pending_remote, &images_path, &args.images_dir)
+                    .await;
+        }
+    }
+    Ok(md)
+}
+
+/// Download remote images that [`ImageMode::Extract`] localized, writing them to
+/// `images_path`. On any failure the original remote URL is restored so the
+/// markdown never points at a missing local file.
+async fn download_pending_remote(
+    mut markdown: String,
+    pending: &[PendingRemoteImage],
+    images_path: &Path,
+    subdir: &str,
+) -> String {
+    let client = reqwest::Client::new();
+    let mut downloaded = 0;
+    for img in pending {
+        let local_ref = format!("{subdir}/{}", img.filename);
+        let bytes = match client.get(&img.url).send().await {
+            Ok(resp) if resp.status().is_success() => resp.bytes().await.ok(),
+            _ => None,
+        };
+        let saved = bytes.is_some_and(|data| {
+            std::fs::create_dir_all(images_path).is_ok()
+                && std::fs::write(images_path.join(&img.filename), &data).is_ok()
+        });
+        if saved {
+            downloaded += 1;
+        } else {
+            // Restore the original URL so the reference is not broken.
+            markdown = markdown.replace(&local_ref, &img.url);
+        }
+    }
+    if downloaded > 0 {
+        eprintln!("Downloaded {downloaded} remote image(s) to {subdir}/");
+    }
+    markdown
 }
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
-    // Initialize tracing
+    let mut args = Args::parse();
+
+    // Initialize tracing after parsing args so --verbose can enable detailed logs.
+    let default_filter = if args.verbose {
+        "web_capture=debug,tower_http=debug"
+    } else {
+        "web_capture=info,tower_http=info"
+    };
     tracing_subscriber::registry()
         .with(
             tracing_subscriber::EnvFilter::try_from_default_env()
-                .unwrap_or_else(|_| "web_capture=info,tower_http=info".into()),
+                .unwrap_or_else(|_| default_filter.into()),
         )
         .with(tracing_subscriber::fmt::layer())
         .init();
 
-    let args = Args::parse();
+    // --no-extract-images is an alias for --embed-images
+    if args.no_extract_images {
+        args.embed_images = true;
+    }
+
+    // --archive flag validation and format override
+    let effective_format = if let Some(ref archive_fmt) = args.archive {
+        let fmt = if archive_fmt.is_empty() {
+            "zip"
+        } else {
+            archive_fmt.as_str()
+        };
+        match fmt {
+            "zip" | "7z" | "tar.gz" | "gz" | "tar" => {}
+            other => {
+                eprintln!("Error: Unsupported archive format \"{other}\". Supported: zip, 7z, tar.gz, gz, tar");
+                std::process::exit(1);
+            }
+        }
+        "archive".to_string()
+    } else {
+        args.format.clone()
+    };
 
     if args.serve {
         // Server mode
         start_server(args.port).await?;
+    } else if args.url.as_deref() == Some("search") {
+        // Structured search mode: `web-capture search <query>`
+        run_search(&args).await?;
     } else if let Some(ref url) = args.url {
         // Capture mode
-        capture_url(url, &args.format, args.output.as_ref(), &args).await?;
+        capture_url(url, &effective_format, args.output.as_ref(), &args).await?;
     } else {
         eprintln!("Error: Missing URL or --serve flag");
         eprintln!("Run with --help for usage information");
@@ -171,7 +423,7 @@ async fn start_server(port: u16) -> anyhow::Result<()> {
         .route("/animation", get(animation_handler))
         .route("/figures", get(figures_handler))
         .route("/themed-image", get(themed_image_handler))
-        .route("/gdocs", get(gdocs_handler))
+        .route("/search", get(search_handler))
         .layer(TraceLayer::new_for_http());
 
     let addr = SocketAddr::from(([0, 0, 0, 0], port));
@@ -180,13 +432,14 @@ async fn start_server(port: u16) -> anyhow::Result<()> {
     info!("Available endpoints:");
     info!("  GET /html?url=<URL>       - Render page as HTML");
     info!("  GET /markdown?url=<URL>   - Convert page to Markdown");
+    info!("  GET /markdown?url=<URL>&converter=kreuzberg&format=json - Structured Markdown conversion");
     info!("  GET /image?url=<URL>      - Screenshot page as PNG");
     info!("  GET /fetch?url=<URL>      - Proxy fetch content");
     info!("  GET /stream?url=<URL>     - Stream content");
     info!("  GET /animation?url=<URL>  - Capture animation frames");
     info!("  GET /figures?url=<URL>    - Extract figure images");
     info!("  GET /themed-image?url=<URL> - Dual-theme screenshots");
-    info!("  GET /gdocs?url=<URL>&format=markdown|html|txt - Google Docs capture");
+    info!("  GET /search?q=<QUERY>     - Structured search-provider capture");
     info!("");
     info!("Press Ctrl+C to stop the server");
 
@@ -251,11 +504,36 @@ async fn html_handler(Query(params): Query<UrlQuery>) -> Response {
 }
 
 /// Markdown endpoint handler
-async fn markdown_handler(Query(params): Query<UrlQuery>) -> Response {
+async fn markdown_handler(Query(params): Query<MarkdownQuery>) -> Response {
     let url = match normalize_url(&params.url) {
         Ok(url) => url,
         Err(e) => return (StatusCode::BAD_REQUEST, e).into_response(),
     };
+
+    let converter = params
+        .converter
+        .as_deref()
+        .unwrap_or("html2md")
+        .to_ascii_lowercase();
+    if converter != "html2md" && converter != "kreuzberg" {
+        return (StatusCode::BAD_REQUEST, "Unsupported `converter` parameter").into_response();
+    }
+
+    let format = params
+        .format
+        .as_deref()
+        .unwrap_or("text")
+        .to_ascii_lowercase();
+    if format != "text" && format != "json" {
+        return (StatusCode::BAD_REQUEST, "Unsupported `format` parameter").into_response();
+    }
+    if format == "json" && converter != "kreuzberg" {
+        return (
+            StatusCode::BAD_REQUEST,
+            "`format=json` is only supported with `converter=kreuzberg`",
+        )
+            .into_response();
+    }
 
     let html = match fetch_html(&url).await {
         Ok(html) => html,
@@ -265,8 +543,47 @@ async fn markdown_handler(Query(params): Query<UrlQuery>) -> Response {
         }
     };
 
-    let markdown = match convert_html_to_markdown(&html, Some(&url)) {
-        Ok(md) => md,
+    let options = EnhancedOptions {
+        content_selector: params.content_selector,
+        body_selector: params.body_selector,
+        ..EnhancedOptions::default()
+    };
+
+    if converter == "kreuzberg" {
+        let mut result = match convert_with_kreuzberg_enhanced(&html, Some(&url), &options) {
+            Ok(result) => result,
+            Err(e) => {
+                error!("Failed to convert to Markdown with kreuzberg: {}", e);
+                return (
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    "Error converting to Markdown",
+                )
+                    .into_response();
+            }
+        };
+
+        let mode = if params.embed_images {
+            ImageMode::Embed
+        } else {
+            ImageMode::Default
+        };
+        if let Ok(image_result) = apply_image_mode(&result.content, mode, Some(&url)) {
+            result.content = image_result.markdown;
+        }
+
+        if format == "json" {
+            return axum::Json(result).into_response();
+        }
+        return (
+            StatusCode::OK,
+            [("Content-Type", "text/markdown")],
+            result.content,
+        )
+            .into_response();
+    }
+
+    let mut markdown = match convert_html_to_markdown_enhanced(&html, Some(&url), &options) {
+        Ok(result) => result.markdown,
         Err(e) => {
             error!("Failed to convert to Markdown: {}", e);
             return (
@@ -276,6 +593,17 @@ async fn markdown_handler(Query(params): Query<UrlQuery>) -> Response {
                 .into_response();
         }
     };
+
+    // Route through the unified chokepoint. The server returns a single
+    // response body, so only Default (strip base64) and Embed apply.
+    let mode = if params.embed_images {
+        ImageMode::Embed
+    } else {
+        ImageMode::Default
+    };
+    if let Ok(result) = apply_image_mode(&markdown, mode, Some(&url)) {
+        markdown = result.markdown;
+    }
 
     (
         StatusCode::OK,
@@ -450,106 +778,71 @@ async fn themed_image_handler(Query(params): Query<UrlQuery>) -> Response {
     }
 }
 
-/// Google Docs endpoint handler
-async fn gdocs_handler(
-    Query(params): Query<GDocsQuery>,
-    headers: axum::http::HeaderMap,
-) -> Response {
-    if !web_capture::gdocs::is_google_docs_url(&params.url) {
-        return (
-            StatusCode::BAD_REQUEST,
-            "URL is not a Google Docs document URL",
-        )
-            .into_response();
+/// Structured search-provider capture endpoint handler
+async fn search_handler(Query(params): Query<SearchQuery>) -> Response {
+    let query = params.q.unwrap_or_default();
+    if query.trim().is_empty() {
+        return (StatusCode::BAD_REQUEST, "Missing `q` (query) parameter").into_response();
     }
+    let provider = params
+        .provider
+        .unwrap_or_else(|| DEFAULT_PROVIDER.to_string());
+    let limit = params.limit.unwrap_or(web_capture::search::DEFAULT_LIMIT);
+    let format = params.format.unwrap_or_else(|| "json".to_string());
 
-    // Resolve API token from query, Authorization header, or X-Api-Token header
-    let api_token = params
-        .api_token
-        .as_deref()
-        .or_else(|| {
-            headers
-                .get("authorization")
-                .and_then(|v| v.to_str().ok())
-                .and_then(web_capture::gdocs::extract_bearer_token)
-        })
-        .or_else(|| headers.get("x-api-token").and_then(|v| v.to_str().ok()));
+    let result = match web_capture::search::search(
+        &query,
+        &provider,
+        limit,
+        "fetch",
+        &now_rfc3339(),
+    )
+    .await
+    {
+        Ok(result) => result,
+        Err(e) => return (StatusCode::BAD_REQUEST, e).into_response(),
+    };
 
-    let format = params.format.as_deref().unwrap_or("markdown");
-
-    match format {
-        "archive" | "zip" => {
-            match web_capture::gdocs::fetch_google_doc_as_archive(&params.url, api_token).await {
-                Ok(archive) => match web_capture::gdocs::create_archive_zip(&archive) {
-                    Ok(zip_data) => {
-                        let filename = format!("gdoc-{}.zip", archive.document_id);
-                        (
-                            StatusCode::OK,
-                            [
-                                ("Content-Type", "application/zip".to_string()),
-                                (
-                                    "Content-Disposition",
-                                    format!("attachment; filename=\"{filename}\""),
-                                ),
-                            ],
-                            zip_data,
-                        )
-                            .into_response()
-                    }
-                    Err(e) => {
-                        error!("Google Docs archive error: {}", e);
-                        (StatusCode::INTERNAL_SERVER_ERROR, e.to_string()).into_response()
-                    }
-                },
-                Err(e) => {
-                    error!("Google Docs capture error: {}", e);
-                    (StatusCode::INTERNAL_SERVER_ERROR, e.to_string()).into_response()
-                }
-            }
-        }
-        "markdown" | "md" => {
-            match web_capture::gdocs::fetch_google_doc_as_markdown(&params.url, api_token).await {
-                Ok(result) => (
-                    StatusCode::OK,
-                    [("Content-Type", "text/markdown")],
-                    result.content,
-                )
-                    .into_response(),
-                Err(e) => {
-                    error!("Google Docs capture error: {}", e);
-                    (StatusCode::INTERNAL_SERVER_ERROR, e.to_string()).into_response()
-                }
-            }
-        }
-        "html" | "txt" | "pdf" | "docx" | "epub" => {
-            match web_capture::gdocs::fetch_google_doc(&params.url, format, api_token).await {
-                Ok(result) => {
-                    let content_type = match format {
-                        "txt" => "text/plain",
-                        "pdf" => "application/pdf",
-                        "docx" => "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-                        "epub" => "application/epub+zip",
-                        _ => "text/html",
-                    };
-                    (
-                        StatusCode::OK,
-                        [("Content-Type", content_type)],
-                        result.content,
-                    )
-                        .into_response()
-                }
-                Err(e) => {
-                    error!("Google Docs capture error: {}", e);
-                    (StatusCode::INTERNAL_SERVER_ERROR, e.to_string()).into_response()
-                }
-            }
-        }
-        _ => (
-            StatusCode::BAD_REQUEST,
-            format!("Unsupported format: {format}"),
+    if format.eq_ignore_ascii_case("markdown") || format.eq_ignore_ascii_case("md") {
+        (
+            StatusCode::OK,
+            [("Content-Type", "text/markdown")],
+            format_search_as_markdown(&result),
         )
-            .into_response(),
+            .into_response()
+    } else {
+        axum::Json(result).into_response()
     }
+}
+
+/// Run structured search from the CLI (`web-capture search <query>`).
+async fn run_search(args: &Args) -> anyhow::Result<()> {
+    let Some(query) = args.query.as_deref() else {
+        eprintln!("Error: Missing search query. Usage: web-capture search <query>");
+        std::process::exit(1);
+    };
+
+    // Search defaults to JSON output unless --format/-f was passed explicitly.
+    let format_explicit = std::env::args().any(|arg| {
+        arg == "-f" || arg == "--format" || arg.starts_with("--format=") || arg.starts_with("-f=")
+    });
+    let format = if format_explicit {
+        args.format.clone()
+    } else {
+        "json".to_string()
+    };
+
+    let result =
+        web_capture::search::search(query, &args.provider, args.limit, "fetch", &now_rfc3339())
+            .await
+            .map_err(|e| anyhow::anyhow!(e))?;
+
+    if format.eq_ignore_ascii_case("markdown") || format.eq_ignore_ascii_case("md") {
+        println!("{}", format_search_as_markdown(&result));
+    } else {
+        println!("{}", serde_json::to_string_pretty(&result)?);
+    }
+    Ok(())
 }
 
 /// Capture a URL and save/output the result
@@ -561,61 +854,228 @@ async fn capture_url(
     args: &Args,
 ) -> anyhow::Result<()> {
     let absolute_url = normalize_url(url).map_err(|e| anyhow::anyhow!(e))?;
+    debug!(
+        url = %absolute_url,
+        format = %format,
+        capture = %args.capture,
+        has_api_token = args.api_token.is_some(),
+        "starting capture"
+    );
 
-    // Auto-detect Google Docs URLs and use API-based capture
+    // Google Docs capture honors --capture:
+    // - browser: load /edit model data
+    // - api without token: public export endpoint
+    // - api with token: docs.googleapis.com REST API
     if web_capture::gdocs::is_google_docs_url(&absolute_url) {
         let api_token = args.api_token.as_deref();
-        match format.to_lowercase().as_str() {
-            "markdown" | "md" => {
-                let result =
-                    web_capture::gdocs::fetch_google_doc_as_markdown(&absolute_url, api_token)
-                        .await?;
-                if let Some(path) = output {
-                    fs::write(path, &result.content).await?;
-                    eprintln!("Google Doc Markdown saved to: {}", path.display());
-                } else {
-                    print!("{}", result.content);
+        let method = web_capture::gdocs::select_capture_method(&args.capture, api_token)?;
+        let format_lower = format.to_lowercase();
+        let model_format = matches!(
+            format_lower.as_str(),
+            "archive" | "markdown" | "md" | "html" | "txt" | "text"
+        );
+        debug!(
+            url = %absolute_url,
+            method = ?method,
+            format = %format_lower,
+            model_format,
+            has_api_token = api_token.is_some(),
+            "selected Google Docs capture method"
+        );
+
+        if method == web_capture::gdocs::GDocsCaptureMethod::BrowserModel && !model_format {
+            debug!(
+                format = %format_lower,
+                "Google Docs editor model does not support requested format; using regular browser pipeline"
+            );
+            // Screenshot-like formats should use the regular browser path below.
+        } else if method == web_capture::gdocs::GDocsCaptureMethod::BrowserModel {
+            let rendered =
+                web_capture::gdocs::fetch_google_doc_from_model(&absolute_url, api_token).await?;
+            write_rendered_gdoc(
+                &rendered,
+                &format_lower,
+                &absolute_url,
+                output,
+                args,
+                "Google Doc (browser-model)",
+            )
+            .await?;
+            return Ok(());
+        } else if method == web_capture::gdocs::GDocsCaptureMethod::DocsApi {
+            let Some(token) = api_token else {
+                unreachable!("Docs API capture is only selected when a token exists");
+            };
+            let rendered =
+                web_capture::gdocs::fetch_google_doc_from_docs_api(&absolute_url, token).await?;
+            write_rendered_gdoc(
+                &rendered,
+                &format_lower,
+                &absolute_url,
+                output,
+                args,
+                "Google Doc (docs-api)",
+            )
+            .await?;
+            return Ok(());
+        } else {
+            match format_lower.as_str() {
+                "archive" => {
+                    let archive_result =
+                        web_capture::gdocs::fetch_google_doc_as_archive(&absolute_url, api_token)
+                            .await?;
+                    let zip_bytes = web_capture::gdocs::create_archive_zip(
+                        &archive_result,
+                        !args.no_pretty_html,
+                    )?;
+                    write_archive_capture(
+                        &zip_bytes,
+                        &absolute_url,
+                        output,
+                        args.archive.as_deref().unwrap_or("zip"),
+                        &args.data_dir,
+                        "Google Doc (archive)",
+                    )
+                    .await?;
+                }
+                "markdown" | "md" => {
+                    let result =
+                        web_capture::gdocs::fetch_google_doc_as_markdown(&absolute_url, api_token)
+                            .await?;
+                    let markdown = result.content;
+                    if let Some(path) =
+                        effective_output_path(&absolute_url, "md", output, &args.data_dir)
+                    {
+                        let markdown =
+                            process_output_markdown(markdown, args, &path, "Google Doc Markdown")
+                                .await?;
+                        write_text_capture_to_path(&markdown, &path, "Google Doc Markdown").await?;
+                    } else {
+                        print!("{markdown}");
+                    }
+                }
+                _ => {
+                    let gdocs_format = match format_lower.as_str() {
+                        "png" | "image" | "screenshot" => "html",
+                        other => other,
+                    };
+                    let result = web_capture::gdocs::fetch_google_doc(
+                        &absolute_url,
+                        gdocs_format,
+                        api_token,
+                    )
+                    .await?;
+                    write_text_capture(
+                        &result.content,
+                        &absolute_url,
+                        gdocs_format,
+                        output,
+                        &args.data_dir,
+                        &format!("Google Doc ({gdocs_format})"),
+                    )
+                    .await?;
                 }
             }
-            _ => {
-                let format_lower = format.to_lowercase();
-                let gdocs_format = match format_lower.as_str() {
-                    "png" | "image" | "screenshot" => "html",
-                    other => other,
-                };
-                let result =
-                    web_capture::gdocs::fetch_google_doc(&absolute_url, gdocs_format, api_token)
-                        .await?;
-                if let Some(path) = output {
-                    fs::write(path, &result.content).await?;
-                    eprintln!("Google Doc ({}) saved to: {}", gdocs_format, path.display());
-                } else {
-                    print!("{}", result.content);
-                }
-            }
+            return Ok(());
         }
-        return Ok(());
     }
 
     match format.to_lowercase().as_str() {
-        "markdown" | "md" => {
-            let html = fetch_html(&absolute_url).await?;
-
-            let markdown = if args.enhanced {
-                let options = EnhancedOptions {
-                    extract_latex: args.extract_latex,
-                    extract_metadata: args.extract_metadata,
-                    post_process: args.post_process,
-                    detect_code_language: args.detect_code_language,
-                };
-                let result =
-                    convert_html_to_markdown_enhanced(&html, Some(&absolute_url), &options)?;
-                result.markdown
-            } else {
-                convert_html_to_markdown(&html, Some(&absolute_url))?
+        "archive" => {
+            let archive_fmt = args.archive.as_deref().unwrap_or("zip");
+            let ext = match archive_fmt {
+                "tar.gz" | "gz" => "tar.gz",
+                "7z" => "7z",
+                "tar" => "tar",
+                _ => "zip",
             };
 
-            if let Some(path) = output {
+            let html = capture_html_content(&absolute_url, args).await?;
+            let options = EnhancedOptions {
+                extract_latex: args.extract_latex,
+                extract_metadata: args.extract_metadata,
+                post_process: args.post_process,
+                detect_code_language: args.detect_code_language,
+                content_selector: args.content_selector.clone(),
+                body_selector: args.body_selector.clone(),
+            };
+            let enhanced = convert_html_to_markdown_enhanced(&html, Some(&absolute_url), &options)?;
+            let markdown = enhanced.markdown;
+
+            let buffers = web_capture::extract_images::extract_base64_to_buffers(
+                &markdown,
+                &args.images_dir,
+            )?;
+
+            let archive_result = web_capture::gdocs::GDocsArchiveResult {
+                html: html.clone(),
+                markdown: buffers.markdown,
+                images: buffers
+                    .images
+                    .into_iter()
+                    .map(|b| web_capture::gdocs::ExtractedImage {
+                        filename: b.filename,
+                        data: b.data,
+                        mime_type: String::new(),
+                    })
+                    .collect(),
+                document_id: String::new(),
+                export_url: absolute_url.clone(),
+            };
+            let zip_bytes =
+                web_capture::gdocs::create_archive_zip(&archive_result, !args.no_pretty_html)?;
+
+            let is_stdout = output.is_some_and(|p| p.as_os_str() == "-");
+            let derived;
+            let effective_output = if is_stdout {
+                None
+            } else if let Some(path) = output {
+                Some(path.clone())
+            } else {
+                derived = derive_output_path(&absolute_url, ext, &args.data_dir);
+                Some(derived)
+            };
+            if let Some(ref path) = effective_output {
+                if let Some(parent) = path.parent() {
+                    std::fs::create_dir_all(parent).ok();
+                }
+                fs::write(path, &zip_bytes).await?;
+                eprintln!("Archive saved to: {}", path.display());
+            } else {
+                use std::io::Write;
+                std::io::stdout().write_all(&zip_bytes)?;
+            }
+        }
+        "markdown" | "md" => {
+            let html = capture_html_content(&absolute_url, args).await?;
+
+            // Enhanced conversion is now the default
+            let options = EnhancedOptions {
+                extract_latex: args.extract_latex,
+                extract_metadata: args.extract_metadata,
+                post_process: args.post_process,
+                detect_code_language: args.detect_code_language,
+                content_selector: args.content_selector.clone(),
+                body_selector: args.body_selector.clone(),
+            };
+            let result = convert_html_to_markdown_enhanced(&html, Some(&absolute_url), &options)?;
+            let markdown = result.markdown;
+
+            let is_stdout = output.is_some_and(|p| p.as_os_str() == "-");
+            let derived;
+            let effective_output = if is_stdout {
+                None
+            } else if let Some(path) = output {
+                Some(path.clone())
+            } else {
+                derived = derive_output_path(&absolute_url, "md", &args.data_dir);
+                Some(derived)
+            };
+            if let Some(ref path) = effective_output {
+                let markdown = process_output_markdown(markdown, args, path, "Markdown").await?;
+                if let Some(parent) = path.parent() {
+                    std::fs::create_dir_all(parent).ok();
+                }
                 fs::write(path, &markdown).await?;
                 eprintln!("Markdown saved to: {}", path.display());
             } else {
@@ -644,19 +1104,24 @@ async fn capture_url(
             }
         }
         _ => {
-            let html_content = fetch_html(&absolute_url).await?;
-            let needs_render = !html::is_html(&html_content) || html::has_javascript(&html_content);
+            let html_content = capture_html_content(&absolute_url, args).await?;
+            let utf8_html = convert_to_utf8(&html_content);
+            let result = convert_relative_urls(&utf8_html, &absolute_url);
 
-            let result = if needs_render {
-                let rendered = render_html(&absolute_url).await?;
-                let utf8_html = convert_to_utf8(&rendered);
-                convert_relative_urls(&utf8_html, &absolute_url)
+            let is_stdout = output.is_some_and(|p| p.as_os_str() == "-");
+            let derived;
+            let effective_output = if is_stdout {
+                None
+            } else if let Some(path) = output {
+                Some(path.clone())
             } else {
-                let utf8_html = convert_to_utf8(&html_content);
-                convert_relative_urls(&utf8_html, &absolute_url)
+                derived = derive_output_path(&absolute_url, "html", &args.data_dir);
+                Some(derived)
             };
-
-            if let Some(path) = output {
+            if let Some(ref path) = effective_output {
+                if let Some(parent) = path.parent() {
+                    std::fs::create_dir_all(parent).ok();
+                }
                 fs::write(path, &result).await?;
                 eprintln!("HTML saved to: {}", path.display());
             } else {
@@ -666,6 +1131,138 @@ async fn capture_url(
     }
 
     Ok(())
+}
+
+async fn capture_html_content(absolute_url: &str, args: &Args) -> anyhow::Result<String> {
+    if capture_uses_browser(&args.capture)? {
+        Ok(render_html(absolute_url).await?)
+    } else {
+        Ok(fetch_html(absolute_url).await?)
+    }
+}
+
+fn capture_uses_browser(capture: &str) -> anyhow::Result<bool> {
+    match capture.to_lowercase().as_str() {
+        "browser" => Ok(true),
+        "api" => Ok(false),
+        other => Err(anyhow::anyhow!(
+            "Unsupported capture method \"{other}\". Use \"browser\" or \"api\"."
+        )),
+    }
+}
+
+async fn write_rendered_gdoc(
+    rendered: &web_capture::gdocs::GDocsRenderedResult,
+    format: &str,
+    absolute_url: &str,
+    output: Option<&PathBuf>,
+    args: &Args,
+    label: &str,
+) -> anyhow::Result<()> {
+    if format == "archive" || format == "zip" {
+        let archive =
+            web_capture::gdocs::localize_rendered_remote_images_for_archive(rendered).await?;
+        let zip_bytes = web_capture::gdocs::create_archive_zip(&archive, !args.no_pretty_html)?;
+        write_archive_capture(
+            &zip_bytes,
+            absolute_url,
+            output,
+            args.archive.as_deref().unwrap_or("zip"),
+            &args.data_dir,
+            "Google Doc (archive)",
+        )
+        .await?;
+        return Ok(());
+    }
+
+    let (content, ext) = match format {
+        "html" => (rendered.html.as_str(), "html"),
+        "txt" | "text" => (rendered.text.as_str(), "txt"),
+        _ => (rendered.markdown.as_str(), "md"),
+    };
+    write_text_capture(content, absolute_url, ext, output, &args.data_dir, label).await
+}
+
+fn effective_output_path(
+    absolute_url: &str,
+    ext: &str,
+    output: Option<&PathBuf>,
+    data_dir: &str,
+) -> Option<PathBuf> {
+    if output.is_some_and(|path| path.as_os_str() == "-") {
+        None
+    } else if let Some(path) = output {
+        Some(path.clone())
+    } else {
+        Some(derive_output_path(absolute_url, ext, data_dir))
+    }
+}
+
+async fn write_text_capture(
+    content: &str,
+    absolute_url: &str,
+    ext: &str,
+    output: Option<&PathBuf>,
+    data_dir: &str,
+    label: &str,
+) -> anyhow::Result<()> {
+    if let Some(path) = effective_output_path(absolute_url, ext, output, data_dir) {
+        write_text_capture_to_path(content, &path, label).await?;
+    } else {
+        print!("{content}");
+    }
+    Ok(())
+}
+
+async fn write_text_capture_to_path(
+    content: &str,
+    path: &PathBuf,
+    label: &str,
+) -> anyhow::Result<()> {
+    if let Some(parent) = path.parent() {
+        std::fs::create_dir_all(parent).ok();
+    }
+    fs::write(path, content).await?;
+    eprintln!("{label} saved to: {}", path.display());
+    Ok(())
+}
+
+async fn write_archive_capture(
+    bytes: &[u8],
+    absolute_url: &str,
+    output: Option<&PathBuf>,
+    archive_fmt: &str,
+    data_dir: &str,
+    label: &str,
+) -> anyhow::Result<()> {
+    let ext = match archive_fmt {
+        "tar.gz" | "gz" => "tar.gz",
+        "7z" => "7z",
+        "tar" => "tar",
+        _ => "zip",
+    };
+    if let Some(path) = effective_output_path(absolute_url, ext, output, data_dir) {
+        if let Some(parent) = path.parent() {
+            std::fs::create_dir_all(parent).ok();
+        }
+        fs::write(&path, bytes).await?;
+        eprintln!("{label} saved to: {}", path.display());
+    } else {
+        use std::io::Write;
+        std::io::stdout().write_all(bytes)?;
+    }
+    Ok(())
+}
+
+/// Derive an output file path from a URL when -o is not provided.
+fn derive_output_path(absolute_url: &str, ext: &str, data_dir: &str) -> PathBuf {
+    let parsed =
+        Url::parse(absolute_url).unwrap_or_else(|_| Url::parse("https://unknown").unwrap());
+    let host = parsed.host_str().unwrap_or("unknown");
+    let url_path = parsed.path().trim_start_matches('/').trim_end_matches('/');
+    let dir = PathBuf::from(data_dir).join(host).join(url_path);
+    std::fs::create_dir_all(&dir).ok();
+    dir.join(format!("document.{ext}"))
 }
 
 /// Normalize URL to ensure it's absolute

@@ -2,43 +2,45 @@
 
 ## Overview
 
-This document analyzes the best experiences from [kreuzberg-dev/html-to-markdown](https://github.com/kreuzberg-dev/html-to-markdown) (v3.1.0) and how they have been integrated into the web-capture project.
+This document analyzes the best experiences from [kreuzberg-dev/html-to-markdown](https://github.com/kreuzberg-dev/html-to-markdown) (v3.5.x) and how they have been integrated into the web-capture project.
 
 ## Key Features of html-to-markdown
 
-| Feature | Description | Integration Value |
-|---------|-------------|-------------------|
-| **High Performance** | 150-280 MB/s throughput, Rust-powered core | High - replaces slower JS/Rust converters |
-| **Structured Results** | `ConversionResult` with content, metadata, tables, images, warnings | High - enriches our API responses |
-| **Metadata Extraction** | Title, links, headings, images, JSON-LD, Microdata, RDFa, Open Graph | High - replaces custom metadata logic |
-| **Table Extraction** | Structured cell data with headers, alignment, rendered markdown | Medium - enhances table handling |
-| **Visitor Pattern** | Custom callbacks for content filtering, URL rewriting | Medium - enables extensibility |
-| **HTML Sanitization** | Built-in sanitization via ammonia | Medium - replaces manual cleaning |
-| **Multiple Output Formats** | Markdown, Djot, Plain Text | Low - we primarily need Markdown |
-| **12 Language Bindings** | Consistent output across Rust, Node.js, Python, etc. | High - both our JS and Rust use same core |
-| **CommonMark Compliance** | Standards-based markdown output | Medium - improves output quality |
+| Feature                     | Description                                                          | Integration Value                                     |
+| --------------------------- | -------------------------------------------------------------------- | ----------------------------------------------------- |
+| **High Performance**        | 150-280 MB/s throughput, Rust-powered core                           | High - adds a faster converter option for JS and Rust |
+| **Structured Results**      | `ConversionResult` with content, metadata, tables, images, warnings  | High - enriches our API responses                     |
+| **Metadata Extraction**     | Title, links, headings, images, JSON-LD, Microdata, RDFa, Open Graph | High - replaces custom metadata logic                 |
+| **Table Extraction**        | Structured cell data with headers, alignment, rendered markdown      | Medium - enhances table handling                      |
+| **Visitor Pattern**         | Custom callbacks for content filtering, URL rewriting                | Medium - enables extensibility                        |
+| **HTML Sanitization**       | Built-in sanitization via ammonia                                    | Medium - replaces manual cleaning                     |
+| **Multiple Output Formats** | Markdown, Djot, Plain Text                                           | Low - we primarily need Markdown                      |
+| **12 Language Bindings**    | Consistent output across Rust, Node.js, Python, etc.                 | High - both our JS and Rust use same core             |
+| **CommonMark Compliance**   | Standards-based markdown output                                      | Medium - improves output quality                      |
 
 ## What We Integrated
 
-### 1. Node.js: `@kreuzberg/html-to-markdown-node` (v3.1.0)
+### 1. Node.js: `@kreuzberg/html-to-markdown-node` (v3.5.x)
 
 **Package**: `@kreuzberg/html-to-markdown-node`
 
 Added as an optional, high-performance converter that can be selected via configuration or query parameter. The existing Turndown-based converter remains as the default for backward compatibility.
 
 **Benefits**:
+
 - 10-80x faster conversion than Turndown
 - Structured results with metadata, tables, images
 - Built-in HTML sanitization
 - CommonMark compliant output
 
-### 2. Rust: `html-to-markdown-rs` (v3.1.0)
+### 2. Rust: `html-to-markdown-rs` (v3.5.x)
 
 **Crate**: `html-to-markdown-rs`
 
-Replaces the basic `html2md` crate with the much more capable `html-to-markdown-rs`, providing feature parity with the Node.js implementation.
+Adds `html-to-markdown-rs` as an alternate high-performance converter while keeping the existing `html2md` path as the Rust default for backward compatibility.
 
 **Benefits**:
+
 - Same Rust core as the Node.js binding (consistent output)
 - Structured conversion results
 - Built-in metadata extraction
@@ -47,14 +49,17 @@ Replaces the basic `html2md` crate with the much more capable `html-to-markdown-
 ### 3. Structured Conversion Results
 
 Both implementations now return structured results including:
+
 - `content`: The converted markdown
 - `metadata`: Extracted page metadata (title, description, links, headings, images)
 - `tables`: Structured table data extracted during conversion
+- `images`: Inline image extraction results when available
 - `warnings`: Any non-fatal processing warnings
 
 ### 4. Enhanced Metadata Extraction
 
 The html-to-markdown library extracts richer metadata than our custom implementation:
+
 - Open Graph tags (og:title, og:description, og:image)
 - Twitter Card metadata
 - JSON-LD structured data
@@ -73,9 +78,10 @@ The html-to-markdown library extracts richer metadata than our custom implementa
 
 ### Query Parameter: `converter`
 
-Both `/markdown` and enhanced endpoints now accept a `converter` query parameter:
+The `/markdown` endpoint now accepts a `converter` query parameter:
 
-- `converter=turndown` (default) - Use existing Turndown-based conversion
+- `converter=turndown` (JavaScript default) - Use existing Turndown-based conversion
+- `converter=html2md` (Rust default) - Use existing html2md-based conversion
 - `converter=kreuzberg` - Use html-to-markdown for high-performance conversion with structured results
 
 ### Response Format
@@ -96,20 +102,21 @@ GET /markdown?url=https://example.com&converter=kreuzberg&format=json
     "images": [...]
   },
   "tables": [...],
+  "images": [...],
   "warnings": []
 }
 ```
 
 ## Performance Comparison
 
-| Metric | Turndown (JS) | html2md (Rust) | html-to-markdown |
-|--------|---------------|----------------|------------------|
-| Throughput | ~5-10 MB/s | ~20-40 MB/s | 150-280 MB/s |
-| Structured results | No | No | Yes |
-| Metadata extraction | Custom | None | Built-in |
-| Table extraction | GFM plugin | Basic | Structured |
-| Sanitization | Manual (Cheerio) | Manual (scraper) | Built-in (ammonia) |
-| CommonMark | Partial | Partial | Full |
+| Metric              | Turndown (JS)    | html2md (Rust)   | html-to-markdown   |
+| ------------------- | ---------------- | ---------------- | ------------------ |
+| Throughput          | ~5-10 MB/s       | ~20-40 MB/s      | 150-280 MB/s       |
+| Structured results  | No               | No               | Yes                |
+| Metadata extraction | Custom           | None             | Built-in           |
+| Table extraction    | GFM plugin       | Basic            | Structured         |
+| Sanitization        | Manual (Cheerio) | Manual (scraper) | Built-in (ammonia) |
+| CommonMark          | Partial          | Partial          | Full               |
 
 ## References
 

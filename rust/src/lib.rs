@@ -34,8 +34,10 @@
 //! ```
 
 pub mod animation;
+pub mod archive;
 pub mod batch;
 pub mod browser;
+pub mod extract_images;
 pub mod figures;
 pub mod gdocs;
 pub mod html;
@@ -45,6 +47,7 @@ pub mod localize_images;
 pub mod markdown;
 pub mod metadata;
 pub mod postprocess;
+pub mod search;
 pub mod themed_image;
 pub mod verify;
 
@@ -205,6 +208,10 @@ pub struct EnhancedOptions {
     pub post_process: bool,
     /// Detect and correct code block languages.
     pub detect_code_language: bool,
+    /// CSS selector used to scope Markdown conversion.
+    pub content_selector: Option<String>,
+    /// CSS selector for article body Markdown; prepends the selected article title when available.
+    pub body_selector: Option<String>,
 }
 
 impl Default for EnhancedOptions {
@@ -214,6 +221,8 @@ impl Default for EnhancedOptions {
             extract_metadata: true,
             post_process: true,
             detect_code_language: true,
+            content_selector: None,
+            body_selector: None,
         }
     }
 }
@@ -248,8 +257,18 @@ pub fn convert_html_to_markdown_enhanced(
     base_url: Option<&str>,
     options: &EnhancedOptions,
 ) -> Result<EnhancedMarkdownResult> {
+    let mut html_for_markdown = scope_html_with_selectors(html, options);
+
+    if options.extract_latex {
+        html_for_markdown = replace_latex_formula_elements(&html_for_markdown);
+    }
+
+    if options.detect_code_language {
+        html_for_markdown = correct_code_languages(&html_for_markdown);
+    }
+
     // Start with basic markdown conversion
-    let mut md = markdown::convert_html_to_markdown(html, base_url)?;
+    let mut md = markdown::convert_html_to_markdown(&html_for_markdown, base_url)?;
 
     // Extract metadata if requested
     let extracted_metadata = if options.extract_metadata {
@@ -279,6 +298,10 @@ pub fn convert_html_to_markdown_enhanced(
     // Apply post-processing if requested
     if options.post_process {
         md = postprocess::post_process_markdown(&md, &postprocess::PostProcessOptions::default());
+    }
+
+    if options.extract_latex {
+        md = normalize_extracted_latex_markdown(&md);
     }
 
     Ok(EnhancedMarkdownResult {
@@ -312,5 +335,204 @@ pub fn convert_with_kreuzberg(
     kreuzberg::convert_with_kreuzberg(html, base_url)
 }
 
+/// Convert HTML to Markdown using kreuzberg after applying enhanced scoping options.
+///
+/// This keeps the alternate converter compatible with the same `contentSelector`
+/// and `bodySelector` controls used by the default enhanced converter.
+///
+/// # Errors
+///
+/// Returns an error if conversion fails.
+pub fn convert_with_kreuzberg_enhanced(
+    html: &str,
+    base_url: Option<&str>,
+    options: &EnhancedOptions,
+) -> Result<kreuzberg::KreuzbergResult> {
+    let scoped_html = scope_html_with_selectors(html, options);
+    kreuzberg::convert_with_kreuzberg(&scoped_html, base_url)
+}
+
+fn normalize_extracted_latex_markdown(markdown: &str) -> String {
+    let re = regex::Regex::new(r"\$([^$\n]+)\$").expect("valid regex");
+    re.replace_all(markdown, |caps: &regex::Captures<'_>| {
+        let formula = caps.get(1).map_or("", |m| m.as_str()).replace(r"\\", r"\");
+        format!("${formula}$")
+    })
+    .into_owned()
+}
+
+fn scope_html_with_selectors(html: &str, options: &EnhancedOptions) -> String {
+    if let Some(body_selector) = options.body_selector.as_deref() {
+        let body_html = markdown::select_html(html, body_selector);
+        let title_selector = options
+            .content_selector
+            .as_deref()
+            .map_or_else(|| "h1".to_string(), |selector| format!("{selector} h1, h1"));
+        let title_html = markdown::select_html(html, &title_selector);
+        return match (title_html, body_html) {
+            (Some(title), Some(body)) => format!("{title}\n{body}"),
+            (None, Some(body)) => body,
+            _ => html.to_string(),
+        };
+    }
+
+    options
+        .content_selector
+        .as_deref()
+        .and_then(|selector| markdown::select_html(html, selector))
+        .unwrap_or_else(|| html.to_string())
+}
+
+fn replace_latex_formula_elements(html: &str) -> String {
+    let mut result = html.to_string();
+
+    let img_formula_re = regex::Regex::new(r"(?is)<img\b[^>]*>").expect("valid regex");
+    result = img_formula_re
+        .replace_all(&result, |caps: &regex::Captures<'_>| {
+            let tag = caps.get(0).map_or("", |m| m.as_str());
+            if is_formula_img_tag(tag) {
+                extract_attr(tag, "source")
+                    .or_else(|| extract_attr(tag, "alt"))
+                    .map_or_else(
+                        || tag.to_string(),
+                        |latex| format!("${}$", normalize_latex_for_html(&latex)),
+                    )
+            } else {
+                tag.to_string()
+            }
+        })
+        .into_owned();
+
+    let math_attr_re = regex::Regex::new(
+        r"(?is)<(?P<tag>mjx-container|span|div)\b(?P<attrs>[^>]*)>.*?</(?P<tag_close>mjx-container|span|div)>",
+    )
+    .expect("valid regex");
+    math_attr_re
+        .replace_all(&result, |caps: &regex::Captures<'_>| {
+            let full = caps.get(0).map_or("", |m| m.as_str());
+            let attrs = caps.name("attrs").map_or("", |m| m.as_str());
+            let tag = caps
+                .name("tag")
+                .map_or("", |m| m.as_str())
+                .to_ascii_lowercase();
+            let tag_close = caps
+                .name("tag_close")
+                .map_or("", |m| m.as_str())
+                .to_ascii_lowercase();
+
+            if tag != tag_close || !is_math_attrs(&tag, attrs) {
+                return full.to_string();
+            }
+
+            extract_attr(attrs, "data-tex")
+                .or_else(|| extract_attr(attrs, "data-latex"))
+                .or_else(|| extract_annotation_tex(full))
+                .map_or_else(
+                    || full.to_string(),
+                    |latex| format!("${}$", normalize_latex_for_html(&latex)),
+                )
+        })
+        .into_owned()
+}
+
+fn correct_code_languages(html: &str) -> String {
+    let code_re = regex::Regex::new(r"(?is)<code\b(?P<attrs>[^>]*)>(?P<body>.*?)</code>")
+        .expect("valid regex");
+
+    code_re
+        .replace_all(html, |caps: &regex::Captures<'_>| {
+            let full = caps.get(0).map_or("", |m| m.as_str());
+            let attrs = caps.name("attrs").map_or("", |m| m.as_str());
+            let body = caps.name("body").map_or("", |m| m.as_str());
+
+            if !has_matlab_language(attrs) || !looks_like_coq(body) {
+                return full.to_string();
+            }
+
+            let updated_attrs = attrs
+                .replace("language-matlab", "language-coq")
+                .replace(r#"class="matlab""#, r#"class="coq""#)
+                .replace("class='matlab'", "class='coq'");
+
+            format!("<code{updated_attrs}>{body}</code>")
+        })
+        .into_owned()
+}
+
+fn is_formula_img_tag(tag: &str) -> bool {
+    extract_attr(tag, "source").is_some()
+        || extract_attr(tag, "class").is_some_and(|classes| classes.contains("formula"))
+}
+
+fn is_math_attrs(tag: &str, attrs: &str) -> bool {
+    tag == "mjx-container"
+        || extract_attr(attrs, "class").is_some_and(|classes| {
+            classes.contains("katex") || classes.contains("math") || classes.contains("MathJax")
+        })
+}
+
+fn has_matlab_language(attrs: &str) -> bool {
+    extract_attr(attrs, "class").is_some_and(|classes| {
+        classes
+            .split_whitespace()
+            .any(|class| class == "language-matlab" || class == "matlab")
+    })
+}
+
+fn looks_like_coq(text: &str) -> bool {
+    let decoded = crate::html::decode_html_entities(text);
+    [
+        "Require Import",
+        "Definition",
+        "Fixpoint",
+        "Lemma",
+        "Theorem",
+        "Proof",
+        "Qed",
+        "Notation",
+        "Inductive",
+    ]
+    .iter()
+    .any(|needle| decoded.contains(needle))
+}
+
+fn normalize_latex_for_html(latex: &str) -> String {
+    latex.trim().replace('\\', "&#92;")
+}
+
+fn extract_annotation_tex(html: &str) -> Option<String> {
+    let re = regex::Regex::new(
+        r#"(?is)<annotation\b[^>]*encoding\s*=\s*["']application/x-tex["'][^>]*>(.*?)</annotation>"#,
+    )
+    .ok()?;
+
+    re.captures(html).and_then(|caps| {
+        let text = caps.get(1)?.as_str().trim();
+        (!text.is_empty()).then(|| crate::html::decode_html_entities(text))
+    })
+}
+
+fn extract_attr(tag: &str, attr: &str) -> Option<String> {
+    let re = regex::Regex::new(&format!(
+        r#"(?is)\b{}\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s"'=<>`]+))"#,
+        regex::escape(attr)
+    ))
+    .ok()?;
+
+    re.captures(tag).and_then(|caps| {
+        let value = caps
+            .get(1)
+            .or_else(|| caps.get(2))
+            .or_else(|| caps.get(3))?
+            .as_str()
+            .trim();
+        (!value.is_empty()).then(|| crate::html::decode_html_entities(value))
+    })
+}
+
 // Re-export commonly used types
 pub use browser::BrowserEngine;
+pub use search::{
+    search, SearchDiagnostics, SearchResult, SearchResultItem, DEFAULT_LIMIT, DEFAULT_PROVIDER,
+    SEARCH_PROVIDERS,
+};

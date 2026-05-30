@@ -105,8 +105,8 @@ describe('kreuzberg html-to-markdown integration', () => {
     </table>`;
     const result = await convertWithKreuzberg(html);
     expect(result.content).toContain('| Name | Value |');
-    expect(result.content).toContain('| A | 1 |');
-    expect(result.content).toContain('| B | 2 |');
+    expect(result.content).toMatch(/\| A\s+\| 1\s+\|/);
+    expect(result.content).toMatch(/\| B\s+\| 2\s+\|/);
   });
 
   it('converts links correctly', async () => {
@@ -117,6 +117,18 @@ describe('kreuzberg html-to-markdown integration', () => {
     const html = '<a href="https://example.com">Click here</a>';
     const result = await convertWithKreuzberg(html);
     expect(result.content).toContain('[Click here](https://example.com)');
+  });
+
+  it('resolves relative links with baseUrl', async () => {
+    const skip = skipIfUnavailable();
+    if (skip) {
+      return;
+    }
+    const html = '<a href="/about">About</a>';
+    const result = await convertWithKreuzberg(html, {
+      baseUrl: 'https://example.com/docs/page',
+    });
+    expect(result.content).toContain('[About](https://example.com/about)');
   });
 
   it('converts bold and italic correctly', async () => {

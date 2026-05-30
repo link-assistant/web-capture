@@ -1,0 +1,16 @@
+
+> @link-assistant/web-capture@1.7.3 test
+> node --experimental-vm-modules ./node_modules/.bin/jest --runTestsByPath tests/unit/package-runtime-dependencies.test.js
+
+(node:690755) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+PASS tests/unit/package-runtime-dependencies.test.js
+  runtime package dependencies
+    ✓ turndown-plugin-gfm is declared as a production dependency (3 ms)
+    ✓ turndown-plugin-gfm is not marked dev-only in package-lock.json (6 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       2 passed, 2 total
+Snapshots:   0 total
+Time:        0.366 s, estimated 1 s
+Ran all test suites within paths "tests/unit/package-runtime-dependencies.test.js".

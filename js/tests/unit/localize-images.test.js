@@ -2,6 +2,8 @@ import {
   extractImageReferences,
   getExtensionFromUrl,
   generateLocalFilename,
+  generateFigureFilename,
+  localizeImages,
 } from '../../src/localize-images.js';
 
 describe('localize-images module', () => {
@@ -73,6 +75,40 @@ describe('localize-images module', () => {
       expect(generateLocalFilename('https://example.com/photo.gif', 2)).toBe(
         'image-03.gif'
       );
+    });
+  });
+
+  describe('generateFigureFilename', () => {
+    it('generates figure-numbered filenames while preserving extensions', () => {
+      expect(
+        generateFigureFilename('https://habrastorage.org/getpro/habr/a.png', 0)
+      ).toBe('figure-1.png');
+      expect(
+        generateFigureFilename('https://habrastorage.org/getpro/habr/a.jpg', 9)
+      ).toBe('figure-10.jpg');
+    });
+  });
+
+  describe('localizeImages', () => {
+    it('accepts a custom filename generator for archive-compatible paths', async () => {
+      const markdown =
+        '![Figure 1](https://habrastorage.org/r/w1560/getpro/habr/figure.png "Figure 1")';
+
+      const result = await localizeImages(markdown, {
+        dryRun: true,
+        filenameGenerator: generateFigureFilename,
+      });
+
+      expect(result.markdown).toBe('![Figure 1](images/figure-1.png)');
+      expect(result.metadata).toEqual([
+        {
+          index: 1,
+          originalUrl:
+            'https://habrastorage.org/r/w1560/getpro/habr/figure.png',
+          altText: 'Figure 1',
+          localPath: 'images/figure-1.png',
+        },
+      ]);
     });
   });
 });
