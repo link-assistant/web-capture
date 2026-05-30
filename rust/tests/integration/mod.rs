@@ -11,6 +11,7 @@ mod gdocs_public_doc;
 mod heading_numbering;
 mod html2md_br_in_list_item;
 mod html2md_ol_numbering;
+mod image_mode_defaults;
 mod markdown_no_empty_title;
 mod paragraph_vs_line_break;
 mod strip_base64_empty_alt;

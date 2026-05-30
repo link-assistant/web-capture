@@ -154,7 +154,7 @@ const config = makeConfig({
       .option('embedImages', {
         type: 'boolean',
         description:
-          'Keep images as inline base64 data URIs instead of extracting to files (default: false). Use --embed-images to enable.',
+          'Keep images inline as base64 data URIs, producing a single self-contained file (default: false). By default markdown keeps remote images as direct links; use --extract-images to save them as local files.',
         default: getenv('WEB_CAPTURE_EMBED_IMAGES', false),
       })
       .option('imagesDir', {
@@ -162,6 +162,14 @@ const config = makeConfig({
         description:
           'Directory name for extracted images, relative to output file (default: images)',
         default: getenv('WEB_CAPTURE_IMAGES_DIR', 'images'),
+      })
+      .option('extractImages', {
+        type: 'string',
+        description:
+          'Extract images to local files under <dir>/images/ and rewrite the ' +
+          'markdown to reference them. Pass a directory, or use the flag with ' +
+          'no value to extract next to the output file. Downloads remote images too.',
+        default: getenv('WEB_CAPTURE_EXTRACT_IMAGES', undefined),
       })
       .option('dataDir', {
         type: 'string',
@@ -183,8 +191,9 @@ const config = makeConfig({
       .option('keepOriginalLinks', {
         type: 'boolean',
         description:
-          'Keep original remote image URLs instead of downloading or extracting. ' +
-          'Base64 data URIs are stripped (no original URL to restore).',
+          'Keep remote image URLs as direct links — the default markdown ' +
+          'behavior, kept as an explicit alias for back-compat. Base64 data ' +
+          'URIs are stripped (no original URL to restore).',
         default: getenv('WEB_CAPTURE_KEEP_ORIGINAL_LINKS', false),
       })
       .option('dualTheme', {
@@ -337,6 +346,123 @@ function deriveOutputPath(absoluteUrl, ext, dataDir) {
   return path.join(dir, `document.${ext}`);
 }
 
+/**
+ * Resolve the image mode for a markdown output destined for `outputDir`,
+ * mirroring the Rust CLI precedence: --embed-images > --extract-images >
+ * default (keep remote links, strip inline base64). See issue #112.
+ *
+ * @param {Object} options - Parsed CLI options
+ * @param {string} outputDir - Directory the markdown file is written to
+ * @returns {{mode: 'embed'|'extract'|'default', dir?: string, subdir: string}}
+ */
+function resolveImageMode(options, outputDir) {
+  const subdir = options.imagesDir || 'images';
+  if (options.embedImages) {
+    return { mode: 'embed', subdir };
+  }
+  const extract = options.extractImages;
+  // `--extract-images` with no value arrives as '' (or true); fall back to the
+  // output directory in that case, otherwise use the provided directory.
+  if (extract !== undefined && extract !== false && extract !== null) {
+    const dir = extract === '' || extract === true ? outputDir : extract;
+    return { mode: 'extract', dir, subdir };
+  }
+  return { mode: 'default', subdir };
+}
+
+/**
+ * Download remote images that an `extract` mode localized, writing them under
+ * `imagesPath`. On any failure the original remote URL is restored so the
+ * markdown never points at a missing local file. Mirrors the Rust helper.
+ *
+ * @param {string} markdown - Markdown with localized remote references
+ * @param {Array<{url: string, filename: string}>} pending - Remote images to fetch
+ * @param {string} imagesPath - Absolute directory to write images into
+ * @param {string} subdir - Images subdirectory name (for the local reference)
+ * @returns {Promise<string>} The (possibly URL-restored) markdown
+ */
+async function downloadPendingRemote(markdown, pending, imagesPath, subdir) {
+  let result = markdown;
+  let downloaded = 0;
+  for (const img of pending) {
+    const localRef = `${subdir}/${img.filename}`;
+    let buffer = null;
+    try {
+      const resp = await fetch(img.url);
+      if (resp.ok) {
+        buffer = Buffer.from(await resp.arrayBuffer());
+      }
+    } catch {
+      buffer = null;
+    }
+    let saved = false;
+    if (buffer) {
+      try {
+        fs.mkdirSync(imagesPath, { recursive: true });
+        fs.writeFileSync(path.join(imagesPath, img.filename), buffer);
+        saved = true;
+      } catch {
+        saved = false;
+      }
+    }
+    if (saved) {
+      downloaded++;
+    } else {
+      // Restore the original URL so the reference is not broken.
+      result = result.split(localRef).join(img.url);
+    }
+  }
+  if (downloaded > 0) {
+    console.error(`Downloaded ${downloaded} remote image(s) to ${subdir}/`);
+  }
+  return result;
+}
+
+/**
+ * Apply the resolved image mode to markdown destined for `outputPath`,
+ * downloading any remote images an extract mode localized. The single
+ * image-handling chokepoint for the JS CLI — every markdown output path routes
+ * through this so flags behave uniformly regardless of capture method (#112).
+ *
+ * @param {string} markdown - Markdown content
+ * @param {Object} options - Parsed CLI options
+ * @param {string} outputPath - File the markdown will be written to
+ * @param {string} label - Human label for log messages
+ * @returns {Promise<string>} The rewritten markdown
+ */
+async function processOutputMarkdown(markdown, options, outputPath, label) {
+  const { applyImageMode } = await import('../src/extract-images.js');
+  const outputDir = path.dirname(outputPath);
+  const resolved = resolveImageMode(options, outputDir);
+  const result = await applyImageMode(markdown, {
+    mode: resolved.mode,
+    dir: resolved.dir,
+    subdir: resolved.subdir,
+  });
+  let md = result.markdown;
+  if (result.extracted > 0) {
+    console.error(
+      `Extracted ${result.extracted} images to ${resolved.subdir}/ (${label})`
+    );
+  }
+  if (result.stripped > 0) {
+    console.error(
+      `Stripped ${result.stripped} inline base64 image(s) (${label}); ` +
+        'use --extract-images to save files or --embed-images to keep them inline'
+    );
+  }
+  if (resolved.mode === 'extract' && result.pendingRemote.length > 0) {
+    const imagesPath = path.resolve(resolved.dir, resolved.subdir);
+    md = await downloadPendingRemote(
+      md,
+      result.pendingRemote,
+      imagesPath,
+      resolved.subdir
+    );
+  }
+  return md;
+}
+
 function archiveExtension(archiveFormat) {
   if (archiveFormat === 'tar.gz' || archiveFormat === 'gz') {
     return 'tar.gz';
@@ -426,7 +552,8 @@ async function captureUrl(url, options) {
     // localImages is used by archive format
     // eslint-disable-next-line no-unused-vars
     localImages,
-    embedImages,
+    // imagesDir/embedImages/extractImages are read via `options` in the image
+    // mode chokepoint (resolveImageMode); destructured only for documentation.
     // eslint-disable-next-line no-unused-vars
     imagesDir,
     dataDir,
@@ -462,7 +589,6 @@ async function captureUrl(url, options) {
     captureGoogleDocWithBrowserOrFallback,
     selectGoogleDocsCaptureMethod,
   } = await import('../src/gdocs.js');
-  const { stripBase64Images } = await import('../src/extract-images.js');
 
   const normalizedFormat = format.toLowerCase();
   log.debug(() => ({
@@ -649,8 +775,6 @@ async function captureUrl(url, options) {
       }
     } else {
       try {
-        const { extractAndSaveImages } =
-          await import('../src/extract-images.js');
         if (normalizedFormat === 'archive' || normalizedFormat === 'zip') {
           const { fetchGoogleDocAsArchive } = await import('../src/gdocs.js');
           const { default: archiver } = await import('archiver');
@@ -721,36 +845,20 @@ async function captureUrl(url, options) {
             apiToken,
             log,
           });
-          let { markdown } = result;
+          const { markdown } = result;
           const output =
             explicitOutput === '-'
               ? null
               : explicitOutput || deriveOutputPath(absoluteUrl, 'md', dataDir);
           if (output) {
-            if (embedImages) {
-              // Keep base64 data URIs inline
-            } else if (keepOriginalLinks) {
-              const strip = stripBase64Images(markdown);
-              if (strip.stripped > 0) {
-                markdown = strip.markdown;
-                console.error(
-                  `Stripped ${strip.stripped} base64 images (keeping original links)`
-                );
-              }
-            } else {
-              const outputDir = path.dirname(output);
-              const extracted = extractAndSaveImages(markdown, outputDir, {
-                imagesDir: options.imagesDir || 'images',
-              });
-              if (extracted.extracted > 0) {
-                markdown = extracted.markdown;
-                console.error(
-                  `Extracted ${extracted.extracted} images to ${options.imagesDir || 'images'}/`
-                );
-              }
-            }
+            const finalMarkdown = await processOutputMarkdown(
+              markdown,
+              options,
+              output,
+              'Google Doc Markdown'
+            );
             fs.mkdirSync(path.dirname(output), { recursive: true });
-            fs.writeFileSync(output, markdown, 'utf-8');
+            fs.writeFileSync(output, finalMarkdown, 'utf-8');
             console.error(`Google Doc Markdown saved to: ${output}`);
           } else {
             process.stdout.write(markdown);
@@ -999,7 +1107,6 @@ async function captureUrl(url, options) {
       // Markdown format — enhanced conversion is now the default
       const html = await fetchHtml(absoluteUrl);
       const { convertHtmlToMarkdownEnhanced } = await import('../src/lib.js');
-      const { extractAndSaveImages } = await import('../src/extract-images.js');
       const result = convertHtmlToMarkdownEnhanced(html, absoluteUrl, {
         extractLatex: options.extractLatex,
         extractMetadata: options.extractMetadata,
@@ -1008,40 +1115,21 @@ async function captureUrl(url, options) {
         contentSelector: options.contentSelector,
         bodySelector: options.bodySelector,
       });
-      let markdown = result.markdown;
+      const markdown = result.markdown;
 
       const output =
         explicitOutput === '-'
           ? null
           : explicitOutput || deriveOutputPath(absoluteUrl, 'md', dataDir);
       if (output) {
-        if (embedImages) {
-          // Keep base64 data URIs inline
-        } else if (keepOriginalLinks) {
-          const strip = stripBase64Images(markdown);
-          if (strip.stripped > 0) {
-            markdown = strip.markdown;
-            console.error(
-              `Stripped ${strip.stripped} base64 images (keeping original links)`
-            );
-          }
-        } else {
-          const outputDir = path.dirname(output);
-          const extracted = extractAndSaveImages(markdown, outputDir, {
-            imagesDir: options.imagesDir || 'images',
-          });
-          if (extracted.extracted > 0) {
-            markdown = extracted.markdown;
-            console.error(
-              `Extracted ${extracted.extracted} images to ${options.imagesDir || 'images'}/`
-            );
-          }
-        }
-      }
-
-      if (output) {
+        const finalMarkdown = await processOutputMarkdown(
+          markdown,
+          options,
+          output,
+          'Markdown'
+        );
         fs.mkdirSync(path.dirname(output), { recursive: true });
-        fs.writeFileSync(output, markdown, 'utf-8');
+        fs.writeFileSync(output, finalMarkdown, 'utf-8');
         console.error(`Markdown saved to: ${output}`);
       } else {
         process.stdout.write(markdown);
@@ -1192,6 +1280,7 @@ async function main() {
       dualTheme: config.dualTheme,
       apiToken: config.apiToken,
       embedImages: config.embedImages,
+      extractImages: config.extractImages,
       imagesDir: config.imagesDir,
       dataDir: config.dataDir,
       archiveFormat: config.archiveFormat,

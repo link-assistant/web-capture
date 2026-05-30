@@ -128,3 +128,93 @@ export function stripBase64Images(markdown) {
 export function hasBase64Images(markdown) {
   return BASE64_IMAGE_REGEX.test(markdown);
 }
+
+// Matches a markdown image whose source is a remote http(s) URL. A trailing
+// markdown title attribute (e.g. `![](url "caption")`) is matched but excluded
+// from the captured URL.
+const REMOTE_IMAGE_REGEX =
+  /!\[([^\]]*)\]\((https?:\/\/[^)\s]+)(?:\s+"[^"]*")?\)/g;
+
+function remoteImageExtension(url) {
+  const cleaned = url.split(/[?#]/)[0];
+  const ext = (cleaned.split('.').pop() || '').toLowerCase();
+  if (ext === 'jpg' || ext === 'jpeg') {
+    return 'jpg';
+  }
+  if (['gif', 'webp', 'svg'].includes(ext)) {
+    return ext;
+  }
+  return 'png';
+}
+
+/**
+ * Apply an image mode to markdown — the single image-handling chokepoint.
+ *
+ * Every CLI/server capture path routes through this function so the same flag
+ * produces the same result regardless of capture method (browser vs API). See
+ * issue #112.
+ *
+ * Modes:
+ *  - `'default'`: keep remote URLs as direct links; strip inline base64 data
+ *    URIs (no remote URL to restore) to a visible placeholder. No `images/`
+ *    folder, no silently-kept multi-megabyte base64 blob.
+ *  - `'embed'`: keep base64 inline (single self-contained file).
+ *  - `'extract'`: extract base64 to files under `dir/subdir` and rewrite remote
+ *    references to the same local `subdir/` paths. The remote bytes are
+ *    downloaded by the caller — see `pendingRemote` in the result.
+ *
+ * @param {string} markdown - Markdown content
+ * @param {Object} [options]
+ * @param {'default'|'embed'|'extract'} [options.mode='default']
+ * @param {string} [options.dir] - Output directory (required for 'extract')
+ * @param {string} [options.subdir='images'] - Images subdirectory name
+ * @returns {Promise<{markdown: string, extracted: number, stripped: number, pendingRemote: Array<{url: string, filename: string}>}>}
+ */
+// Async by contract: this is the single chokepoint every capture path awaits,
+// and remote localization is fulfilled asynchronously by the caller. The body
+// itself is currently synchronous.
+// eslint-disable-next-line require-await
+export async function applyImageMode(markdown, options = {}) {
+  const { mode = 'default', dir, subdir = 'images' } = options;
+
+  if (mode === 'embed') {
+    return { markdown, extracted: 0, stripped: 0, pendingRemote: [] };
+  }
+
+  if (mode === 'extract') {
+    if (!dir) {
+      throw new Error("applyImageMode: 'extract' mode requires an output dir");
+    }
+    // 1. Extract inline base64 images to files.
+    const extracted = extractAndSaveImages(markdown, dir, {
+      imagesDir: subdir,
+    });
+    // 2. Plan localization of remote image references to the same folder.
+    const pendingRemote = [];
+    let index = 0;
+    const localized = extracted.markdown.replace(
+      REMOTE_IMAGE_REGEX,
+      (_match, altText, url) => {
+        index++;
+        const filename = `image-${String(index).padStart(2, '0')}.${remoteImageExtension(url)}`;
+        pendingRemote.push({ url, filename });
+        return `![${altText}](${subdir}/${filename})`;
+      }
+    );
+    return {
+      markdown: localized,
+      extracted: extracted.extracted,
+      stripped: 0,
+      pendingRemote,
+    };
+  }
+
+  // 'default'
+  const strip = stripBase64Images(markdown);
+  return {
+    markdown: strip.markdown,
+    extracted: 0,
+    stripped: strip.stripped,
+    pendingRemote: [],
+  };
+}
