@@ -138,8 +138,12 @@ const REMOTE_IMAGE_REGEX =
 function remoteImageExtension(url) {
   const cleaned = url.split(/[?#]/)[0];
   const ext = (cleaned.split('.').pop() || '').toLowerCase();
-  if (ext === 'jpg' || ext === 'jpeg') return 'jpg';
-  if (['gif', 'webp', 'svg'].includes(ext)) return ext;
+  if (ext === 'jpg' || ext === 'jpeg') {
+    return 'jpg';
+  }
+  if (['gif', 'webp', 'svg'].includes(ext)) {
+    return ext;
+  }
   return 'png';
 }
 
@@ -166,6 +170,10 @@ function remoteImageExtension(url) {
  * @param {string} [options.subdir='images'] - Images subdirectory name
  * @returns {Promise<{markdown: string, extracted: number, stripped: number, pendingRemote: Array<{url: string, filename: string}>}>}
  */
+// Async by contract: this is the single chokepoint every capture path awaits,
+// and remote localization is fulfilled asynchronously by the caller. The body
+// itself is currently synchronous.
+// eslint-disable-next-line require-await
 export async function applyImageMode(markdown, options = {}) {
   const { mode = 'default', dir, subdir = 'images' } = options;
 

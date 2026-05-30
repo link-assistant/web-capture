@@ -26,13 +26,14 @@ use axum::{
 use clap::Parser;
 use serde::Deserialize;
 use std::net::SocketAddr;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use tokio::fs;
 use tower_http::trace::TraceLayer;
 use tracing::{debug, error, info};
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 use url::Url;
 
+use web_capture::extract_images::{apply_image_mode, ImageMode, PendingRemoteImage};
 use web_capture::{
     capture_screenshot, convert_html_to_markdown_enhanced, convert_relative_urls, convert_to_utf8,
     fetch_html, html, render_html, EnhancedOptions,
@@ -95,8 +96,9 @@ struct Args {
     #[arg(long, env = "WEB_CAPTURE_BODY_SELECTOR")]
     body_selector: Option<String>,
 
-    /// Keep images as inline base64 data URIs instead of extracting to files (default: false).
-    /// Use --embed-images to keep base64 inline.
+    /// Keep images inline as base64 data URIs, producing a single self-contained
+    /// file (default: false). By default markdown keeps remote images as direct
+    /// links; use --extract-images to save them as local files instead.
     #[arg(long, default_value_t = false, env = "WEB_CAPTURE_EMBED_IMAGES")]
     embed_images: bool,
 
@@ -124,10 +126,18 @@ struct Args {
     #[arg(long, default_value_t = false)]
     no_extract_images: bool,
 
-    /// Keep original remote image URLs instead of downloading or extracting.
-    /// Base64 data URIs are stripped (no original URL to restore).
+    /// Keep remote image URLs as direct links — this is the default markdown
+    /// behavior, kept as an explicit alias for back-compat. Base64 data URIs are
+    /// stripped (no original URL to restore).
     #[arg(long, default_value_t = false, env = "WEB_CAPTURE_KEEP_ORIGINAL_LINKS")]
     keep_original_links: bool,
+
+    /// Extract images to local files: base64 data URIs and remote images are
+    /// saved under <DIR>/<images-dir>/ and the markdown is rewritten to point at
+    /// them. Without a value, the output file's directory is used. Default
+    /// markdown keeps images as direct remote links instead.
+    #[arg(long, num_args = 0..=1, default_missing_value = "", env = "WEB_CAPTURE_EXTRACT_IMAGES")]
+    extract_images: Option<String>,
 
     /// Capture both light and dark theme screenshots
     #[arg(long, default_value_t = false)]
@@ -182,6 +192,105 @@ struct MarkdownQuery {
 
 const fn default_true() -> bool {
     true
+}
+
+/// Resolve the image-handling [`ImageMode`] from CLI flags.
+///
+/// Precedence: `--embed-images` (and its `--no-extract-images` alias) >
+/// `--extract-images` > the default contract (keep remote links, strip inline
+/// base64). `--keep-original-links` falls through to the default, which is its
+/// documented behaviour.
+fn resolve_image_mode(args: &Args, output_dir: &Path) -> ImageMode {
+    if args.embed_images {
+        ImageMode::Embed
+    } else if let Some(dir) = args.extract_images.as_ref() {
+        let base = if dir.is_empty() {
+            output_dir.to_path_buf()
+        } else {
+            PathBuf::from(dir)
+        };
+        ImageMode::Extract {
+            dir: base,
+            subdir: args.images_dir.clone(),
+        }
+    } else {
+        ImageMode::Default
+    }
+}
+
+/// Apply the resolved image mode to markdown destined for a file, downloading
+/// any remote images that an Extract mode localized. Returns the rewritten
+/// markdown.
+async fn process_output_markdown(
+    markdown: String,
+    args: &Args,
+    output_path: &Path,
+    label: &str,
+) -> anyhow::Result<String> {
+    let output_dir = output_path.parent().unwrap_or_else(|| Path::new("."));
+    let mode = resolve_image_mode(args, output_dir);
+    let extract_dir = match &mode {
+        ImageMode::Extract { dir, .. } => Some(dir.clone()),
+        _ => None,
+    };
+    let result = apply_image_mode(&markdown, mode, None)?;
+    let mut md = result.markdown;
+    if result.extracted > 0 {
+        eprintln!(
+            "Extracted {} images to {}/ ({label})",
+            result.extracted, args.images_dir
+        );
+    }
+    if result.stripped > 0 {
+        eprintln!(
+            "Stripped {} inline base64 image(s) ({label}); \
+             use --extract-images to save files or --embed-images to keep them inline",
+            result.stripped
+        );
+    }
+    if let Some(dir) = extract_dir {
+        if !result.pending_remote.is_empty() {
+            let images_path = dir.join(&args.images_dir);
+            md =
+                download_pending_remote(md, &result.pending_remote, &images_path, &args.images_dir)
+                    .await;
+        }
+    }
+    Ok(md)
+}
+
+/// Download remote images that [`ImageMode::Extract`] localized, writing them to
+/// `images_path`. On any failure the original remote URL is restored so the
+/// markdown never points at a missing local file.
+async fn download_pending_remote(
+    mut markdown: String,
+    pending: &[PendingRemoteImage],
+    images_path: &Path,
+    subdir: &str,
+) -> String {
+    let client = reqwest::Client::new();
+    let mut downloaded = 0;
+    for img in pending {
+        let local_ref = format!("{subdir}/{}", img.filename);
+        let bytes = match client.get(&img.url).send().await {
+            Ok(resp) if resp.status().is_success() => resp.bytes().await.ok(),
+            _ => None,
+        };
+        let saved = bytes.is_some_and(|data| {
+            std::fs::create_dir_all(images_path).is_ok()
+                && std::fs::write(images_path.join(&img.filename), &data).is_ok()
+        });
+        if saved {
+            downloaded += 1;
+        } else {
+            // Restore the original URL so the reference is not broken.
+            markdown = markdown.replace(&local_ref, &img.url);
+        }
+    }
+    if downloaded > 0 {
+        eprintln!("Downloaded {downloaded} remote image(s) to {subdir}/");
+    }
+    markdown
 }
 
 #[tokio::main]
@@ -361,8 +470,14 @@ async fn markdown_handler(Query(params): Query<MarkdownQuery>) -> Response {
         }
     };
 
-    if !params.embed_images {
-        let result = web_capture::extract_images::strip_base64_images(&markdown);
+    // Route through the unified chokepoint. The server returns a single
+    // response body, so only Default (strip base64) and Embed apply.
+    let mode = if params.embed_images {
+        ImageMode::Embed
+    } else {
+        ImageMode::Default
+    };
+    if let Ok(result) = apply_image_mode(&markdown, mode, Some(&url)) {
         markdown = result.markdown;
     }
 
@@ -636,37 +751,13 @@ async fn capture_url(
                     let result =
                         web_capture::gdocs::fetch_google_doc_as_markdown(&absolute_url, api_token)
                             .await?;
-                    let mut markdown = result.content;
+                    let markdown = result.content;
                     if let Some(path) =
                         effective_output_path(&absolute_url, "md", output, &args.data_dir)
                     {
-                        if args.embed_images {
-                            // Keep base64 data URIs inline
-                        } else if args.keep_original_links {
-                            let result =
-                                web_capture::extract_images::strip_base64_images(&markdown);
-                            if result.stripped > 0 {
-                                markdown = result.markdown;
-                                eprintln!(
-                                    "Stripped {} base64 images (keeping original links)",
-                                    result.stripped
-                                );
-                            }
-                        } else {
-                            let output_dir = path.parent().unwrap_or(&path);
-                            let result = web_capture::extract_images::extract_and_save_images(
-                                &markdown,
-                                output_dir,
-                                &args.images_dir,
-                            )?;
-                            if result.extracted > 0 {
-                                markdown = result.markdown;
-                                eprintln!(
-                                    "Extracted {} images to {}/",
-                                    result.extracted, args.images_dir
-                                );
-                            }
-                        }
+                        let markdown =
+                            process_output_markdown(markdown, args, &path, "Google Doc Markdown")
+                                .await?;
                         write_text_capture_to_path(&markdown, &path, "Google Doc Markdown").await?;
                     } else {
                         print!("{markdown}");
@@ -777,7 +868,7 @@ async fn capture_url(
                 body_selector: args.body_selector.clone(),
             };
             let result = convert_html_to_markdown_enhanced(&html, Some(&absolute_url), &options)?;
-            let mut markdown = result.markdown;
+            let markdown = result.markdown;
 
             let is_stdout = output.is_some_and(|p| p.as_os_str() == "-");
             let derived;
@@ -790,32 +881,7 @@ async fn capture_url(
                 Some(derived)
             };
             if let Some(ref path) = effective_output {
-                if args.embed_images {
-                    // Keep base64 data URIs inline
-                } else if args.keep_original_links {
-                    let result = web_capture::extract_images::strip_base64_images(&markdown);
-                    if result.stripped > 0 {
-                        markdown = result.markdown;
-                        eprintln!(
-                            "Stripped {} base64 images (keeping original links)",
-                            result.stripped
-                        );
-                    }
-                } else {
-                    let output_dir = path.parent().unwrap_or(path);
-                    let result = web_capture::extract_images::extract_and_save_images(
-                        &markdown,
-                        output_dir,
-                        &args.images_dir,
-                    )?;
-                    if result.extracted > 0 {
-                        markdown = result.markdown;
-                        eprintln!(
-                            "Extracted {} images to {}/",
-                            result.extracted, args.images_dir
-                        );
-                    }
-                }
+                let markdown = process_output_markdown(markdown, args, path, "Markdown").await?;
                 if let Some(parent) = path.parent() {
                     std::fs::create_dir_all(parent).ok();
                 }

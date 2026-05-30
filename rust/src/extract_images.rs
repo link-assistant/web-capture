@@ -309,13 +309,9 @@ pub fn apply_image_mode(
                     let alt_text = &caps[1];
                     let url = caps[2].to_string();
                     index += 1;
-                    let filename =
-                        format!("image-{index:02}.{}", remote_image_extension(&url));
+                    let filename = format!("image-{index:02}.{}", remote_image_extension(&url));
                     let relative_path = format!("{subdir}/{filename}");
-                    pending_remote.push(PendingRemoteImage {
-                        url,
-                        filename,
-                    });
+                    pending_remote.push(PendingRemoteImage { url, filename });
                     format!("![{alt_text}]({relative_path})")
                 })
                 .into_owned();

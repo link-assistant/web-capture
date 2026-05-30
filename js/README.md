@@ -73,11 +73,17 @@ web-capture https://example.com --archive
 web-capture https://example.com --archive zip -o site.zip
 web-capture https://example.com --archive tar.gz -o site.tar.gz
 
-# Keep images inline as base64 (opt-in)
+# Default markdown keeps remote image URLs as direct links
+web-capture https://example.com -o page.md
+
+# Keep images inline as base64 (self-contained file, opt-in)
 web-capture https://example.com --embed-images -o page.md
 
+# Extract images (inline base64 + remote) to a local images/ folder
+web-capture https://example.com --extract-images -o page.md
+
 # Custom images directory
-web-capture https://example.com --images-dir assets -o page.md
+web-capture https://example.com --extract-images --images-dir assets -o page.md
 
 # Disable specific features
 web-capture https://example.com --no-extract-latex --no-post-process -o page.md
@@ -256,9 +262,10 @@ web-capture <url> [options]
 | `--height`                  |       | Viewport height in pixels                      | 800                                 |
 | `--quality`                 |       | JPEG quality 0-100                             | 80                                  |
 | `--fullPage`                |       | Capture full scrollable page                   | false                               |
-| `--embed-images`            |       | Keep images as inline base64 data URIs         | false                               |
+| `--embed-images`            |       | Keep images inline as base64 (self-contained)  | false                               |
 | `--no-extract-images`       |       | Alias for `--embed-images`                     | false                               |
-| `--keep-original-links`     |       | Keep original remote URLs, strip base64        | false                               |
+| `--extract-images[=DIR]`    |       | Extract images to `DIR/images/` + download remote | -                                |
+| `--keep-original-links`     |       | Keep remote URLs as direct links (the default) | false                               |
 | `--images-dir`              |       | Subdirectory name for extracted images         | `images`                            |
 | `--archive`                 |       | Create archive: `zip`, `7z`, `tar.gz`, `tar`   | -                                   |
 | `--document-format`         |       | Document format in archive: `markdown`, `html` | `markdown`                          |

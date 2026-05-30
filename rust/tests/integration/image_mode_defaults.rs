@@ -18,16 +18,13 @@ fn temp_dir() -> PathBuf {
     use std::sync::atomic::{AtomicU64, Ordering};
     static COUNTER: AtomicU64 = AtomicU64::new(0);
     let id = COUNTER.fetch_add(1, Ordering::Relaxed);
-    let dir = std::env::temp_dir().join(format!(
-        "image-mode-defaults-{}-{id}",
-        std::process::id()
-    ));
+    let dir = std::env::temp_dir().join(format!("image-mode-defaults-{}-{id}", std::process::id()));
     let _ = std::fs::remove_dir_all(&dir);
     std::fs::create_dir_all(&dir).unwrap();
     dir
 }
 
-fn fixture_md_with_remote_url() -> &'static str {
+const fn fixture_md_with_remote_url() -> &'static str {
     "Hi.\n\n![](https://example.invalid/foo.png)\n\nBye.\n"
 }
 
@@ -38,8 +35,7 @@ fn fixture_md_with_base64() -> String {
 
 #[test]
 fn default_markdown_keeps_remote_urls_as_direct_links() {
-    let result =
-        apply_image_mode(fixture_md_with_remote_url(), ImageMode::Default, None).unwrap();
+    let result = apply_image_mode(fixture_md_with_remote_url(), ImageMode::Default, None).unwrap();
     assert!(result.markdown.contains("https://example.invalid/foo.png"));
     assert!(!result.markdown.contains("images/"));
     assert!(!result.markdown.contains("data:image"));
@@ -52,14 +48,14 @@ fn default_markdown_keeps_base64_as_inline_when_no_remote_source_exists() {
     // with a clear error pointing the user to a flag.
     let md = fixture_md_with_base64();
     let result = apply_image_mode(&md, ImageMode::Default, None);
-    // Acceptance: either the function returns inline-base64 with a WARN log, or
-    // it errors. It must NOT silently emit a multi-megabyte file with no notice.
-    match result {
-        Ok(r) => assert!(
+    // Acceptable: Ok with base64 stripped (a WARN was logged), OR an explicit
+    // error asking the user for a flag. Either way, no silent inline blob — it
+    // must NOT silently emit a multi-megabyte file with no notice.
+    if let Ok(r) = result {
+        assert!(
             !r.markdown.contains("data:image"),
             "default must not silently keep inline base64"
-        ),
-        Err(_) => {} // also acceptable: explicit error asking for a flag
+        );
     }
 }
 
@@ -82,8 +78,7 @@ fn extract_images_mode_writes_images_folder() {
 
 #[test]
 fn embed_images_mode_keeps_base64() {
-    let result =
-        apply_image_mode(&fixture_md_with_base64(), ImageMode::Embed, None).unwrap();
+    let result = apply_image_mode(&fixture_md_with_base64(), ImageMode::Embed, None).unwrap();
     assert!(result.markdown.contains("data:image"));
 }
 

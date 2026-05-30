@@ -81,15 +81,31 @@ web-capture --serve --port 8080
 | `--output`               | `-o`  | Output file path. Use `-o -` for stdout                                                 | auto-derived from URL |
 | `--data-dir`             |       | Base directory for auto-derived output paths                                            | `./data/web-capture`  |
 | `--engine`               | `-e`  | Browser engine (JS only): `puppeteer`, `playwright`                                     | `puppeteer`           |
-| `--embed-images`         |       | Keep images as inline base64 data URIs                                                  | `false`               |
+| `--embed-images`         |       | Keep images inline as base64 data URIs (self-contained file)                            | `false`               |
 | `--no-extract-images`    |       | Alias for `--embed-images`                                                              | `false`               |
-| `--keep-original-links`  |       | Keep original remote image URLs, strip base64                                           | `false`               |
+| `--extract-images[=DIR]` |       | Extract images to `DIR/images/` (or next to the output) and download remote images      | -                     |
+| `--keep-original-links`  |       | Keep remote image URLs as direct links (the default markdown behavior)                   | `false`               |
 | `--images-dir`           |       | Subdirectory name for extracted images                                                  | `images`              |
 | `--archive`              |       | Create archive: `zip` (default), `7z`, `tar.gz`, `tar`                                  | -                     |
 | `--extract-latex`        |       | Extract LaTeX formulas                                                                  | `true`                |
 | `--extract-metadata`     |       | Extract article metadata                                                                | `true`                |
 | `--post-process`         |       | Apply post-processing                                                                   | `true`                |
 | `--detect-code-language` |       | Detect code block languages                                                             | `true`                |
+
+## Image Handling
+
+Markdown output supports three image modes, and every capture path (browser or
+API, CLI or server) routes through the same chokepoint so a flag behaves
+identically regardless of how the page was captured:
+
+| Mode                        | Flag                  | Result                                                                                     |
+| --------------------------- | --------------------- | ------------------------------------------------------------------------------------------ |
+| **Direct links** (default)  | _none_ / `--keep-original-links` | Remote images stay as direct `https://…` URLs. Inline base64 (which has no remote URL to restore) is stripped to a placeholder with a warning — never silently kept as a multi-megabyte blob. No `images/` folder. |
+| **Embed**                   | `--embed-images`      | Base64 images are kept inline, producing a single self-contained file.                      |
+| **Extract**                 | `--extract-images[=DIR]` | Inline base64 _and_ remote images are written to `DIR/images/` (defaults to next to the output file) and the markdown is rewritten to reference the local files. |
+
+The `--archive` formats always bundle images into the archive's `images/`
+folder regardless of these flags.
 
 ## Environment Variables
 
@@ -99,6 +115,7 @@ All flags can be controlled via environment variables:
 | ---------------------------------- | ----------------------------------- | -------------------- |
 | `WEB_CAPTURE_DATA_DIR`             | Base directory for output           | `./data/web-capture` |
 | `WEB_CAPTURE_EMBED_IMAGES`         | `0`/`1` — keep images inline        | `0`                  |
+| `WEB_CAPTURE_EXTRACT_IMAGES`       | Directory to extract images into    | -                    |
 | `WEB_CAPTURE_KEEP_ORIGINAL_LINKS`  | `0`/`1` — keep original remote URLs | `0`                  |
 | `WEB_CAPTURE_IMAGES_DIR`           | Subdirectory for extracted images   | `images`             |
 | `WEB_CAPTURE_EXTRACT_LATEX`        | `0`/`1` — extract LaTeX             | `1`                  |
