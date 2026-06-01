@@ -278,6 +278,23 @@ async fn main() -> anyhow::Result<()> {
 }
 ```
 
+## Testing
+
+```bash
+cargo test --all-features   # Unit and integration tests (offline)
+```
+
+Some integration suites hit live servers and are skipped by default. Enable them
+with environment variables:
+
+```bash
+# Download the Wikipedia page (markdown + image) via the browser engine
+WIKIPEDIA_INTEGRATION=1 cargo test --test integration wikipedia_download::live -- --nocapture
+
+# Public Google Docs live suite
+GDOCS_INTEGRATION=1 cargo test --test integration gdocs_public_doc::live -- --nocapture
+```
+
 ## Built With
 
 - [Axum](https://github.com/tokio-rs/axum) - Web framework
