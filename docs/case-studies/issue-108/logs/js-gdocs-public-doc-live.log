@@ -1,0 +1,48 @@
+
+> @link-assistant/web-capture@1.7.17 test
+> node --experimental-vm-modules ./node_modules/.bin/jest --testPathPattern=gdocs-public-doc --testTimeout=120000
+
+(node:780584) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+PASS tests/integration/gdocs-public-doc.test.js (16.325 s)
+  Google Docs public test document (issue #90)
+    URL variations
+      ✓ accepts https://docs.google.com/document/d/1f5zI2xOFpKa90v0GjamO_t7lqSdzMlaM as a Google Docs URL (5 ms)
+      ✓ accepts https://docs.google.com/document/d/1f5zI2xOFpKa90v0GjamO_t7lqSdzMlaM/edit as a Google Docs URL
+      ✓ accepts https://docs.google.com/document/d/1f5zI2xOFpKa90v0GjamO_t7lqSdzMlaM/edit?usp=sharing as a Google Docs URL (1 ms)
+      ✓ accepts https://docs.google.com/document/d/1f5zI2xOFpKa90v0GjamO_t7lqSdzMlaM/edit?usp=sharing&ouid=102030405060708090100&rtpof=true&sd=true as a Google Docs URL (15 ms)
+      ✓ accepts https://docs.google.com/document/d/1f5zI2xOFpKa90v0GjamO_t7lqSdzMlaM/edit?tab=t.0 as a Google Docs URL
+      ✓ extracts the public document ID from https://docs.google.com/document/d/1f5zI2xOFpKa90v0GjamO_t7lqSdzMlaM
+      ✓ extracts the public document ID from https://docs.google.com/document/d/1f5zI2xOFpKa90v0GjamO_t7lqSdzMlaM/edit
+      ✓ extracts the public document ID from https://docs.google.com/document/d/1f5zI2xOFpKa90v0GjamO_t7lqSdzMlaM/edit?usp=sharing (1 ms)
+      ✓ extracts the public document ID from https://docs.google.com/document/d/1f5zI2xOFpKa90v0GjamO_t7lqSdzMlaM/edit?usp=sharing&ouid=102030405060708090100&rtpof=true&sd=true
+      ✓ extracts the public document ID from https://docs.google.com/document/d/1f5zI2xOFpKa90v0GjamO_t7lqSdzMlaM/edit?tab=t.0 (1 ms)
+      ✓ builds the expected export URL for the public document
+      ✓ builds the expected editor URL for the public document
+      ✓ builds the expected Docs API URL for the public document
+    Capture method selection (issue #72 regression guard)
+      ✓ routes --capture browser to the editor-model backend (1 ms)
+      ✓ routes --capture api to the public-export backend when no token
+      ✓ routes --capture api with a token to the Docs REST API backend (3 ms)
+    Reference markdown fixture
+      ✓ contains every feature category documented in issue #90 (5 ms)
+      ✓ embeds the four test images referenced by the issue
+    Live capture against the public document
+      ✓ fetches the public document via --capture api and returns markdown (779 ms)
+      ✓ resolves https://docs.google.com/document/d/1f5zI2xOFpKa90v0GjamO_t7lqSdzMlaM to the same document when capturing (802 ms)
+      ✓ resolves https://docs.google.com/document/d/1f5zI2xOFpKa90v0GjamO_t7lqSdzMlaM/edit to the same document when capturing (496 ms)
+      ✓ resolves https://docs.google.com/document/d/1f5zI2xOFpKa90v0GjamO_t7lqSdzMlaM/edit?usp=sharing to the same document when capturing (421 ms)
+      ✓ resolves https://docs.google.com/document/d/1f5zI2xOFpKa90v0GjamO_t7lqSdzMlaM/edit?usp=sharing&ouid=102030405060708090100&rtpof=true&sd=true to the same document when capturing (392 ms)
+      ✓ resolves https://docs.google.com/document/d/1f5zI2xOFpKa90v0GjamO_t7lqSdzMlaM/edit?tab=t.0 to the same document when capturing (404 ms)
+      ✓ captures the public document via --capture browser and renders DOCS_modelChunk markdown (6053 ms)
+      ✓ fetches the issue #108 v2 document via --capture api and preserves Section 15 semantics (448 ms)
+      ✓ captures the issue #108 v2 document via --capture browser and preserves Section 15 semantics (5254 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       27 passed, 27 total
+Snapshots:   0 total
+Time:        16.344 s
+Ran all test suites matching /gdocs-public-doc/i.
+Jest did not exit one second after the test run has completed.
+
+'This usually means that there are asynchronous operations that weren't stopped in your tests. Consider running Jest with `--detectOpenHandles` to troubleshoot this issue.

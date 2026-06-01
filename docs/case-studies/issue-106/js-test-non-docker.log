@@ -1,0 +1,515 @@
+
+> @link-assistant/web-capture@1.7.16 test
+> node --experimental-vm-modules ./node_modules/.bin/jest --testPathIgnorePatterns=docker.test.js
+
+(node:96925) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:96912) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:96913) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:96911) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:96919) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+PASS tests/unit/cli.test.js
+  CLI
+    --help
+      ✓ shows help message with --help flag (113 ms)
+      ✓ shows help message with -h flag (103 ms)
+      ✓ shows error and exits with code 1 when no arguments provided (104 ms)
+    --version
+      ✓ shows version with --version flag (148 ms)
+      ✓ shows version with -v flag (88 ms)
+      ✓ shows web-capture version when run from another npm project (92 ms)
+    URL validation
+      ✓ accepts a URL as a positional argument (326 ms)
+      ✓ accepts a URL after the -- argument separator (320 ms)
+      ✓ rejects unknown options (88 ms)
+      ✓ rejects invalid URL (78 ms)
+    format options
+      ✓ accepts --format html (79 ms)
+      ✓ accepts --format markdown (81 ms)
+      ✓ accepts --format image (72 ms)
+    engine options
+      ✓ help shows engine options (70 ms)
+      ✓ accepts --engine option (68 ms)
+    server mode options
+      ✓ help shows --serve option (72 ms)
+      ✓ help shows --port option (77 ms)
+      ✓ help shows API endpoints (75 ms)
+    output options
+      ✓ help shows --output option (75 ms)
+
+PASS tests/unit/retry.test.js
+  retry
+    ✓ returns result on first success (1 ms)
+    ✓ retries on failure and succeeds eventually (152 ms)
+    ✓ throws after exhausting retries (158 ms)
+    ✓ calls onRetry callback before each retry (52 ms)
+    ✓ uses exponential backoff delays (703 ms)
+    ✓ caps delay at maxDelay (1104 ms)
+    ✓ passes attempt number to fn (152 ms)
+
+PASS tests/integration/api-endpoints.test.js
+  API Endpoint Tests
+    unsupported routes
+      ✓ does not expose /gdocs as an output-format endpoint (25 ms)
+    GET /image
+      ✓ rejects invalid format (5 ms)
+      ✓ returns 400 without url (3 ms)
+    GET /markdown
+      ✓ returns markdown (39 ms)
+    GET /archive
+      ✓ returns a ZIP archive with remote images (markdown format) (26 ms)
+      ✓ returns a ZIP archive with HTML format (12 ms)
+      ✓ returns a ZIP archive with local images and folders (16 ms)
+      ✓ returns a ZIP archive with HTML format and local CSS (16 ms)
+      ✓ returns 400 without url (3 ms)
+    GET /docx
+      ✓ returns a DOCX document (41 ms)
+      ✓ returns 400 without url (3 ms)
+    GET /pdf
+      ✓ returns 400 without url (3 ms)
+
+PASS tests/unit/html2md.test.js
+  convertHtmlToMarkdown
+    ✓ removes empty links and anchor headings (13 ms)
+    ✓ removes empty links in complex content (3 ms)
+    ✓ removes empty links with only whitespace (4 ms)
+    ✓ removes empty links with only child elements (3 ms)
+    ✓ removes headings with only whitespace (2 ms)
+    ✓ converts relative links to absolute if baseUrl is provided (2 ms)
+    ✓ does not change links if no baseUrl is provided (2 ms)
+    ✓ converts ARIA role table to Markdown table (8 ms)
+    ✓ converts a regular HTML table to Markdown table (4 ms)
+    ✓ handles empty tables gracefully (2 ms)
+    ✓ handles specific ARIA table example (17 ms)
+  convertHtmlToMarkdownEnhanced content selectors
+    ✓ scopes Habr-shaped article markdown while keeping full-page metadata (7 ms)
+  convertHtmlToMarkdownEnhanced Habr compatibility
+    ✓ preserves article code line breaks and extracts formulas from a Habr fixture (7 ms)
+
+PASS tests/unit/extract-images.test.js
+  extract-images module
+    extractAndSaveImages
+      ✓ extracts a single PNG image from markdown (4 ms)
+      ✓ extracts multiple images with content-hash filenames (1 ms)
+      ✓ produces stable filenames for duplicate images (2 ms)
+      ✓ handles JPEG mime type correctly (1 ms)
+      ✓ uses custom imagesDir (1 ms)
+      ✓ returns markdown unchanged when no base64 images
+      ✓ preserves non-base64 image references (1 ms)
+      ✓ preserves alt text during extraction (1 ms)
+      ✓ handles SVG data URIs (2 ms)
+    extractBase64ToBuffers
+      ✓ extracts base64 images to in-memory buffers (1 ms)
+      ✓ uses custom imagesDir prefix
+      ✓ does not write files to disk
+    stripBase64Images
+      ✓ strips base64 images and leaves alt text placeholder (1 ms)
+      ✓ strips base64 images with empty alt text
+      ✓ preserves remote image URLs (1 ms)
+      ✓ strips multiple base64 images (1 ms)
+    hasBase64Images
+      ✓ returns true when markdown has base64 images
+      ✓ returns false when no base64 images (1 ms)
+      ✓ returns false for empty string
+
+PASS tests/unit/gdocs.test.js
+  gdocs
+    isGoogleDocsUrl
+      ✓ returns true for standard Google Docs edit URL (2 ms)
+      ✓ returns true for URL with query parameters
+      ✓ returns true for URL without /edit (1 ms)
+      ✓ returns false for non-Google Docs URL
+      ✓ returns false for Google Sheets URL
+      ✓ returns false for empty string
+      ✓ returns false for null
+      ✓ returns false for undefined
+      ✓ returns false for non-string input
+    extractDocumentId
+      ✓ extracts document ID from standard URL
+      ✓ extracts document ID from URL with query params
+      ✓ extracts document ID with hyphens and underscores (1 ms)
+      ✓ returns null for non-Google Docs URL
+      ✓ returns null for empty string
+      ✓ returns null for null input
+    buildExportUrl
+      ✓ builds HTML export URL (1 ms)
+      ✓ builds Markdown export URL
+      ✓ builds PDF export URL
+      ✓ builds TXT export URL
+      ✓ defaults to html for unknown format
+      ✓ defaults to html when format is omitted
+      ✓ uses the real document ID from test document (1 ms)
+    capture method selection (issue #72)
+      ✓ honors explicit browser capture for Google Docs URLs
+      ✓ uses public export for API capture without token
+      ✓ uses Docs REST API for API capture with token
+    buildEditUrl
+      ✓ builds the fresh Google Docs editor URL
+    buildDocsApiUrl
+      ✓ builds the Google Docs REST API URL
+    parseGoogleDocsModelChunks (issue #72)
+      ✓ includes regular and suggested text from DOCS_modelChunk data (2 ms)
+      ✓ accepts individual DOCS_modelChunk items captured from push calls
+      ✓ extracts table cells and suggested images from DOCS_modelChunk data (1 ms)
+      ✓ parses multi-column tables when rows are separated by 0x0a (issue #92 R2) (1 ms)
+      ✓ does not create empty columns when Docs emits both 0x1c and 0x0a cell separators (issue #96)
+      ✓ does not create ghost columns from the live Google Docs 0x0a+0x1c table separator pattern (issue #100) (3 ms)
+      ✓ preserves intentionally empty table cells without shifting following cells (issue #100) (1 ms)
+      ✓ numbers ordered list items sequentially (issue #92 R3) (1 ms)
+      ✓ joins consecutive list items with a single newline (issue #92 R4)
+      ✓ keeps nested ordered lists ordered and tight when Google Docs uses separate list ids per level (issue #100) (1 ms)
+      ✓ renders model style records for headings, inline formatting, links, lists, blockquotes, rules, and images (1 ms)
+      ✓ renders soft breaks outside marks and preserves image dimensions (issue #104) (2 ms)
+      ✓ does not keep inline marks open across embedded newlines (issue #104)
+      ✓ keeps nested bold and italic markers balanced (issue #96)
+      ✓ keeps styled same-target link segments in one link label (issue #96) (1 ms)
+      ✓ keeps consecutive blockquote paragraphs in the same quote block (issue #96)
+      ✓ ends rendered markdown with a newline (issue #96)
+    renderDocsApiDocument (issue #72)
+      ✓ renders Google Docs REST API paragraphs, tables, and inline images (1 ms)
+    captureGoogleDocWithBrowserOrFallback (issue #81)
+      ✓ falls back to public export archive when the editor exposes no model chunks (21 ms)
+    captureGoogleDocWithBrowser (issue #106)
+      ✓ waits for DOCS_modelChunk data to stop changing before parsing (10 ms)
+    GDOCS_EXPORT_FORMATS
+      ✓ contains all expected formats (1 ms)
+    localizeGoogleDocsModelImages (issue #92 R5)
+      ✓ downloads docs-images-rt URLs and rewrites markdown/html (1 ms)
+      ✓ keeps original URL when download fails
+    preprocessGoogleDocsExportHtml (issue #92 R6)
+      ✓ hoists font-weight:700 spans into <strong> (2 ms)
+      ✓ hoists font-style:italic spans into <em> (1 ms)
+      ✓ hoists text-decoration:line-through spans into <del> (1 ms)
+      ✓ hoists Google Docs CSS class styles into semantic inline tags (2 ms)
+      ✓ combines multiple styles on a single span (1 ms)
+      ✓ unwraps google.com/url?q= redirect links (1 ms)
+      ✓ strips leading empty anchors and numbering span inside headings (1 ms)
+      ✓ strips standalone empty anchors before headings
+      ✓ turns class-indented Google Docs paragraphs into blockquotes
+      ✓ replaces &nbsp; entity and U+00A0 with regular spaces (1 ms)
+      ✓ is a no-op for HTML without Google Docs markers (1 ms)
+      ✓ recovers public-export markdown structure for issue #102 (10 ms)
+    extractBase64Images
+      ✓ extracts a single PNG data URI image
+      ✓ extracts multiple images with correct numbering and extensions
+      ✓ returns empty array when no data URI images
+      ✓ preserves non-data-URI images (1 ms)
+    image extraction pipeline (issue #53)
+      ✓ extractBase64Images from HTML produces images with data buffers (2 ms)
+      ✓ default markdown mode extracts base64 images to disk (not strip) (2 ms)
+      ✓ keepOriginalLinks strips base64 images
+      ✓ extractBase64ToBuffers produces in-memory buffers for archive (1 ms)
+
+PASS tests/unit/heading-image.test.js
+  heading image parity
+    ✓ <img> inside <h1> survives Turndown and stays in sync with extraction (11 ms)
+    ✓ <img> inside all heading levels is preserved (8 ms)
+    ✓ image count parity across full pipeline (2 ms)
+
+PASS tests/unit/latex.test.js
+  latex module
+    extractHabrFormula
+      ✓ extracts LaTeX from Habr formula img source attribute (4 ms)
+      ✓ falls back to alt text when source is missing
+      ✓ returns null when no source or alt
+    extractKatexFormula
+      ✓ extracts from annotation element (1 ms)
+      ✓ extracts from data-tex attribute (1 ms)
+      ✓ returns null when no TeX source found
+    extractMathJaxFormula
+      ✓ extracts from data-tex attribute (1 ms)
+    isFormulaImage
+      ✓ identifies img.formula elements
+      ✓ identifies img with source attribute (1 ms)
+      ✓ rejects regular images
+    isMathElement
+      ✓ identifies katex elements (1 ms)
+      ✓ identifies math elements
+      ✓ identifies mjx-container (1 ms)
+      ✓ rejects regular elements
+    extractFormula
+      ✓ extracts from Habr formula image (1 ms)
+      ✓ extracts from KaTeX element
+      ✓ returns null for regular elements (1 ms)
+
+PASS tests/unit/browser.test.js (7.757 s)
+  Browser Abstraction Layer
+    getBrowserEngine
+      ✓ returns puppeteer by default (5 ms)
+      ✓ returns playwright when engine=playwright query param is provided
+      ✓ returns playwright when engine=pw query param is provided (1 ms)
+      ✓ returns puppeteer when engine=puppeteer query param is provided
+      ✓ returns puppeteer when engine=pptr query param is provided
+      ✓ returns playwright when browser=playwright query param is provided
+      ✓ is case insensitive (10 ms)
+      ✓ returns playwright from BROWSER_ENGINE env var (1 ms)
+      ✓ prefers query param over env var
+    createBrowser - Puppeteer
+      ✓ creates a puppeteer browser with type field (1384 ms)
+      ✓ can create and use a page (910 ms)
+    createBrowser - Playwright
+      ✓ creates a playwright browser with type field (1219 ms)
+      ✓ can create and use a page (653 ms)
+    Page Adapter Compatibility
+      ✓ both adapters support the same interface (1499 ms)
+      ✓ both adapters expose browser-commander v0.7.0+ APIs (1532 ms)
+
+PASS tests/integration/gdocs-public-doc.test.js
+  Google Docs public test document (issue #90)
+    URL variations
+      ✓ accepts https://docs.google.com/document/d/1f5zI2xOFpKa90v0GjamO_t7lqSdzMlaM as a Google Docs URL (1 ms)
+      ✓ accepts https://docs.google.com/document/d/1f5zI2xOFpKa90v0GjamO_t7lqSdzMlaM/edit as a Google Docs URL
+      ✓ accepts https://docs.google.com/document/d/1f5zI2xOFpKa90v0GjamO_t7lqSdzMlaM/edit?usp=sharing as a Google Docs URL
+      ✓ accepts https://docs.google.com/document/d/1f5zI2xOFpKa90v0GjamO_t7lqSdzMlaM/edit?usp=sharing&ouid=102030405060708090100&rtpof=true&sd=true as a Google Docs URL (1 ms)
+      ✓ accepts https://docs.google.com/document/d/1f5zI2xOFpKa90v0GjamO_t7lqSdzMlaM/edit?tab=t.0 as a Google Docs URL
+      ✓ extracts the public document ID from https://docs.google.com/document/d/1f5zI2xOFpKa90v0GjamO_t7lqSdzMlaM
+      ✓ extracts the public document ID from https://docs.google.com/document/d/1f5zI2xOFpKa90v0GjamO_t7lqSdzMlaM/edit
+      ✓ extracts the public document ID from https://docs.google.com/document/d/1f5zI2xOFpKa90v0GjamO_t7lqSdzMlaM/edit?usp=sharing
+      ✓ extracts the public document ID from https://docs.google.com/document/d/1f5zI2xOFpKa90v0GjamO_t7lqSdzMlaM/edit?usp=sharing&ouid=102030405060708090100&rtpof=true&sd=true
+      ✓ extracts the public document ID from https://docs.google.com/document/d/1f5zI2xOFpKa90v0GjamO_t7lqSdzMlaM/edit?tab=t.0 (1 ms)
+      ✓ builds the expected export URL for the public document
+      ✓ builds the expected editor URL for the public document
+      ✓ builds the expected Docs API URL for the public document
+    Capture method selection (issue #72 regression guard)
+      ✓ routes --capture browser to the editor-model backend (1 ms)
+      ✓ routes --capture api to the public-export backend when no token
+      ✓ routes --capture api with a token to the Docs REST API backend
+    Reference markdown fixture
+      ✓ contains every feature category documented in issue #90 (5 ms)
+      ✓ embeds the four test images referenced by the issue (1 ms)
+    Live capture against the public document
+      ○ skipped fetches the public document via --capture api and returns markdown
+      ○ skipped resolves https://docs.google.com/document/d/1f5zI2xOFpKa90v0GjamO_t7lqSdzMlaM to the same document when capturing
+      ○ skipped resolves https://docs.google.com/document/d/1f5zI2xOFpKa90v0GjamO_t7lqSdzMlaM/edit to the same document when capturing
+      ○ skipped resolves https://docs.google.com/document/d/1f5zI2xOFpKa90v0GjamO_t7lqSdzMlaM/edit?usp=sharing to the same document when capturing
+      ○ skipped resolves https://docs.google.com/document/d/1f5zI2xOFpKa90v0GjamO_t7lqSdzMlaM/edit?usp=sharing&ouid=102030405060708090100&rtpof=true&sd=true to the same document when capturing
+      ○ skipped resolves https://docs.google.com/document/d/1f5zI2xOFpKa90v0GjamO_t7lqSdzMlaM/edit?tab=t.0 to the same document when capturing
+      ○ skipped captures the public document via --capture browser and renders DOCS_modelChunk markdown
+
+PASS tests/unit/convertRelativeUrls.test.js
+  convertRelativeUrls
+    ✓ should NOT inject runtimeHook if there are no <script> tags (2 ms)
+    ✓ should inject runtimeHook if there is a <script> tag (1 ms)
+    ✓ should inject runtimeHook if there is an inline <script> (1 ms)
+
+PASS tests/unit/metadata.test.js
+  metadata module
+    extractMetadata
+      ✓ extracts author information (9 ms)
+      ✓ extracts publication date (2 ms)
+      ✓ extracts hubs (3 ms)
+      ✓ extracts tags from meta keywords (2 ms)
+      ✓ extracts LD+JSON author name (2 ms)
+      ✓ extracts votes and comments (1 ms)
+      ✓ returns empty object for minimal HTML (1 ms)
+    formatMetadataBlock
+      ✓ formats author line with link (1 ms)
+      ✓ formats author with full name
+      ✓ formats publication date (16 ms)
+      ✓ includes hubs and tags (1 ms)
+      ✓ returns empty array for null metadata (1 ms)
+    formatFooterBlock
+      ✓ includes separator line
+      ✓ formats tag links (1 ms)
+      ✓ formats article stats (1 ms)
+      ✓ returns empty array for null metadata
+
+PASS tests/unit/localize-images.test.js
+  localize-images module
+    extractImageReferences
+      ✓ extracts markdown image references (2 ms)
+      ✓ ignores local image references (1 ms)
+      ✓ ignores non-image links
+      ✓ returns empty array for no images
+    getExtensionFromUrl
+      ✓ detects .png extension (1 ms)
+      ✓ detects .jpg extension
+      ✓ detects .gif extension
+      ✓ handles query parameters
+      ✓ defaults to .png for unknown extension
+    generateLocalFilename
+      ✓ generates zero-padded filename
+      ✓ preserves file extension from URL (1 ms)
+    generateFigureFilename
+      ✓ generates figure-numbered filenames while preserving extensions
+    localizeImages
+      ✓ accepts a custom filename generator for archive-compatible paths (2 ms)
+
+PASS tests/unit/figures.test.js
+  figures module
+    extractFigures
+      ✓ extracts figures with captions (7 ms)
+      ✓ handles Russian figure captions (1 ms)
+      ✓ uses sequential numbering when no caption number (2 ms)
+      ✓ skips SVG images (1 ms)
+      ✓ resolves relative URLs
+      ✓ returns empty array for no figures (1 ms)
+
+PASS tests/unit/verify.test.js
+  verify module
+    normalizeText
+      ✓ lowercases text (2 ms)
+      ✓ normalizes unicode spaces
+      ✓ normalizes curly quotes (1 ms)
+      ✓ removes LaTeX delimiters
+      ✓ normalizes arrows
+      ✓ removes \displaystyle
+      ✓ extracts text from \text{}
+    normalizeCode
+      ✓ lowercases and collapses whitespace (1 ms)
+      ✓ normalizes multiplication sign
+    verifyMarkdownContent
+      ✓ verifies title presence
+      ✓ detects missing title
+      ✓ verifies headings
+      ✓ detects missing headings
+      ✓ verifies code blocks with fuzzy matching (1 ms)
+      ✓ calculates pass rate
+      ✓ checks figure images when hasLocalImages is set (1 ms)
+
+PASS tests/unit/postprocess.test.js
+  postprocess module
+    applyUnicodeNormalization
+      ✓ preserves non-breaking spaces as &nbsp; entities (1 ms)
+      ✓ normalizes curly quotes to straight quotes
+      ✓ normalizes en-dash to hyphen
+      ✓ normalizes ellipsis
+    applyLatexSpacingFixes
+      ✓ adds space before formula after word character (1 ms)
+      ✓ trims whitespace inside formula delimiters
+      ✓ does not modify block formulas (1 ms)
+      ✓ does not modify blockquote block formulas
+      ✓ handles multiple formulas on one line
+    applyPercentSignFix
+      ✓ fixes percent sign in inline formulas
+      ✓ fixes \text{%} notation (1 ms)
+    applyBoldFormattingFixes
+      ✓ removes empty bold markers
+      ✓ trims content inside bold markers
+      ✓ adds space between word and bold (1 ms)
+    postProcessMarkdown
+      ✓ applies all transformations by default
+      ✓ respects option flags
+      ✓ removes stray standalone $ signs (1 ms)
+
+  console.log
+    Using explicitly configured JavaScript root: js
+
+      at getJsRoot (../scripts/js-paths.mjs:28:15)
+
+  console.log
+    Verifying publish (attempt 1 of 12)...
+
+      at verifyPublishedVersionWithRunner (../scripts/publish-to-npm.mjs:119:13)
+
+  console.log
+    Version not visible on npm yet: npm error code E404
+
+      at verifyPublishedVersionWithRunner (../scripts/publish-to-npm.mjs:130:17)
+
+  console.log
+    Verifying publish (attempt 2 of 12)...
+
+      at verifyPublishedVersionWithRunner (../scripts/publish-to-npm.mjs:119:13)
+
+  console.log
+    Version not visible on npm yet: npm error code E404
+
+      at verifyPublishedVersionWithRunner (../scripts/publish-to-npm.mjs:130:17)
+
+  console.log
+    Verifying publish (attempt 3 of 12)...
+
+      at verifyPublishedVersionWithRunner (../scripts/publish-to-npm.mjs:119:13)
+
+PASS tests/unit/publish-verification.test.js
+  publish verification
+    ✓ keeps polling verification through transient npm 404s (21 ms)
+
+PASS tests/unit/batch.test.js
+  batch module
+    getArticle
+      ✓ returns article config by version (1 ms)
+      ✓ merges defaults into article config
+      ✓ throws for unknown version (5 ms)
+    getAllVersions
+      ✓ returns all version keys (1 ms)
+    getAllArticles
+      ✓ returns all articles with defaults merged
+    createConfigFromUrls
+      ✓ creates config from URL list (1 ms)
+      ✓ sets default archive paths
+    validateConfig
+      ✓ validates correct config (1 ms)
+      ✓ rejects config without articles
+      ✓ rejects article without url
+      ✓ rejects article with invalid url
+
+PASS tests/unit/animation.test.js
+  animation module
+    compareFrames
+      ✓ returns 1.0 for identical frames (2 ms)
+      ✓ returns 0 for completely different frames
+      ✓ returns 0 for different sized frames (1 ms)
+      ✓ returns 0 for null frames
+      ✓ calculates partial similarity
+
+PASS tests/unit/package-runtime-dependencies.test.js
+  runtime package dependencies
+    ✓ turndown-plugin-gfm is declared as a production dependency (2 ms)
+    ✓ turndown-plugin-gfm is not marked dev-only in package-lock.json (7 ms)
+
+PASS tests/e2e/process.test.js (10.704 s)
+  E2E: Web Capture Microservice
+    ✓ should return HTML from /html endpoint (111 ms)
+    ✓ should return Markdown from /markdown endpoint (27 ms)
+    ✓ should return PNG from /image endpoint (9474 ms)
+    ✓ should stream content from /stream endpoint (8 ms)
+    ✓ should return content from /fetch endpoint (4 ms)
+
+PASS tests/mock/index.test.js (11.009 s)
+  Web Capture Microservice
+    GET /html
+      ✓ should return HTML content when URL is provided (30 ms)
+      ✓ should return 400 when URL is missing (3 ms)
+      ✓ should return 500 when fetch fails (5 ms)
+    GET /markdown
+      ✓ should convert HTML to Markdown when URL is provided (19 ms)
+      ✓ should remove CSS from the markdown output (10 ms)
+      ✓ should return 400 when URL is missing (2 ms)
+      ✓ should return 500 when fetch fails (4 ms)
+    GET /image
+      ✓ should return PNG image when URL is provided (9503 ms)
+      ✓ should return 400 when URL is missing (4 ms)
+    GET /stream
+      ✓ should stream content from the given URL (9 ms)
+      ✓ should return 400 when URL is missing (2 ms)
+      ✓ should return 500 when fetch fails (32 ms)
+    GET /fetch
+      ✓ should return content when URL is provided (5 ms)
+      ✓ should return 400 when URL is missing (3 ms)
+      ✓ should return 500 when fetch fails (4 ms)
+
+PASS tests/integration/browser-engines.test.js (18.037 s)
+  Browser Engine Integration Tests
+    Puppeteer Engine
+      ✓ can navigate to a page and get content (3511 ms)
+      ✓ can take a screenshot (3040 ms)
+      ✓ can set custom headers and user agent (2931 ms)
+    Playwright Engine
+      ✓ can navigate to a page and get content (1482 ms)
+      ✓ can take a screenshot (1227 ms)
+      ✓ can set custom headers and user agent (1230 ms)
+    Engine Parity
+      ✓ both engines produce similar content for the same page (4055 ms)
+
+A worker process has failed to exit gracefully and has been force exited. This is likely caused by tests leaking due to improper teardown. Try running with --detectOpenHandles to find leaks. Active timers can also cause this, ensure that .unref() was called on them.
+Test Suites: 1 skipped, 23 passed, 23 of 24 total
+Tests:       23 skipped, 310 passed, 333 total
+Snapshots:   0 total
+Time:        18.66 s
+Ran all test suites.

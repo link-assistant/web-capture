@@ -1,0 +1,117 @@
+
+> @link-assistant/web-capture@1.7.16 test
+> node --experimental-vm-modules ./node_modules/.bin/jest --runTestsByPath tests/unit/gdocs.test.js --testNamePattern=waits for DOCS_modelChunk
+
+(node:60617) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+FAIL tests/unit/gdocs.test.js
+  gdocs
+    isGoogleDocsUrl
+      ○ skipped returns true for standard Google Docs edit URL
+      ○ skipped returns true for URL with query parameters
+      ○ skipped returns true for URL without /edit
+      ○ skipped returns false for non-Google Docs URL
+      ○ skipped returns false for Google Sheets URL
+      ○ skipped returns false for empty string
+      ○ skipped returns false for null
+      ○ skipped returns false for undefined
+      ○ skipped returns false for non-string input
+    extractDocumentId
+      ○ skipped extracts document ID from standard URL
+      ○ skipped extracts document ID from URL with query params
+      ○ skipped extracts document ID with hyphens and underscores
+      ○ skipped returns null for non-Google Docs URL
+      ○ skipped returns null for empty string
+      ○ skipped returns null for null input
+    buildExportUrl
+      ○ skipped builds HTML export URL
+      ○ skipped builds Markdown export URL
+      ○ skipped builds PDF export URL
+      ○ skipped builds TXT export URL
+      ○ skipped defaults to html for unknown format
+      ○ skipped defaults to html when format is omitted
+      ○ skipped uses the real document ID from test document
+    capture method selection (issue #72)
+      ○ skipped honors explicit browser capture for Google Docs URLs
+      ○ skipped uses public export for API capture without token
+      ○ skipped uses Docs REST API for API capture with token
+    buildEditUrl
+      ○ skipped builds the fresh Google Docs editor URL
+    buildDocsApiUrl
+      ○ skipped builds the Google Docs REST API URL
+    parseGoogleDocsModelChunks (issue #72)
+      ○ skipped includes regular and suggested text from DOCS_modelChunk data
+      ○ skipped accepts individual DOCS_modelChunk items captured from push calls
+      ○ skipped extracts table cells and suggested images from DOCS_modelChunk data
+      ○ skipped parses multi-column tables when rows are separated by 0x0a (issue #92 R2)
+      ○ skipped does not create empty columns when Docs emits both 0x1c and 0x0a cell separators (issue #96)
+      ○ skipped does not create ghost columns from the live Google Docs 0x0a+0x1c table separator pattern (issue #100)
+      ○ skipped preserves intentionally empty table cells without shifting following cells (issue #100)
+      ○ skipped numbers ordered list items sequentially (issue #92 R3)
+      ○ skipped joins consecutive list items with a single newline (issue #92 R4)
+      ○ skipped keeps nested ordered lists ordered and tight when Google Docs uses separate list ids per level (issue #100)
+      ○ skipped renders model style records for headings, inline formatting, links, lists, blockquotes, rules, and images
+      ○ skipped renders soft breaks outside marks and preserves image dimensions (issue #104)
+      ○ skipped does not keep inline marks open across embedded newlines (issue #104)
+      ○ skipped keeps nested bold and italic markers balanced (issue #96)
+      ○ skipped keeps styled same-target link segments in one link label (issue #96)
+      ○ skipped keeps consecutive blockquote paragraphs in the same quote block (issue #96)
+      ○ skipped ends rendered markdown with a newline (issue #96)
+    renderDocsApiDocument (issue #72)
+      ○ skipped renders Google Docs REST API paragraphs, tables, and inline images
+    captureGoogleDocWithBrowserOrFallback (issue #81)
+      ○ skipped falls back to public export archive when the editor exposes no model chunks
+    captureGoogleDocWithBrowser (issue #106)
+      ✕ waits for DOCS_modelChunk data to stop changing before parsing (5 ms)
+    GDOCS_EXPORT_FORMATS
+      ○ skipped contains all expected formats
+    localizeGoogleDocsModelImages (issue #92 R5)
+      ○ skipped downloads docs-images-rt URLs and rewrites markdown/html
+      ○ skipped keeps original URL when download fails
+    preprocessGoogleDocsExportHtml (issue #92 R6)
+      ○ skipped hoists font-weight:700 spans into <strong>
+      ○ skipped hoists font-style:italic spans into <em>
+      ○ skipped hoists text-decoration:line-through spans into <del>
+      ○ skipped hoists Google Docs CSS class styles into semantic inline tags
+      ○ skipped combines multiple styles on a single span
+      ○ skipped unwraps google.com/url?q= redirect links
+      ○ skipped strips leading empty anchors and numbering span inside headings
+      ○ skipped strips standalone empty anchors before headings
+      ○ skipped turns class-indented Google Docs paragraphs into blockquotes
+      ○ skipped replaces &nbsp; entity and U+00A0 with regular spaces
+      ○ skipped is a no-op for HTML without Google Docs markers
+      ○ skipped recovers public-export markdown structure for issue #102
+    extractBase64Images
+      ○ skipped extracts a single PNG data URI image
+      ○ skipped extracts multiple images with correct numbering and extensions
+      ○ skipped returns empty array when no data URI images
+      ○ skipped preserves non-data-URI images
+    image extraction pipeline (issue #53)
+      ○ skipped extractBase64Images from HTML produces images with data buffers
+      ○ skipped default markdown mode extracts base64 images to disk (not strip)
+      ○ skipped keepOriginalLinks strips base64 images
+      ○ skipped extractBase64ToBuffers produces in-memory buffers for archive
+
+  ● gdocs › captureGoogleDocWithBrowser (issue #106) › waits for DOCS_modelChunk data to stop changing before parsing
+
+    expect(received).toContain(expected) // indexOf
+
+    Expected substring: "Second paragraph"
+    Received string:    "First paragraph
+    "
+
+       996 |
+       997 |       expect(result.markdown).toContain('First paragraph');
+    >  998 |       expect(result.markdown).toContain('Second paragraph');
+           |                               ^
+       999 |       expect(browser.evaluateCalls).toBeGreaterThan(2);
+      1000 |     });
+      1001 |   });
+
+      at Object.toContain (tests/unit/gdocs.test.js:998:31)
+
+Test Suites: 1 failed, 1 total
+Tests:       1 failed, 69 skipped, 70 total
+Snapshots:   0 total
+Time:        1.435 s
+Ran all test suites within paths "tests/unit/gdocs.test.js".

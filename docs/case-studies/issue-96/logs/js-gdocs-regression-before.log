@@ -1,0 +1,223 @@
+
+> @link-assistant/web-capture@1.7.11 test
+> node --experimental-vm-modules ./node_modules/.bin/jest --runTestsByPath tests/unit/gdocs.test.js
+
+(node:1314860) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+FAIL tests/unit/gdocs.test.js
+  gdocs
+    isGoogleDocsUrl
+      ✓ returns true for standard Google Docs edit URL (2 ms)
+      ✓ returns true for URL with query parameters
+      ✓ returns true for URL without /edit
+      ✓ returns false for non-Google Docs URL
+      ✓ returns false for Google Sheets URL
+      ✓ returns false for empty string
+      ✓ returns false for null
+      ✓ returns false for undefined
+      ✓ returns false for non-string input
+    extractDocumentId
+      ✓ extracts document ID from standard URL
+      ✓ extracts document ID from URL with query params
+      ✓ extracts document ID with hyphens and underscores
+      ✓ returns null for non-Google Docs URL
+      ✓ returns null for empty string
+      ✓ returns null for null input
+    buildExportUrl
+      ✓ builds HTML export URL
+      ✓ builds Markdown export URL
+      ✓ builds PDF export URL
+      ✓ builds TXT export URL
+      ✓ defaults to html for unknown format
+      ✓ defaults to html when format is omitted
+      ✓ uses the real document ID from test document
+    capture method selection (issue #72)
+      ✓ honors explicit browser capture for Google Docs URLs
+      ✓ uses public export for API capture without token
+      ✓ uses Docs REST API for API capture with token
+    buildEditUrl
+      ✓ builds the fresh Google Docs editor URL
+    buildDocsApiUrl
+      ✓ builds the Google Docs REST API URL
+    parseGoogleDocsModelChunks (issue #72)
+      ✓ includes regular and suggested text from DOCS_modelChunk data (1 ms)
+      ✓ accepts individual DOCS_modelChunk items captured from push calls
+      ✓ extracts table cells and suggested images from DOCS_modelChunk data (1 ms)
+      ✓ parses multi-column tables when rows are separated by 0x0a (issue #92 R2) (1 ms)
+      ✕ does not create empty columns when Docs emits both 0x1c and 0x0a cell separators (issue #96) (2 ms)
+      ✓ numbers ordered list items sequentially (issue #92 R3) (1 ms)
+      ✓ joins consecutive list items with a single newline (issue #92 R4) (1 ms)
+      ✓ renders model style records for headings, inline formatting, links, lists, blockquotes, rules, and images (3 ms)
+      ✕ keeps nested bold and italic markers balanced (issue #96) (4 ms)
+      ✕ keeps consecutive blockquote paragraphs in the same quote block (issue #96) (1 ms)
+      ✕ ends rendered markdown with a newline (issue #96) (1 ms)
+    renderDocsApiDocument (issue #72)
+      ✓ renders Google Docs REST API paragraphs, tables, and inline images (1 ms)
+    captureGoogleDocWithBrowserOrFallback (issue #81)
+      ✓ falls back to public export archive when the editor exposes no model chunks (33 ms)
+    GDOCS_EXPORT_FORMATS
+      ✓ contains all expected formats (1 ms)
+    localizeGoogleDocsModelImages (issue #92 R5)
+      ✓ downloads docs-images-rt URLs and rewrites markdown/html (1 ms)
+      ✓ keeps original URL when download fails (1 ms)
+    preprocessGoogleDocsExportHtml (issue #92 R6)
+      ✓ hoists font-weight:700 spans into <strong> (3 ms)
+      ✓ hoists font-style:italic spans into <em> (1 ms)
+      ✓ hoists text-decoration:line-through spans into <del> (1 ms)
+      ✕ hoists Google Docs CSS class styles into semantic inline tags (2 ms)
+      ✓ combines multiple styles on a single span (1 ms)
+      ✓ unwraps google.com/url?q= redirect links (1 ms)
+      ✓ strips leading empty anchors and numbering span inside headings (1 ms)
+      ✕ strips standalone empty anchors before headings (1 ms)
+      ✕ turns class-indented Google Docs paragraphs into blockquotes
+      ✓ replaces &nbsp; entity and U+00A0 with regular spaces
+      ✓ is a no-op for HTML without Google Docs markers
+    extractBase64Images
+      ✓ extracts a single PNG data URI image (1 ms)
+      ✓ extracts multiple images with correct numbering and extensions
+      ✓ returns empty array when no data URI images (1 ms)
+      ✓ preserves non-data-URI images
+    image extraction pipeline (issue #53)
+      ✓ extractBase64Images from HTML produces images with data buffers (2 ms)
+      ✓ default markdown mode extracts base64 images to disk (not strip) (2 ms)
+      ✓ keepOriginalLinks strips base64 images (1 ms)
+      ✓ extractBase64ToBuffers produces in-memory buffers for archive (1 ms)
+
+  ● gdocs › parseGoogleDocsModelChunks (issue #72) › does not create empty columns when Docs emits both 0x1c and 0x0a cell separators (issue #96)
+
+    expect(received).toHaveLength(expected)
+
+    Expected length: 3
+    Received length: 5
+    Received array:  [{"content": [{"bold": false, "italic": false, "link": null, "strike": false, "text": "A", "type": "text"}]}, {"content": []}, {"content": [{"bold": false, "italic": false, "link": null, "strike": false, "text": "B", "type": "text"}]}, {"content": []}, {"content": [{"bold": false, "italic": false, "link": null, "strike": false, "text": "C", "type": "text"}]}]
+
+      304 |       const markdown = renderGoogleDocsCapture(capture, 'markdown');
+      305 |
+    > 306 |       expect(capture.tables[0].rows[0].cells).toHaveLength(3);
+          |                                               ^
+      307 |       expect(markdown).toContain('| A | B | C |');
+      308 |       expect(markdown).not.toContain('| A |  | B |');
+      309 |     });
+
+      at Object.toHaveLength (tests/unit/gdocs.test.js:306:47)
+
+  ● gdocs › parseGoogleDocsModelChunks (issue #72) › keeps nested bold and italic markers balanced (issue #96)
+
+    expect(received).toBe(expected) // Object.is equality
+
+    - Expected  - 2
+    + Received  + 1
+
+    - **Bold text with *italic inside* and back to bold**
+    + **Bold text with ***italic inside*** and back to bold**
+    -
+
+      521 |       const markdown = renderGoogleDocsCapture(capture, 'markdown');
+      522 |
+    > 523 |       expect(markdown).toBe(
+          |                        ^
+      524 |         '**Bold text with *italic inside* and back to bold**\n'
+      525 |       );
+      526 |     });
+
+      at Object.toBe (tests/unit/gdocs.test.js:523:24)
+
+  ● gdocs › parseGoogleDocsModelChunks (issue #72) › keeps consecutive blockquote paragraphs in the same quote block (issue #96)
+
+    expect(received).toBe(expected) // Object.is equality
+
+    - Expected  - 2
+    + Received  + 1
+
+      > Quote paragraph one
+    - >
+    +
+      > Quote paragraph two
+    -
+
+      554 |       const markdown = renderGoogleDocsCapture(capture, 'markdown');
+      555 |
+    > 556 |       expect(markdown).toBe(
+          |                        ^
+      557 |         '> Quote paragraph one\n>\n> Quote paragraph two\n'
+      558 |       );
+      559 |     });
+
+      at Object.toBe (tests/unit/gdocs.test.js:556:24)
+
+  ● gdocs › parseGoogleDocsModelChunks (issue #72) › ends rendered markdown with a newline (issue #96)
+
+    expect(received).toBe(expected) // Object.is equality
+
+    - Expected  - 1
+    + Received  + 0
+
+      Last line
+    -
+
+      564 |       ]);
+      565 |
+    > 566 |       expect(renderGoogleDocsCapture(capture, 'markdown')).toBe('Last line\n');
+          |                                                            ^
+      567 |     });
+      568 |   });
+      569 |
+
+      at Object.toBe (tests/unit/gdocs.test.js:566:60)
+
+  ● gdocs › preprocessGoogleDocsExportHtml (issue #92 R6) › hoists Google Docs CSS class styles into semantic inline tags
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 3
+    Received: 0
+
+      791 |       const { html: out, hoisted } = preprocessGoogleDocsExportHtml(html);
+      792 |
+    > 793 |       expect(hoisted).toBe(3);
+          |                       ^
+      794 |       expect(out).toContain('<strong>Bold</strong>');
+      795 |       expect(out).toContain('<em>Italic</em>');
+      796 |       expect(out).toContain('<del>Strike</del>');
+
+      at Object.toBe (tests/unit/gdocs.test.js:793:23)
+
+  ● gdocs › preprocessGoogleDocsExportHtml (issue #92 R6) › strips standalone empty anchors before headings
+
+    expect(received).not.toContain(expected) // indexOf
+
+    Expected substring: not "<a id="
+    Received string:        "<html><head></head><body><a id=\"anchor-1\"></a><h2>Headings</h2></body></html>"
+
+      831 |
+      832 |       expect(out).toContain('<h2>Headings</h2>');
+    > 833 |       expect(out).not.toContain('<a id=');
+          |                       ^
+      834 |     });
+      835 |
+      836 |     it('turns class-indented Google Docs paragraphs into blockquotes', () => {
+
+      at Object.toContain (tests/unit/gdocs.test.js:833:23)
+
+  ● gdocs › preprocessGoogleDocsExportHtml (issue #92 R6) › turns class-indented Google Docs paragraphs into blockquotes
+
+    expect(received).toContain(expected) // indexOf
+
+    Expected substring: "<blockquote><p>Quote</p></blockquote>"
+    Received string:    "<html><head><style>.c18{margin-left:24pt;margin-right:24pt}</style></head><body><p class=\"c18\">Quote</p></body></html>"
+
+      839 |       const { html: out } = preprocessGoogleDocsExportHtml(html);
+      840 |
+    > 841 |       expect(out).toContain('<blockquote><p>Quote</p></blockquote>');
+          |                   ^
+      842 |     });
+      843 |
+      844 |     it('replaces &nbsp; entity and U+00A0 with regular spaces', () => {
+
+      at Object.toContain (tests/unit/gdocs.test.js:841:19)
+
+Test Suites: 1 failed, 1 total
+Tests:       7 failed, 55 passed, 62 total
+Snapshots:   0 total
+Time:        1.136 s
+Ran all test suites within paths "tests/unit/gdocs.test.js".

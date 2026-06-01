@@ -1,0 +1,8 @@
+# web-capture default configuration
+# This file uses Links Notation format (key: value)
+
+# Server port
+PORT: 3000
+
+# Browser engine (puppeteer or playwright)
+BROWSER_ENGINE: puppeteer

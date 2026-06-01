@@ -1,132 +1,284 @@
 # web-capture
 
-<img width="1824" alt="Screenshot 2025-05-12 at 3 49 32 AM" src="https://github.com/user-attachments/assets/cbf63dec-7dcd-40e7-9d5d-eddc49fe6169" />
+**JavaScript:** [![npm version](https://img.shields.io/npm/v/@link-assistant/web-capture?label=npm&color=blue)](https://www.npmjs.com/package/@link-assistant/web-capture) [![npm downloads](https://img.shields.io/npm/dm/@link-assistant/web-capture?label=downloads&color=blue)](https://www.npmjs.com/package/@link-assistant/web-capture) [![CI - JavaScript](https://img.shields.io/github/actions/workflow/status/link-assistant/web-capture/js.yml?branch=main&label=JS%20CI)](https://github.com/link-assistant/web-capture/actions/workflows/js.yml)
 
-A microservice to fetch URLs and render them as:
+**Rust:** [![crates.io version](https://img.shields.io/crates/v/web-capture?label=crates.io&color=orange)](https://crates.io/crates/web-capture) [![crates.io downloads](https://img.shields.io/crates/d/web-capture?label=downloads&color=orange)](https://crates.io/crates/web-capture) [![docs.rs](https://img.shields.io/docsrs/web-capture?label=docs.rs)](https://docs.rs/web-capture) [![CI - Rust](https://img.shields.io/github/actions/workflow/status/link-assistant/web-capture/rust.yml?branch=main&label=Rust%20CI)](https://github.com/link-assistant/web-capture/actions/workflows/rust.yml)
 
-- **HTML**: GET /html?url=<URL>
-- **Markdown**: GET /markdown?url=<URL>
-- **PNG screenshot**: GET /image?url=<URL>
+**Release:** [![GitHub Release](https://img.shields.io/github/v/release/link-assistant/web-capture?label=GitHub%20Release)](https://github.com/link-assistant/web-capture/releases) [![License: Unlicense](https://img.shields.io/badge/license-Unlicense-green)](https://unlicense.org)
 
-## Installation
+A CLI and microservice to fetch URLs and render them as:
+
+- **Markdown**: Clean HTML-to-Markdown conversion with image extraction
+- **HTML**: Rendered page content
+- **PNG/JPEG screenshot**: Viewport or full-page capture
+- **ZIP archive**: Markdown/HTML + locally downloaded images
+- **PDF**: Print-quality document
+- **DOCX**: Word document
+
+## Language Implementations
+
+This repository contains two implementations with compatible APIs:
+
+| Implementation         | Directory          | Package                                                                                  | Status     |
+| ---------------------- | ------------------ | ---------------------------------------------------------------------------------------- | ---------- |
+| **JavaScript/Node.js** | [`./js`](./js)     | [@link-assistant/web-capture](https://www.npmjs.com/package/@link-assistant/web-capture) | Production |
+| **Rust**               | [`./rust`](./rust) | [web-capture](https://crates.io/crates/web-capture)                                      | Production |
+
+Both implementations provide the same CLI interface and HTTP API endpoints, allowing you to choose based on your deployment preferences.
+
+## Quick Start
+
+### JavaScript
 
 ```bash
+cd js
 npm install
-# or
-yarn install
+npm run dev
 ```
 
-## Available Commands
+### Rust
 
-### Development
-- `yarn dev` - Start the development server with hot reloading using nodemon
-- `yarn start` - Start the service using Docker Compose
-
-### Testing
-- `yarn test` - Run all unit tests
-- `yarn test:watch` - Run tests in watch mode
-- `yarn test:e2e` - Run end-to-end tests
-- `yarn test:e2e:docker` - Run end-to-end tests against Docker container
-- `yarn test:all` - Run all tests including build and e2e tests
-
-### Building
-- `yarn build` - Build and start the Docker container
-
-### Examples
-- `yarn examples:python` - Run Python example scripts
-- `yarn examples:javascript` - Run JavaScript example scripts
-- `yarn examples` - Run all examples (requires build)
-
-## Usage
-
-### Local Development
 ```bash
-yarn dev
-curl http://localhost:3000/html?url=https://example.com
-```
-
-### Docker
-```bash
-# Build and run using Docker Compose
-yarn start
-
-# Or manually
-docker build -t web-capture .
-docker run -p 3000:3000 web-capture
+cd rust
+cargo run -- --serve
 ```
 
 ## API Endpoints
 
-### HTML Endpoint
+Both implementations expose the same API:
+
+| Endpoint                                                  | Description                                                                                                    |
+| --------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| `GET /html?url=<URL>`                                     | Get rendered HTML content                                                                                      |
+| `GET /markdown?url=<URL>`                                 | Get Markdown conversion with the default converter                                                             |
+| `GET /markdown?url=<URL>&converter=kreuzberg`             | High-performance Markdown conversion via [html-to-markdown](https://github.com/kreuzberg-dev/html-to-markdown) |
+| `GET /markdown?url=<URL>&converter=kreuzberg&format=json` | Structured result with metadata, tables, images, and warnings                                                  |
+| `GET /image?url=<URL>`                                    | Get PNG screenshot                                                                                             |
+| `GET /archive?url=<URL>`                                  | Get a ZIP archive with markdown/HTML and images                                                                |
+| `GET /fetch?url=<URL>`                                    | Proxy fetch content                                                                                            |
+| `GET /stream?url=<URL>`                                   | Stream content                                                                                                 |
+| `GET /search?q=<QUERY>`                                   | Capture structured search-provider results                                                                     |
+
+## CLI Usage
+
 ```bash
-GET /html?url=<URL>&engine=<ENGINE>
-```
-Returns the raw HTML content of the specified URL.
+# Capture a URL as Markdown (default format, writes to ./data/web-capture/<host>/<path>/)
+web-capture https://example.com
 
-**Parameters:**
-- `url` (required): The URL to fetch
-- `engine` (optional): Browser engine to use (`puppeteer` or `playwright`). Default: `puppeteer`
+# Capture as Markdown and save to specific file
+web-capture https://example.com -o page.md
 
-**Examples:**
-```bash
-# Using default Puppeteer engine
-curl http://localhost:3000/html?url=https://example.com
+# Write to stdout explicitly
+web-capture https://example.com -o -
 
-# Using Playwright engine
-curl http://localhost:3000/html?url=https://example.com&engine=playwright
-```
+# Capture as HTML
+web-capture https://example.com --format html
 
-### Markdown Endpoint
-```bash
-GET /markdown?url=<URL>
-```
-Converts the HTML content of the specified URL to Markdown format.
+# Take a screenshot
+web-capture https://example.com --format png -o screenshot.png
 
-### Image Endpoint
-```bash
-GET /image?url=<URL>&engine=<ENGINE>
-```
-Returns a PNG screenshot of the specified URL.
+# Create a ZIP archive
+web-capture https://example.com --archive
 
-**Parameters:**
-- `url` (required): The URL to capture
-- `engine` (optional): Browser engine to use (`puppeteer` or `playwright`). Default: `puppeteer`
+# Start as API server
+web-capture --serve
 
-**Examples:**
-```bash
-# Using default Puppeteer engine
-curl http://localhost:3000/image?url=https://example.com > screenshot.png
-
-# Using Playwright engine
-curl http://localhost:3000/image?url=https://example.com&engine=playwright > screenshot.png
+# Start server on custom port
+web-capture --serve --port 8080
 ```
 
-## Browser Engine Support
+## CLI Options
 
-The service supports both **Puppeteer** and **Playwright** browser engines:
+| Option                   | Short | Description                                                                             | Default               |
+| ------------------------ | ----- | --------------------------------------------------------------------------------------- | --------------------- |
+| `--serve`                | `-s`  | Start as HTTP API server                                                                | -                     |
+| `--port`                 | `-p`  | Port to listen on                                                                       | 3000                  |
+| `--format`               | `-f`  | Output format: `markdown`/`md`, `html`, `image`/`png`, `jpeg`, `pdf`, `docx`, `archive` | `markdown`            |
+| `--output`               | `-o`  | Output file path. Use `-o -` for stdout                                                 | auto-derived from URL |
+| `--data-dir`             |       | Base directory for auto-derived output paths                                            | `./data/web-capture`  |
+| `--engine`               | `-e`  | Browser engine (JS only): `puppeteer`, `playwright`                                     | `puppeteer`           |
+| `--embed-images`         |       | Keep images inline as base64 data URIs (self-contained file)                            | `false`               |
+| `--no-extract-images`    |       | Alias for `--embed-images`                                                              | `false`               |
+| `--extract-images[=DIR]` |       | Extract images to `DIR/images/` (or next to the output) and download remote images      | -                     |
+| `--keep-original-links`  |       | Keep remote image URLs as direct links (the default markdown behavior)                  | `false`               |
+| `--images-dir`           |       | Subdirectory name for extracted images                                                  | `images`              |
+| `--archive`              |       | Create archive: `zip` (default), `7z`, `tar.gz`, `tar`                                  | -                     |
+| `--extract-latex`        |       | Extract LaTeX formulas                                                                  | `true`                |
+| `--extract-metadata`     |       | Extract article metadata                                                                | `true`                |
+| `--post-process`         |       | Apply post-processing                                                                   | `true`                |
+| `--detect-code-language` |       | Detect code block languages                                                             | `true`                |
 
-- **Puppeteer**: Default engine, mature and well-tested
-- **Playwright**: Alternative engine with similar capabilities
+## Image Handling
 
-You can choose the engine using the `engine` query parameter or by setting the `BROWSER_ENGINE` environment variable.
+Markdown output supports three image modes, and every capture path (browser or
+API, CLI or server) routes through the same chokepoint so a flag behaves
+identically regardless of how the page was captured:
 
-**Supported engine values:**
-- `puppeteer` or `pptr` - Use Puppeteer
-- `playwright` or `pw` - Use Playwright
+| Mode                       | Flag                             | Result                                                                                                                                                                                                             |
+| -------------------------- | -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Direct links** (default) | _none_ / `--keep-original-links` | Remote images stay as direct `https://…` URLs. Inline base64 (which has no remote URL to restore) is stripped to a placeholder with a warning — never silently kept as a multi-megabyte blob. No `images/` folder. |
+| **Embed**                  | `--embed-images`                 | Base64 images are kept inline, producing a single self-contained file.                                                                                                                                             |
+| **Extract**                | `--extract-images[=DIR]`         | Inline base64 _and_ remote images are written to `DIR/images/` (defaults to next to the output file) and the markdown is rewritten to reference the local files.                                                   |
 
-**Environment Variable:**
+The `--archive` formats always bundle images into the archive's `images/`
+folder regardless of these flags.
+
+## Environment Variables
+
+All flags can be controlled via environment variables:
+
+| Variable                           | Description                         | Default              |
+| ---------------------------------- | ----------------------------------- | -------------------- |
+| `WEB_CAPTURE_DATA_DIR`             | Base directory for output           | `./data/web-capture` |
+| `WEB_CAPTURE_EMBED_IMAGES`         | `0`/`1` — keep images inline        | `0`                  |
+| `WEB_CAPTURE_EXTRACT_IMAGES`       | Directory to extract images into    | -                    |
+| `WEB_CAPTURE_KEEP_ORIGINAL_LINKS`  | `0`/`1` — keep original remote URLs | `0`                  |
+| `WEB_CAPTURE_IMAGES_DIR`           | Subdirectory for extracted images   | `images`             |
+| `WEB_CAPTURE_EXTRACT_LATEX`        | `0`/`1` — extract LaTeX             | `1`                  |
+| `WEB_CAPTURE_EXTRACT_METADATA`     | `0`/`1` — extract metadata          | `1`                  |
+| `WEB_CAPTURE_POST_PROCESS`         | `0`/`1` — post-processing           | `1`                  |
+| `WEB_CAPTURE_DETECT_CODE_LANGUAGE` | `0`/`1` — detect code langs         | `1`                  |
+
+## API Endpoints
+
+Both implementations expose the same API:
+
+| Endpoint                                                  | Description                                               |
+| --------------------------------------------------------- | --------------------------------------------------------- |
+| `GET /html?url=<URL>`                                     | Get rendered HTML content                                 |
+| `GET /markdown?url=<URL>`                                 | Get Markdown (original links kept, base64 stripped)       |
+| `GET /markdown?url=<URL>&converter=kreuzberg`             | Get Markdown with the high-performance converter          |
+| `GET /markdown?url=<URL>&converter=kreuzberg&format=json` | Get structured Markdown conversion data                   |
+| `GET /markdown?url=<URL>&embedImages=true`                | Get Markdown with base64 images inline                    |
+| `GET /markdown?url=<URL>&keepOriginalLinks=false`         | Get Markdown with all images stripped                     |
+| `GET /image?url=<URL>`                                    | Get PNG screenshot                                        |
+| `GET /archive?url=<URL>`                                  | ZIP archive with markdown + images extracted to `images/` |
+| `GET /archive?url=<URL>&keepOriginalLinks=true`           | ZIP archive keeping original remote image URLs            |
+| `GET /archive?url=<URL>&embedImages=true`                 | ZIP archive with base64 images inline                     |
+| `GET /pdf?url=<URL>`                                      | PDF with embedded images                                  |
+| `GET /docx?url=<URL>`                                     | DOCX with embedded images                                 |
+| `GET /fetch?url=<URL>`                                    | Proxy fetch content                                       |
+| `GET /stream?url=<URL>`                                   | Stream content                                            |
+
+## Docker
+
+### JavaScript
+
 ```bash
-export BROWSER_ENGINE=playwright
+cd js
+docker build -t web-capture-js .
+docker run -p 3000:3000 web-capture-js
+```
+
+### Rust
+
+```bash
+cd rust
+docker build -t web-capture-rust .
+docker run -p 3000:3000 web-capture-rust
+```
+
+## Project Structure
+
+```
+web-capture/
+├── js/                          # JavaScript/Node.js implementation
+│   ├── src/                     # Source code
+│   ├── bin/                     # CLI entry point
+│   ├── tests/                   # Test files
+│   ├── examples/                # Usage examples
+│   ├── package.json             # npm package manifest
+│   ├── Dockerfile               # Docker build file
+│   └── README.md                # JavaScript-specific docs
+│
+├── rust/                        # Rust implementation
+│   ├── src/                     # Source code
+│   │   ├── lib.rs               # Library exports
+│   │   ├── main.rs              # CLI/server entry point
+│   │   ├── browser.rs           # Browser automation
+│   │   ├── html.rs              # HTML processing
+│   │   └── markdown.rs          # Markdown conversion
+│   ├── tests/                   # Test files
+│   ├── examples/                # Usage examples
+│   ├── Cargo.toml               # Cargo package manifest
+│   ├── Dockerfile               # Docker build file
+│   └── README.md                # Rust-specific docs
+│
+├── scripts/                     # Shared build/release scripts
+│   ├── *.mjs                    # JavaScript-specific scripts
+│   └── rust-*.mjs               # Rust-specific scripts
+│
+├── .github/workflows/
+│   ├── js.yml                   # JavaScript CI/CD
+│   └── rust.yml                 # Rust CI/CD
+│
+└── README.md                    # This file
 ```
 
 ## Development
 
-The service is built with:
-- Express.js for the web server
-- Puppeteer and Playwright for headless browser automation and screenshots
-- Turndown for HTML to Markdown conversion
-- Jest for testing
+### JavaScript
+
+```bash
+cd js
+npm install
+npm run dev          # Start dev server
+npm test             # Run tests
+npm run lint         # Run linter
+```
+
+### Rust
+
+```bash
+cd rust
+cargo build          # Build
+cargo test           # Run tests
+cargo clippy         # Run linter
+cargo fmt            # Format code
+```
+
+## Features
+
+- **Markdown Conversion**: Clean HTML-to-Markdown with LaTeX extraction, metadata, and code language detection
+- **Image Extraction**: Base64 data URI images extracted to files with content-hash filenames
+- **HTML Rendering**: Fetch and render HTML with JavaScript support via headless browsers
+- **High-Performance Conversion**: Optional [kreuzberg html-to-markdown](https://github.com/kreuzberg-dev/html-to-markdown) backend with structured metadata, table, and image results
+- **Screenshots**: Capture PNG/JPEG screenshots with theme and viewport control
+- **Archives**: ZIP archives with markdown/HTML + locally downloaded images
+- **Google Docs**: Public export, Google Docs REST API, and editor-model capture
+- **URL Normalization**: Convert relative URLs to absolute
+- **Encoding Detection**: Automatic charset detection and UTF-8 conversion
+
+## Browser Engines
+
+### JavaScript Version
+
+- **Puppeteer** (default): Mature, well-tested Chrome automation
+- **Playwright**: Cross-browser automation with similar capabilities
+
+### Rust Version
+
+- **browser-commander**: A Rust crate for browser automation using chromiumoxide
 
 ## License
 
-UNLICENSED
+[Unlicense](LICENSE) — This is free and unencumbered software released into the public domain. You are free to copy, modify, publish, use, compile, sell, or distribute this software for any purpose, commercial or non-commercial, and by any means. See [https://unlicense.org](https://unlicense.org) for details.
+
+## Markdown Converters
+
+web-capture supports three HTML-to-Markdown converter backends across the JavaScript and Rust implementations:
+
+| Converter              | Selection             | Throughput   | Structured Results             | Used In             |
+| ---------------------- | --------------------- | ------------ | ------------------------------ | ------------------- |
+| **Turndown** (default) | `converter=turndown`  | ~5-10 MB/s   | No                             | JS implementation   |
+| **html2md** (default)  | `converter=html2md`   | ~20-40 MB/s  | No                             | Rust implementation |
+| **kreuzberg**          | `converter=kreuzberg` | 150-280 MB/s | Yes (metadata, tables, images) | Both JS and Rust    |
+
+The kreuzberg converter is powered by [html-to-markdown](https://github.com/kreuzberg-dev/html-to-markdown) and uses the same Rust core across both implementations, ensuring consistent output. See [integration analysis](docs/html-to-markdown-integration.md) for details.
+
+## Related Projects
+
+- [browser-commander](https://github.com/link-foundation/browser-commander) - Browser automation library used in Rust implementation
+- [turndown](https://github.com/mixmark-io/turndown) - HTML to Markdown converter used in JS implementation
+- [html2md](https://github.com/nickyc975/html2md-rs) - HTML to Markdown converter used in Rust implementation
+- [html-to-markdown](https://github.com/kreuzberg-dev/html-to-markdown) - High-performance HTML to Markdown converter (kreuzberg), integrated as optional converter

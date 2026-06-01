@@ -1,0 +1,25 @@
+<!doctype html>
+<html>
+  <body>
+    <!-- Symptom A: two adjacent bold spans -->
+    <p>
+      <span style="font-weight:700">13.1 </span
+      ><span style="font-weight:700">First subsection</span>
+    </p>
+
+    <!-- Symptom B: outer bold ends, inner bold begins, no separator -->
+    <ol>
+      <li><span style="font-weight:700">Item header.</span></li>
+    </ol>
+    <p>
+      <span style="font-weight:700">Note:</span> body text.
+    </p>
+
+    <!-- Symptom C: bold range spans across <br> and <img> -->
+    <p>
+      <span style="font-weight:700"
+        >Caption A:<img alt="" src="data:image/png;base64,iVBORw0KGgo=" /><br />Caption
+        B:<img alt="" src="data:image/png;base64,iVBORw0KGgo=" /></span>
+    </p>
+  </body>
+</html>

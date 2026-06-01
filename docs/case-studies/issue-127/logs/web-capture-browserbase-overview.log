@@ -1,0 +1,12 @@
+    Blocking waiting for file lock on package cache
+    Blocking waiting for file lock on package cache
+    Blocking waiting for file lock on package cache
+    Blocking waiting for file lock on shared package cache
+    Blocking waiting for file lock on artifact directory
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.43s
+     Running `rust/target/debug/web-capture 'https://docs.browserbase.com/welcome/getting-started' -f markdown -o docs/case-studies/issue-127/reference/web-capture-browserbase-overview.md`
+2026-05-30T09:50:58.514380Z  INFO web_capture::browser: Rendering HTML for URL: https://docs.browserbase.com/welcome/getting-started
+2026-05-30T09:50:59.201755Z  INFO web_capture::browser: Successfully rendered HTML (33928 bytes)
+2026-05-30T09:50:59.222065Z  INFO web_capture::markdown: Converting HTML to Markdown
+2026-05-30T09:50:59.318146Z  INFO web_capture::markdown: Successfully converted to Markdown (2094 bytes)
+Markdown saved to: docs/case-studies/issue-127/reference/web-capture-browserbase-overview.md
