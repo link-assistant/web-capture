@@ -1,0 +1,910 @@
+
+> @link-assistant/web-capture@1.7.4 test
+> node --experimental-vm-modules ./node_modules/.bin/jest --runInBand
+
+(node:50104) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+PASS tests/unit/html2md.test.js
+  convertHtmlToMarkdown
+    ✓ removes empty links and anchor headings (27 ms)
+    ✓ removes empty links in complex content (9 ms)
+    ✓ removes empty links with only whitespace (7 ms)
+    ✓ removes empty links with only child elements (3 ms)
+    ✓ removes headings with only whitespace (2 ms)
+    ✓ converts relative links to absolute if baseUrl is provided (4 ms)
+    ✓ does not change links if no baseUrl is provided (4 ms)
+    ✓ converts ARIA role table to Markdown table (24 ms)
+    ✓ converts a regular HTML table to Markdown table (9 ms)
+    ✓ handles empty tables gracefully (3 ms)
+    ✓ handles specific ARIA table example (27 ms)
+
+PASS tests/unit/extract-images.test.js
+  extract-images module
+    extractAndSaveImages
+      ✓ extracts a single PNG image from markdown (8 ms)
+      ✓ extracts multiple images with content-hash filenames (1 ms)
+      ✓ produces stable filenames for duplicate images (6 ms)
+      ✓ handles JPEG mime type correctly (2 ms)
+      ✓ uses custom imagesDir (8 ms)
+      ✓ returns markdown unchanged when no base64 images (7 ms)
+      ✓ preserves non-base64 image references (1 ms)
+      ✓ preserves alt text during extraction (6 ms)
+      ✓ handles SVG data URIs (9 ms)
+    extractBase64ToBuffers
+      ✓ extracts base64 images to in-memory buffers (7 ms)
+      ✓ uses custom imagesDir prefix (1 ms)
+      ✓ does not write files to disk
+    stripBase64Images
+      ✓ strips base64 images and leaves alt text placeholder (3 ms)
+      ✓ strips base64 images with empty alt text
+      ✓ preserves remote image URLs (1 ms)
+      ✓ strips multiple base64 images (1 ms)
+    hasBase64Images
+      ✓ returns true when markdown has base64 images (1 ms)
+      ✓ returns false when no base64 images
+      ✓ returns false for empty string (1 ms)
+
+PASS tests/integration/api-endpoints.test.js
+  API Endpoint Tests
+    unsupported routes
+      ✓ does not expose /gdocs as an output-format endpoint (27 ms)
+    GET /image
+      ✓ rejects invalid format (4 ms)
+      ✓ returns 400 without url (3 ms)
+    GET /markdown
+      ✓ returns markdown (26 ms)
+    GET /archive
+      ✓ returns a ZIP archive with remote images (markdown format) (18 ms)
+      ✓ returns a ZIP archive with HTML format (12 ms)
+      ✓ returns a ZIP archive with local images and folders (16 ms)
+      ✓ returns a ZIP archive with HTML format and local CSS (23 ms)
+      ✓ returns 400 without url (4 ms)
+    GET /docx
+      ✓ returns a DOCX document (41 ms)
+      ✓ returns 400 without url (3 ms)
+    GET /pdf
+      ✓ returns 400 without url (4 ms)
+
+PASS tests/unit/cli.test.js
+  CLI
+    --help
+      ✓ shows help message with --help flag (92 ms)
+      ✓ shows help message with -h flag (100 ms)
+      ✓ shows error and exits with code 1 when no arguments provided (86 ms)
+    --version
+      ✓ shows version with --version flag (106 ms)
+      ✓ shows version with -v flag (133 ms)
+    URL validation
+      ✓ accepts a URL as a positional argument (379 ms)
+      ✓ accepts a URL after the -- argument separator (301 ms)
+      ✓ rejects unknown options (90 ms)
+      ✓ rejects invalid URL (96 ms)
+    format options
+      ✓ accepts --format html (100 ms)
+      ✓ accepts --format markdown (94 ms)
+      ✓ accepts --format image (75 ms)
+    engine options
+      ✓ help shows engine options (94 ms)
+      ✓ accepts --engine option (79 ms)
+    server mode options
+      ✓ help shows --serve option (84 ms)
+      ✓ help shows --port option (87 ms)
+      ✓ help shows API endpoints (85 ms)
+    output options
+      ✓ help shows --output option (82 ms)
+
+PASS tests/mock/index.test.js (9.876 s)
+  Web Capture Microservice
+    GET /html
+      ✓ should return HTML content when URL is provided (12 ms)
+      ✓ should return 400 when URL is missing (2 ms)
+      ✓ should return 500 when fetch fails (4 ms)
+    GET /markdown
+      ✓ should convert HTML to Markdown when URL is provided (14 ms)
+      ✓ should remove CSS from the markdown output (9 ms)
+      ✓ should return 400 when URL is missing (2 ms)
+      ✓ should return 500 when fetch fails (4 ms)
+    GET /image
+      ✓ should return PNG image when URL is provided (9407 ms)
+      ✓ should return 400 when URL is missing (3 ms)
+    GET /stream
+      ✓ should stream content from the given URL (8 ms)
+      ✓ should return 400 when URL is missing (4 ms)
+      ✓ should return 500 when fetch fails (46 ms)
+    GET /fetch
+      ✓ should return content when URL is provided (7 ms)
+      ✓ should return 400 when URL is missing (2 ms)
+      ✓ should return 500 when fetch fails (7 ms)
+
+  console.log
+    Checking if Docker service is already running...
+
+      at Object.log (tests/e2e/docker.test.js:47:11)
+
+  console.log
+    Service not running, starting Docker container...
+
+      at Object.log (tests/e2e/docker.test.js:50:13)
+
+FAIL tests/e2e/docker.test.js
+  E2E (Docker): Web Capture Microservice
+    ✕ should return HTML from /html endpoint
+    ✕ should return Markdown from /markdown endpoint
+    ✕ should return PNG from /image endpoint
+    ✕ should stream content from /stream endpoint
+    ✕ should return content from /fetch endpoint
+
+  ● E2E (Docker): Web Capture Microservice › should return HTML from /html endpoint
+
+    Command failed: docker compose up -d
+    /bin/sh: 1: docker: not found
+
+
+
+  ● E2E (Docker): Web Capture Microservice › should return Markdown from /markdown endpoint
+
+    Command failed: docker compose up -d
+    /bin/sh: 1: docker: not found
+
+
+
+  ● E2E (Docker): Web Capture Microservice › should return PNG from /image endpoint
+
+    Command failed: docker compose up -d
+    /bin/sh: 1: docker: not found
+
+
+
+  ● E2E (Docker): Web Capture Microservice › should stream content from /stream endpoint
+
+    Command failed: docker compose up -d
+    /bin/sh: 1: docker: not found
+
+
+
+  ● E2E (Docker): Web Capture Microservice › should return content from /fetch endpoint
+
+    Command failed: docker compose up -d
+    /bin/sh: 1: docker: not found
+
+
+
+FAIL tests/unit/browser.test.js
+  Browser Abstraction Layer
+    getBrowserEngine
+      ✓ returns puppeteer by default (2 ms)
+      ✓ returns playwright when engine=playwright query param is provided
+      ✓ returns playwright when engine=pw query param is provided
+      ✓ returns puppeteer when engine=puppeteer query param is provided
+      ✓ returns puppeteer when engine=pptr query param is provided
+      ✓ returns playwright when browser=playwright query param is provided
+      ✓ is case insensitive
+      ✓ returns playwright from BROWSER_ENGINE env var (1 ms)
+      ✓ prefers query param over env var
+    createBrowser - Puppeteer
+      ✓ creates a puppeteer browser with type field (901 ms)
+      ✓ can create and use a page (862 ms)
+    createBrowser - Playwright
+      ✕ creates a playwright browser with type field (273 ms)
+      ✕ can create and use a page (5 ms)
+    Page Adapter Compatibility
+      ✕ both adapters support the same interface (748 ms)
+      ✕ both adapters expose browser-commander v0.7.0+ APIs (733 ms)
+
+  ● Browser Abstraction Layer › createBrowser - Playwright › creates a playwright browser with type field
+
+    browserType.launchPersistentContext: Executable doesn't exist at /workspace/.cache/ms-playwright/chromium_headless_shell-1194/chrome-linux/headless_shell
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     npx playwright install                                              ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+      74 |
+      75 |   // Use browser-commander's launchBrowser with server-specific args
+    > 76 |   const { browser, page: initialPage } = await launchBrowser({
+         |                                          ^
+      77 |     engine: engineType,
+      78 |     args: SERVER_CHROME_ARGS,
+      79 |     headless: true,
+
+      at launchBrowser (node_modules/browser-commander/src/browser/launcher.js:68:15)
+      at createBrowser (src/browser.js:76:42)
+      at Object.<anonymous> (tests/unit/browser.test.js:90:23)
+
+  ● Browser Abstraction Layer › createBrowser - Playwright › can create and use a page
+
+    browserType.launchPersistentContext: Executable doesn't exist at /workspace/.cache/ms-playwright/chromium_headless_shell-1194/chrome-linux/headless_shell
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     npx playwright install                                              ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+      74 |
+      75 |   // Use browser-commander's launchBrowser with server-specific args
+    > 76 |   const { browser, page: initialPage } = await launchBrowser({
+         |                                          ^
+      77 |     engine: engineType,
+      78 |     args: SERVER_CHROME_ARGS,
+      79 |     headless: true,
+
+      at launchBrowser (node_modules/browser-commander/src/browser/launcher.js:68:15)
+      at createBrowser (src/browser.js:76:42)
+      at Object.<anonymous> (tests/unit/browser.test.js:98:23)
+
+  ● Browser Abstraction Layer › Page Adapter Compatibility › both adapters support the same interface
+
+    browserType.launchPersistentContext: Executable doesn't exist at /workspace/.cache/ms-playwright/chromium_headless_shell-1194/chrome-linux/headless_shell
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     npx playwright install                                              ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+      74 |
+      75 |   // Use browser-commander's launchBrowser with server-specific args
+    > 76 |   const { browser, page: initialPage } = await launchBrowser({
+         |                                          ^
+      77 |     engine: engineType,
+      78 |     args: SERVER_CHROME_ARGS,
+      79 |     headless: true,
+
+      at launchBrowser (node_modules/browser-commander/src/browser/launcher.js:68:15)
+      at createBrowser (src/browser.js:76:42)
+      at Object.<anonymous> (tests/unit/browser.test.js:112:33)
+
+  ● Browser Abstraction Layer › Page Adapter Compatibility › both adapters expose browser-commander v0.7.0+ APIs
+
+    browserType.launchPersistentContext: Executable doesn't exist at /workspace/.cache/ms-playwright/chromium_headless_shell-1194/chrome-linux/headless_shell
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     npx playwright install                                              ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+      74 |
+      75 |   // Use browser-commander's launchBrowser with server-specific args
+    > 76 |   const { browser, page: initialPage } = await launchBrowser({
+         |                                          ^
+      77 |     engine: engineType,
+      78 |     args: SERVER_CHROME_ARGS,
+      79 |     headless: true,
+
+      at launchBrowser (node_modules/browser-commander/src/browser/launcher.js:68:15)
+      at createBrowser (src/browser.js:76:42)
+      at Object.<anonymous> (tests/unit/browser.test.js:138:33)
+
+PASS tests/unit/verify.test.js
+  verify module
+    normalizeText
+      ✓ lowercases text (1 ms)
+      ✓ normalizes unicode spaces
+      ✓ normalizes curly quotes
+      ✓ removes LaTeX delimiters (1 ms)
+      ✓ normalizes arrows
+      ✓ removes \displaystyle
+      ✓ extracts text from \text{} (1 ms)
+    normalizeCode
+      ✓ lowercases and collapses whitespace
+      ✓ normalizes multiplication sign
+    verifyMarkdownContent
+      ✓ verifies title presence (1 ms)
+      ✓ detects missing title
+      ✓ verifies headings (1 ms)
+      ✓ detects missing headings
+      ✓ verifies code blocks with fuzzy matching (1 ms)
+      ✓ calculates pass rate
+      ✓ checks figure images when hasLocalImages is set (1 ms)
+
+PASS tests/unit/metadata.test.js
+  metadata module
+    extractMetadata
+      ✓ extracts author information (9 ms)
+      ✓ extracts publication date (2 ms)
+      ✓ extracts hubs (2 ms)
+      ✓ extracts tags from meta keywords (1 ms)
+      ✓ extracts LD+JSON author name (1 ms)
+      ✓ extracts votes and comments (1 ms)
+      ✓ returns empty object for minimal HTML (1 ms)
+    formatMetadataBlock
+      ✓ formats author line with link (1 ms)
+      ✓ formats author with full name
+      ✓ formats publication date (11 ms)
+      ✓ includes hubs and tags
+      ✓ returns empty array for null metadata (1 ms)
+    formatFooterBlock
+      ✓ includes separator line
+      ✓ formats tag links (1 ms)
+      ✓ formats article stats
+      ✓ returns empty array for null metadata
+
+PASS tests/e2e/process.test.js (9.846 s)
+  E2E: Web Capture Microservice
+    ✓ should return HTML from /html endpoint (27 ms)
+    ✓ should return Markdown from /markdown endpoint (21 ms)
+    ✓ should return PNG from /image endpoint (9294 ms)
+    ✓ should stream content from /stream endpoint (9 ms)
+    ✓ should return content from /fetch endpoint (5 ms)
+
+FAIL tests/integration/browser-engines.test.js (10.136 s)
+  Browser Engine Integration Tests
+    Puppeteer Engine
+      ✓ can navigate to a page and get content (3022 ms)
+      ✓ can take a screenshot (3048 ms)
+      ✓ can set custom headers and user agent (2969 ms)
+    Playwright Engine
+      ✕ can navigate to a page and get content (217 ms)
+      ✕ can take a screenshot (4 ms)
+      ✕ can set custom headers and user agent (4 ms)
+    Engine Parity
+      ✕ both engines produce similar content for the same page (769 ms)
+
+  ● Browser Engine Integration Tests › Playwright Engine › can navigate to a page and get content
+
+    browserType.launchPersistentContext: Executable doesn't exist at /workspace/.cache/ms-playwright/chromium_headless_shell-1194/chrome-linux/headless_shell
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     npx playwright install                                              ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+      74 |
+      75 |   // Use browser-commander's launchBrowser with server-specific args
+    > 76 |   const { browser, page: initialPage } = await launchBrowser({
+         |                                          ^
+      77 |     engine: engineType,
+      78 |     args: SERVER_CHROME_ARGS,
+      79 |     headless: true,
+
+      at launchBrowser (node_modules/browser-commander/src/browser/launcher.js:68:15)
+      at createBrowser (src/browser.js:76:42)
+      at Object.<anonymous> (tests/integration/browser-engines.test.js:56:17)
+
+  ● Browser Engine Integration Tests › Playwright Engine › can take a screenshot
+
+    browserType.launchPersistentContext: Executable doesn't exist at /workspace/.cache/ms-playwright/chromium_headless_shell-1194/chrome-linux/headless_shell
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     npx playwright install                                              ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+      74 |
+      75 |   // Use browser-commander's launchBrowser with server-specific args
+    > 76 |   const { browser, page: initialPage } = await launchBrowser({
+         |                                          ^
+      77 |     engine: engineType,
+      78 |     args: SERVER_CHROME_ARGS,
+      79 |     headless: true,
+
+      at launchBrowser (node_modules/browser-commander/src/browser/launcher.js:68:15)
+      at createBrowser (src/browser.js:76:42)
+      at Object.<anonymous> (tests/integration/browser-engines.test.js:56:17)
+
+  ● Browser Engine Integration Tests › Playwright Engine › can set custom headers and user agent
+
+    browserType.launchPersistentContext: Executable doesn't exist at /workspace/.cache/ms-playwright/chromium_headless_shell-1194/chrome-linux/headless_shell
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     npx playwright install                                              ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+      74 |
+      75 |   // Use browser-commander's launchBrowser with server-specific args
+    > 76 |   const { browser, page: initialPage } = await launchBrowser({
+         |                                          ^
+      77 |     engine: engineType,
+      78 |     args: SERVER_CHROME_ARGS,
+      79 |     headless: true,
+
+      at launchBrowser (node_modules/browser-commander/src/browser/launcher.js:68:15)
+      at createBrowser (src/browser.js:76:42)
+      at Object.<anonymous> (tests/integration/browser-engines.test.js:56:17)
+
+  ● Browser Engine Integration Tests › Engine Parity › both engines produce similar content for the same page
+
+    browserType.launchPersistentContext: Executable doesn't exist at /workspace/.cache/ms-playwright/chromium_headless_shell-1194/chrome-linux/headless_shell
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     npx playwright install                                              ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+      74 |
+      75 |   // Use browser-commander's launchBrowser with server-specific args
+    > 76 |   const { browser, page: initialPage } = await launchBrowser({
+         |                                          ^
+      77 |     engine: engineType,
+      78 |     args: SERVER_CHROME_ARGS,
+      79 |     headless: true,
+
+      at launchBrowser (node_modules/browser-commander/src/browser/launcher.js:68:15)
+      at createBrowser (src/browser.js:76:42)
+      at Object.<anonymous> (tests/integration/browser-engines.test.js:103:33)
+
+PASS tests/unit/latex.test.js
+  latex module
+    extractHabrFormula
+      ✓ extracts LaTeX from Habr formula img source attribute (5 ms)
+      ✓ falls back to alt text when source is missing (1 ms)
+      ✓ returns null when no source or alt (1 ms)
+    extractKatexFormula
+      ✓ extracts from annotation element (1 ms)
+      ✓ extracts from data-tex attribute
+      ✓ returns null when no TeX source found
+    extractMathJaxFormula
+      ✓ extracts from data-tex attribute
+    isFormulaImage
+      ✓ identifies img.formula elements (1 ms)
+      ✓ identifies img with source attribute (1 ms)
+      ✓ rejects regular images (1 ms)
+    isMathElement
+      ✓ identifies katex elements (1 ms)
+      ✓ identifies math elements
+      ✓ identifies mjx-container (1 ms)
+      ✓ rejects regular elements (1 ms)
+    extractFormula
+      ✓ extracts from Habr formula image (1 ms)
+      ✓ extracts from KaTeX element
+      ✓ returns null for regular elements (1 ms)
+
+PASS tests/unit/postprocess.test.js
+  postprocess module
+    applyUnicodeNormalization
+      ✓ preserves non-breaking spaces as &nbsp; entities (2 ms)
+      ✓ normalizes curly quotes to straight quotes
+      ✓ normalizes en-dash to hyphen
+      ✓ normalizes ellipsis
+    applyLatexSpacingFixes
+      ✓ adds space before formula after word character
+      ✓ trims whitespace inside formula delimiters (1 ms)
+      ✓ does not modify block formulas
+      ✓ does not modify blockquote block formulas
+      ✓ handles multiple formulas on one line (1 ms)
+    applyPercentSignFix
+      ✓ fixes percent sign in inline formulas
+      ✓ fixes \text{%} notation (1 ms)
+    applyBoldFormattingFixes
+      ✓ removes empty bold markers (1 ms)
+      ✓ trims content inside bold markers
+      ✓ adds space between word and bold
+    postProcessMarkdown
+      ✓ applies all transformations by default (1 ms)
+      ✓ respects option flags
+      ✓ removes stray standalone $ signs
+
+PASS tests/unit/batch.test.js
+  batch module
+    getArticle
+      ✓ returns article config by version (2 ms)
+      ✓ merges defaults into article config
+      ✓ throws for unknown version (7 ms)
+    getAllVersions
+      ✓ returns all version keys
+    getAllArticles
+      ✓ returns all articles with defaults merged
+    createConfigFromUrls
+      ✓ creates config from URL list (1 ms)
+      ✓ sets default archive paths
+    validateConfig
+      ✓ validates correct config (1 ms)
+      ✓ rejects config without articles
+      ✓ rejects article without url (1 ms)
+      ✓ rejects article with invalid url
+
+PASS tests/unit/retry.test.js
+  retry
+    ✓ returns result on first success (3 ms)
+    ✓ retries on failure and succeeds eventually (151 ms)
+    ✓ throws after exhausting retries (156 ms)
+    ✓ calls onRetry callback before each retry (52 ms)
+    ✓ uses exponential backoff delays (704 ms)
+    ✓ caps delay at maxDelay (1104 ms)
+    ✓ passes attempt number to fn (152 ms)
+
+PASS tests/unit/localize-images.test.js
+  localize-images module
+    extractImageReferences
+      ✓ extracts markdown image references (2 ms)
+      ✓ ignores local image references
+      ✓ ignores non-image links (1 ms)
+      ✓ returns empty array for no images (5 ms)
+    getExtensionFromUrl
+      ✓ detects .png extension (1 ms)
+      ✓ detects .jpg extension
+      ✓ detects .gif extension (1 ms)
+      ✓ handles query parameters
+      ✓ defaults to .png for unknown extension
+    generateLocalFilename
+      ✓ generates zero-padded filename (1 ms)
+      ✓ preserves file extension from URL
+
+PASS tests/unit/figures.test.js
+  figures module
+    extractFigures
+      ✓ extracts figures with captions (8 ms)
+      ✓ handles Russian figure captions (1 ms)
+      ✓ uses sequential numbering when no caption number (2 ms)
+      ✓ skips SVG images
+      ✓ resolves relative URLs
+      ✓ returns empty array for no figures
+
+PASS tests/unit/heading-image.test.js
+  heading image parity
+    ✓ <img> inside <h1> survives Turndown and stays in sync with extraction (15 ms)
+    ✓ <img> inside all heading levels is preserved (9 ms)
+    ✓ image count parity across full pipeline (3 ms)
+
+PASS tests/unit/convertRelativeUrls.test.js
+  convertRelativeUrls
+    ✓ should NOT inject runtimeHook if there are no <script> tags (2 ms)
+    ✓ should inject runtimeHook if there is a <script> tag (1 ms)
+    ✓ should inject runtimeHook if there is an inline <script>
+
+PASS tests/unit/package-runtime-dependencies.test.js
+  runtime package dependencies
+    ✓ turndown-plugin-gfm is declared as a production dependency (2 ms)
+    ✓ turndown-plugin-gfm is not marked dev-only in package-lock.json (5 ms)
+
+  console.log
+    Using explicitly configured JavaScript root: js
+
+      at getJsRoot (../scripts/js-paths.mjs:28:15)
+
+  console.log
+    Verifying publish (attempt 1 of 12)...
+
+      at verifyPublishedVersionWithRunner (../scripts/publish-to-npm.mjs:119:13)
+
+  console.log
+    Version not visible on npm yet: npm error code E404
+
+      at verifyPublishedVersionWithRunner (../scripts/publish-to-npm.mjs:130:17)
+
+  console.log
+    Verifying publish (attempt 2 of 12)...
+
+      at verifyPublishedVersionWithRunner (../scripts/publish-to-npm.mjs:119:13)
+
+  console.log
+    Version not visible on npm yet: npm error code E404
+
+      at verifyPublishedVersionWithRunner (../scripts/publish-to-npm.mjs:130:17)
+
+  console.log
+    Verifying publish (attempt 3 of 12)...
+
+      at verifyPublishedVersionWithRunner (../scripts/publish-to-npm.mjs:119:13)
+
+PASS tests/unit/publish-verification.test.js
+  publish verification
+    ✓ keeps polling verification through transient npm 404s (11 ms)
+
+PASS tests/unit/animation.test.js
+  animation module
+    compareFrames
+      ✓ returns 1.0 for identical frames (2 ms)
+      ✓ returns 0 for completely different frames
+      ✓ returns 0 for different sized frames
+      ✓ returns 0 for null frames
+      ✓ calculates partial similarity
+
+PASS tests/unit/gdocs.test.js
+  gdocs
+    isGoogleDocsUrl
+      ✓ returns true for standard Google Docs edit URL (1 ms)
+      ✓ returns true for URL with query parameters (1 ms)
+      ✓ returns true for URL without /edit
+      ✓ returns false for non-Google Docs URL
+      ✓ returns false for Google Sheets URL (1 ms)
+      ✓ returns false for empty string
+      ✓ returns false for null
+      ✓ returns false for undefined
+      ✓ returns false for non-string input
+    extractDocumentId
+      ✓ extracts document ID from standard URL
+      ✓ extracts document ID from URL with query params (1 ms)
+      ✓ extracts document ID with hyphens and underscores
+      ✓ returns null for non-Google Docs URL
+      ✓ returns null for empty string
+      ✓ returns null for null input (1 ms)
+    buildExportUrl
+      ✓ builds HTML export URL
+      ✓ builds Markdown export URL
+      ✓ builds PDF export URL
+      ✓ builds TXT export URL
+      ✓ defaults to html for unknown format
+      ✓ defaults to html when format is omitted (1 ms)
+      ✓ uses the real document ID from test document
+    capture method selection (issue #72)
+      ✓ honors explicit browser capture for Google Docs URLs
+      ✓ uses public export for API capture without token
+      ✓ uses Docs REST API for API capture with token (1 ms)
+    buildEditUrl
+      ✓ builds the fresh Google Docs editor URL
+    buildDocsApiUrl
+      ✓ builds the Google Docs REST API URL
+    parseGoogleDocsModelChunks (issue #72)
+      ✓ includes regular and suggested text from DOCS_modelChunk data (1 ms)
+      ✓ extracts table cells and suggested images from DOCS_modelChunk data (1 ms)
+    renderDocsApiDocument (issue #72)
+      ✓ renders Google Docs REST API paragraphs, tables, and inline images (1 ms)
+    GDOCS_EXPORT_FORMATS
+      ✓ contains all expected formats (1 ms)
+    extractBase64Images
+      ✓ extracts a single PNG data URI image (1 ms)
+      ✓ extracts multiple images with correct numbering and extensions (1 ms)
+      ✓ returns empty array when no data URI images
+      ✓ preserves non-data-URI images
+    image extraction pipeline (issue #53)
+      ✓ extractBase64Images from HTML produces images with data buffers (1 ms)
+      ✓ default markdown mode extracts base64 images to disk (not strip) (2 ms)
+      ✓ keepOriginalLinks strips base64 images (1 ms)
+      ✓ extractBase64ToBuffers produces in-memory buffers for archive
+
+Summary of all failing tests
+FAIL tests/e2e/docker.test.js
+  ● E2E (Docker): Web Capture Microservice › should return HTML from /html endpoint
+
+    Command failed: docker compose up -d
+    /bin/sh: 1: docker: not found
+
+
+
+  ● E2E (Docker): Web Capture Microservice › should return Markdown from /markdown endpoint
+
+    Command failed: docker compose up -d
+    /bin/sh: 1: docker: not found
+
+
+
+  ● E2E (Docker): Web Capture Microservice › should return PNG from /image endpoint
+
+    Command failed: docker compose up -d
+    /bin/sh: 1: docker: not found
+
+
+
+  ● E2E (Docker): Web Capture Microservice › should stream content from /stream endpoint
+
+    Command failed: docker compose up -d
+    /bin/sh: 1: docker: not found
+
+
+
+  ● E2E (Docker): Web Capture Microservice › should return content from /fetch endpoint
+
+    Command failed: docker compose up -d
+    /bin/sh: 1: docker: not found
+
+
+
+FAIL tests/unit/browser.test.js
+  ● Browser Abstraction Layer › createBrowser - Playwright › creates a playwright browser with type field
+
+    browserType.launchPersistentContext: Executable doesn't exist at /workspace/.cache/ms-playwright/chromium_headless_shell-1194/chrome-linux/headless_shell
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     npx playwright install                                              ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+      74 |
+      75 |   // Use browser-commander's launchBrowser with server-specific args
+    > 76 |   const { browser, page: initialPage } = await launchBrowser({
+         |                                          ^
+      77 |     engine: engineType,
+      78 |     args: SERVER_CHROME_ARGS,
+      79 |     headless: true,
+
+      at launchBrowser (node_modules/browser-commander/src/browser/launcher.js:68:15)
+      at createBrowser (src/browser.js:76:42)
+      at Object.<anonymous> (tests/unit/browser.test.js:90:23)
+
+  ● Browser Abstraction Layer › createBrowser - Playwright › can create and use a page
+
+    browserType.launchPersistentContext: Executable doesn't exist at /workspace/.cache/ms-playwright/chromium_headless_shell-1194/chrome-linux/headless_shell
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     npx playwright install                                              ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+      74 |
+      75 |   // Use browser-commander's launchBrowser with server-specific args
+    > 76 |   const { browser, page: initialPage } = await launchBrowser({
+         |                                          ^
+      77 |     engine: engineType,
+      78 |     args: SERVER_CHROME_ARGS,
+      79 |     headless: true,
+
+      at launchBrowser (node_modules/browser-commander/src/browser/launcher.js:68:15)
+      at createBrowser (src/browser.js:76:42)
+      at Object.<anonymous> (tests/unit/browser.test.js:98:23)
+
+  ● Browser Abstraction Layer › Page Adapter Compatibility › both adapters support the same interface
+
+    browserType.launchPersistentContext: Executable doesn't exist at /workspace/.cache/ms-playwright/chromium_headless_shell-1194/chrome-linux/headless_shell
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     npx playwright install                                              ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+      74 |
+      75 |   // Use browser-commander's launchBrowser with server-specific args
+    > 76 |   const { browser, page: initialPage } = await launchBrowser({
+         |                                          ^
+      77 |     engine: engineType,
+      78 |     args: SERVER_CHROME_ARGS,
+      79 |     headless: true,
+
+      at launchBrowser (node_modules/browser-commander/src/browser/launcher.js:68:15)
+      at createBrowser (src/browser.js:76:42)
+      at Object.<anonymous> (tests/unit/browser.test.js:112:33)
+
+  ● Browser Abstraction Layer › Page Adapter Compatibility › both adapters expose browser-commander v0.7.0+ APIs
+
+    browserType.launchPersistentContext: Executable doesn't exist at /workspace/.cache/ms-playwright/chromium_headless_shell-1194/chrome-linux/headless_shell
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     npx playwright install                                              ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+      74 |
+      75 |   // Use browser-commander's launchBrowser with server-specific args
+    > 76 |   const { browser, page: initialPage } = await launchBrowser({
+         |                                          ^
+      77 |     engine: engineType,
+      78 |     args: SERVER_CHROME_ARGS,
+      79 |     headless: true,
+
+      at launchBrowser (node_modules/browser-commander/src/browser/launcher.js:68:15)
+      at createBrowser (src/browser.js:76:42)
+      at Object.<anonymous> (tests/unit/browser.test.js:138:33)
+
+FAIL tests/integration/browser-engines.test.js (10.136 s)
+  ● Browser Engine Integration Tests › Playwright Engine › can navigate to a page and get content
+
+    browserType.launchPersistentContext: Executable doesn't exist at /workspace/.cache/ms-playwright/chromium_headless_shell-1194/chrome-linux/headless_shell
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     npx playwright install                                              ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+      74 |
+      75 |   // Use browser-commander's launchBrowser with server-specific args
+    > 76 |   const { browser, page: initialPage } = await launchBrowser({
+         |                                          ^
+      77 |     engine: engineType,
+      78 |     args: SERVER_CHROME_ARGS,
+      79 |     headless: true,
+
+      at launchBrowser (node_modules/browser-commander/src/browser/launcher.js:68:15)
+      at createBrowser (src/browser.js:76:42)
+      at Object.<anonymous> (tests/integration/browser-engines.test.js:56:17)
+
+  ● Browser Engine Integration Tests › Playwright Engine › can take a screenshot
+
+    browserType.launchPersistentContext: Executable doesn't exist at /workspace/.cache/ms-playwright/chromium_headless_shell-1194/chrome-linux/headless_shell
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     npx playwright install                                              ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+      74 |
+      75 |   // Use browser-commander's launchBrowser with server-specific args
+    > 76 |   const { browser, page: initialPage } = await launchBrowser({
+         |                                          ^
+      77 |     engine: engineType,
+      78 |     args: SERVER_CHROME_ARGS,
+      79 |     headless: true,
+
+      at launchBrowser (node_modules/browser-commander/src/browser/launcher.js:68:15)
+      at createBrowser (src/browser.js:76:42)
+      at Object.<anonymous> (tests/integration/browser-engines.test.js:56:17)
+
+  ● Browser Engine Integration Tests › Playwright Engine › can set custom headers and user agent
+
+    browserType.launchPersistentContext: Executable doesn't exist at /workspace/.cache/ms-playwright/chromium_headless_shell-1194/chrome-linux/headless_shell
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     npx playwright install                                              ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+      74 |
+      75 |   // Use browser-commander's launchBrowser with server-specific args
+    > 76 |   const { browser, page: initialPage } = await launchBrowser({
+         |                                          ^
+      77 |     engine: engineType,
+      78 |     args: SERVER_CHROME_ARGS,
+      79 |     headless: true,
+
+      at launchBrowser (node_modules/browser-commander/src/browser/launcher.js:68:15)
+      at createBrowser (src/browser.js:76:42)
+      at Object.<anonymous> (tests/integration/browser-engines.test.js:56:17)
+
+  ● Browser Engine Integration Tests › Engine Parity › both engines produce similar content for the same page
+
+    browserType.launchPersistentContext: Executable doesn't exist at /workspace/.cache/ms-playwright/chromium_headless_shell-1194/chrome-linux/headless_shell
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     npx playwright install                                              ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+      74 |
+      75 |   // Use browser-commander's launchBrowser with server-specific args
+    > 76 |   const { browser, page: initialPage } = await launchBrowser({
+         |                                          ^
+      77 |     engine: engineType,
+      78 |     args: SERVER_CHROME_ARGS,
+      79 |     headless: true,
+
+      at launchBrowser (node_modules/browser-commander/src/browser/launcher.js:68:15)
+      at createBrowser (src/browser.js:76:42)
+      at Object.<anonymous> (tests/integration/browser-engines.test.js:103:33)
+
+
+Test Suites: 3 failed, 1 skipped, 20 passed, 23 of 24 total
+Tests:       13 failed, 16 skipped, 248 passed, 277 total
+Snapshots:   0 total
+Time:        43.338 s
+Ran all test suites.
+Jest did not exit one second after the test run has completed.
+
+'This usually means that there are asynchronous operations that weren't stopped in your tests. Consider running Jest with `--detectOpenHandles` to troubleshoot this issue.

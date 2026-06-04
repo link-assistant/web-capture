@@ -1,0 +1,113 @@
+# File Tree: link-foundation/rust-ai-driven-development-pipeline-template
+# Branch: main
+# Root SHA: 1dd6d81da270f30e5355bca43cc67bc953bec583
+
+TYPE      SIZE  PATH
+------------------------------------------------------------
+tree            .github
+tree            .github/workflows
+blob     16372  .github/workflows/release.yml
+blob       859  .gitignore
+blob       836  .pre-commit-config.yaml
+blob     47562  CHANGELOG.md
+blob      7201  CONTRIBUTING.md
+blob      8837  Cargo.lock
+blob      1242  Cargo.toml
+blob      1211  LICENSE
+blob     11715  README.md
+tree            changelog.d
+blob       608  changelog.d/20251227_224645_changeset_support.md
+blob       432  changelog.d/20251229_143823_fix_ci_workflow_dependencies.md
+blob       286  changelog.d/20251231_115800_fix_readme_script_references.md
+blob       830  changelog.d/20260107_apply_best_practices.md
+blob       857  changelog.d/20260108_171124_fix_changelog_check.md
+blob       455  changelog.d/20260108_171435_prevent_manual_version_modification.md
+blob       497  changelog.d/20260108_apply_lino_objects_codec_fixes.md
+blob       694  changelog.d/20260111_multi_language_support.md
+blob      1137  changelog.d/20260119_best_practices_from_browser_commander.md
+blob       383  changelog.d/20260311_translate_scripts_to_rust.md
+blob      1052  changelog.d/20260413-ci-cd-best-practices.md
+blob       474  changelog.d/20260413_fix_cargo_token_fallback.md
+blob       658  changelog.d/20260413_fix_crates_io_check.md
+blob       742  changelog.d/20260413_fix_lookahead_regex.md
+blob       231  changelog.d/20260414_fix_per_commit_diff.md
+blob      3235  changelog.d/README.md
+tree            docs
+tree            docs/case-studies
+tree            docs/case-studies/issue-11
+blob      8907  docs/case-studies/issue-11/README.md
+blob      6801  docs/case-studies/issue-11/analysis-crates-io.md
+blob      4331  docs/case-studies/issue-11/analysis-set-output.md
+blob      5375  docs/case-studies/issue-11/analysis-workflow-dispatch.md
+blob      6372  docs/case-studies/issue-11/online-research.md
+tree            docs/case-studies/issue-17
+blob      5870  docs/case-studies/issue-17/README.md
+tree            docs/case-studies/issue-19
+blob     10930  docs/case-studies/issue-19/README.md
+tree            docs/case-studies/issue-19/ci-logs
+blob     20042  docs/case-studies/issue-19/ci-logs/ci-run-20885464993.log.gz
+tree            docs/case-studies/issue-19/pr-114-data
+blob       708  docs/case-studies/issue-19/pr-114-data/issue-113-details.txt
+blob      3550  docs/case-studies/issue-19/pr-114-data/pr-commits.json
+blob      8310  docs/case-studies/issue-19/pr-114-data/pr-conversation-comments.json
+blob      6727  docs/case-studies/issue-19/pr-114-data/pr-details.json
+blob     31790  docs/case-studies/issue-19/pr-114-data/pr-diff.patch
+blob         2  docs/case-studies/issue-19/pr-114-data/pr-review-comments.json
+blob         2  docs/case-studies/issue-19/pr-114-data/pr-reviews.json
+blob     89348  docs/case-studies/issue-19/pr-114-data/solution-draft-log-1.txt.gz
+blob     69878  docs/case-studies/issue-19/pr-114-data/solution-draft-log-2.txt.gz
+tree            docs/case-studies/issue-21
+blob      9651  docs/case-studies/issue-21/README.md
+blob      3766  docs/case-studies/issue-21/browser-commander-issue-27.md
+blob      5448  docs/case-studies/issue-21/browser-commander-issue-29.md
+blob      4224  docs/case-studies/issue-21/browser-commander-issue-31.md
+blob      6909  docs/case-studies/issue-21/browser-commander-issue-33.md
+blob     14865  docs/case-studies/issue-21/browser-commander-rust.yml
+tree            docs/case-studies/issue-25
+blob      4724  docs/case-studies/issue-25/README.md
+tree            docs/case-studies/issue-29
+blob      6614  docs/case-studies/issue-29/README.md
+tree            docs/case-studies/issue-32
+blob      5520  docs/case-studies/issue-32/README.md
+tree            docs/case-studies/issue-34
+blob      7573  docs/case-studies/issue-34/README.md
+tree            docs/ci-cd
+blob      6373  docs/ci-cd/troubleshooting.md
+tree            examples
+blob       183  examples/basic_usage.rs
+tree            experiments
+blob      3100  experiments/test-changelog-parsing.rs
+blob      2946  experiments/test-crates-io-check.rs
+blob      3146  experiments/test-detect-code-changes.sh
+blob       812  experiments/test-version-check-dependencies.sh
+blob      1420  experiments/test-version-check.sh
+tree            scripts
+blob      5190  scripts/bump-version.rs
+blob      5230  scripts/check-changelog-fragment.rs
+blob      2764  scripts/check-file-size.rs
+blob      9444  scripts/check-release-needed.rs
+blob      4917  scripts/check-version-modification.rs
+blob      7325  scripts/collect-changelog.rs
+blob      3280  scripts/create-changelog-fragment.rs
+blob      7005  scripts/create-github-release.rs
+blob      7070  scripts/detect-code-changes.rs
+blob      5331  scripts/get-bump-type.rs
+blob      3082  scripts/get-version.rs
+blob      1953  scripts/git-config.rs
+blob      7905  scripts/publish-crate.rs
+blob      4922  scripts/rust-paths.rs
+blob     18766  scripts/version-and-commit.rs
+tree            src
+blob        32  src/lib.rs
+blob       444  src/main.rs
+blob        66  src/sum.rs
+tree            tests
+tree            tests/integration
+blob         9  tests/integration/mod.rs
+blob      1059  tests/integration/sum.rs
+tree            tests/unit
+tree            tests/unit/ci-cd
+blob      2308  tests/unit/ci-cd/changelog_parsing.rs
+blob        23  tests/unit/ci-cd/mod.rs
+blob        46  tests/unit/mod.rs
+blob       417  tests/unit/sum.rs

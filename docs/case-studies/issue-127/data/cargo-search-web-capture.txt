@@ -1,0 +1,2 @@
+web-capture = "0.3.19"    # CLI and microservice to render web pages as HTML, Markdown, or PNG
+formal-ai = "0.153.0"     # Formal symbolic AI implementation with OpenAI-compatible APIs

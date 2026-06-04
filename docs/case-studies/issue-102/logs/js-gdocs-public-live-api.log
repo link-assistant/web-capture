@@ -1,0 +1,43 @@
+
+> @link-assistant/web-capture@1.7.14 test
+> node --experimental-vm-modules ./node_modules/.bin/jest --runTestsByPath tests/integration/gdocs-public-doc.test.js --runInBand --testNamePattern=fetches the public document via --capture api
+
+(node:193142) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+PASS tests/integration/gdocs-public-doc.test.js
+  Google Docs public test document (issue #90)
+    URL variations
+      ○ skipped accepts https://docs.google.com/document/d/1f5zI2xOFpKa90v0GjamO_t7lqSdzMlaM as a Google Docs URL
+      ○ skipped accepts https://docs.google.com/document/d/1f5zI2xOFpKa90v0GjamO_t7lqSdzMlaM/edit as a Google Docs URL
+      ○ skipped accepts https://docs.google.com/document/d/1f5zI2xOFpKa90v0GjamO_t7lqSdzMlaM/edit?usp=sharing as a Google Docs URL
+      ○ skipped accepts https://docs.google.com/document/d/1f5zI2xOFpKa90v0GjamO_t7lqSdzMlaM/edit?usp=sharing&ouid=102030405060708090100&rtpof=true&sd=true as a Google Docs URL
+      ○ skipped accepts https://docs.google.com/document/d/1f5zI2xOFpKa90v0GjamO_t7lqSdzMlaM/edit?tab=t.0 as a Google Docs URL
+      ○ skipped extracts the public document ID from https://docs.google.com/document/d/1f5zI2xOFpKa90v0GjamO_t7lqSdzMlaM
+      ○ skipped extracts the public document ID from https://docs.google.com/document/d/1f5zI2xOFpKa90v0GjamO_t7lqSdzMlaM/edit
+      ○ skipped extracts the public document ID from https://docs.google.com/document/d/1f5zI2xOFpKa90v0GjamO_t7lqSdzMlaM/edit?usp=sharing
+      ○ skipped extracts the public document ID from https://docs.google.com/document/d/1f5zI2xOFpKa90v0GjamO_t7lqSdzMlaM/edit?usp=sharing&ouid=102030405060708090100&rtpof=true&sd=true
+      ○ skipped extracts the public document ID from https://docs.google.com/document/d/1f5zI2xOFpKa90v0GjamO_t7lqSdzMlaM/edit?tab=t.0
+      ○ skipped builds the expected export URL for the public document
+      ○ skipped builds the expected editor URL for the public document
+      ○ skipped builds the expected Docs API URL for the public document
+    Capture method selection (issue #72 regression guard)
+      ○ skipped routes --capture browser to the editor-model backend
+      ○ skipped routes --capture api to the public-export backend when no token
+      ○ skipped routes --capture api with a token to the Docs REST API backend
+    Reference markdown fixture
+      ○ skipped contains every feature category documented in issue #90
+      ○ skipped embeds the four test images referenced by the issue
+    Live capture against the public document
+      ✓ fetches the public document via --capture api and returns markdown (538 ms)
+      ○ skipped resolves https://docs.google.com/document/d/1f5zI2xOFpKa90v0GjamO_t7lqSdzMlaM to the same document when capturing
+      ○ skipped resolves https://docs.google.com/document/d/1f5zI2xOFpKa90v0GjamO_t7lqSdzMlaM/edit to the same document when capturing
+      ○ skipped resolves https://docs.google.com/document/d/1f5zI2xOFpKa90v0GjamO_t7lqSdzMlaM/edit?usp=sharing to the same document when capturing
+      ○ skipped resolves https://docs.google.com/document/d/1f5zI2xOFpKa90v0GjamO_t7lqSdzMlaM/edit?usp=sharing&ouid=102030405060708090100&rtpof=true&sd=true to the same document when capturing
+      ○ skipped resolves https://docs.google.com/document/d/1f5zI2xOFpKa90v0GjamO_t7lqSdzMlaM/edit?tab=t.0 to the same document when capturing
+      ○ skipped captures the public document via --capture browser and renders DOCS_modelChunk markdown
+
+Test Suites: 1 passed, 1 total
+Tests:       24 skipped, 1 passed, 25 total
+Snapshots:   0 total
+Time:        1.167 s
+Ran all test suites within paths "tests/integration/gdocs-public-doc.test.js".

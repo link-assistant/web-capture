@@ -1,0 +1,5 @@
+Found 1 changeset file(s)
+Validating changeset: .changeset/support-gdocs-capture-methods.md
+✅ Changeset validation passed
+   Type: patch
+   Description: Support Google Docs capture selection through `--capture browser` editor-model parsing, public export API capture, and authenticated Docs REST API capture.

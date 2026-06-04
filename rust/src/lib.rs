@@ -1,0 +1,539 @@
+//! # web-capture
+//!
+//! A library and CLI/microservice to render web pages as HTML, Markdown, or PNG screenshots.
+//!
+//! ## Features
+//!
+//! - Fetch HTML content from URLs
+//! - Convert HTML to Markdown
+//! - Capture PNG screenshots of web pages
+//! - Convert relative URLs to absolute URLs
+//! - Support for headless browser rendering via browser-commander
+//!
+//! ## Example
+//!
+//! ```rust,no_run
+//! use web_capture::{fetch_html, convert_html_to_markdown, capture_screenshot};
+//!
+//! #[tokio::main]
+//! async fn main() -> anyhow::Result<()> {
+//!     // Fetch HTML from a URL
+//!     let html = fetch_html("https://example.com").await?;
+//!     println!("HTML length: {}", html.len());
+//!
+//!     // Convert HTML to Markdown
+//!     let markdown = convert_html_to_markdown(&html, Some("https://example.com"))?;
+//!     println!("Markdown: {}", markdown);
+//!
+//!     // Capture a screenshot
+//!     let screenshot = capture_screenshot("https://example.com").await?;
+//!     println!("Screenshot size: {} bytes", screenshot.len());
+//!
+//!     Ok(())
+//! }
+//! ```
+
+pub mod animation;
+pub mod archive;
+pub mod batch;
+pub mod browser;
+pub mod extract_images;
+pub mod figures;
+pub mod gdocs;
+pub mod html;
+pub mod kreuzberg;
+pub mod latex;
+pub mod localize_images;
+pub mod markdown;
+pub mod metadata;
+pub mod postprocess;
+pub mod search;
+pub mod themed_image;
+pub mod verify;
+pub mod xpaste;
+
+use thiserror::Error;
+
+/// Version of the web-capture library
+pub const VERSION: &str = env!("CARGO_PKG_VERSION");
+
+/// Error types for web-capture operations
+#[derive(Error, Debug)]
+pub enum WebCaptureError {
+    #[error("Failed to fetch URL: {0}")]
+    FetchError(String),
+
+    #[error("Failed to parse HTML: {0}")]
+    ParseError(String),
+
+    #[error("Failed to convert to Markdown: {0}")]
+    MarkdownError(String),
+
+    #[error("Failed to capture screenshot: {0}")]
+    ScreenshotError(String),
+
+    #[error("Browser error: {0}")]
+    BrowserError(String),
+
+    #[error("Invalid URL: {0}")]
+    InvalidUrl(String),
+
+    #[error("IO error: {0}")]
+    IoError(#[from] std::io::Error),
+
+    #[error("Request error: {0}")]
+    RequestError(#[from] reqwest::Error),
+}
+
+/// Result type for web-capture operations
+pub type Result<T> = std::result::Result<T, WebCaptureError>;
+
+/// Fetch HTML content from a URL
+///
+/// This function makes a simple HTTP GET request to fetch the HTML content.
+/// For JavaScript-heavy pages, use `render_html` instead.
+///
+/// # Arguments
+///
+/// * `url` - The URL to fetch
+///
+/// # Returns
+///
+/// The HTML content as a string
+///
+/// # Errors
+///
+/// Returns an error if the fetch fails or the response cannot be decoded
+pub async fn fetch_html(url: &str) -> Result<String> {
+    html::fetch_html(url).await
+}
+
+/// Render HTML content from a URL using a headless browser
+///
+/// This function uses browser-commander to launch a headless browser,
+/// navigate to the URL, and return the rendered HTML content.
+///
+/// # Arguments
+///
+/// * `url` - The URL to render
+///
+/// # Returns
+///
+/// The rendered HTML content as a string
+///
+/// # Errors
+///
+/// Returns an error if browser operations fail
+pub async fn render_html(url: &str) -> Result<String> {
+    browser::render_html(url).await
+}
+
+/// Convert HTML content to Markdown
+///
+/// # Arguments
+///
+/// * `html` - The HTML content to convert
+/// * `base_url` - Optional base URL for converting relative URLs to absolute
+///
+/// # Returns
+///
+/// The Markdown content as a string
+///
+/// # Errors
+///
+/// Returns an error if conversion fails
+pub fn convert_html_to_markdown(html: &str, base_url: Option<&str>) -> Result<String> {
+    markdown::convert_html_to_markdown(html, base_url)
+}
+
+/// Capture a PNG screenshot of a URL
+///
+/// This function uses browser-commander to launch a headless browser,
+/// navigate to the URL, and capture a screenshot.
+///
+/// # Arguments
+///
+/// * `url` - The URL to capture
+///
+/// # Returns
+///
+/// The PNG image data as bytes
+///
+/// # Errors
+///
+/// Returns an error if browser operations fail
+pub async fn capture_screenshot(url: &str) -> Result<Vec<u8>> {
+    browser::capture_screenshot(url).await
+}
+
+/// Convert relative URLs to absolute URLs in HTML content
+///
+/// # Arguments
+///
+/// * `html` - The HTML content to process
+/// * `base_url` - The base URL to use for resolving relative URLs
+///
+/// # Returns
+///
+/// The HTML content with absolute URLs
+#[must_use]
+pub fn convert_relative_urls(html: &str, base_url: &str) -> String {
+    html::convert_relative_urls(html, base_url)
+}
+
+/// Convert HTML content to UTF-8 encoding
+///
+/// Detects the current encoding from meta tags and converts to UTF-8 if needed.
+///
+/// # Arguments
+///
+/// * `html` - The HTML content to convert
+///
+/// # Returns
+///
+/// The UTF-8 encoded HTML content
+#[must_use]
+pub fn convert_to_utf8(html: &str) -> String {
+    html::convert_to_utf8(html)
+}
+
+/// Options for enhanced HTML-to-Markdown conversion.
+#[allow(clippy::struct_excessive_bools)]
+#[derive(Debug, Clone)]
+pub struct EnhancedOptions {
+    /// Extract LaTeX formulas from img.formula, `KaTeX`, `MathJax` elements.
+    pub extract_latex: bool,
+    /// Extract article metadata (author, date, hubs, tags).
+    pub extract_metadata: bool,
+    /// Apply post-processing (unicode normalization, LaTeX spacing, etc.).
+    pub post_process: bool,
+    /// Detect and correct code block languages.
+    pub detect_code_language: bool,
+    /// CSS selector used to scope Markdown conversion.
+    pub content_selector: Option<String>,
+    /// CSS selector for article body Markdown; prepends the selected article title when available.
+    pub body_selector: Option<String>,
+}
+
+impl Default for EnhancedOptions {
+    fn default() -> Self {
+        Self {
+            extract_latex: true,
+            extract_metadata: true,
+            post_process: true,
+            detect_code_language: true,
+            content_selector: None,
+            body_selector: None,
+        }
+    }
+}
+
+/// Result of enhanced HTML-to-Markdown conversion.
+#[derive(Debug, Clone)]
+pub struct EnhancedMarkdownResult {
+    pub markdown: String,
+    pub metadata: Option<metadata::ArticleMetadata>,
+}
+
+/// Convert HTML to Markdown with enhanced options.
+///
+/// Supports LaTeX formula extraction, metadata extraction, and
+/// post-processing pipeline matching the JavaScript implementation.
+///
+/// # Arguments
+///
+/// * `html` - The HTML content to convert
+/// * `base_url` - Optional base URL for resolving relative URLs
+/// * `options` - Enhanced conversion options
+///
+/// # Returns
+///
+/// Enhanced result with markdown text and optional metadata
+///
+/// # Errors
+///
+/// Returns an error if base conversion fails
+pub fn convert_html_to_markdown_enhanced(
+    html: &str,
+    base_url: Option<&str>,
+    options: &EnhancedOptions,
+) -> Result<EnhancedMarkdownResult> {
+    let mut html_for_markdown = scope_html_with_selectors(html, options);
+
+    if options.extract_latex {
+        html_for_markdown = replace_latex_formula_elements(&html_for_markdown);
+    }
+
+    if options.detect_code_language {
+        html_for_markdown = correct_code_languages(&html_for_markdown);
+    }
+
+    // Start with basic markdown conversion
+    let mut md = markdown::convert_html_to_markdown(&html_for_markdown, base_url)?;
+
+    // Extract metadata if requested
+    let extracted_metadata = if options.extract_metadata {
+        let meta = metadata::extract_metadata(html);
+        // Prepend metadata block
+        let header_lines = metadata::format_metadata_block(&meta);
+        if !header_lines.is_empty() {
+            let header = header_lines.join("\n");
+            // Insert after the first heading
+            if let Some(pos) = md.find("\n\n") {
+                md = format!("{}\n\n{}\n{}", &md[..pos], header, &md[pos + 2..]);
+            } else {
+                md = format!("{header}\n\n{md}");
+            }
+        }
+        // Append footer block
+        let footer_lines = metadata::format_footer_block(&meta);
+        if !footer_lines.is_empty() {
+            md.push_str("\n\n");
+            md.push_str(&footer_lines.join("\n"));
+        }
+        Some(meta)
+    } else {
+        None
+    };
+
+    // Apply post-processing if requested
+    if options.post_process {
+        md = postprocess::post_process_markdown(&md, &postprocess::PostProcessOptions::default());
+    }
+
+    if options.extract_latex {
+        md = normalize_extracted_latex_markdown(&md);
+    }
+
+    Ok(EnhancedMarkdownResult {
+        markdown: md,
+        metadata: extracted_metadata,
+    })
+}
+
+/// Convert HTML to Markdown using the kreuzberg html-to-markdown library.
+///
+/// Returns a structured result with content, metadata, tables, images, and warnings.
+/// This is a high-performance alternative to `convert_html_to_markdown` using the
+/// same Rust core that powers the kreuzberg ecosystem.
+///
+/// # Arguments
+///
+/// * `html` - The HTML content to convert
+/// * `base_url` - Optional base URL for converting relative URLs to absolute
+///
+/// # Returns
+///
+/// A `KreuzbergResult` with structured conversion output
+///
+/// # Errors
+///
+/// Returns an error if conversion fails
+pub fn convert_with_kreuzberg(
+    html: &str,
+    base_url: Option<&str>,
+) -> Result<kreuzberg::KreuzbergResult> {
+    kreuzberg::convert_with_kreuzberg(html, base_url)
+}
+
+/// Convert HTML to Markdown using kreuzberg after applying enhanced scoping options.
+///
+/// This keeps the alternate converter compatible with the same `contentSelector`
+/// and `bodySelector` controls used by the default enhanced converter.
+///
+/// # Errors
+///
+/// Returns an error if conversion fails.
+pub fn convert_with_kreuzberg_enhanced(
+    html: &str,
+    base_url: Option<&str>,
+    options: &EnhancedOptions,
+) -> Result<kreuzberg::KreuzbergResult> {
+    let scoped_html = scope_html_with_selectors(html, options);
+    kreuzberg::convert_with_kreuzberg(&scoped_html, base_url)
+}
+
+fn normalize_extracted_latex_markdown(markdown: &str) -> String {
+    let re = regex::Regex::new(r"\$([^$\n]+)\$").expect("valid regex");
+    re.replace_all(markdown, |caps: &regex::Captures<'_>| {
+        let formula = caps.get(1).map_or("", |m| m.as_str()).replace(r"\\", r"\");
+        format!("${formula}$")
+    })
+    .into_owned()
+}
+
+fn scope_html_with_selectors(html: &str, options: &EnhancedOptions) -> String {
+    if let Some(body_selector) = options.body_selector.as_deref() {
+        let body_html = markdown::select_html(html, body_selector);
+        let title_selector = options
+            .content_selector
+            .as_deref()
+            .map_or_else(|| "h1".to_string(), |selector| format!("{selector} h1, h1"));
+        let title_html = markdown::select_html(html, &title_selector);
+        return match (title_html, body_html) {
+            (Some(title), Some(body)) => format!("{title}\n{body}"),
+            (None, Some(body)) => body,
+            _ => html.to_string(),
+        };
+    }
+
+    options
+        .content_selector
+        .as_deref()
+        .and_then(|selector| markdown::select_html(html, selector))
+        .unwrap_or_else(|| html.to_string())
+}
+
+fn replace_latex_formula_elements(html: &str) -> String {
+    let mut result = html.to_string();
+
+    let img_formula_re = regex::Regex::new(r"(?is)<img\b[^>]*>").expect("valid regex");
+    result = img_formula_re
+        .replace_all(&result, |caps: &regex::Captures<'_>| {
+            let tag = caps.get(0).map_or("", |m| m.as_str());
+            if is_formula_img_tag(tag) {
+                extract_attr(tag, "source")
+                    .or_else(|| extract_attr(tag, "alt"))
+                    .map_or_else(
+                        || tag.to_string(),
+                        |latex| format!("${}$", normalize_latex_for_html(&latex)),
+                    )
+            } else {
+                tag.to_string()
+            }
+        })
+        .into_owned();
+
+    let math_attr_re = regex::Regex::new(
+        r"(?is)<(?P<tag>mjx-container|span|div)\b(?P<attrs>[^>]*)>.*?</(?P<tag_close>mjx-container|span|div)>",
+    )
+    .expect("valid regex");
+    math_attr_re
+        .replace_all(&result, |caps: &regex::Captures<'_>| {
+            let full = caps.get(0).map_or("", |m| m.as_str());
+            let attrs = caps.name("attrs").map_or("", |m| m.as_str());
+            let tag = caps
+                .name("tag")
+                .map_or("", |m| m.as_str())
+                .to_ascii_lowercase();
+            let tag_close = caps
+                .name("tag_close")
+                .map_or("", |m| m.as_str())
+                .to_ascii_lowercase();
+
+            if tag != tag_close || !is_math_attrs(&tag, attrs) {
+                return full.to_string();
+            }
+
+            extract_attr(attrs, "data-tex")
+                .or_else(|| extract_attr(attrs, "data-latex"))
+                .or_else(|| extract_annotation_tex(full))
+                .map_or_else(
+                    || full.to_string(),
+                    |latex| format!("${}$", normalize_latex_for_html(&latex)),
+                )
+        })
+        .into_owned()
+}
+
+fn correct_code_languages(html: &str) -> String {
+    let code_re = regex::Regex::new(r"(?is)<code\b(?P<attrs>[^>]*)>(?P<body>.*?)</code>")
+        .expect("valid regex");
+
+    code_re
+        .replace_all(html, |caps: &regex::Captures<'_>| {
+            let full = caps.get(0).map_or("", |m| m.as_str());
+            let attrs = caps.name("attrs").map_or("", |m| m.as_str());
+            let body = caps.name("body").map_or("", |m| m.as_str());
+
+            if !has_matlab_language(attrs) || !looks_like_coq(body) {
+                return full.to_string();
+            }
+
+            let updated_attrs = attrs
+                .replace("language-matlab", "language-coq")
+                .replace(r#"class="matlab""#, r#"class="coq""#)
+                .replace("class='matlab'", "class='coq'");
+
+            format!("<code{updated_attrs}>{body}</code>")
+        })
+        .into_owned()
+}
+
+fn is_formula_img_tag(tag: &str) -> bool {
+    extract_attr(tag, "source").is_some()
+        || extract_attr(tag, "class").is_some_and(|classes| classes.contains("formula"))
+}
+
+fn is_math_attrs(tag: &str, attrs: &str) -> bool {
+    tag == "mjx-container"
+        || extract_attr(attrs, "class").is_some_and(|classes| {
+            classes.contains("katex") || classes.contains("math") || classes.contains("MathJax")
+        })
+}
+
+fn has_matlab_language(attrs: &str) -> bool {
+    extract_attr(attrs, "class").is_some_and(|classes| {
+        classes
+            .split_whitespace()
+            .any(|class| class == "language-matlab" || class == "matlab")
+    })
+}
+
+fn looks_like_coq(text: &str) -> bool {
+    let decoded = crate::html::decode_html_entities(text);
+    [
+        "Require Import",
+        "Definition",
+        "Fixpoint",
+        "Lemma",
+        "Theorem",
+        "Proof",
+        "Qed",
+        "Notation",
+        "Inductive",
+    ]
+    .iter()
+    .any(|needle| decoded.contains(needle))
+}
+
+fn normalize_latex_for_html(latex: &str) -> String {
+    latex.trim().replace('\\', "&#92;")
+}
+
+fn extract_annotation_tex(html: &str) -> Option<String> {
+    let re = regex::Regex::new(
+        r#"(?is)<annotation\b[^>]*encoding\s*=\s*["']application/x-tex["'][^>]*>(.*?)</annotation>"#,
+    )
+    .ok()?;
+
+    re.captures(html).and_then(|caps| {
+        let text = caps.get(1)?.as_str().trim();
+        (!text.is_empty()).then(|| crate::html::decode_html_entities(text))
+    })
+}
+
+fn extract_attr(tag: &str, attr: &str) -> Option<String> {
+    let re = regex::Regex::new(&format!(
+        r#"(?is)\b{}\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s"'=<>`]+))"#,
+        regex::escape(attr)
+    ))
+    .ok()?;
+
+    re.captures(tag).and_then(|caps| {
+        let value = caps
+            .get(1)
+            .or_else(|| caps.get(2))
+            .or_else(|| caps.get(3))?
+            .as_str()
+            .trim();
+        (!value.is_empty()).then(|| crate::html::decode_html_entities(value))
+    })
+}
+
+// Re-export commonly used types
+pub use browser::BrowserEngine;
+pub use search::{
+    search, SearchDiagnostics, SearchResult, SearchResultItem, DEFAULT_LIMIT, DEFAULT_PROVIDER,
+    SEARCH_PROVIDERS,
+};

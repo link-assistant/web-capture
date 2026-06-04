@@ -1,0 +1,62 @@
+
+> @link-assistant/web-capture@1.7.3 test
+> node --experimental-vm-modules ./node_modules/.bin/jest --runTestsByPath tests/unit/package-runtime-dependencies.test.js tests/unit/cli.test.js tests/unit/html2md.test.js
+
+(node:711345) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:711346) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:711352) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+PASS tests/unit/package-runtime-dependencies.test.js
+  runtime package dependencies
+    ✓ turndown-plugin-gfm is declared as a production dependency (5 ms)
+    ✓ turndown-plugin-gfm is not marked dev-only in package-lock.json (17 ms)
+
+PASS tests/unit/html2md.test.js
+  convertHtmlToMarkdown
+    ✓ removes empty links and anchor headings (22 ms)
+    ✓ removes empty links in complex content (6 ms)
+    ✓ removes empty links with only whitespace (6 ms)
+    ✓ removes empty links with only child elements (3 ms)
+    ✓ removes headings with only whitespace (2 ms)
+    ✓ converts relative links to absolute if baseUrl is provided (3 ms)
+    ✓ does not change links if no baseUrl is provided (2 ms)
+    ✓ converts ARIA role table to Markdown table (15 ms)
+    ✓ converts a regular HTML table to Markdown table (4 ms)
+    ✓ handles empty tables gracefully (3 ms)
+    ✓ handles specific ARIA table example (21 ms)
+
+PASS tests/unit/cli.test.js
+  CLI
+    --help
+      ✓ shows help message with --help flag (146 ms)
+      ✓ shows help message with -h flag (114 ms)
+      ✓ shows error and exits with code 1 when no arguments provided (122 ms)
+    --version
+      ✓ shows version with --version flag (103 ms)
+      ✓ shows version with -v flag (89 ms)
+    URL validation
+      ✓ accepts a URL as a positional argument (368 ms)
+      ✓ accepts a URL after the -- argument separator (389 ms)
+      ✓ rejects unknown options (93 ms)
+      ✓ rejects invalid URL (94 ms)
+    format options
+      ✓ accepts --format html (96 ms)
+      ✓ accepts --format markdown (89 ms)
+      ✓ accepts --format image (90 ms)
+    engine options
+      ✓ help shows engine options (96 ms)
+      ✓ accepts --engine option (96 ms)
+    server mode options
+      ✓ help shows --serve option (93 ms)
+      ✓ help shows --port option (99 ms)
+      ✓ help shows API endpoints (92 ms)
+    output options
+      ✓ help shows --output option (97 ms)
+
+Test Suites: 3 passed, 3 total
+Tests:       31 passed, 31 total
+Snapshots:   0 total
+Time:        3.077 s
+Ran all test suites within paths "tests/unit/package-runtime-dependencies.test.js", "tests/unit/cli.test.js", "tests/unit/html2md.test.js".
