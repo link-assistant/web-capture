@@ -1,5 +1,11 @@
 # @link-assistant/web-capture
 
+## 1.10.2
+
+### Patch Changes
+
+- Add xpaste.pro raw text capture and large-paste markdown archive handling.
+
 ## 1.10.1
 
 ### Patch Changes
