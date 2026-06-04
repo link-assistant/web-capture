@@ -33,6 +33,7 @@ pub fn convert_html_to_markdown(html: &str, base_url: Option<&str>) -> Result<St
         || html.to_string(),
         |base| convert_relative_urls(html, base),
     );
+    let processed_html = reorder_visual_layout_elements(&processed_html);
 
     // Parse and clean the HTML
     let cleaned_html = clean_html(&processed_html);
@@ -130,6 +131,55 @@ fn clean_html(html: &str) -> String {
     }
 
     cleaned
+}
+
+fn reorder_visual_layout_elements(html: &str) -> String {
+    fn move_before(html: &str, moving: &Regex, anchor: &Regex) -> String {
+        let Some(moving_match) = moving.find(html) else {
+            return html.to_string();
+        };
+        let Some(anchor_match) = anchor.find(html) else {
+            return html.to_string();
+        };
+        if moving_match.start() < anchor_match.start() {
+            return html.to_string();
+        }
+
+        let moved = moving_match.as_str().to_string();
+        let mut without_moved = html.to_string();
+        without_moved.replace_range(moving_match.range(), "");
+        if let Some(anchor_match) = anchor.find(&without_moved) {
+            without_moved.insert_str(anchor_match.start(), &moved);
+        }
+        without_moved
+    }
+
+    fn move_after(html: &str, moving: &Regex, anchor: &Regex) -> String {
+        let Some(moving_match) = moving.find(html) else {
+            return html.to_string();
+        };
+        let Some(anchor_match) = anchor.find(html) else {
+            return html.to_string();
+        };
+        if moving_match.start() > anchor_match.start() {
+            return html.to_string();
+        }
+
+        let moved = moving_match.as_str().to_string();
+        let mut without_moved = html.to_string();
+        without_moved.replace_range(moving_match.range(), "");
+        if let Some(anchor_match) = anchor.find(&without_moved) {
+            without_moved.insert_str(anchor_match.end(), &moved);
+        }
+        without_moved
+    }
+
+    let header = Regex::new(r"(?is)<header\b[^>]*>.*?</header>").expect("valid regex");
+    let main = Regex::new(r"(?is)<main\b[^>]*>.*?</main>").expect("valid regex");
+    let footer = Regex::new(r"(?is)<footer\b[^>]*>.*?</footer>").expect("valid regex");
+
+    let html = move_before(html, &header, &main);
+    move_after(&html, &footer, &main)
 }
 
 /// Unwrap `<ol><li><hN>...</hN></li></ol>` when the heading text already

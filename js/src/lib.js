@@ -19,6 +19,95 @@ export async function fetchHtml(url) {
   return response.text();
 }
 
+export function isTextPasteUrl(url) {
+  const parsed = parseTextPasteUrl(url);
+  return Boolean(parsed);
+}
+
+export function normalizeUrlForTextContent(url) {
+  const parsed = parseTextPasteUrl(url);
+  if (!parsed) {
+    return url;
+  }
+  return `https://${parsed.host}${parsed.pathPrefix}/p/${parsed.pasteId}/raw`;
+}
+
+export function normalizeUrlForTextPage(url) {
+  const parsed = parseTextPasteUrl(url);
+  if (!parsed) {
+    return url;
+  }
+  return `https://${parsed.host}${parsed.pathPrefix}/p/${parsed.pasteId}`;
+}
+
+export function getTextPasteId(url) {
+  return parseTextPasteUrl(url)?.pasteId || null;
+}
+
+export function getTextPasteFilename(url) {
+  const pasteId = getTextPasteId(url);
+  return pasteId ? `xpaste-pro-${pasteId}.txt` : null;
+}
+
+export function appendTextPasteMarkdownAttachment(markdown, url, rawText) {
+  const textFilename = getTextPasteFilename(url) || 'download.txt';
+  const normalizedRawText = normalizeMarkdownAttachmentText(rawText);
+  const fence = markdownFenceFor(normalizedRawText);
+  const attachmentText = normalizedRawText.endsWith('\n')
+    ? normalizedRawText
+    : `${normalizedRawText}\n`;
+
+  return [
+    markdown.trimEnd(),
+    '',
+    `## ${textFilename}`,
+    '',
+    `${fence}text`,
+    `${attachmentText}${fence}`,
+    '',
+  ].join('\n');
+}
+
+function normalizeMarkdownAttachmentText(text) {
+  return String(text).replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+}
+
+function markdownFenceFor(text) {
+  const runs = text.match(/`{3,}/g) || [];
+  const length = runs.reduce((max, run) => Math.max(max, run.length + 1), 3);
+  return '`'.repeat(length);
+}
+
+function parseTextPasteUrl(url) {
+  try {
+    const parsed = new URL(url);
+    const host = parsed.hostname.toLowerCase();
+    if (host !== 'xpaste.pro' && host !== 'www.xpaste.pro') {
+      return null;
+    }
+
+    const parts = parsed.pathname.split('/').filter(Boolean);
+    const index = parts.indexOf('p');
+    let pathPrefix = '';
+    if (index === -1 || !parts[index + 1]) {
+      return null;
+    }
+    if (index === 1 && ['en', 'ru'].includes(parts[0])) {
+      pathPrefix = `/${parts[0]}`;
+    } else if (index !== 0) {
+      return null;
+    }
+    const tail = parts.slice(index + 2);
+    if (tail.length > 1 || (tail[0] && tail[0] !== 'raw')) {
+      return null;
+    }
+
+    return { host: 'xpaste.pro', pathPrefix, pasteId: parts[index + 1] };
+  } catch {
+    return null;
+  }
+}
+
 export function convertHtmlToMarkdown(html, baseUrl) {
   // Ensure all URLs are absolute before Markdown conversion
   if (baseUrl) {
@@ -26,6 +115,8 @@ export function convertHtmlToMarkdown(html, baseUrl) {
   }
   // Load HTML into Cheerio
   const $ = cheerio.load(html);
+
+  reorderVisualLayoutElements($);
 
   // Remove <style>, <script>, and <noscript> tags
   $('style, script, noscript').remove();
@@ -197,6 +288,20 @@ export function convertHtmlToMarkdown(html, baseUrl) {
 // mean "paragraph break" in the source HTML, so collapse them to `\n\n`.
 function coalesceBrRunsToParagraphBreak(markdown) {
   return markdown.replace(/(?: {2,}\n){2,}/g, '\n\n');
+}
+
+function reorderVisualLayoutElements($) {
+  const $header = $('header').first();
+  const $main = $('main').first();
+  const $footer = $('footer').first();
+
+  if ($header.length && $main.length && $header.index() > $main.index()) {
+    $main.before($header);
+  }
+
+  if ($footer.length && $main.length && $footer.index() < $main.index()) {
+    $main.after($footer);
+  }
 }
 
 // Lift <br> nodes out of inline parents when they sit at the leading or
@@ -597,6 +702,8 @@ export function convertHtmlToMarkdownEnhanced(html, baseUrl, options = {}) {
 
   html = scopeHtmlForMarkdown(html, { contentSelector, bodySelector });
   $ = cheerio.load(html);
+
+  reorderVisualLayoutElements($);
 
   // Remove unwanted elements
   $('style, script, noscript').remove();

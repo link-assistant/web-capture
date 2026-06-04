@@ -13,6 +13,7 @@ export default {
     '**/tests/mock/**/*.test.js',
     '**/tests/e2e/**/*.test.js',
     '**/tests/integration/**/*.test.js',
+    '**/tests/xpaste/**/*.test.js',
   ],
   setupFiles: ['./tests/jest.setup.mjs'],
 };

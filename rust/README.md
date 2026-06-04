@@ -11,6 +11,7 @@ A CLI and microservice to fetch URLs and render them as:
 
 - **Markdown**: Converted from HTML with image extraction (default)
 - **HTML**: Rendered page content
+- **Plain text**: Raw text downloads for paste-like URLs such as xpaste.pro
 - **PNG screenshot**: Full page capture
 
 This is the Rust implementation of web-capture, providing the same API as the JavaScript version.
@@ -48,6 +49,9 @@ web-capture https://example.com -o -
 # Capture as HTML
 web-capture https://example.com --format html
 
+# Capture raw paste text
+web-capture https://xpaste.pro/p/t4q0Lsp0 --format txt -o paste.txt
+
 # Take a screenshot
 web-capture https://example.com --format png -o screenshot.png
 
@@ -75,8 +79,15 @@ web-capture --serve --port 8080
 - **Markdown (base64 inline)**: `GET /markdown?url=<URL>&embedImages=true`
 - **Markdown (all images stripped)**: `GET /markdown?url=<URL>&keepOriginalLinks=false`
 - **HTML**: `GET /html?url=<URL>`
+- **Text**: `GET /txt?url=<URL>` (xpaste.pro paste URLs normalize to `/raw`)
 - **PNG screenshot**: `GET /image?url=<URL>`
 - **Search**: `GET /search?q=<QUERY>&provider=<PROVIDER>&format=json|markdown`
+
+For xpaste.pro paste URLs, `/markdown` captures the visual paste page in visible
+order and appends the raw paste text as `xpaste-pro-<id>.txt` when the final
+Markdown stays under 1500 lines. Larger paste pages return a ZIP containing
+`index.md`, `xpaste-pro-<id>.md`, and `xpaste-pro-<id>.txt`. Canonical,
+localized, and `/raw` paste URLs are normalized before capture.
 
 ### Search Endpoint
 
@@ -144,25 +155,25 @@ Capture a URL directly:
 web-capture <url> [options]
 ```
 
-| Option                      | Short | Description                                           | Default               |
-| --------------------------- | ----- | ----------------------------------------------------- | --------------------- |
-| `--format`                  | `-f`  | Output format: `markdown`/`md`, `html`, `image`/`png` | `markdown`            |
-| `--output`                  | `-o`  | Output file path. Use `-o -` for stdout               | auto-derived from URL |
-| `--capture`                 |       | Capture method: `browser` or `api`                    | `browser`             |
-| `--data-dir`                |       | Base directory for auto-derived output paths          | `./data/web-capture`  |
-| `--embed-images`            |       | Keep images as inline base64 data URIs                | false                 |
-| `--no-extract-images`       |       | Alias for `--embed-images`                            | false                 |
-| `--keep-original-links`     |       | Keep original remote URLs, strip base64               | false                 |
-| `--images-dir`              |       | Subdirectory name for extracted images                | `images`              |
-| `--archive`                 |       | Create archive: `zip`, `7z`, `tar.gz`, `tar`          | -                     |
-| `--extract-latex`           |       | Extract LaTeX formulas                                | true                  |
-| `--no-extract-latex`        |       | Disable LaTeX extraction                              | -                     |
-| `--extract-metadata`        |       | Extract article metadata                              | true                  |
-| `--no-extract-metadata`     |       | Disable metadata extraction                           | -                     |
-| `--post-process`            |       | Apply post-processing                                 | true                  |
-| `--no-post-process`         |       | Disable post-processing                               | -                     |
-| `--detect-code-language`    |       | Detect code block languages                           | true                  |
-| `--no-detect-code-language` |       | Disable code language detection                       | -                     |
+| Option                      | Short | Description                                                         | Default               |
+| --------------------------- | ----- | ------------------------------------------------------------------- | --------------------- |
+| `--format`                  | `-f`  | Output format: `markdown`/`md`, `html`, `txt`/`text`, `image`/`png` | `markdown`            |
+| `--output`                  | `-o`  | Output file path. Use `-o -` for stdout                             | auto-derived from URL |
+| `--capture`                 |       | Capture method: `browser` or `api`                                  | `browser`             |
+| `--data-dir`                |       | Base directory for auto-derived output paths                        | `./data/web-capture`  |
+| `--embed-images`            |       | Keep images as inline base64 data URIs                              | false                 |
+| `--no-extract-images`       |       | Alias for `--embed-images`                                          | false                 |
+| `--keep-original-links`     |       | Keep original remote URLs, strip base64                             | false                 |
+| `--images-dir`              |       | Subdirectory name for extracted images                              | `images`              |
+| `--archive`                 |       | Create archive: `zip`, `7z`, `tar.gz`, `tar`                        | -                     |
+| `--extract-latex`           |       | Extract LaTeX formulas                                              | true                  |
+| `--no-extract-latex`        |       | Disable LaTeX extraction                                            | -                     |
+| `--extract-metadata`        |       | Extract article metadata                                            | true                  |
+| `--no-extract-metadata`     |       | Disable metadata extraction                                         | -                     |
+| `--post-process`            |       | Apply post-processing                                               | true                  |
+| `--no-post-process`         |       | Disable post-processing                                             | -                     |
+| `--detect-code-language`    |       | Detect code block languages                                         | true                  |
+| `--no-detect-code-language` |       | Disable code language detection                                     | -                     |
 
 ### Search Mode
 
@@ -193,6 +204,9 @@ web-capture https://example.com -o -
 
 # HTML format
 web-capture https://example.com -f html -o page.html
+
+# Raw paste text
+web-capture https://xpaste.pro/p/t4q0Lsp0 -f txt -o paste.txt
 
 # Google Docs live editor model
 web-capture https://docs.google.com/document/d/DOC_ID/edit --capture browser

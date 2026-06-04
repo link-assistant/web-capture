@@ -77,6 +77,7 @@ web-capture/
 │   ├── index.js           # Express server entry point
 │   ├── browser.js         # Browser abstraction layer (Puppeteer & Playwright)
 │   ├── html.js            # HTML endpoint handler
+│   ├── txt.js             # Text endpoint handler
 │   ├── markdown.js        # Markdown endpoint handler
 │   ├── image.js           # Screenshot endpoint handler
 │   ├── stream.js          # Stream endpoint handler (stub)
@@ -133,6 +134,7 @@ web-capture/
 **Endpoints**:
 
 - `GET /html?url=<URL>` - Raw HTML or Puppeteer-rendered HTML
+- `GET /txt?url=<URL>` - Raw text fetch/download
 - `GET /markdown?url=<URL>` - Markdown conversion
 - `GET /image?url=<URL>` - PNG screenshot
 - `GET /stream?url=<URL>` - Stream handler (future)
@@ -197,26 +199,42 @@ flowchart TD
 
 ```javascript
 const browser = await puppeteer.launch({
-  args: ['--no-sandbox', '--disable-setuid-sandbox'],
+  args: ["--no-sandbox", "--disable-setuid-sandbox"],
 });
 await page.setViewport({ width: 1280, height: 800 });
 await page.goto(url, {
-  waitUntil: 'networkidle0',
+  waitUntil: "networkidle0",
   timeout: 30000,
 });
 ```
 
 ---
 
-### 3. Markdown Handler (`src/markdown.js`)
+### 3. Text Handler (`src/txt.js`)
+
+**Purpose**: Fetch text resources and return them as `.txt` downloads
+
+**Process**:
+
+1. Normalize paste-like URLs such as `https://xpaste.pro/p/<id>` to their raw text endpoint
+2. Fetch the text resource
+3. Reject non-text responses
+4. Return as `text/plain` with an attachment filename
+
+---
+
+### 4. Markdown Handler (`src/markdown.js`)
 
 **Purpose**: Convert web pages to clean, readable Markdown
 
 **Process**:
 
 1. Fetch HTML (via `fetchHtml`)
-2. Convert to Markdown (via `convertHtmlToMarkdown`)
-3. Return as `text/markdown`
+2. Normalize xpaste.pro paste URLs so `/p/<id>`, localized paste pages, and `/raw` URLs capture the visual paste page
+3. Reorder page landmarks so headers, main content, and footers follow visual order before conversion
+4. Convert to Markdown (via `convertHtmlToMarkdown`)
+5. For xpaste.pro pastes, append raw paste text inline when the result stays under 1500 lines, or return a ZIP with `index.md`, page Markdown, and raw `.txt` when larger
+6. Return as `text/markdown` or `application/zip`
 
 **Output**: Clean Markdown suitable for:
 
@@ -227,7 +245,7 @@ await page.goto(url, {
 
 ---
 
-### 4. Image Handler (`src/image.js`)
+### 5. Image Handler (`src/image.js`)
 
 **Purpose**: Capture PNG screenshots of web pages
 
@@ -261,8 +279,8 @@ sequenceDiagram
 **Response Headers**:
 
 ```javascript
-res.set('Content-Type', 'image/png');
-res.set('Content-Disposition', 'inline; filename="screenshot.png"');
+res.set("Content-Type", "image/png");
+res.set("Content-Disposition", 'inline; filename="screenshot.png"');
 ```
 
 ---
@@ -321,7 +339,7 @@ observer.observe(document.body, { childList: true, subtree: true });
 
 ```javascript
 const charsetMatch = html.match(/<meta[^>]+charset=["']?([^"'>\s]+)/i);
-const currentCharset = charsetMatch ? charsetMatch[1].toLowerCase() : 'utf-8';
+const currentCharset = charsetMatch ? charsetMatch[1].toLowerCase() : "utf-8";
 ```
 
 ---
@@ -400,9 +418,9 @@ The abstraction layer automatically handles differences between engines:
 **Using Puppeteer (default)**:
 
 ```javascript
-const browser = await createBrowser('puppeteer');
+const browser = await createBrowser("puppeteer");
 const page = await browser.newPage();
-await page.goto('https://example.com');
+await page.goto("https://example.com");
 const html = await page.content();
 await browser.close();
 ```
@@ -410,9 +428,9 @@ await browser.close();
 **Using Playwright**:
 
 ```javascript
-const browser = await createBrowser('playwright');
+const browser = await createBrowser("playwright");
 const page = await browser.newPage();
-await page.goto('https://example.com');
+await page.goto("https://example.com");
 const html = await page.content();
 await browser.close();
 ```
@@ -462,6 +480,33 @@ curl "http://localhost:3000/html?url=https://example.com&engine=playwright"
 
 ---
 
+### GET /txt
+
+**Description**: Fetch and return text content as a `.txt` attachment
+
+**Parameters**:
+
+- `url` (required): Target URL
+
+**Response**:
+
+- `Content-Type: text/plain; charset=utf-8`
+- `Content-Disposition: attachment; filename="...txt"`
+- Body: Text content
+
+**Example**:
+
+```bash
+curl "http://localhost:3000/txt?url=https://xpaste.pro/p/t4q0Lsp0" > paste.txt
+```
+
+**Behavior**:
+
+- xpaste.pro paste URLs normalize to `/raw`, including `/ru/p/<id>` and `/en/p/<id>`
+- Non-text responses are rejected
+
+---
+
 ### GET /markdown
 
 **Description**: Convert web page to Markdown
@@ -474,6 +519,7 @@ curl "http://localhost:3000/html?url=https://example.com&engine=playwright"
 
 - `Content-Type: text/markdown`
 - Body: Markdown content
+- xpaste.pro paste pages include raw paste text inline under 1500 lines, or return `application/zip` with `index.md`, page Markdown, and raw `.txt` files when larger
 
 **Example**:
 
@@ -556,12 +602,12 @@ ENTRYPOINT ["node", "bin/web-capture.js", "--serve"]
 ### Docker Compose
 
 ```yaml
-version: '3.8'
+version: "3.8"
 services:
   web-capture:
     build: .
     ports:
-      - '3000:3000'
+      - "3000:3000"
     restart: unless-stopped
     environment:
       - PORT=3000
@@ -586,15 +632,15 @@ docker run -p 3000:3000 web-capture
 
 ```javascript
 // examples/js/markdown_download.js
-import fetch from 'node-fetch';
-import fs from 'fs';
+import fetch from "node-fetch";
+import fs from "fs";
 
-const url = 'https://example.com';
+const url = "https://example.com";
 const response = await fetch(
-  `http://localhost:3000/markdown?url=${encodeURIComponent(url)}`
+  `http://localhost:3000/markdown?url=${encodeURIComponent(url)}`,
 );
 const markdown = await response.text();
-fs.writeFileSync('downloaded.md', markdown);
+fs.writeFileSync("downloaded.md", markdown);
 ```
 
 ### Python
@@ -654,14 +700,14 @@ yarn test:all
 
 ```javascript
 export default {
-  testEnvironment: 'node',
+  testEnvironment: "node",
   transform: {
-    '^.+\\.m?js$': 'babel-jest',
+    "^.+\\.m?js$": "babel-jest",
   },
   moduleNameMapper: {
-    '^(\\.{1,2}/.*)\\.js$': '$1',
+    "^(\\.{1,2}/.*)\\.js$": "$1",
   },
-  testMatch: ['**/tests/**/*.test.js'],
+  testMatch: ["**/tests/**/*.test.js"],
 };
 ```
 
@@ -700,9 +746,9 @@ export default {
 
 ```javascript
 args: [
-  '--no-sandbox', // Required for Docker
-  '--disable-setuid-sandbox', // Required for Docker
-  '--disable-dev-shm-usage', // Avoid shared memory issues
+  "--no-sandbox", // Required for Docker
+  "--disable-setuid-sandbox", // Required for Docker
+  "--disable-dev-shm-usage", // Avoid shared memory issues
 ];
 ```
 
@@ -926,15 +972,15 @@ export async function myEndpointHandler(req, res) {
 2. Register in `src/index.js`:
 
 ```javascript
-import { myEndpointHandler } from './myEndpoint.js';
-app.get('/my-endpoint', myEndpointHandler);
+import { myEndpointHandler } from "./myEndpoint.js";
+app.get("/my-endpoint", myEndpointHandler);
 ```
 
 3. Add tests in `tests/unit/`:
 
 ```javascript
 // tests/unit/myEndpoint.test.js
-test('myEndpoint works', async () => {
+test("myEndpoint works", async () => {
   // Test implementation
 });
 ```

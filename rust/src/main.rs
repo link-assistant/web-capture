@@ -18,7 +18,7 @@
 
 use axum::{
     extract::Query,
-    http::StatusCode,
+    http::{header, HeaderValue, StatusCode},
     response::{IntoResponse, Response},
     routing::get,
     Router,
@@ -74,7 +74,7 @@ struct Args {
     #[arg(short, long, default_value = "3000", env = "PORT")]
     port: u16,
 
-    /// Output format: markdown/md, html, image/png
+    /// Output format: markdown/md, html, txt/text, image/png
     #[arg(short, long, default_value = "markdown")]
     format: String,
 
@@ -417,6 +417,7 @@ async fn start_server(port: u16) -> anyhow::Result<()> {
     let app = Router::new()
         .route("/html", get(html_handler))
         .route("/markdown", get(markdown_handler))
+        .route("/txt", get(txt_handler))
         .route("/image", get(image_handler))
         .route("/fetch", get(fetch_handler))
         .route("/stream", get(stream_handler))
@@ -433,6 +434,7 @@ async fn start_server(port: u16) -> anyhow::Result<()> {
     info!("  GET /html?url=<URL>       - Render page as HTML");
     info!("  GET /markdown?url=<URL>   - Convert page to Markdown");
     info!("  GET /markdown?url=<URL>&converter=kreuzberg&format=json - Structured Markdown conversion");
+    info!("  GET /txt?url=<URL>        - Fetch text content");
     info!("  GET /image?url=<URL>      - Screenshot page as PNG");
     info!("  GET /fetch?url=<URL>      - Proxy fetch content");
     info!("  GET /stream?url=<URL>     - Stream content");
@@ -535,7 +537,8 @@ async fn markdown_handler(Query(params): Query<MarkdownQuery>) -> Response {
             .into_response();
     }
 
-    let html = match fetch_html(&url).await {
+    let page_url = web_capture::xpaste::normalize_url_for_text_page(&url);
+    let html = match fetch_html(&page_url).await {
         Ok(html) => html,
         Err(e) => {
             error!("Failed to fetch HTML: {}", e);
@@ -550,7 +553,7 @@ async fn markdown_handler(Query(params): Query<MarkdownQuery>) -> Response {
     };
 
     if converter == "kreuzberg" {
-        let mut result = match convert_with_kreuzberg_enhanced(&html, Some(&url), &options) {
+        let mut result = match convert_with_kreuzberg_enhanced(&html, Some(&page_url), &options) {
             Ok(result) => result,
             Err(e) => {
                 error!("Failed to convert to Markdown with kreuzberg: {}", e);
@@ -567,22 +570,20 @@ async fn markdown_handler(Query(params): Query<MarkdownQuery>) -> Response {
         } else {
             ImageMode::Default
         };
-        if let Ok(image_result) = apply_image_mode(&result.content, mode, Some(&url)) {
+        if let Ok(image_result) = apply_image_mode(&result.content, mode, Some(&page_url)) {
             result.content = image_result.markdown;
         }
 
         if format == "json" {
             return axum::Json(result).into_response();
         }
-        return (
-            StatusCode::OK,
-            [("Content-Type", "text/markdown")],
-            result.content,
-        )
-            .into_response();
+        if let Some(response) = maybe_text_paste_markdown_response(&url, &result.content).await {
+            return response;
+        }
+        return markdown_response(result.content);
     }
 
-    let mut markdown = match convert_html_to_markdown_enhanced(&html, Some(&url), &options) {
+    let mut markdown = match convert_html_to_markdown_enhanced(&html, Some(&page_url), &options) {
         Ok(result) => result.markdown,
         Err(e) => {
             error!("Failed to convert to Markdown: {}", e);
@@ -601,16 +602,162 @@ async fn markdown_handler(Query(params): Query<MarkdownQuery>) -> Response {
     } else {
         ImageMode::Default
     };
-    if let Ok(result) = apply_image_mode(&markdown, mode, Some(&url)) {
+    if let Ok(result) = apply_image_mode(&markdown, mode, Some(&page_url)) {
         markdown = result.markdown;
     }
 
+    if let Some(response) = maybe_text_paste_markdown_response(&url, &markdown).await {
+        return response;
+    }
+
+    markdown_response(markdown)
+}
+
+/// Text download endpoint handler
+async fn txt_handler(Query(params): Query<UrlQuery>) -> Response {
+    let url = match normalize_url(&params.url) {
+        Ok(url) => url,
+        Err(e) => return (StatusCode::BAD_REQUEST, e).into_response(),
+    };
+
+    let text = match fetch_text_content(&url).await {
+        Ok(text) => text,
+        Err(e) => {
+            error!("Failed to fetch text content: {}", e);
+            return (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                "Error fetching text content",
+            )
+                .into_response();
+        }
+    };
+
+    text_response(&url, text)
+}
+
+async fn fetch_text_content(url: &str) -> anyhow::Result<String> {
+    let text_url = web_capture::xpaste::normalize_url_for_text_content(url);
+    let response = reqwest::get(&text_url).await?;
+    if !response.status().is_success() {
+        anyhow::bail!("HTTP {} fetching {text_url}", response.status());
+    }
+    let content_type = response
+        .headers()
+        .get(header::CONTENT_TYPE)
+        .and_then(|value| value.to_str().ok())
+        .unwrap_or("text/plain");
+    if !content_type.contains("text/") {
+        anyhow::bail!("Expected text content, got {content_type}");
+    }
+    Ok(response.text().await?)
+}
+
+fn text_response(url: &str, text: String) -> Response {
+    let filename = web_capture::xpaste::filename_for_text_url(url);
+    let mut response = (StatusCode::OK, text).into_response();
+    response.headers_mut().insert(
+        header::CONTENT_TYPE,
+        HeaderValue::from_static("text/plain; charset=utf-8"),
+    );
+    if let Ok(value) = HeaderValue::from_str(&format!("attachment; filename=\"{filename}\"")) {
+        response
+            .headers_mut()
+            .insert(header::CONTENT_DISPOSITION, value);
+    }
+    response
+}
+
+async fn maybe_text_paste_markdown_response(url: &str, markdown: &str) -> Option<Response> {
+    if !web_capture::xpaste::is_text_paste_url(url) {
+        return None;
+    }
+
+    let raw_text = match fetch_text_content(url).await {
+        Ok(raw_text) => raw_text,
+        Err(e) => {
+            error!("Failed to fetch text paste raw content: {}", e);
+            return Some(
+                (
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    "Error fetching text content",
+                )
+                    .into_response(),
+            );
+        }
+    };
+
+    let markdown_with_text =
+        web_capture::xpaste::append_text_attachment_markdown(markdown, url, &raw_text);
+    if markdown_with_text.lines().count() < web_capture::xpaste::INLINE_MARKDOWN_LINE_LIMIT {
+        return Some(markdown_response(markdown_with_text));
+    }
+
+    Some(
+        match create_text_paste_markdown_archive(url, markdown, &raw_text) {
+            Ok(bytes) => zip_response(url, bytes),
+            Err(e) => {
+                error!("Failed to create text paste markdown archive: {}", e);
+                (
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    "Error creating Markdown archive",
+                )
+                    .into_response()
+            }
+        },
+    )
+}
+
+fn markdown_response(markdown: String) -> Response {
     (
         StatusCode::OK,
         [("Content-Type", "text/markdown")],
         markdown,
     )
         .into_response()
+}
+
+fn create_text_paste_markdown_archive(
+    url: &str,
+    markdown: &str,
+    raw_text: &str,
+) -> anyhow::Result<Vec<u8>> {
+    use std::io::{Cursor, Write};
+
+    let paste_id = web_capture::xpaste::paste_id(url).unwrap_or_else(|| "paste".to_string());
+    let markdown_filename = format!("xpaste-pro-{paste_id}.md");
+    let text_filename = format!("xpaste-pro-{paste_id}.txt");
+    let mut cursor = Cursor::new(Vec::new());
+    let mut zip = zip::ZipWriter::new(&mut cursor);
+    let options = zip::write::SimpleFileOptions::default()
+        .compression_method(zip::CompressionMethod::Deflated);
+    let line_count = markdown.lines().count();
+    let index = format!(
+        "# {url}\n\nContent from: {url}\n\nThe page markdown is available in [{markdown_filename}]({markdown_filename}) ({line_count} lines).\nThe raw text content is available in [{text_filename}]({text_filename}).\n"
+    );
+
+    zip.start_file("index.md", options)?;
+    zip.write_all(index.as_bytes())?;
+    zip.start_file(markdown_filename, options)?;
+    zip.write_all(markdown.as_bytes())?;
+    zip.start_file(text_filename, options)?;
+    zip.write_all(raw_text.as_bytes())?;
+    zip.finish()?;
+    Ok(cursor.into_inner())
+}
+
+fn zip_response(url: &str, bytes: Vec<u8>) -> Response {
+    let paste_id = web_capture::xpaste::paste_id(url).unwrap_or_else(|| "paste".to_string());
+    let mut response = (StatusCode::OK, bytes).into_response();
+    response.headers_mut().insert(
+        header::CONTENT_TYPE,
+        HeaderValue::from_static("application/zip"),
+    );
+    if let Ok(value) = HeaderValue::from_str(&format!("attachment; filename=\"{paste_id}.zip\"")) {
+        response
+            .headers_mut()
+            .insert(header::CONTENT_DISPOSITION, value);
+    }
+    response
 }
 
 /// Image/screenshot endpoint handler
@@ -981,6 +1128,10 @@ async fn capture_url(
     }
 
     match format.to_lowercase().as_str() {
+        "txt" | "text" => {
+            let text = fetch_text_content(&absolute_url).await?;
+            write_text_capture(&text, &absolute_url, "txt", output, &args.data_dir, "Text").await?;
+        }
         "archive" => {
             let archive_fmt = args.archive.as_deref().unwrap_or("zip");
             let ext = match archive_fmt {

@@ -50,6 +50,7 @@ pub mod postprocess;
 pub mod search;
 pub mod themed_image;
 pub mod verify;
+pub mod xpaste;
 
 use thiserror::Error;
 

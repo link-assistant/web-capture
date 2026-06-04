@@ -78,7 +78,7 @@ const config = makeConfig({
         alias: 'f',
         type: 'string',
         description:
-          'Output format: markdown, md, html, image, png, jpeg, pdf, docx, archive',
+          'Output format: markdown, md, html, txt, text, image, png, jpeg, pdf, docx, archive',
         default: 'markdown',
       })
       .option('theme', {
@@ -289,7 +289,7 @@ const config = makeConfig({
         'Capture private Google Doc with API token'
       )
       .epilogue(
-        'API Endpoints (in server mode):\n  GET /html?url=<URL>&engine=<ENGINE>           Get rendered HTML\n  GET /markdown?url=<URL>                       Get Markdown conversion\n  GET /image?url=<URL>&format=png|jpeg&theme=light|dark  Screenshot\n  GET /archive?url=<URL>&localImages=true&documentFormat=markdown|html  ZIP archive\n  GET /pdf?url=<URL>&theme=light|dark           PDF with embedded images\n  GET /docx?url=<URL>                           DOCX with embedded images\n  GET /fetch?url=<URL>                          Proxy fetch\n  GET /stream?url=<URL>                         Streaming proxy'
+        'API Endpoints (in server mode):\n  GET /html?url=<URL>&engine=<ENGINE>           Get rendered HTML\n  GET /markdown?url=<URL>                       Get Markdown conversion\n  GET /txt?url=<URL>                            Get text content\n  GET /image?url=<URL>&format=png|jpeg&theme=light|dark  Screenshot\n  GET /archive?url=<URL>&localImages=true&documentFormat=markdown|html  ZIP archive\n  GET /pdf?url=<URL>&theme=light|dark           PDF with embedded images\n  GET /docx?url=<URL>                           DOCX with embedded images\n  GET /fetch?url=<URL>                          Proxy fetch\n  GET /stream?url=<URL>                         Streaming proxy'
       )
       .strict(),
   lenv: {
@@ -322,6 +322,7 @@ async function startServer(port) {
       console.log('Available endpoints:');
       console.log(`  GET /html?url=<URL>       - Render page as HTML`);
       console.log(`  GET /markdown?url=<URL>   - Convert page to Markdown`);
+      console.log(`  GET /txt?url=<URL>        - Fetch text content`);
       console.log(`  GET /image?url=<URL>      - Screenshot (PNG/JPEG)`);
       console.log(
         `  GET /archive?url=<URL>    - ZIP archive with markdown + images`
@@ -598,8 +599,12 @@ async function captureUrl(url, options) {
   }
 
   // Import required modules
-  const { fetchHtml, convertToUtf8, convertRelativeUrls } =
-    await import('../src/lib.js');
+  const {
+    fetchHtml,
+    convertToUtf8,
+    convertRelativeUrls,
+    normalizeUrlForTextContent,
+  } = await import('../src/lib.js');
   const { createBrowser } = await import('../src/browser.js');
   const {
     isGoogleDocsUrl,
@@ -915,7 +920,28 @@ async function captureUrl(url, options) {
   }
 
   try {
-    if (normalizedFormat === 'jpeg') {
+    if (normalizedFormat === 'txt' || normalizedFormat === 'text') {
+      const response = await fetch(normalizeUrlForTextContent(absoluteUrl));
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+      const contentType = response.headers.get('content-type') || 'text/plain';
+      if (!contentType.includes('text/')) {
+        throw new Error(`Expected text content, got ${contentType}`);
+      }
+      const text = await response.text();
+      const output =
+        explicitOutput === '-'
+          ? null
+          : explicitOutput || deriveOutputPath(absoluteUrl, 'txt', dataDir);
+      if (output) {
+        fs.mkdirSync(path.dirname(output), { recursive: true });
+        fs.writeFileSync(output, text, 'utf-8');
+        console.error(`Text saved to: ${output}`);
+      } else {
+        process.stdout.write(text);
+      }
+    } else if (normalizedFormat === 'jpeg') {
       // JPEG screenshot
       const { createBrowser } = await import('../src/browser.js');
       const { dismissPopups, scrollToLoadContent } =
@@ -1160,6 +1186,8 @@ async function captureUrl(url, options) {
       normalizedFormat === 'screenshot'
     ) {
       // Image/screenshot format
+      const { dismissPopups, scrollToLoadContent } =
+        await import('../src/popups.js');
       const browser = await createBrowser(engine);
       try {
         const page = await browser.newPage();
@@ -1177,8 +1205,12 @@ async function captureUrl(url, options) {
         });
         // Wait for 5 seconds after page load
         await new Promise((resolve) => setTimeout(resolve, 5000));
+        if (fullPage) {
+          await scrollToLoadContent(page);
+        }
+        await dismissPopups(page);
 
-        const buffer = await page.screenshot({ type: 'png' });
+        const buffer = await page.screenshot({ type: 'png', fullPage });
 
         if (explicitOutput) {
           fs.writeFileSync(explicitOutput, buffer);

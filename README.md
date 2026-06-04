@@ -10,6 +10,7 @@ A CLI and microservice to fetch URLs and render them as:
 
 - **Markdown**: Clean HTML-to-Markdown conversion with image extraction
 - **HTML**: Rendered page content
+- **Plain text**: Raw text downloads for paste-like URLs such as xpaste.pro
 - **PNG/JPEG screenshot**: Viewport or full-page capture
 - **ZIP archive**: Markdown/HTML + locally downloaded images
 - **PDF**: Print-quality document
@@ -50,7 +51,8 @@ Both implementations expose the same API:
 | Endpoint                                                  | Description                                                                                                    |
 | --------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
 | `GET /html?url=<URL>`                                     | Get rendered HTML content                                                                                      |
-| `GET /markdown?url=<URL>`                                 | Get Markdown conversion with the default converter                                                             |
+| `GET /txt?url=<URL>`                                      | Get raw text content, with xpaste.pro paste URLs normalized to `/raw`                                          |
+| `GET /markdown?url=<URL>`                                 | Get Markdown conversion; xpaste.pro pastes include raw text inline under 1500 lines or as a ZIP when larger    |
 | `GET /markdown?url=<URL>&converter=kreuzberg`             | High-performance Markdown conversion via [html-to-markdown](https://github.com/kreuzberg-dev/html-to-markdown) |
 | `GET /markdown?url=<URL>&converter=kreuzberg&format=json` | Structured result with metadata, tables, images, and warnings                                                  |
 | `GET /image?url=<URL>`                                    | Get PNG screenshot                                                                                             |
@@ -74,6 +76,9 @@ web-capture https://example.com -o -
 # Capture as HTML
 web-capture https://example.com --format html
 
+# Capture raw paste text
+web-capture https://xpaste.pro/p/t4q0Lsp0 --format txt -o paste.txt
+
 # Take a screenshot
 web-capture https://example.com --format png -o screenshot.png
 
@@ -89,24 +94,24 @@ web-capture --serve --port 8080
 
 ## CLI Options
 
-| Option                   | Short | Description                                                                             | Default               |
-| ------------------------ | ----- | --------------------------------------------------------------------------------------- | --------------------- |
-| `--serve`                | `-s`  | Start as HTTP API server                                                                | -                     |
-| `--port`                 | `-p`  | Port to listen on                                                                       | 3000                  |
-| `--format`               | `-f`  | Output format: `markdown`/`md`, `html`, `image`/`png`, `jpeg`, `pdf`, `docx`, `archive` | `markdown`            |
-| `--output`               | `-o`  | Output file path. Use `-o -` for stdout                                                 | auto-derived from URL |
-| `--data-dir`             |       | Base directory for auto-derived output paths                                            | `./data/web-capture`  |
-| `--engine`               | `-e`  | Browser engine (JS only): `puppeteer`, `playwright`                                     | `puppeteer`           |
-| `--embed-images`         |       | Keep images inline as base64 data URIs (self-contained file)                            | `false`               |
-| `--no-extract-images`    |       | Alias for `--embed-images`                                                              | `false`               |
-| `--extract-images[=DIR]` |       | Extract images to `DIR/images/` (or next to the output) and download remote images      | -                     |
-| `--keep-original-links`  |       | Keep remote image URLs as direct links (the default markdown behavior)                  | `false`               |
-| `--images-dir`           |       | Subdirectory name for extracted images                                                  | `images`              |
-| `--archive`              |       | Create archive: `zip` (default), `7z`, `tar.gz`, `tar`                                  | -                     |
-| `--extract-latex`        |       | Extract LaTeX formulas                                                                  | `true`                |
-| `--extract-metadata`     |       | Extract article metadata                                                                | `true`                |
-| `--post-process`         |       | Apply post-processing                                                                   | `true`                |
-| `--detect-code-language` |       | Detect code block languages                                                             | `true`                |
+| Option                   | Short | Description                                                                                           | Default               |
+| ------------------------ | ----- | ----------------------------------------------------------------------------------------------------- | --------------------- |
+| `--serve`                | `-s`  | Start as HTTP API server                                                                              | -                     |
+| `--port`                 | `-p`  | Port to listen on                                                                                     | 3000                  |
+| `--format`               | `-f`  | Output format: `markdown`/`md`, `html`, `txt`/`text`, `image`/`png`, `jpeg`, `pdf`, `docx`, `archive` | `markdown`            |
+| `--output`               | `-o`  | Output file path. Use `-o -` for stdout                                                               | auto-derived from URL |
+| `--data-dir`             |       | Base directory for auto-derived output paths                                                          | `./data/web-capture`  |
+| `--engine`               | `-e`  | Browser engine (JS only): `puppeteer`, `playwright`                                                   | `puppeteer`           |
+| `--embed-images`         |       | Keep images inline as base64 data URIs (self-contained file)                                          | `false`               |
+| `--no-extract-images`    |       | Alias for `--embed-images`                                                                            | `false`               |
+| `--extract-images[=DIR]` |       | Extract images to `DIR/images/` (or next to the output) and download remote images                    | -                     |
+| `--keep-original-links`  |       | Keep remote image URLs as direct links (the default markdown behavior)                                | `false`               |
+| `--images-dir`           |       | Subdirectory name for extracted images                                                                | `images`              |
+| `--archive`              |       | Create archive: `zip` (default), `7z`, `tar.gz`, `tar`                                                | -                     |
+| `--extract-latex`        |       | Extract LaTeX formulas                                                                                | `true`                |
+| `--extract-metadata`     |       | Extract article metadata                                                                              | `true`                |
+| `--post-process`         |       | Apply post-processing                                                                                 | `true`                |
+| `--detect-code-language` |       | Detect code block languages                                                                           | `true`                |
 
 ## Image Handling
 
@@ -143,22 +148,23 @@ All flags can be controlled via environment variables:
 
 Both implementations expose the same API:
 
-| Endpoint                                                  | Description                                               |
-| --------------------------------------------------------- | --------------------------------------------------------- |
-| `GET /html?url=<URL>`                                     | Get rendered HTML content                                 |
-| `GET /markdown?url=<URL>`                                 | Get Markdown (original links kept, base64 stripped)       |
-| `GET /markdown?url=<URL>&converter=kreuzberg`             | Get Markdown with the high-performance converter          |
-| `GET /markdown?url=<URL>&converter=kreuzberg&format=json` | Get structured Markdown conversion data                   |
-| `GET /markdown?url=<URL>&embedImages=true`                | Get Markdown with base64 images inline                    |
-| `GET /markdown?url=<URL>&keepOriginalLinks=false`         | Get Markdown with all images stripped                     |
-| `GET /image?url=<URL>`                                    | Get PNG screenshot                                        |
-| `GET /archive?url=<URL>`                                  | ZIP archive with markdown + images extracted to `images/` |
-| `GET /archive?url=<URL>&keepOriginalLinks=true`           | ZIP archive keeping original remote image URLs            |
-| `GET /archive?url=<URL>&embedImages=true`                 | ZIP archive with base64 images inline                     |
-| `GET /pdf?url=<URL>`                                      | PDF with embedded images                                  |
-| `GET /docx?url=<URL>`                                     | DOCX with embedded images                                 |
-| `GET /fetch?url=<URL>`                                    | Proxy fetch content                                       |
-| `GET /stream?url=<URL>`                                   | Stream content                                            |
+| Endpoint                                                  | Description                                                                                      |
+| --------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
+| `GET /html?url=<URL>`                                     | Get rendered HTML content                                                                        |
+| `GET /txt?url=<URL>`                                      | Get raw text content, including normalized xpaste.pro raw paste text                             |
+| `GET /markdown?url=<URL>`                                 | Get Markdown; xpaste.pro pastes include raw text inline under 1500 lines or as a ZIP when larger |
+| `GET /markdown?url=<URL>&converter=kreuzberg`             | Get Markdown with the high-performance converter                                                 |
+| `GET /markdown?url=<URL>&converter=kreuzberg&format=json` | Get structured Markdown conversion data                                                          |
+| `GET /markdown?url=<URL>&embedImages=true`                | Get Markdown with base64 images inline                                                           |
+| `GET /markdown?url=<URL>&keepOriginalLinks=false`         | Get Markdown with all images stripped                                                            |
+| `GET /image?url=<URL>`                                    | Get PNG screenshot                                                                               |
+| `GET /archive?url=<URL>`                                  | ZIP archive with markdown + images extracted to `images/`                                        |
+| `GET /archive?url=<URL>&keepOriginalLinks=true`           | ZIP archive keeping original remote image URLs                                                   |
+| `GET /archive?url=<URL>&embedImages=true`                 | ZIP archive with base64 images inline                                                            |
+| `GET /pdf?url=<URL>`                                      | PDF with embedded images                                                                         |
+| `GET /docx?url=<URL>`                                     | DOCX with embedded images                                                                        |
+| `GET /fetch?url=<URL>`                                    | Proxy fetch content                                                                              |
+| `GET /stream?url=<URL>`                                   | Stream content                                                                                   |
 
 ## Docker
 
@@ -206,7 +212,9 @@ web-capture/
 │
 ├── scripts/                     # Shared build/release scripts
 │   ├── *.mjs                    # JavaScript-specific scripts
+│   ├── xpaste/                  # xpaste fixture capture/regeneration helpers
 │   └── rust-*.mjs               # Rust-specific scripts
+├── tests/xpaste/data/           # Shared xpaste HTML/text/markdown/screenshot fixtures
 │
 ├── .github/workflows/
 │   ├── js.yml                   # JavaScript CI/CD
@@ -240,6 +248,7 @@ cargo fmt            # Format code
 ## Features
 
 - **Markdown Conversion**: Clean HTML-to-Markdown with LaTeX extraction, metadata, and code language detection
+- **Plain Text Capture**: `/txt` endpoint and `--format txt` output for text resources and xpaste.pro raw paste URLs
 - **Image Extraction**: Base64 data URI images extracted to files with content-hash filenames
 - **HTML Rendering**: Fetch and render HTML with JavaScript support via headless browsers
 - **High-Performance Conversion**: Optional [kreuzberg html-to-markdown](https://github.com/kreuzberg-dev/html-to-markdown) backend with structured metadata, table, and image results

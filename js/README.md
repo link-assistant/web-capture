@@ -10,6 +10,7 @@ A CLI and microservice to fetch URLs and render them as:
 
 - **Markdown**: Converted from HTML with image extraction (default)
 - **HTML**: Rendered page content
+- **Plain text**: Raw text downloads for paste-like URLs such as xpaste.pro
 - **PNG/JPEG screenshot**: Viewport or full-page capture with theme support
 - **ZIP archive**: Markdown + locally downloaded images
 - **PDF**: Print-quality document with embedded images
@@ -47,6 +48,9 @@ web-capture https://example.com -o -
 
 # Capture as HTML
 web-capture https://example.com --format html -o page.html
+
+# Capture raw paste text
+web-capture https://xpaste.pro/p/t4q0Lsp0 --format txt -o paste.txt
 
 # Take a PNG screenshot
 web-capture https://example.com --format png -o screenshot.png
@@ -141,6 +145,14 @@ GET /markdown?url=<URL>
 
 Converts the HTML content of the specified URL to Markdown format. By default, original remote image URLs are preserved and base64 data URIs are stripped (clean single-file output). Use `keepOriginalLinks=false` to strip all images, or `embedImages=true` to keep base64 images inline.
 
+For xpaste.pro paste URLs, `/markdown` fetches the visual paste page, keeps
+visible header, language, metadata, paste body, and footer text in visual order,
+and appends the raw paste text as a fenced block named `xpaste-pro-<id>.txt`
+when the final Markdown stays under 1500 lines. Larger paste pages return a ZIP
+containing `index.md`, `xpaste-pro-<id>.md`, and `xpaste-pro-<id>.txt`.
+Canonical `/p/<id>`, `/p/<id>/raw`, `/ru/p/<id>`, and `/en/p/<id>` URLs are
+normalized before capture.
+
 | Parameter           | Required | Description                                                               | Default  |
 | ------------------- | -------- | ------------------------------------------------------------------------- | -------- |
 | `url`               | Yes      | URL to fetch                                                              | -        |
@@ -148,6 +160,20 @@ Converts the HTML content of the specified URL to Markdown format. By default, o
 | `format`            | No       | Response format: `text` or `json` (`json` requires `converter=kreuzberg`) | text     |
 | `embedImages`       | No       | Keep base64 images inline (`true`/`false`)                                | `false`  |
 | `keepOriginalLinks` | No       | Keep original remote URLs, strip base64                                   | `true`   |
+
+### Text Endpoint
+
+```
+GET /txt?url=<URL>
+```
+
+Returns raw text content as a `.txt` attachment. xpaste.pro paste URLs are
+normalized to their `/raw` endpoint, including localized `/ru/p/<id>` and
+`/en/p/<id>` URLs.
+
+| Parameter | Required | Description  | Default |
+| --------- | -------- | ------------ | ------- |
+| `url`     | Yes      | URL to fetch | -       |
 
 ### Image Endpoint
 
@@ -334,6 +360,7 @@ web-capture <url> [options]
 | ----------------- | ---------------------------------------- |
 | `markdown` / `md` | Markdown conversion (default)            |
 | `html`            | Rendered HTML                            |
+| `txt` / `text`    | Raw text download                        |
 | `image` / `png`   | PNG screenshot (lossless)                |
 | `jpeg`            | JPEG screenshot (configurable quality)   |
 | `pdf`             | PDF with embedded images                 |
