@@ -314,6 +314,12 @@ jobs:
         run: npm test -- --testPathPattern="gdocs-public-doc" --testTimeout=120000
         timeout-minutes: 10
 
+      - name: Run Wikipedia page download live integration tests (issue #8)
+        env:
+          WIKIPEDIA_INTEGRATION: 'true'
+        run: npm test -- --testPathPattern="wikipedia-download" --testTimeout=120000
+        timeout-minutes: 10
+
       - name: Build Docker image for e2e tests
         run: docker compose build
         timeout-minutes: 10

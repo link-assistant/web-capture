@@ -456,6 +456,18 @@ npm run test:e2e            # Run end-to-end tests
 npm run test:all            # Run all tests including build
 ```
 
+Some integration suites hit live servers and are skipped by default. Enable them
+with environment variables:
+
+```bash
+# Download the Wikipedia page (markdown + image) in every supported engine
+WIKIPEDIA_INTEGRATION=true npm test -- --testPathPattern="wikipedia-download"
+
+# Habr articles and public Google Docs live suites
+HABR_INTEGRATION=true npm test -- --testPathPattern="habr-article"
+GDOCS_INTEGRATION=true npm test -- --testPathPattern="gdocs-public-doc"
+```
+
 ## Built With
 
 - Express.js for the web server

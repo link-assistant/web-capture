@@ -18,3 +18,4 @@ mod paragraph_vs_line_break;
 mod search;
 mod strip_base64_empty_alt;
 mod themed_image;
+mod wikipedia_download;
