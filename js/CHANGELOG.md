@@ -1,5 +1,15 @@
 # @link-assistant/web-capture
 
+## 1.10.1
+
+### Patch Changes
+
+- 31b93a8: Add a live integration test that downloads the Wikipedia page
+  (https://en.wikipedia.org/wiki/Wikipedia) as both Markdown and an image (PNG
+  screenshot) using every supported browser engine — Puppeteer and Playwright
+  (issue #8). The suite is gated behind `WIKIPEDIA_INTEGRATION=true` so default
+  offline runs stay deterministic, and is wired into CI as a dedicated live step.
+
 ## 1.10.0
 
 ### Minor Changes
