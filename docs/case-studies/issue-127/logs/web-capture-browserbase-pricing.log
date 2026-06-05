@@ -1,0 +1,10 @@
+    Blocking waiting for file lock on package cache
+    Blocking waiting for file lock on package cache
+    Blocking waiting for file lock on package cache
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.38s
+     Running `rust/target/debug/web-capture 'https://www.browserbase.com/pricing' -f markdown -o docs/case-studies/issue-127/reference/web-capture-browserbase-pricing.md`
+2026-05-30T09:50:58.455744Z  INFO web_capture::browser: Rendering HTML for URL: https://www.browserbase.com/pricing
+2026-05-30T09:50:59.221829Z  INFO web_capture::browser: Successfully rendered HTML (33928 bytes)
+2026-05-30T09:50:59.244124Z  INFO web_capture::markdown: Converting HTML to Markdown
+2026-05-30T09:50:59.356520Z  INFO web_capture::markdown: Successfully converted to Markdown (2094 bytes)
+Markdown saved to: docs/case-studies/issue-127/reference/web-capture-browserbase-pricing.md

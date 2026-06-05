@@ -1,0 +1,373 @@
+   Compiling proc-macro2 v1.0.106
+   Compiling quote v1.0.45
+   Compiling unicode-ident v1.0.24
+   Compiling cfg-if v1.0.4
+   Compiling libc v0.2.184
+   Compiling serde_core v1.0.228
+   Compiling serde v1.0.228
+   Compiling smallvec v1.15.1
+   Compiling pin-project-lite v0.2.17
+   Compiling value-bag v1.12.0
+   Compiling futures-core v0.3.32
+   Compiling itoa v1.0.18
+   Compiling parking_lot_core v0.9.12
+   Compiling log v0.4.29
+   Compiling memchr v2.8.0
+   Compiling scopeguard v1.2.0
+   Compiling lock_api v0.4.14
+   Compiling once_cell v1.21.4
+   Compiling version_check v0.9.5
+   Compiling syn v2.0.117
+   Compiling stable_deref_trait v1.2.1
+   Compiling siphasher v1.0.2
+   Compiling errno v0.3.14
+   Compiling futures-io v0.3.32
+   Compiling parking_lot v0.12.5
+   Compiling phf_shared v0.11.3
+   Compiling rand_core v0.6.4
+   Compiling signal-hook-registry v1.4.8
+   Compiling rand v0.8.5
+   Compiling bitflags v2.11.0
+   Compiling slab v0.4.12
+   Compiling mio v1.2.0
+   Compiling socket2 v0.6.3
+   Compiling crossbeam-utils v0.8.21
+   Compiling phf_generator v0.11.3
+   Compiling futures-sink v0.3.32
+   Compiling phf_codegen v0.11.3
+   Compiling tracing-core v0.1.36
+   Compiling parking v2.2.1
+   Compiling futures-channel v0.3.32
+   Compiling percent-encoding v2.3.2
+   Compiling shlex v1.3.0
+   Compiling concurrent-queue v2.5.0
+   Compiling writeable v0.6.3
+   Compiling atomic-waker v1.1.2
+   Compiling find-msvc-tools v0.1.9
+   Compiling litemap v0.8.2
+   Compiling utf-8 v0.7.6
+   Compiling zmij v1.0.21
+   Compiling cc v1.2.60
+   Compiling pkg-config v0.3.33
+   Compiling utf8_iter v1.0.4
+   Compiling icu_normalizer_data v2.2.0
+   Compiling icu_properties_data v2.2.0
+   Compiling futures-task v0.3.32
+   Compiling vcpkg v0.2.15
+   Compiling string_cache_codegen v0.5.4
+   Compiling serde_json v1.0.149
+   Compiling fastrand v2.4.1
+   Compiling httparse v1.10.1
+   Compiling new_debug_unreachable v1.0.6
+   Compiling fnv v1.0.7
+   Compiling zerocopy v0.8.48
+   Compiling hashbrown v0.17.0
+   Compiling equivalent v1.0.2
+   Compiling typenum v1.19.0
+   Compiling crc32fast v1.5.0
+   Compiling rustix v1.1.4
+   Compiling openssl-sys v0.9.113
+   Compiling indexmap v2.14.0
+   Compiling futures-lite v2.6.1
+   Compiling event-listener v5.4.1
+   Compiling synstructure v0.13.2
+   Compiling generic-array v0.14.7
+   Compiling powerfmt v0.2.0
+   Compiling tower-service v0.3.3
+   Compiling autocfg v1.5.0
+   Compiling num-conv v0.2.1
+   Compiling simd-adler32 v0.3.9
+   Compiling linux-raw-sys v0.12.1
+   Compiling time-core v0.1.8
+   Compiling mac v0.1.1
+   Compiling precomputed-hash v0.1.1
+   Compiling futf v0.1.5
+   Compiling time-macros v0.2.27
+   Compiling async-io v2.6.0
+   Compiling deranged v0.5.8
+   Compiling event-listener-strategy v0.5.4
+   Compiling serde_derive v1.0.228
+   Compiling zerofrom-derive v0.1.7
+   Compiling yoke-derive v0.8.2
+   Compiling zerovec-derive v0.11.3
+   Compiling tokio-macros v2.7.0
+   Compiling displaydoc v0.2.5
+   Compiling tracing-attributes v0.1.31
+   Compiling zerofrom v0.1.7
+   Compiling yoke v0.8.2
+   Compiling futures-macro v0.3.32
+   Compiling zerovec v0.11.6
+   Compiling zerotrie v0.2.4
+   Compiling phf_macros v0.11.3
+   Compiling futures-util v0.3.32
+   Compiling tinystr v0.8.3
+   Compiling tracing v0.1.44
+   Compiling icu_locale_core v2.2.0
+   Compiling potential_utf v0.1.5
+   Compiling icu_collections v2.2.0
+   Compiling phf v0.11.3
+   Compiling form_urlencoded v1.2.2
+   Compiling aho-corasick v1.1.4
+   Compiling try-lock v0.2.5
+   Compiling icu_provider v2.2.0
+   Compiling bytes v1.11.1
+   Compiling icu_normalizer v2.2.0
+   Compiling icu_properties v2.2.0
+   Compiling tokio v1.51.1
+   Compiling http v1.4.0
+   Compiling idna_adapter v1.2.1
+   Compiling http-body v1.0.1
+   Compiling adler2 v2.0.1
+   Compiling openssl v0.10.77
+   Compiling foreign-types-shared v0.1.1
+   Compiling thiserror v1.0.69
+   Compiling alloc-no-stdlib v2.0.4
+   Compiling regex-syntax v0.8.10
+   Compiling alloc-stdlib v0.2.2
+   Compiling foreign-types v0.3.2
+   Compiling miniz_oxide v0.8.9
+   Compiling http-body-util v0.1.3
+   Compiling idna v1.1.0
+   Compiling string_cache v0.8.9
+   Compiling polling v3.11.0
+   Compiling want v0.3.1
+   Compiling time v0.3.47
+   Compiling openssl-macros v0.1.1
+   Compiling thiserror-impl v1.0.69
+   Compiling tendril v0.4.3
+   Compiling native-tls v0.2.18
+   Compiling regex-automata v0.4.14
+   Compiling async-task v4.7.1
+   Compiling zlib-rs v0.6.3
+   Compiling httpdate v1.0.3
+   Compiling brotli-decompressor v5.0.0
+   Compiling tokio-util v0.7.18
+   Compiling async-channel v2.5.0
+   Compiling h2 v0.4.13
+   Compiling cookie v0.18.1
+   Compiling getrandom v0.2.17
+   Compiling sync_wrapper v1.0.2
+   Compiling syn v1.0.109
+   Compiling base64 v0.22.1
+   Compiling openssl-probe v0.2.1
+   Compiling tower-layer v0.3.3
+   Compiling flate2 v1.1.9
+   Compiling byteorder v1.5.0
+   Compiling ipnet v2.12.0
+   Compiling brotli v8.0.2
+   Compiling block-buffer v0.10.4
+   Compiling crypto-common v0.1.7
+   Compiling url v2.5.8
+   Compiling ppv-lite86 v0.2.21
+   Compiling async-lock v3.4.2
+   Compiling markup5ever v0.12.1
+   Compiling piper v0.2.5
+   Compiling compression-core v0.4.31
+   Compiling mime v0.3.17
+   Compiling blocking v1.6.2
+   Compiling rand_chacha v0.3.1
+   Compiling hyper v1.9.0
+   Compiling digest v0.10.7
+   Compiling tokio-native-tls v0.3.1
+   Compiling tower v0.5.3
+   Compiling regex v1.12.3
+   Compiling async-signal v0.2.14
+   Compiling async-executor v1.14.0
+   Compiling hyper-util v0.1.20
+   Compiling cookie v0.16.2
+   Compiling utf8parse v0.2.2
+   Compiling compression-codecs v0.4.37
+   Compiling event-listener v2.5.3
+   Compiling ryu v1.0.23
+   Compiling rustix v0.38.44
+   Compiling litrs v1.0.0
+   Compiling either v1.15.0
+   Compiling cpufeatures v0.2.17
+   Compiling psl-types v2.0.11
+   Compiling publicsuffix v2.3.0
+   Compiling sha1 v0.10.6
+   Compiling document-features v0.2.12
+   Compiling serde_urlencoded v0.7.1
+   Compiling async-compression v0.4.41
+   Compiling async-channel v1.9.0
+   Compiling anstyle-parse v1.0.0
+   Compiling hyper-tls v0.6.0
+   Compiling async-global-executor v2.4.1
+   Compiling async-process v2.5.0
+   Compiling chromiumoxide_types v0.7.0
+   Compiling html5ever v0.27.0
+   Compiling async-attributes v1.1.2
+   Compiling markup5ever v0.14.1
+   Compiling kv-log-macro v1.0.7
+   Compiling heck v0.4.1
+   Compiling lazy_static v1.5.0
+   Compiling pin-utils v0.1.0
+   Compiling linux-raw-sys v0.4.15
+   Compiling iri-string v0.7.12
+   Compiling anstyle v1.0.14
+   Compiling is_terminal_polyfill v1.70.2
+   Compiling data-encoding v2.10.0
+   Compiling colorchoice v1.0.5
+   Compiling zeroize v1.8.2
+   Compiling anstyle-query v1.1.5
+   Compiling dtoa v1.0.11
+   Compiling getrandom v0.3.4
+   Compiling anstream v1.0.0
+   Compiling dtoa-short v0.3.5
+   Compiling tungstenite v0.23.0
+   Compiling rustls-pki-types v1.14.0
+   Compiling async-std v1.13.2
+   Compiling chromiumoxide_pdl v0.7.0
+   Compiling tower-http v0.6.8
+   Compiling cookie_store v0.22.1
+   Compiling futures-executor v0.3.32
+   Compiling http v0.2.12
+   Compiling cssparser-macros v0.6.1
+   Compiling selectors v0.26.0
+   Compiling ahash v0.8.12
+   Compiling encoding_rs v0.8.35
+   Compiling clap_lex v1.1.0
+   Compiling unicode-segmentation v1.13.2
+   Compiling base64 v0.21.7
+   Compiling option-ext v0.2.0
+   Compiling heck v0.5.0
+   Compiling strsim v0.11.1
+   Compiling anyhow v1.0.102
+   Compiling dtor-proc-macro v0.0.5
+   Compiling home v0.5.12
+   Compiling clap_builder v4.6.0
+   Compiling dtor v0.0.6
+   Compiling which v6.0.3
+   Compiling clap_derive v4.6.0
+   Compiling webdriver v0.50.0
+   Compiling reqwest v0.12.28
+   Compiling dirs-sys v0.4.1
+   Compiling async-tungstenite v0.27.0
+   Compiling cssparser v0.34.0
+   Compiling futures v0.3.32
+   Compiling chromiumoxide_cdp v0.7.0
+   Compiling sharded-slab v0.1.7
+   Compiling xml5ever v0.18.1
+   Compiling fxhash v0.2.1
+   Compiling matchers v0.2.0
+   Compiling match_token v0.1.0
+   Compiling derive_more v0.99.20
+   Compiling tracing-log v0.2.0
+   Compiling servo_arc v0.4.3
+   Compiling thread_local v1.1.9
+   Compiling nu-ansi-term v0.50.3
+   Compiling futures-timer v3.0.3
+   Compiling dunce v1.0.5
+   Compiling bumpalo v3.20.2
+   Compiling ctor-proc-macro v0.0.6
+   Compiling thiserror v2.0.18
+   Compiling unicode-width v0.2.2
+   Compiling ctor v0.4.3
+   Compiling zopfli v0.8.3
+   Compiling getopts v0.2.24
+   Compiling tracing-subscriber v0.3.23
+   Compiling html5ever v0.29.1
+   Compiling markup5ever_rcdom v0.3.0
+   Compiling clap v4.6.0
+   Compiling fantoccini v0.21.5
+   Compiling dirs v5.0.1
+   Compiling axum-core v0.5.6
+   Compiling thiserror-impl v2.0.18
+   Compiling async-trait v0.1.89
+   Compiling serde_path_to_error v0.1.20
+   Compiling lino-env v0.1.0
+   Compiling utf8-width v0.1.8
+   Compiling ego-tree v0.9.0
+   Compiling dotenvy v0.15.7
+   Compiling matchit v0.8.4
+   Compiling scraper v0.21.0
+   Compiling html-escape v0.2.13
+   Compiling axum v0.8.8
+   Compiling lino-arguments v0.3.0
+   Compiling html2md v0.2.15
+   Compiling zip v4.6.1
+   Compiling tokio-stream v0.1.18
+   Compiling tokio-test v0.4.5
+   Compiling chromiumoxide v0.7.0
+   Compiling browser-commander v0.9.1
+   Compiling web-capture v0.3.4 (/tmp/gh-issue-solver-1776771484617/rust)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1m 10s
+     Running tests/integration/mod.rs (target/debug/deps/integration-11ed2f35788064ac)
+
+running 40 tests
+test gdocs::test_build_docs_api_url ... ok
+test gdocs::test_build_edit_url ... ok
+test gdocs::test_build_export_url ... ok
+test gdocs::test_capture_method_selection_honors_browser_flag ... ok
+test gdocs::test_create_archive_zip_empty_images ... ok
+test gdocs::test_extract_bearer_token ... ok
+test gdocs::test_create_archive_zip_produces_valid_zip ... ok
+test gdocs::test_extract_base64_images_no_images ... ok
+test gdocs::test_is_google_docs_url_invalid ... ok
+test gdocs::test_is_google_docs_url_valid ... ok
+test gdocs::test_parse_model_chunks_accepts_individual_model_items ... ok
+test gdocs::test_extract_document_id ... ok
+test gdocs::test_extract_base64_images_multiple ... ok
+
+thread 'gdocs::test_parse_model_chunks_drops_live_gdocs_table_ghost_columns_issue_100' (1565239) panicked at tests/integration/gdocs.rs:571:5:
+assertion `left == right` failed
+  left: [5, 5]
+ right: [3, 3]
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test gdocs::test_parse_model_chunks_drops_duplicate_table_separator_empty_cells_issue_96 ... ok
+test gdocs::test_extract_base64_images_single ... ok
+test gdocs::test_extract_base64_images_preserves_non_data_images ... ok
+test gdocs::test_parse_model_chunks_multi_column_table_r2 ... ok
+test gdocs::test_parse_model_chunks_drops_live_gdocs_table_ghost_columns_issue_100 ... FAILED
+
+thread 'gdocs::test_parse_model_chunks_preserves_empty_table_cell_positions_issue_100' (1565242) panicked at tests/integration/gdocs.rs:612:5:
+assertion `left == right` failed
+  left: [5, 3, 4]
+ right: [3, 3, 3]
+test gdocs::test_parse_model_chunks_includes_suggestions_and_images ... ok
+test gdocs::test_parse_model_chunks_preserves_empty_table_cell_positions_issue_100 ... FAILED
+test gdocs::test_parse_model_chunks_translates_utf16_positions ... ok
+test gdocs::test_parse_model_chunks_renders_style_records ... ok
+test gdocs::test_preprocess_exports_noop_for_regular_html_r6 ... ok
+test gdocs::test_preprocess_exports_converts_class_indented_paragraphs_to_blockquotes_issue_96 ... ok
+test gdocs::test_preprocess_exports_hoists_strikethrough_r6 ... ok
+test gdocs::test_preprocess_exports_hoists_font_weight_r6 ... ok
+test gdocs::test_preprocess_exports_hoists_google_docs_css_class_styles_issue_96 ... ok
+test gdocs::test_render_captured_markdown_ends_with_newline_issue_96 ... ok
+test gdocs::test_render_consecutive_blockquote_paragraphs_stay_in_one_quote_issue_96 ... ok
+test gdocs::test_render_docs_api_document_paragraphs_tables_and_images ... ok
+test gdocs::test_preprocess_exports_hoists_font_style_italic_r6 ... ok
+test gdocs::test_render_nested_bold_italic_markers_balanced_issue_96 ... ok
+
+thread 'gdocs::test_render_nested_ordered_lists_keep_type_and_tight_spacing_issue_100' (1565260) panicked at tests/integration/gdocs.rs:801:5:
+markdown was: - Parent item 1
+
+  1. Child item 1.1
+  2. Child item 1.2
+
+    - Grandchild item 1.2.1
+    - Grandchild item 1.2.2
+
+  3. Child item 1.3
+
+- Parent item 2
+
+test gdocs::test_render_nested_ordered_lists_keep_type_and_tight_spacing_issue_100 ... FAILED
+test gdocs::test_render_ordered_list_sequential_numbering_r3 ... ok
+test gdocs::test_render_styled_same_target_link_segments_as_one_label_issue_96 ... ok
+test gdocs::test_render_list_items_joined_with_single_newline_r4 ... ok
+test gdocs::test_preprocess_exports_replaces_nbsp_r6 ... ok
+test gdocs::test_preprocess_exports_strips_standalone_empty_anchors_issue_96 ... ok
+test gdocs::test_preprocess_exports_strips_heading_numbering_r6 ... ok
+test gdocs::test_preprocess_exports_unwraps_redirect_links_r6 ... ok
+
+failures:
+
+failures:
+    gdocs::test_parse_model_chunks_drops_live_gdocs_table_ghost_columns_issue_100
+    gdocs::test_parse_model_chunks_preserves_empty_table_cell_positions_issue_100
+    gdocs::test_render_nested_ordered_lists_keep_type_and_tight_spacing_issue_100
+
+test result: FAILED. 37 passed; 3 failed; 0 ignored; 0 measured; 44 filtered out; finished in 0.05s
+
+error: test failed, to rerun pass `--test integration`

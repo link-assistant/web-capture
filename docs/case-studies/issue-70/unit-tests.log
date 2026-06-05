@@ -1,0 +1,360 @@
+
+> @link-assistant/web-capture@1.7.3 test
+> node --experimental-vm-modules ./node_modules/.bin/jest tests/unit
+
+(node:696294) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:696296) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:696306) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:696312) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:696293) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+PASS tests/unit/extract-images.test.js
+  extract-images module
+    extractAndSaveImages
+      ✓ extracts a single PNG image from markdown (16 ms)
+      ✓ extracts multiple images with content-hash filenames (3 ms)
+      ✓ produces stable filenames for duplicate images (2 ms)
+      ✓ handles JPEG mime type correctly (2 ms)
+      ✓ uses custom imagesDir (2 ms)
+      ✓ returns markdown unchanged when no base64 images (1 ms)
+      ✓ preserves non-base64 image references (1 ms)
+      ✓ preserves alt text during extraction (1 ms)
+      ✓ handles SVG data URIs (2 ms)
+    extractBase64ToBuffers
+      ✓ extracts base64 images to in-memory buffers (1 ms)
+      ✓ uses custom imagesDir prefix (1 ms)
+      ✓ does not write files to disk (1 ms)
+    stripBase64Images
+      ✓ strips base64 images and leaves alt text placeholder
+      ✓ strips base64 images with empty alt text (1 ms)
+      ✓ preserves remote image URLs
+      ✓ strips multiple base64 images
+    hasBase64Images
+      ✓ returns true when markdown has base64 images
+      ✓ returns false when no base64 images (9 ms)
+      ✓ returns false for empty string (1 ms)
+
+PASS tests/unit/verify.test.js
+  verify module
+    normalizeText
+      ✓ lowercases text (4 ms)
+      ✓ normalizes unicode spaces
+      ✓ normalizes curly quotes
+      ✓ removes LaTeX delimiters (1 ms)
+      ✓ normalizes arrows
+      ✓ removes \displaystyle
+      ✓ extracts text from \text{} (1 ms)
+    normalizeCode
+      ✓ lowercases and collapses whitespace
+      ✓ normalizes multiplication sign
+    verifyMarkdownContent
+      ✓ verifies title presence (1 ms)
+      ✓ detects missing title
+      ✓ verifies headings (1 ms)
+      ✓ detects missing headings
+      ✓ verifies code blocks with fuzzy matching (1 ms)
+      ✓ calculates pass rate
+      ✓ checks figure images when hasLocalImages is set (1 ms)
+
+PASS tests/unit/postprocess.test.js
+  postprocess module
+    applyUnicodeNormalization
+      ✓ preserves non-breaking spaces as &nbsp; entities (1 ms)
+      ✓ normalizes curly quotes to straight quotes (1 ms)
+      ✓ normalizes en-dash to hyphen
+      ✓ normalizes ellipsis
+    applyLatexSpacingFixes
+      ✓ adds space before formula after word character
+      ✓ trims whitespace inside formula delimiters (1 ms)
+      ✓ does not modify block formulas
+      ✓ does not modify blockquote block formulas (1 ms)
+      ✓ handles multiple formulas on one line
+    applyPercentSignFix
+      ✓ fixes percent sign in inline formulas (1 ms)
+      ✓ fixes \text{%} notation
+    applyBoldFormattingFixes
+      ✓ removes empty bold markers (1 ms)
+      ✓ trims content inside bold markers
+      ✓ adds space between word and bold
+    postProcessMarkdown
+      ✓ applies all transformations by default (1 ms)
+      ✓ respects option flags (1 ms)
+      ✓ removes stray standalone $ signs (3 ms)
+
+PASS tests/unit/metadata.test.js
+  metadata module
+    extractMetadata
+      ✓ extracts author information (9 ms)
+      ✓ extracts publication date (2 ms)
+      ✓ extracts hubs (11 ms)
+      ✓ extracts tags from meta keywords (1 ms)
+      ✓ extracts LD+JSON author name (2 ms)
+      ✓ extracts votes and comments (2 ms)
+      ✓ returns empty object for minimal HTML (2 ms)
+    formatMetadataBlock
+      ✓ formats author line with link
+      ✓ formats author with full name
+      ✓ formats publication date (17 ms)
+      ✓ includes hubs and tags
+      ✓ returns empty array for null metadata
+    formatFooterBlock
+      ✓ includes separator line (3 ms)
+      ✓ formats tag links
+      ✓ formats article stats (1 ms)
+      ✓ returns empty array for null metadata
+
+PASS tests/unit/latex.test.js
+  latex module
+    extractHabrFormula
+      ✓ extracts LaTeX from Habr formula img source attribute (5 ms)
+      ✓ falls back to alt text when source is missing
+      ✓ returns null when no source or alt
+    extractKatexFormula
+      ✓ extracts from annotation element (3 ms)
+      ✓ extracts from data-tex attribute (1 ms)
+      ✓ returns null when no TeX source found (1 ms)
+    extractMathJaxFormula
+      ✓ extracts from data-tex attribute (1 ms)
+    isFormulaImage
+      ✓ identifies img.formula elements (1 ms)
+      ✓ identifies img with source attribute (1 ms)
+      ✓ rejects regular images (1 ms)
+    isMathElement
+      ✓ identifies katex elements
+      ✓ identifies math elements
+      ✓ identifies mjx-container (1 ms)
+      ✓ rejects regular elements (1 ms)
+    extractFormula
+      ✓ extracts from Habr formula image
+      ✓ extracts from KaTeX element (1 ms)
+      ✓ returns null for regular elements (1 ms)
+
+PASS tests/unit/batch.test.js
+  batch module
+    getArticle
+      ✓ returns article config by version (2 ms)
+      ✓ merges defaults into article config (1 ms)
+      ✓ throws for unknown version (8 ms)
+    getAllVersions
+      ✓ returns all version keys (1 ms)
+    getAllArticles
+      ✓ returns all articles with defaults merged (1 ms)
+    createConfigFromUrls
+      ✓ creates config from URL list
+      ✓ sets default archive paths (1 ms)
+    validateConfig
+      ✓ validates correct config (16 ms)
+      ✓ rejects config without articles
+      ✓ rejects article without url
+      ✓ rejects article with invalid url
+
+PASS tests/unit/gdocs.test.js
+  gdocs
+    isGoogleDocsUrl
+      ✓ returns true for standard Google Docs edit URL (4 ms)
+      ✓ returns true for URL with query parameters
+      ✓ returns true for URL without /edit
+      ✓ returns false for non-Google Docs URL
+      ✓ returns false for Google Sheets URL
+      ✓ returns false for empty string
+      ✓ returns false for null
+      ✓ returns false for undefined
+      ✓ returns false for non-string input
+    extractDocumentId
+      ✓ extracts document ID from standard URL
+      ✓ extracts document ID from URL with query params
+      ✓ extracts document ID with hyphens and underscores (1 ms)
+      ✓ returns null for non-Google Docs URL
+      ✓ returns null for empty string
+      ✓ returns null for null input (1 ms)
+    buildExportUrl
+      ✓ builds HTML export URL
+      ✓ builds Markdown export URL (1 ms)
+      ✓ builds PDF export URL
+      ✓ builds TXT export URL
+      ✓ defaults to html for unknown format
+      ✓ defaults to html when format is omitted
+      ✓ uses the real document ID from test document (1 ms)
+    GDOCS_EXPORT_FORMATS
+      ✓ contains all expected formats (1 ms)
+    extractBase64Images
+      ✓ extracts a single PNG data URI image (3 ms)
+      ✓ extracts multiple images with correct numbering and extensions (2 ms)
+      ✓ returns empty array when no data URI images
+      ✓ preserves non-data-URI images
+    image extraction pipeline (issue #53)
+      ✓ extractBase64Images from HTML produces images with data buffers (2 ms)
+      ✓ default markdown mode extracts base64 images to disk (not strip) (2 ms)
+      ✓ keepOriginalLinks strips base64 images (1 ms)
+      ✓ extractBase64ToBuffers produces in-memory buffers for archive (5 ms)
+
+PASS tests/unit/localize-images.test.js
+  localize-images module
+    extractImageReferences
+      ✓ extracts markdown image references (2 ms)
+      ✓ ignores local image references
+      ✓ ignores non-image links
+      ✓ returns empty array for no images
+    getExtensionFromUrl
+      ✓ detects .png extension (1 ms)
+      ✓ detects .jpg extension (1 ms)
+      ✓ detects .gif extension
+      ✓ handles query parameters
+      ✓ defaults to .png for unknown extension
+    generateLocalFilename
+      ✓ generates zero-padded filename (9 ms)
+      ✓ preserves file extension from URL (1 ms)
+
+PASS tests/unit/figures.test.js
+  figures module
+    extractFigures
+      ✓ extracts figures with captions (9 ms)
+      ✓ handles Russian figure captions (3 ms)
+      ✓ uses sequential numbering when no caption number (2 ms)
+      ✓ skips SVG images (2 ms)
+      ✓ resolves relative URLs (7 ms)
+      ✓ returns empty array for no figures (1 ms)
+
+PASS tests/unit/convertRelativeUrls.test.js
+  convertRelativeUrls
+    ✓ should NOT inject runtimeHook if there are no <script> tags (3 ms)
+    ✓ should inject runtimeHook if there is a <script> tag (1 ms)
+    ✓ should inject runtimeHook if there is an inline <script>
+
+  console.log
+    Using explicitly configured JavaScript root: js
+
+      at getJsRoot (../scripts/js-paths.mjs:28:15)
+
+PASS tests/unit/heading-image.test.js
+  heading image parity
+    ✓ <img> inside <h1> survives Turndown and stays in sync with extraction (16 ms)
+    ✓ <img> inside all heading levels is preserved (9 ms)
+    ✓ image count parity across full pipeline (3 ms)
+
+  console.log
+    Verifying publish (attempt 1 of 12)...
+
+      at verifyPublishedVersionWithRunner (../scripts/publish-to-npm.mjs:119:13)
+
+  console.log
+    Version not visible on npm yet: npm error code E404
+
+      at verifyPublishedVersionWithRunner (../scripts/publish-to-npm.mjs:130:17)
+
+  console.log
+    Verifying publish (attempt 2 of 12)...
+
+      at verifyPublishedVersionWithRunner (../scripts/publish-to-npm.mjs:119:13)
+
+  console.log
+    Version not visible on npm yet: npm error code E404
+
+      at verifyPublishedVersionWithRunner (../scripts/publish-to-npm.mjs:130:17)
+
+  console.log
+    Verifying publish (attempt 3 of 12)...
+
+      at verifyPublishedVersionWithRunner (../scripts/publish-to-npm.mjs:119:13)
+
+PASS tests/unit/publish-verification.test.js
+  publish verification
+    ✓ keeps polling verification through transient npm 404s (30 ms)
+
+PASS tests/unit/animation.test.js
+  animation module
+    compareFrames
+      ✓ returns 1.0 for identical frames (2 ms)
+      ✓ returns 0 for completely different frames (1 ms)
+      ✓ returns 0 for different sized frames
+      ✓ returns 0 for null frames
+      ✓ calculates partial similarity (1 ms)
+
+PASS tests/unit/package-runtime-dependencies.test.js
+  runtime package dependencies
+    ✓ turndown-plugin-gfm is declared as a production dependency (9 ms)
+    ✓ turndown-plugin-gfm is not marked dev-only in package-lock.json (5 ms)
+
+PASS tests/unit/html2md.test.js
+  convertHtmlToMarkdown
+    ✓ removes empty links and anchor headings (16 ms)
+    ✓ removes empty links in complex content (5 ms)
+    ✓ removes empty links with only whitespace (4 ms)
+    ✓ removes empty links with only child elements (4 ms)
+    ✓ removes headings with only whitespace (2 ms)
+    ✓ converts relative links to absolute if baseUrl is provided (3 ms)
+    ✓ does not change links if no baseUrl is provided (2 ms)
+    ✓ converts ARIA role table to Markdown table (10 ms)
+    ✓ converts a regular HTML table to Markdown table (4 ms)
+    ✓ handles empty tables gracefully (2 ms)
+    ✓ handles specific ARIA table example (19 ms)
+
+PASS tests/unit/retry.test.js
+  retry
+    ✓ returns result on first success (2 ms)
+    ✓ retries on failure and succeeds eventually (155 ms)
+    ✓ throws after exhausting retries (165 ms)
+    ✓ calls onRetry callback before each retry (53 ms)
+    ✓ uses exponential backoff delays (703 ms)
+    ✓ caps delay at maxDelay (1104 ms)
+    ✓ passes attempt number to fn (151 ms)
+
+PASS tests/unit/cli.test.js
+  CLI
+    --help
+      ✓ shows help message with --help flag (92 ms)
+      ✓ shows help message with -h flag (85 ms)
+      ✓ shows error and exits with code 1 when no arguments provided (79 ms)
+    --version
+      ✓ shows version with --version flag (79 ms)
+      ✓ shows version with -v flag (78 ms)
+    URL validation
+      ✓ accepts a URL as a positional argument (352 ms)
+      ✓ accepts a URL after the -- argument separator (320 ms)
+      ✓ rejects unknown options (94 ms)
+      ✓ rejects invalid URL (84 ms)
+    format options
+      ✓ accepts --format html (82 ms)
+      ✓ accepts --format markdown (96 ms)
+      ✓ accepts --format image (100 ms)
+    engine options
+      ✓ help shows engine options (96 ms)
+      ✓ accepts --engine option (95 ms)
+    server mode options
+      ✓ help shows --serve option (104 ms)
+      ✓ help shows --port option (98 ms)
+      ✓ help shows API endpoints (85 ms)
+    output options
+      ✓ help shows --output option (83 ms)
+
+PASS tests/unit/browser.test.js (8.027 s)
+  Browser Abstraction Layer
+    getBrowserEngine
+      ✓ returns puppeteer by default (4 ms)
+      ✓ returns playwright when engine=playwright query param is provided
+      ✓ returns playwright when engine=pw query param is provided (1 ms)
+      ✓ returns puppeteer when engine=puppeteer query param is provided
+      ✓ returns puppeteer when engine=pptr query param is provided
+      ✓ returns playwright when browser=playwright query param is provided (1 ms)
+      ✓ is case insensitive
+      ✓ returns playwright from BROWSER_ENGINE env var
+      ✓ prefers query param over env var
+    createBrowser - Puppeteer
+      ✓ creates a puppeteer browser with type field (1498 ms)
+      ✓ can create and use a page (844 ms)
+    createBrowser - Playwright
+      ✓ creates a playwright browser with type field (1299 ms)
+      ✓ can create and use a page (649 ms)
+    Page Adapter Compatibility
+      ✓ both adapters support the same interface (1517 ms)
+      ✓ both adapters expose browser-commander v0.7.0+ APIs (1483 ms)
+
+Test Suites: 18 passed, 18 total
+Tests:       209 passed, 209 total
+Snapshots:   0 total
+Time:        8.21 s
+Ran all test suites matching /tests\/unit/i.
