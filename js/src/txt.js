@@ -1,6 +1,11 @@
 import fetch from 'node-fetch';
 import { URL } from 'node:url';
-import { getTextPasteFilename, normalizeUrlForTextContent } from './lib.js';
+import {
+  fetchHtml,
+  getTextPasteFilename,
+  isStackOverflowQuestionUrl,
+  normalizeUrlForTextContent,
+} from './lib.js';
 import {
   fetchGithubRepositorySnapshot,
   formatGithubRepositoryText,
@@ -18,6 +23,11 @@ export async function txtHandler(req, res) {
     if (isGithubRepositoryUrl(url)) {
       const snapshot = await fetchGithubRepositorySnapshot(url);
       const text = formatGithubRepositoryText(snapshot);
+      return sendTextResponse(res, url, text);
+    }
+
+    if (isStackOverflowQuestionUrl(url)) {
+      const text = await fetchHtml(url);
       return sendTextResponse(res, url, text);
     }
 

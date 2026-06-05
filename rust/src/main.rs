@@ -367,7 +367,7 @@ async fn main() -> anyhow::Result<()> {
             tracing_subscriber::EnvFilter::try_from_default_env()
                 .unwrap_or_else(|_| default_filter.into()),
         )
-        .with(tracing_subscriber::fmt::layer())
+        .with(tracing_subscriber::fmt::layer().with_writer(std::io::stderr))
         .init();
 
     // --no-extract-images is an alias for --embed-images
@@ -704,6 +704,9 @@ async fn fetch_text_content(url: &str) -> anyhow::Result<String> {
         return Ok(web_capture::github::format_github_repository_text(
             &snapshot,
         ));
+    }
+    if web_capture::stackoverflow::is_stackoverflow_question_url(url) {
+        return Ok(web_capture::fetch_html(url).await?);
     }
 
     let text_url = web_capture::xpaste::normalize_url_for_text_content(url);
@@ -1386,6 +1389,10 @@ async fn capture_url(
 }
 
 async fn capture_html_content(absolute_url: &str, args: &Args) -> anyhow::Result<String> {
+    if web_capture::stackoverflow::is_stackoverflow_question_url(absolute_url) {
+        return Ok(fetch_html(absolute_url).await?);
+    }
+
     if capture_uses_browser(&args.capture)? {
         Ok(render_html(absolute_url).await?)
     } else {

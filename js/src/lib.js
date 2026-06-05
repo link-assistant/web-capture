@@ -4,19 +4,74 @@ import fetch from 'node-fetch';
 import * as cheerio from 'cheerio';
 import TurndownService from 'turndown';
 import iconv from 'iconv-lite';
-import { URL } from 'url';
+import { URL, URLSearchParams } from 'url';
 import turndownPluginGfm from 'turndown-plugin-gfm';
 import he from 'he';
 import { isFormulaImage, isMathElement, extractFormula } from './latex.js';
 import { extractMetadata } from './metadata.js';
 import { postProcessMarkdown } from './postprocess.js';
+import { retry } from './retry.js';
+
+const STACKPRINTER_RETRIES = 3;
+const STACKPRINTER_RETRY_BASE_DELAY_MS = 1000;
 
 export async function fetchHtml(url) {
   if (!url) {
     throw new Error('Missing URL parameter');
   }
+  const stackPrinterUrl = stackPrinterUrlForQuestion(url);
+  if (stackPrinterUrl) {
+    return await fetchStackPrinterHtml(stackPrinterUrl);
+  }
+
   const response = await fetch(url);
   return response.text();
+}
+
+async function fetchStackPrinterHtml(url) {
+  return await retry(
+    async () => {
+      const response = await fetch(url);
+      if (!response.ok) {
+        throw new Error(`StackPrinter returned HTTP ${response.status}`);
+      }
+
+      const html = await response.text();
+      if (isStackPrinterTransientError(html)) {
+        throw new Error('StackPrinter returned a transient error page');
+      }
+      return html;
+    },
+    {
+      retries: STACKPRINTER_RETRIES,
+      baseDelay: STACKPRINTER_RETRY_BASE_DELAY_MS,
+    }
+  );
+}
+
+function isStackPrinterTransientError(html) {
+  return /Ooooops|Please try again later/i.test(html);
+}
+
+export function isStackOverflowQuestionUrl(url) {
+  return Boolean(getStackOverflowQuestionId(url));
+}
+
+export function stackPrinterUrlForQuestion(url) {
+  const questionId = getStackOverflowQuestionId(url);
+  if (!questionId) {
+    return null;
+  }
+
+  const params = new URLSearchParams({
+    question: questionId,
+    service: 'stackoverflow',
+    language: 'en',
+    hideAnswers: 'false',
+    showAll: 'true',
+    width: '640',
+  });
+  return `https://stackprinter.appspot.com/export?${params.toString()}`;
 }
 
 export function isTextPasteUrl(url) {
@@ -25,6 +80,11 @@ export function isTextPasteUrl(url) {
 }
 
 export function normalizeUrlForTextContent(url) {
+  const stackPrinterUrl = stackPrinterUrlForQuestion(url);
+  if (stackPrinterUrl) {
+    return stackPrinterUrl;
+  }
+
   const parsed = parseTextPasteUrl(url);
   if (!parsed) {
     return url;
@@ -47,6 +107,25 @@ export function getTextPasteId(url) {
 export function getTextPasteFilename(url) {
   const pasteId = getTextPasteId(url);
   return pasteId ? `xpaste-pro-${pasteId}.txt` : null;
+}
+
+function getStackOverflowQuestionId(url) {
+  try {
+    const parsed = new URL(url);
+    const hostname = parsed.hostname.replace(/^www\./, '');
+    if (hostname !== 'stackoverflow.com') {
+      return null;
+    }
+
+    const [, prefix, questionId] = parsed.pathname.split('/');
+    if (prefix !== 'questions' || !/^\d+$/.test(questionId || '')) {
+      return null;
+    }
+
+    return questionId;
+  } catch {
+    return null;
+  }
 }
 
 export function appendTextPasteMarkdownAttachment(markdown, url, rawText) {

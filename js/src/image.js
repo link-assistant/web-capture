@@ -1,4 +1,5 @@
 import { createBrowser, getBrowserEngine } from './browser.js';
+import { isStackOverflowQuestionUrl } from './lib.js';
 import { dismissPopups, scrollToLoadContent } from './popups.js';
 
 /**
@@ -39,6 +40,10 @@ export async function imageHandler(req, res) {
   try {
     const absoluteUrl = url.startsWith('http') ? url : `https://${url}`;
     const engine = getBrowserEngine(req);
+    const waitUntil =
+      engine === 'playwright' && isStackOverflowQuestionUrl(absoluteUrl)
+        ? 'load'
+        : 'networkidle0';
     const browserOpts = theme ? { colorScheme: theme } : {};
     const browser = await createBrowser(engine, browserOpts);
     try {
@@ -52,7 +57,7 @@ export async function imageHandler(req, res) {
       );
       await page.setViewport({ width, height });
       await page.goto(absoluteUrl, {
-        waitUntil: 'networkidle0',
+        waitUntil,
         timeout: 30000,
       });
 

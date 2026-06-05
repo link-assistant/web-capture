@@ -28,6 +28,10 @@ const USER_AGENT: &str = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/
 pub async fn fetch_html(url: &str) -> Result<String> {
     info!("Fetching HTML from URL: {}", url);
 
+    if crate::stackoverflow::is_stackoverflow_question_url(url) {
+        return crate::stackoverflow::fetch_stackoverflow_html(url).await;
+    }
+
     let client = reqwest::Client::builder()
         .user_agent(USER_AGENT)
         .build()

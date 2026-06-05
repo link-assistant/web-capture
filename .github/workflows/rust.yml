@@ -186,7 +186,15 @@ jobs:
         working-directory: rust
         env:
           GITHUB_REPOSITORY_INTEGRATION: '1'
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: cargo test --test integration github_repository::live -- --nocapture
+        timeout-minutes: 10
+
+      - name: Run StackOverflow page download live integration tests (issue #11)
+        working-directory: rust
+        env:
+          STACKOVERFLOW_INTEGRATION: '1'
+        run: cargo test --test integration stackoverflow_download::live -- --nocapture --test-threads=1
         timeout-minutes: 10
 
   # Build check - only runs when Rust code changes

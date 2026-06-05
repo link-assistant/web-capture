@@ -49,6 +49,7 @@ pub mod markdown;
 pub mod metadata;
 pub mod postprocess;
 pub mod search;
+pub mod stackoverflow;
 pub mod themed_image;
 pub mod verify;
 pub mod xpaste;

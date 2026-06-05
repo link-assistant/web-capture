@@ -1,4 +1,9 @@
-import { fetchHtml, convertToUtf8, convertRelativeUrls } from './lib.js';
+import {
+  fetchHtml,
+  convertToUtf8,
+  convertRelativeUrls,
+  isStackOverflowQuestionUrl,
+} from './lib.js';
 import { createBrowser, getBrowserEngine } from './browser.js';
 
 export async function htmlHandler(req, res) {
@@ -12,6 +17,11 @@ export async function htmlHandler(req, res) {
 
     // First try to fetch HTML directly
     const html = await fetchHtml(absoluteUrl);
+    if (isStackOverflowQuestionUrl(absoluteUrl)) {
+      const utf8Html = convertToUtf8(html);
+      const absoluteHtml = convertRelativeUrls(utf8Html, absoluteUrl);
+      return res.type('text/html; charset=utf-8').send(absoluteHtml);
+    }
 
     // Check if it's valid HTML and contains JavaScript
     const hasJavaScript =
