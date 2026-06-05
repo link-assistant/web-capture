@@ -1,0 +1,8 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.19s
+     Running tests/integration/mod.rs (target/debug/deps/integration-7146b2b7d589b7ac)
+
+running 2 tests
+test gdocs_public_doc::live_capture_of_public_document_preserves_every_section ... ok
+test gdocs_public_doc::live_browser_model_capture_of_public_document_preserves_markdown_features ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 57 filtered out; finished in 3.25s

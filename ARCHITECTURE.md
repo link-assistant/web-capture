@@ -77,6 +77,7 @@ web-capture/
 │   ├── index.js           # Express server entry point
 │   ├── browser.js         # Browser abstraction layer (Puppeteer & Playwright)
 │   ├── html.js            # HTML endpoint handler
+│   ├── txt.js             # Text endpoint handler
 │   ├── markdown.js        # Markdown endpoint handler
 │   ├── image.js           # Screenshot endpoint handler
 │   ├── stream.js          # Stream endpoint handler (stub)
@@ -131,19 +132,23 @@ web-capture/
 **Entry Point**: Main HTTP server with Express.js
 
 **Endpoints**:
+
 - `GET /html?url=<URL>` - Raw HTML or Puppeteer-rendered HTML
+- `GET /txt?url=<URL>` - Raw text fetch/download
 - `GET /markdown?url=<URL>` - Markdown conversion
 - `GET /image?url=<URL>` - PNG screenshot
 - `GET /stream?url=<URL>` - Stream handler (future)
 - `GET /fetch?url=<URL>` - Fetch handler (future)
 
 **Features**:
+
 - Graceful shutdown handling (SIGTERM, SIGINT)
 - Process PID logging
 - Uncaught exception handling
 - Docker-friendly timeout (2s force exit)
 
 **Server Configuration**:
+
 ```javascript
 const port = process.env.PORT || 3000;
 app.listen(port, () => {
@@ -183,6 +188,7 @@ flowchart TD
 ```
 
 **Key Features**:
+
 - **Smart Detection**: Checks if HTML contains JavaScript or is not valid HTML
 - **Puppeteer Rendering**: For JS-heavy sites, renders with headless Chrome
 - **UTF-8 Conversion**: Ensures proper character encoding
@@ -190,29 +196,48 @@ flowchart TD
 - **Runtime JS Hook**: Injects JavaScript to fix dynamically loaded URLs
 
 **Puppeteer Configuration**:
+
 ```javascript
 const browser = await puppeteer.launch({
-  args: ['--no-sandbox', '--disable-setuid-sandbox']
+  args: ["--no-sandbox", "--disable-setuid-sandbox"],
 });
 await page.setViewport({ width: 1280, height: 800 });
 await page.goto(url, {
-  waitUntil: 'networkidle0',
-  timeout: 30000
+  waitUntil: "networkidle0",
+  timeout: 30000,
 });
 ```
 
 ---
 
-### 3. Markdown Handler (`src/markdown.js`)
+### 3. Text Handler (`src/txt.js`)
+
+**Purpose**: Fetch text resources and return them as `.txt` downloads
+
+**Process**:
+
+1. Normalize paste-like URLs such as `https://xpaste.pro/p/<id>` to their raw text endpoint
+2. Fetch the text resource
+3. Reject non-text responses
+4. Return as `text/plain` with an attachment filename
+
+---
+
+### 4. Markdown Handler (`src/markdown.js`)
 
 **Purpose**: Convert web pages to clean, readable Markdown
 
 **Process**:
+
 1. Fetch HTML (via `fetchHtml`)
-2. Convert to Markdown (via `convertHtmlToMarkdown`)
-3. Return as `text/markdown`
+2. Normalize xpaste.pro paste URLs so `/p/<id>`, localized paste pages, and `/raw` URLs capture the visual paste page
+3. Reorder page landmarks so headers, main content, and footers follow visual order before conversion
+4. Convert to Markdown (via `convertHtmlToMarkdown`)
+5. For xpaste.pro pastes, append raw paste text inline when the result stays under 1500 lines, or return a ZIP with `index.md`, page Markdown, and raw `.txt` when larger
+6. Return as `text/markdown` or `application/zip`
 
 **Output**: Clean Markdown suitable for:
+
 - AI/LLM ingestion
 - Documentation
 - Note-taking systems
@@ -220,17 +245,19 @@ await page.goto(url, {
 
 ---
 
-### 4. Image Handler (`src/image.js`)
+### 5. Image Handler (`src/image.js`)
 
 **Purpose**: Capture PNG screenshots of web pages
 
 **Features**:
+
 - Viewport-only screenshot (not full page)
 - Fixed viewport size: 1280x800
 - 5-second wait for dynamic content
 - PNG format output
 
 **Process**:
+
 ```mermaid
 sequenceDiagram
     participant Client
@@ -250,9 +277,10 @@ sequenceDiagram
 ```
 
 **Response Headers**:
+
 ```javascript
-res.set('Content-Type', 'image/png');
-res.set('Content-Disposition', 'inline; filename="screenshot.png"');
+res.set("Content-Type", "image/png");
+res.set("Content-Disposition", 'inline; filename="screenshot.png"');
 ```
 
 ---
@@ -262,15 +290,18 @@ res.set('Content-Disposition', 'inline; filename="screenshot.png"');
 #### Key Functions
 
 **`fetchHtml(url)`**
+
 - Simple fetch wrapper using node-fetch
 - Returns HTML as text
 
 **`convertHtmlToMarkdown(html, baseUrl)`**
+
 - Converts HTML to Markdown using Turndown
 - Cleans HTML before conversion
 - Absolutifies all URLs
 
 **HTML Cleaning Operations**:
+
 1. Remove `<style>`, `<script>`, `<noscript>` tags
 2. Remove inline event handlers (`onclick`, `onload`, etc.)
 3. Remove `javascript:` links
@@ -281,12 +312,14 @@ res.set('Content-Disposition', 'inline; filename="screenshot.png"');
 8. Convert ARIA role tables to semantic `<table>` elements
 
 **`convertRelativeUrls(html, baseUrl)`**
+
 - Converts all relative URLs to absolute
 - Handles: `<a>`, `<img>`, `<script>`, `<link>`, `<form>`, `<video>`, `<audio>`, `<iframe>`, etc.
 - Processes inline `style` with `url()` references
 - Injects runtime JavaScript hook for dynamic content
 
 **Runtime JavaScript Hook**:
+
 ```javascript
 // Injected script that fixes URLs dynamically
 fixAllUrls(document);
@@ -297,14 +330,16 @@ observer.observe(document.body, { childList: true, subtree: true });
 ```
 
 **`convertToUtf8(html)`**
+
 - Detects charset from `<meta>` tag
 - Converts HTML to UTF-8 using iconv-lite
 - Updates charset meta tag
 
 **Charset Detection**:
+
 ```javascript
 const charsetMatch = html.match(/<meta[^>]+charset=["']?([^"'>\s]+)/i);
-const currentCharset = charsetMatch ? charsetMatch[1].toLowerCase() : 'utf-8';
+const currentCharset = charsetMatch ? charsetMatch[1].toLowerCase() : "utf-8";
 ```
 
 ---
@@ -323,11 +358,13 @@ const currentCharset = charsetMatch ? charsetMatch[1].toLowerCase() : 'utf-8';
 #### Browser Factory
 
 **`createBrowser(engine, options)`**
+
 - Creates a browser instance using the specified engine
 - Returns a unified `BrowserAdapter` object
 - Supported engines: `'puppeteer'` or `'playwright'`
 
 **`getBrowserEngine(req)`**
+
 - Determines which browser engine to use
 - Priority: query parameter > environment variable > default (puppeteer)
 - Supported query params: `engine` or `browser`
@@ -379,27 +416,30 @@ The abstraction layer automatically handles differences between engines:
 #### Usage Examples
 
 **Using Puppeteer (default)**:
+
 ```javascript
-const browser = await createBrowser('puppeteer');
+const browser = await createBrowser("puppeteer");
 const page = await browser.newPage();
-await page.goto('https://example.com');
+await page.goto("https://example.com");
 const html = await page.content();
 await browser.close();
 ```
 
 **Using Playwright**:
+
 ```javascript
-const browser = await createBrowser('playwright');
+const browser = await createBrowser("playwright");
 const page = await browser.newPage();
-await page.goto('https://example.com');
+await page.goto("https://example.com");
 const html = await page.content();
 await browser.close();
 ```
 
 **In Request Handlers**:
+
 ```javascript
 export async function htmlHandler(req, res) {
-  const engine = getBrowserEngine(req);  // From query param or env
+  const engine = getBrowserEngine(req); // From query param or env
   const browser = await createBrowser(engine);
   // ... rest of implementation
 }
@@ -414,14 +454,17 @@ export async function htmlHandler(req, res) {
 **Description**: Fetch and return HTML content
 
 **Parameters**:
+
 - `url` (required): Target URL
 - `engine` (optional): Browser engine (`puppeteer` or `playwright`). Default: `puppeteer`
 
 **Response**:
+
 - `Content-Type: text/html; charset=utf-8`
 - Body: HTML content
 
 **Examples**:
+
 ```bash
 # Using default Puppeteer engine
 curl "http://localhost:3000/html?url=https://example.com"
@@ -431,8 +474,36 @@ curl "http://localhost:3000/html?url=https://example.com&engine=playwright"
 ```
 
 **Behavior**:
+
 - Plain HTML sites: Direct fetch + UTF-8 conversion + URL absolutification
 - JavaScript sites: Browser rendering (Puppeteer or Playwright) + 5s wait + URL absolutification
+
+---
+
+### GET /txt
+
+**Description**: Fetch and return text content as a `.txt` attachment
+
+**Parameters**:
+
+- `url` (required): Target URL
+
+**Response**:
+
+- `Content-Type: text/plain; charset=utf-8`
+- `Content-Disposition: attachment; filename="...txt"`
+- Body: Text content
+
+**Example**:
+
+```bash
+curl "http://localhost:3000/txt?url=https://xpaste.pro/p/t4q0Lsp0" > paste.txt
+```
+
+**Behavior**:
+
+- xpaste.pro paste URLs normalize to `/raw`, including `/ru/p/<id>` and `/en/p/<id>`
+- Non-text responses are rejected
 
 ---
 
@@ -441,18 +512,23 @@ curl "http://localhost:3000/html?url=https://example.com&engine=playwright"
 **Description**: Convert web page to Markdown
 
 **Parameters**:
+
 - `url` (required): Target URL
 
 **Response**:
+
 - `Content-Type: text/markdown`
 - Body: Markdown content
+- xpaste.pro paste pages include raw paste text inline under 1500 lines, or return `application/zip` with `index.md`, page Markdown, and raw `.txt` files when larger
 
 **Example**:
+
 ```bash
 curl "http://localhost:3000/markdown?url=https://example.com" > page.md
 ```
 
 **Features**:
+
 - GitHub Flavored Markdown (GFM)
 - Clean, readable output
 - Absolute URLs preserved
@@ -465,15 +541,18 @@ curl "http://localhost:3000/markdown?url=https://example.com" > page.md
 **Description**: Capture PNG screenshot
 
 **Parameters**:
+
 - `url` (required): Target URL
 - `engine` (optional): Browser engine (`puppeteer` or `playwright`). Default: `puppeteer`
 
 **Response**:
+
 - `Content-Type: image/png`
 - `Content-Disposition: inline; filename="screenshot.png"`
 - Body: PNG image buffer
 
 **Examples**:
+
 ```bash
 # Using default Puppeteer engine
 curl "http://localhost:3000/image?url=https://example.com" > screenshot.png
@@ -483,6 +562,7 @@ curl "http://localhost:3000/image?url=https://example.com&engine=playwright" > s
 ```
 
 **Screenshot Specs**:
+
 - Viewport: 1280x800
 - Wait time: 5 seconds after load
 - Format: PNG
@@ -495,6 +575,7 @@ curl "http://localhost:3000/image?url=https://example.com&engine=playwright" > s
 ### Docker
 
 **Dockerfile** (Node 22 + Chromium):
+
 ```dockerfile
 FROM node:22-bullseye
 
@@ -515,13 +596,13 @@ RUN yarn install --frozen-lockfile
 
 COPY . .
 EXPOSE 3000
-ENTRYPOINT ["node", "src/index.js"]
+ENTRYPOINT ["node", "bin/web-capture.js", "--serve"]
 ```
 
 ### Docker Compose
 
 ```yaml
-version: '3.8'
+version: "3.8"
 services:
   web-capture:
     build: .
@@ -533,6 +614,7 @@ services:
 ```
 
 **Commands**:
+
 ```bash
 # Build and start
 yarn start  # or docker compose up -d
@@ -550,13 +632,15 @@ docker run -p 3000:3000 web-capture
 
 ```javascript
 // examples/js/markdown_download.js
-import fetch from 'node-fetch';
-import fs from 'fs';
+import fetch from "node-fetch";
+import fs from "fs";
 
-const url = 'https://example.com';
-const response = await fetch(`http://localhost:3000/markdown?url=${encodeURIComponent(url)}`);
+const url = "https://example.com";
+const response = await fetch(
+  `http://localhost:3000/markdown?url=${encodeURIComponent(url)}`,
+);
 const markdown = await response.text();
-fs.writeFileSync('downloaded.md', markdown);
+fs.writeFileSync("downloaded.md", markdown);
 ```
 
 ### Python
@@ -578,14 +662,17 @@ with open('downloaded.md', 'w') as f:
 ### Test Structure
 
 **Unit Tests** (`tests/unit/`):
+
 - `html2md.test.js` - Markdown conversion tests
 - `convertRelativeUrls.test.js` - URL absolutification tests
 
 **E2E Tests** (`tests/e2e/`):
+
 - `process.test.js` - Local process tests
 - `docker.test.js` - Docker container tests
 
 **Mock Tests** (`tests/mock/`):
+
 - `index.test.js` - Mocked HTTP tests with nock
 
 ### Running Tests
@@ -610,20 +697,22 @@ yarn test:all
 ### Test Framework
 
 **Jest Configuration**:
+
 ```javascript
 export default {
-  testEnvironment: 'node',
+  testEnvironment: "node",
   transform: {
-    '^.+\\.m?js$': 'babel-jest',
+    "^.+\\.m?js$": "babel-jest",
   },
   moduleNameMapper: {
-    '^(\\.{1,2}/.*)\\.js$': '$1',
+    "^(\\.{1,2}/.*)\\.js$": "$1",
   },
-  testMatch: ['**/tests/**/*.test.js'],
+  testMatch: ["**/tests/**/*.test.js"],
 };
 ```
 
 **Tools**:
+
 - Jest 29.7.0
 - Supertest (HTTP assertions)
 - Nock (HTTP mocking)
@@ -636,30 +725,35 @@ export default {
 ### Environment Variables
 
 **General**:
+
 - `PORT` - Server port (default: 3000)
 - `BROWSER_ENGINE` - Default browser engine (`puppeteer` or `playwright`)
 
 **Puppeteer**:
+
 - `PUPPETEER_EXECUTABLE_PATH` - Chromium path (Docker: `/usr/bin/chromium`)
 - `PUPPETEER_SKIP_CHROMIUM_DOWNLOAD` - Skip bundled Chromium (Docker: `true`)
 - `PUPPETEER_ARGS` - Additional Puppeteer launch args
 
 **Playwright**:
+
 - `PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH` - Chromium path (Docker: `/usr/bin/chromium`)
 - `PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD` - Skip browser download (Docker: `1`)
 
 ### Browser Configuration
 
 **Browser Launch Args** (both engines):
+
 ```javascript
 args: [
-  '--no-sandbox',              // Required for Docker
-  '--disable-setuid-sandbox',  // Required for Docker
-  '--disable-dev-shm-usage'    // Avoid shared memory issues
-]
+  "--no-sandbox", // Required for Docker
+  "--disable-setuid-sandbox", // Required for Docker
+  "--disable-dev-shm-usage", // Avoid shared memory issues
+];
 ```
 
 **Page Options** (both engines):
+
 - User Agent: Chrome 120 on Windows 10
 - Viewport: 1280x800
 - Wait strategy: `networkidle0` (Puppeteer) / `networkidle` (Playwright)
@@ -674,12 +768,13 @@ args: [
 
 ```json
 {
-  "cheerio": "^1.0.0",           // HTML parsing
-  "express": "^4.18.2",          // Web server
-  "node-fetch": "^2.7.0",        // HTTP client
-  "playwright": "^1.49.0",       // Headless browser (Playwright)
-  "puppeteer": "^24.8.2",        // Headless browser (Puppeteer)
-  "turndown": "^7.1.1"           // HTML to Markdown
+  "cheerio": "^1.0.0", // HTML parsing
+  "express": "^4.18.2", // Web server
+  "node-fetch": "^2.7.0", // HTTP client
+  "playwright": "^1.49.0", // Headless browser (Playwright)
+  "puppeteer": "^24.8.2", // Headless browser (Puppeteer)
+  "turndown": "^7.1.1", // HTML to Markdown
+  "turndown-plugin-gfm": "^1.0.2" // GitHub Flavored Markdown
 }
 ```
 
@@ -687,14 +782,13 @@ args: [
 
 ```json
 {
-  "@babel/core": "^7.24.0",                // Babel core
-  "@babel/preset-env": "^7.24.0",          // Babel preset
-  "babel-jest": "^29.7.0",                 // Jest Babel integration
-  "get-port": "^7.1.0",                    // Find available port
-  "jest": "^29.7.0",                       // Test framework
-  "nock": "^13.5.4",                       // HTTP mocking
-  "supertest": "^6.3.4",                   // HTTP assertions
-  "turndown-plugin-gfm": "^1.0.2"          // GitHub Flavored Markdown
+  "@babel/core": "^7.24.0", // Babel core
+  "@babel/preset-env": "^7.24.0", // Babel preset
+  "babel-jest": "^29.7.0", // Jest Babel integration
+  "get-port": "^7.1.0", // Find available port
+  "jest": "^29.7.0", // Test framework
+  "nock": "^13.5.4", // HTTP mocking
+  "supertest": "^6.3.4" // HTTP assertions
 }
 ```
 
@@ -744,12 +838,14 @@ args: [
 ### Content Sanitization
 
 **Markdown Conversion**:
+
 - Removes `<script>` tags
 - Removes inline event handlers
 - Removes `javascript:` links
 - Removes inline styles
 
 **HTML Output**:
+
 - Preserves original content (intentionally)
 - Converts to UTF-8 for consistency
 
@@ -791,26 +887,31 @@ args: [
 ### Common Issues
 
 **1. "Error fetching HTML"**
+
 - Check if target URL is accessible
 - Verify network connectivity
 - Check if URL requires authentication
 
 **2. "Error capturing screenshot"**
+
 - Target website may block headless browsers
 - Page may have infinite loading scripts
 - Try increasing timeout
 
 **3. Puppeteer launch failed**
+
 - In Docker: Ensure Chromium dependencies are installed
 - Check `--no-sandbox` flag is present
 - Verify `PUPPETEER_EXECUTABLE_PATH`
 
 **4. Memory issues**
+
 - Chromium is memory-intensive
 - Consider increasing Docker memory limits
 - Implement browser pooling
 
 **5. Timeout errors**
+
 - Increase `timeout` in page.goto()
 - Some sites take > 30s to load
 - Check if site requires user interaction
@@ -858,6 +959,7 @@ yarn examples
 ### Adding a New Endpoint
 
 1. Create handler in `src/`:
+
 ```javascript
 // src/myEndpoint.js
 export async function myEndpointHandler(req, res) {
@@ -868,15 +970,17 @@ export async function myEndpointHandler(req, res) {
 ```
 
 2. Register in `src/index.js`:
+
 ```javascript
-import { myEndpointHandler } from './myEndpoint.js';
-app.get('/my-endpoint', myEndpointHandler);
+import { myEndpointHandler } from "./myEndpoint.js";
+app.get("/my-endpoint", myEndpointHandler);
 ```
 
 3. Add tests in `tests/unit/`:
+
 ```javascript
 // tests/unit/myEndpoint.test.js
-test('myEndpoint works', async () => {
+test("myEndpoint works", async () => {
   // Test implementation
 });
 ```
@@ -920,5 +1024,5 @@ Deep.Assistant Team
 
 ---
 
-*Document generated: 2025-10-25*
-*Version: 1.0.0*
+_Document generated: 2025-10-25_
+_Version: 1.0.0_

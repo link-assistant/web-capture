@@ -1,0 +1,533 @@
+name: JavaScript Checks and Release
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    types: [opened, synchronize, reopened]
+  # Manual release support - consolidated here to work with npm trusted publishing
+  # npm only allows ONE workflow file as trusted publisher, so all publishing
+  # must go through this workflow (js.yml)
+  workflow_dispatch:
+    inputs:
+      release_mode:
+        description: 'Manual release mode'
+        required: true
+        type: choice
+        default: 'instant'
+        options:
+          - instant
+          - changeset-pr
+      bump_type:
+        description: 'Manual release type'
+        required: true
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+      description:
+        description: 'Manual release description (optional)'
+        required: false
+        type: string
+
+# Concurrency: Only one workflow run per branch at a time
+# - For main branch (releases): cancel older runs to prevent blocking newer releases
+# - For PR branches: queue runs to avoid cancelling checks on force-pushes
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref == 'refs/heads/main' }}
+
+defaults:
+  run:
+    working-directory: js
+
+jobs:
+  # === DETECT CHANGES - determines which jobs should run ===
+  detect-changes:
+    name: JS - Detect Changes
+    runs-on: ubuntu-latest
+    if: github.event_name != 'workflow_dispatch'
+    outputs:
+      js-code-changed: ${{ steps.changes.outputs.js-code-changed }}
+      js-changed: ${{ steps.changes.outputs.js-changed }}
+      scripts-changed: ${{ steps.changes.outputs.scripts-changed }}
+      js-workflow-changed: ${{ steps.changes.outputs.js-workflow-changed }}
+      any-js-code-changed: ${{ steps.changes.outputs.any-js-code-changed }}
+      any-code-changed: ${{ steps.changes.outputs.any-code-changed }}
+      docs-changed: ${{ steps.changes.outputs.docs-changed }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Detect changes
+        id: changes
+        working-directory: .
+        env:
+          GITHUB_EVENT_NAME: ${{ github.event_name }}
+          GITHUB_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          GITHUB_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: node scripts/detect-code-changes.mjs
+
+  # Changeset check - only runs on PRs with JS package source changes
+  changeset-check:
+    name: JS - Check for Changesets
+    runs-on: ubuntu-latest
+    needs: [detect-changes]
+    if: github.event_name == 'pull_request' && needs.detect-changes.outputs.js-code-changed == 'true'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: '24.x'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Check for changesets
+        run: |
+          # Skip changeset check for automated version PRs
+          if [[ "${{ github.head_ref }}" == "changeset-release/"* ]]; then
+            echo "Skipping changeset check for automated release PR"
+            exit 0
+          fi
+
+          # Run changeset validation script
+          node ../scripts/validate-changeset.mjs
+
+  # === PUBLISHABLE CHANGES CHECK ===
+  # Warns when PR touches publishable paths without changeset
+  # This is informational — auto-release on main handles the gap
+  publishable-check:
+    name: JS - Publishable Changes Check
+    runs-on: ubuntu-latest
+    needs: [detect-changes]
+    if: github.event_name == 'pull_request' && needs.detect-changes.outputs.any-js-code-changed == 'true'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check for publishable changes without changeset
+        working-directory: .
+        env:
+          GITHUB_BASE_REF: ${{ github.base_ref }}
+        run: node scripts/check-publishable-changes.mjs
+
+  # Linting and formatting - runs when JS-relevant files change
+  lint:
+    name: JS - Lint and Format Check
+    runs-on: ubuntu-latest
+    needs: [detect-changes]
+    if: |
+      always() && !cancelled() && (
+        github.event_name == 'push' ||
+        github.event_name == 'workflow_dispatch' ||
+        needs.detect-changes.outputs.any-js-code-changed == 'true' ||
+        needs.detect-changes.outputs.docs-changed == 'true'
+      )
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: '24.x'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run ESLint
+        run: npm run lint
+
+      - name: Check formatting
+        run: npm run format:check
+
+      - name: Check code duplication
+        run: npm run check:duplication
+
+  # Test matrix: Node.js on Ubuntu with unit tests and e2e tests
+  test:
+    name: JS - Test (Node.js on ${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    needs: [detect-changes, changeset-check]
+    # Run if: push/dispatch event, OR (changeset check passed/skipped AND JS code actually changed)
+    if: |
+      always() && !cancelled() && (
+        github.event_name == 'push' ||
+        github.event_name == 'workflow_dispatch' ||
+        (
+          (needs.changeset-check.result == 'success' || needs.changeset-check.result == 'skipped') &&
+          needs.detect-changes.outputs.any-js-code-changed == 'true'
+        )
+      )
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: '24.x'
+
+      - name: Install dependencies
+        run: npm install
+
+      # Install the Chromium bundle Playwright needs.
+      #
+      # The live download from cdn.playwright.dev intermittently hangs at 100%
+      # on GitHub-hosted runners — the bytes arrive but the connection never
+      # closes, so `playwright install` blocks forever and the job is cancelled
+      # at its 30-min budget (issue #113 / PR #131). To decouple CI from that
+      # flaky CDN we copy the browser bundle out of Microsoft's official
+      # prebuilt Playwright image (tagged to match the installed Playwright
+      # version) and drop it where Playwright expects it. The image is pulled
+      # from mcr.microsoft.com (Azure), which is reliable on Azure-hosted
+      # runners. We stay on the host runner — rather than running the whole job
+      # inside the container — so the later Docker-based e2e steps keep working.
+      #
+      # `timeout`/retry still wrap both the prebuilt copy and the direct-download
+      # fallback so a stall fails fast and retries instead of hanging the job.
+      - name: Install Playwright browsers
+        run: |
+          set -o pipefail
+          PW_VERSION="$(node -e "process.stdout.write(require('playwright-core/package.json').version)")"
+          IMAGE="mcr.microsoft.com/playwright:v${PW_VERSION}-noble"
+          DEST="${HOME}/.cache/ms-playwright"
+
+          install_from_prebuilt_image() {
+            echo "::group::Playwright prebuilt image ($IMAGE)"
+            local ok=1
+            if timeout 300 docker pull "$IMAGE"; then
+              cid="$(docker create "$IMAGE")"
+              mkdir -p "$DEST"
+              if docker cp "$cid:/ms-playwright/." "$DEST/"; then ok=0; fi
+              docker rm "$cid" >/dev/null 2>&1 || true
+            fi
+            echo "::endgroup::"
+            return $ok
+          }
+
+          install_from_cdn() {
+            for attempt in 1 2 3; do
+              echo "::group::Playwright install via CDN (attempt $attempt)"
+              if timeout 300 npx playwright install --with-deps chromium; then
+                echo "::endgroup::"
+                return 0
+              fi
+              echo "::endgroup::"
+              echo "Playwright CDN install attempt $attempt failed or timed out; retrying..."
+              sleep 10
+            done
+            return 1
+          }
+
+          echo "Installing Chromium for Playwright $PW_VERSION"
+          if install_from_prebuilt_image; then
+            # System libraries are preinstalled on ubuntu-latest; install-deps is
+            # apt-only (no browser download) and a no-op when they are present.
+            timeout 300 npx playwright install-deps chromium || true
+            # Validate the copied bundle is the build Playwright expects (this
+            # only inspects the local cache; it does not hit the network when the
+            # browser is already present).
+            npx playwright install chromium --dry-run
+            echo "Chromium installed from prebuilt image $IMAGE"
+          else
+            echo "Prebuilt image path failed; falling back to direct CDN download"
+            install_from_cdn || { echo "Playwright install failed (prebuilt + CDN)" >&2; exit 1; }
+          fi
+
+      # Install the Chrome build Puppeteer needs.
+      #
+      # `puppeteer browsers install chrome` reliably DOWNLOADS the Chrome
+      # archive (~163 MiB) but its built-in unzip leaves the extraction
+      # incomplete on this runner — only a few sub-folders appear and the main
+      # `chrome` binary is missing, yet the command still exits 0. (That is also
+      # why the runner image ships a broken cache entry.) The browser-launch
+      # tests then fail with "Could not find Chrome". To make this deterministic
+      # we let Puppeteer download the archive, then extract it ourselves with
+      # the system `unzip`, and hard-verify the executable Puppeteer resolves at
+      # launch time.
+      - name: Install Puppeteer browsers
+        env:
+          PUPPETEER_SKIP_DOWNLOAD: 'false'
+          PUPPETEER_SKIP_CHROMIUM_DOWNLOAD: 'false'
+        run: |
+          CACHE="${HOME}/.cache/puppeteer"
+          # executablePath() returns the computed path for the pinned Chrome
+          # build (independent of whether it is installed yet), so the version
+          # is tracked automatically across Puppeteer bumps.
+          EXPECTED="$(node -e "process.stdout.write(require('puppeteer').executablePath())")"
+          echo "Expected Chrome executable: $EXPECTED"
+          rm -rf "$CACHE/chrome" "$CACHE/chrome-headless-shell" || true
+          for attempt in 1 2 3; do
+            echo "::group::Puppeteer install (attempt $attempt)"
+            timeout 300 npx puppeteer browsers install chrome || true
+            echo "::endgroup::"
+            if [ ! -x "$EXPECTED" ]; then
+              # Puppeteer's extraction was incomplete; extract the downloaded
+              # archive ourselves into the version directory.
+              zip="$(ls "$CACHE"/chrome/*.zip 2>/dev/null | head -1)"
+              if [ -n "$zip" ]; then
+                destdir="$(dirname "$(dirname "$EXPECTED")")"
+                echo "Extracting $zip -> $destdir"
+                mkdir -p "$destdir"
+                unzip -oq "$zip" -d "$destdir"
+                chmod +x "$EXPECTED" 2>/dev/null || true
+              fi
+            fi
+            if [ -x "$EXPECTED" ]; then
+              break
+            fi
+            echo "Attempt $attempt did not yield a usable Chrome; retrying..."
+            rm -rf "$CACHE/chrome" || true
+            sleep 10
+          done
+          if [ ! -x "$EXPECTED" ]; then
+            echo "Chrome still missing after install + manual extraction" >&2
+            exit 1
+          fi
+          echo "Verified Chrome executable: $EXPECTED"
+
+      - name: Run unit, integration, and e2e process tests
+        run: npm test -- --testPathIgnorePatterns="docker.test.js"
+
+      - name: Run Habr article live integration tests
+        env:
+          HABR_INTEGRATION: 'true'
+        run: npm test -- --testPathPattern="habr-article" --testTimeout=120000
+        timeout-minutes: 15
+
+      - name: Run Google Docs public-document live integration tests (issue #90)
+        env:
+          GDOCS_INTEGRATION: 'true'
+        run: npm test -- --testPathPattern="gdocs-public-doc" --testTimeout=120000
+        timeout-minutes: 10
+
+      - name: Run Wikipedia page download live integration tests (issue #8)
+        env:
+          WIKIPEDIA_INTEGRATION: 'true'
+        run: npm test -- --testPathPattern="wikipedia-download" --testTimeout=120000
+        timeout-minutes: 10
+
+      - name: Run GitHub repository capture live integration tests (issue #5)
+        env:
+          GITHUB_REPOSITORY_INTEGRATION: 'true'
+        run: npm test -- --testPathPattern="github-readme" --testTimeout=120000
+        timeout-minutes: 10
+
+      - name: Run StackOverflow page download live integration tests (issue #11)
+        env:
+          STACKOVERFLOW_INTEGRATION: 'true'
+        run: npm test -- --testPathPattern="stackoverflow-download" --testTimeout=180000
+        timeout-minutes: 10
+
+      - name: Build Docker image for e2e tests
+        run: docker compose build
+        timeout-minutes: 10
+
+      - name: Run e2e Docker tests
+        run: npm test -- tests/e2e/docker.test.js
+        timeout-minutes: 5
+
+  # Release - only runs on main after tests pass (for push events)
+  # Self-healing: detects unreleased commits and auto-bumps patch version
+  release:
+    name: JS - Release
+    needs: [lint, test]
+    if: |
+      !cancelled() &&
+      github.ref == 'refs/heads/main' &&
+      github.event_name == 'push' &&
+      needs.lint.result == 'success' &&
+      needs.test.result == 'success'
+    runs-on: ubuntu-latest
+    # Permissions required for npm OIDC trusted publishing
+    permissions:
+      contents: write
+      pull-requests: write
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: '24.x'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Update npm for OIDC trusted publishing
+        run: node ../scripts/setup-npm.mjs
+
+      - name: Check if release is needed
+        id: release_check
+        run: node ../scripts/check-release-needed.mjs
+
+      - name: Auto-bump patch version for unreleased changes
+        if: steps.release_check.outputs.should_release == 'true' && steps.release_check.outputs.needs_auto_bump == 'true'
+        id: auto_bump
+        working-directory: .
+        # Uses scripts/safe-git-push.mjs for fetch+rebase+retry so concurrent
+        # pushes from the Rust release workflow don't cause non-fast-forward
+        # rejections. See docs/case-studies/issue-94.
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          cd js
+          node ../scripts/instant-version-bump.mjs --bump-type patch --description "Auto-release unreleased changes"
+          cd ..
+          git add -A
+          NEW_VERSION=$(node -p "require('./js/package.json').version")
+          git commit -m "chore(js): auto-bump to ${NEW_VERSION} for unreleased changes"
+          node scripts/safe-git-push.mjs --branch main
+          echo "version=${NEW_VERSION}" >> $GITHUB_OUTPUT
+          echo "Auto-bumped to ${NEW_VERSION}"
+
+      - name: Version packages and commit to main (changeset flow)
+        if: steps.release_check.outputs.has_changesets == 'true' && steps.release_check.outputs.needs_auto_bump != 'true'
+        id: version
+        run: node ../scripts/version-and-commit.mjs --mode changeset
+
+      - name: Publish to npm
+        if: |
+          steps.release_check.outputs.should_release == 'true' && (
+            steps.version.outputs.version_committed == 'true' ||
+            steps.version.outputs.already_released == 'true' ||
+            steps.auto_bump.outputs.version != '' ||
+            steps.release_check.outputs.needs_auto_bump == 'false'
+          )
+        id: publish
+        run: node ../scripts/publish-to-npm.mjs --should-pull
+
+      - name: Create GitHub Release
+        if: steps.publish.outputs.published == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: node ../scripts/create-github-release.mjs --release-version "${{ steps.publish.outputs.published_version }}" --repository "${{ github.repository }}"
+
+      - name: Format GitHub release notes
+        if: steps.publish.outputs.published == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: node ../scripts/format-github-release.mjs --release-version "${{ steps.publish.outputs.published_version }}" --repository "${{ github.repository }}" --commit-sha "${{ github.sha }}"
+
+  # Manual Instant Release - triggered via workflow_dispatch with instant mode
+  # This job is in js.yml because npm trusted publishing
+  # only allows one workflow file to be registered as a trusted publisher
+  instant-release:
+    name: JS - Instant Release
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.release_mode == 'instant'
+    runs-on: ubuntu-latest
+    # Permissions required for npm OIDC trusted publishing
+    permissions:
+      contents: write
+      pull-requests: write
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: '24.x'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Update npm for OIDC trusted publishing
+        run: node ../scripts/setup-npm.mjs
+
+      - name: Version packages and commit to main
+        id: version
+        run: node ../scripts/version-and-commit.mjs --mode instant --bump-type "${{ github.event.inputs.bump_type }}" --description "${{ github.event.inputs.description }}"
+
+      - name: Publish to npm
+        # Run if version was committed OR if a previous attempt already committed (for re-runs)
+        if: steps.version.outputs.version_committed == 'true' || steps.version.outputs.already_released == 'true'
+        id: publish
+        run: node ../scripts/publish-to-npm.mjs
+
+      - name: Create GitHub Release
+        if: steps.publish.outputs.published == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: node ../scripts/create-github-release.mjs --release-version "${{ steps.publish.outputs.published_version }}" --repository "${{ github.repository }}"
+
+      - name: Format GitHub release notes
+        if: steps.publish.outputs.published == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: node ../scripts/format-github-release.mjs --release-version "${{ steps.publish.outputs.published_version }}" --repository "${{ github.repository }}" --commit-sha "${{ github.sha }}"
+
+  # Manual Changeset PR - creates a pull request with the changeset for review
+  changeset-pr:
+    name: JS - Create Changeset PR
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.release_mode == 'changeset-pr'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: '24.x'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Create changeset file
+        run: node ../scripts/create-manual-changeset.mjs --bump-type "${{ github.event.inputs.bump_type }}" --description "${{ github.event.inputs.description }}"
+
+      - name: Format changeset with Prettier
+        run: |
+          # Run Prettier on the changeset file to ensure it matches project style
+          npx prettier --write ".changeset/*.md" || true
+
+          echo "Formatted changeset files"
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v8
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: 'chore(js): add changeset for manual ${{ github.event.inputs.bump_type }} release'
+          branch: changeset-js-manual-release-${{ github.run_id }}
+          delete-branch: true
+          title: 'chore(js): manual ${{ github.event.inputs.bump_type }} release'
+          body: |
+            ## Manual Release Request (JavaScript)
+
+            This PR was created by a manual workflow trigger to prepare a **${{ github.event.inputs.bump_type }}** release.
+
+            ### Release Details
+            - **Type:** ${{ github.event.inputs.bump_type }}
+            - **Description:** ${{ github.event.inputs.description || 'Manual release' }}
+            - **Triggered by:** @${{ github.actor }}
+
+            ### Next Steps
+            1. Review the changeset in this PR
+            2. Merge this PR to main
+            3. The automated release workflow will create a version PR
+            4. Merge the version PR to publish to npm and create a GitHub release
