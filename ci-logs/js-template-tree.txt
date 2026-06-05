@@ -1,0 +1,136 @@
+tree  .changeset
+blob  .changeset/README.md (510 bytes)
+blob  .changeset/config.json (271 bytes)
+tree  .github
+tree  .github/workflows
+blob  .github/workflows/links.yml (3035 bytes)
+blob  .github/workflows/release.yml (19369 bytes)
+blob  .gitignore (2178 bytes)
+blob  .gitkeep (204 bytes)
+tree  .husky
+blob  .husky/pre-commit (16 bytes)
+blob  .jscpd.json (390 bytes)
+blob  .lycheeignore (721 bytes)
+blob  .prettierignore (166 bytes)
+blob  .prettierrc (173 bytes)
+blob  .secretlintrc.json (92 bytes)
+blob  CHANGELOG.md (7475 bytes)
+blob  LICENSE (1211 bytes)
+blob  README.md (9322 bytes)
+blob  bunfig.toml (136 bytes)
+blob  deno.json (121 bytes)
+tree  docs
+blob  docs/BEST-PRACTICES.md (7560 bytes)
+blob  docs/CONTRIBUTING.md (4675 bytes)
+tree  docs/case-studies
+tree  docs/case-studies/issue-13
+blob  docs/case-studies/issue-13/README.md (7506 bytes)
+blob  docs/case-studies/issue-13/hive-mind-issue-960.json (2202 bytes)
+blob  docs/case-studies/issue-13/hive-mind-pr-961-diff.txt (27983 bytes)
+blob  docs/case-studies/issue-13/hive-mind-pr-961.json (6745 bytes)
+tree  docs/case-studies/issue-21
+blob  docs/case-studies/issue-21/README.md (14434 bytes)
+tree  docs/case-studies/issue-21/ci-logs
+blob  docs/case-studies/issue-21/ci-logs/run-20803315337.txt (133670 bytes)
+blob  docs/case-studies/issue-21/ci-logs/run-20885464993.txt (155417 bytes)
+blob  docs/case-studies/issue-21/issue-111-data.txt (700 bytes)
+blob  docs/case-studies/issue-21/issue-113-data.txt (708 bytes)
+blob  docs/case-studies/issue-21/pr-112-data.json (4967 bytes)
+blob  docs/case-studies/issue-21/pr-112-diff.patch (140742 bytes)
+blob  docs/case-studies/issue-21/pr-114-data.json (7852 bytes)
+blob  docs/case-studies/issue-21/pr-114-diff.patch (31790 bytes)
+tree  docs/case-studies/issue-23
+blob  docs/case-studies/issue-23/README.md (9202 bytes)
+tree  docs/case-studies/issue-23/data
+blob  docs/case-studies/issue-23/data/hive-mind-check-version.mjs (3689 bytes)
+blob  docs/case-studies/issue-23/data/hive-mind-ci.yml (3 bytes)
+blob  docs/case-studies/issue-23/data/hive-mind-eslint.config.mjs (2312 bytes)
+blob  docs/case-studies/issue-23/data/hive-mind-release.yml (85858 bytes)
+blob  docs/case-studies/issue-23/data/issue-1126-details.txt (485 bytes)
+blob  docs/case-studies/issue-23/data/issue-1141-comments.json (2 bytes)
+blob  docs/case-studies/issue-23/data/issue-1141-details.txt (1151 bytes)
+blob  docs/case-studies/issue-23/data/pr-1127-conversation-comments.json (17911 bytes)
+blob  docs/case-studies/issue-23/data/pr-1127-diff.txt (11091 bytes)
+blob  docs/case-studies/issue-23/data/pr-1127-review-comments.json (2 bytes)
+blob  docs/case-studies/issue-23/data/pr-1142-conversation-comments.json (8054 bytes)
+blob  docs/case-studies/issue-23/data/pr-1142-diff.txt (27946 bytes)
+blob  docs/case-studies/issue-23/data/pr-1142-review-comments.json (2 bytes)
+tree  docs/case-studies/issue-25
+blob  docs/case-studies/issue-25/DETAILED-COMPARISON.md (17912 bytes)
+blob  docs/case-studies/issue-25/README.md (10084 bytes)
+tree  docs/case-studies/issue-25/data
+blob  docs/case-studies/issue-25/data/hive-mind-file-tree.txt (84928 bytes)
+blob  docs/case-studies/issue-25/data/issue-1274-case-study.md (9175 bytes)
+blob  docs/case-studies/issue-25/data/issue-1278-case-study.md (13738 bytes)
+blob  docs/case-studies/issue-25/data/template-file-tree.txt (3372 bytes)
+tree  docs/case-studies/issue-29
+blob  docs/case-studies/issue-29/README.md (6303 bytes)
+tree  docs/case-studies/issue-3
+blob  docs/case-studies/issue-3/README.md (10928 bytes)
+blob  docs/case-studies/issue-3/created-issues.md (1274 bytes)
+blob  docs/case-studies/issue-3/issue-data.json (4625 bytes)
+blob  docs/case-studies/issue-3/original-format-release-notes.mjs (7649 bytes)
+blob  docs/case-studies/issue-3/reference-pr-59-diff.txt (23744 bytes)
+blob  docs/case-studies/issue-3/reference-pr-59.json (7914 bytes)
+blob  docs/case-studies/issue-3/release-v0.1.0.json (1008 bytes)
+blob  docs/case-studies/issue-3/repositories-with-same-script.json (771 bytes)
+blob  docs/case-studies/issue-3/research-notes.md (1394 bytes)
+tree  docs/case-studies/issue-31
+blob  docs/case-studies/issue-31/README.md (4832 bytes)
+blob  docs/case-studies/issue-31/web-capture-pr49-commits.json (2633 bytes)
+tree  docs/case-studies/issue-33
+blob  docs/case-studies/issue-33/README.md (7513 bytes)
+tree  docs/case-studies/issue-33/ci-logs
+blob  docs/case-studies/issue-33/ci-logs/release-24395209194.txt (786370 bytes)
+blob  docs/case-studies/issue-33/ci-logs/upstream-nodejs-62430.json (2053 bytes)
+blob  docs/case-studies/issue-33/ci-logs/upstream-npm-cli-9151.json (6870 bytes)
+blob  docs/case-studies/issue-33/ci-logs/upstream-runner-images-13883.json (4055 bytes)
+tree  docs/case-studies/issue-36
+blob  docs/case-studies/issue-36/README.md (5048 bytes)
+tree  docs/case-studies/issue-36/ci-logs
+blob  docs/case-studies/issue-36/ci-logs/release-24399965550.txt (845925 bytes)
+tree  docs/case-studies/issue-7
+blob  docs/case-studies/issue-7/BEST-PRACTICES-COMPARISON.md (9478 bytes)
+blob  docs/case-studies/issue-7/FORMATTER-COMPARISON.md (17660 bytes)
+blob  docs/case-studies/issue-7/current-repository-analysis.json (1988 bytes)
+blob  docs/case-studies/issue-7/effect-template-analysis.json (4644 bytes)
+blob  eslint.config.js (2850 bytes)
+tree  examples
+blob  examples/basic-usage.js (747 bytes)
+tree  experiments
+blob  experiments/test-changeset-scripts.mjs (8385 bytes)
+blob  experiments/test-check-release-needed.mjs (2751 bytes)
+blob  experiments/test-detect-changes.mjs (4045 bytes)
+blob  experiments/test-failure-detection.mjs (4472 bytes)
+blob  experiments/test-format-major-changes.mjs (1557 bytes)
+blob  experiments/test-format-minor-changes.mjs (1766 bytes)
+blob  experiments/test-format-no-hash.mjs (1284 bytes)
+blob  experiments/test-format-patch-changes.mjs (1460 bytes)
+blob  package-lock.json (144505 bytes)
+blob  package.json (1709 bytes)
+tree  scripts
+blob  scripts/changeset-version.mjs (2667 bytes)
+blob  scripts/check-changesets.mjs (1729 bytes)
+blob  scripts/check-file-line-limits.sh (1634 bytes)
+blob  scripts/check-mjs-syntax.sh (634 bytes)
+blob  scripts/check-release-needed.mjs (4050 bytes)
+blob  scripts/check-version.mjs (3737 bytes)
+blob  scripts/check-web-archive.mjs (8314 bytes)
+blob  scripts/create-github-release.mjs (2927 bytes)
+blob  scripts/create-manual-changeset.mjs (2738 bytes)
+blob  scripts/detect-code-changes.mjs (4899 bytes)
+blob  scripts/format-github-release.mjs (2871 bytes)
+blob  scripts/format-release-notes.mjs (8176 bytes)
+blob  scripts/instant-version-bump.mjs (5925 bytes)
+blob  scripts/js-paths.mjs (5686 bytes)
+blob  scripts/merge-changesets.mjs (6385 bytes)
+blob  scripts/publish-to-npm.mjs (9615 bytes)
+blob  scripts/setup-npm.mjs (3701 bytes)
+blob  scripts/simulate-fresh-merge.sh (2007 bytes)
+blob  scripts/validate-changeset.mjs (8043 bytes)
+blob  scripts/version-and-commit.mjs (9584 bytes)
+tree  src
+blob  src/index.d.ts (651 bytes)
+blob  src/index.js (694 bytes)
+tree  tests
+blob  tests/index.test.js (783 bytes)

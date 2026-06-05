@@ -1,0 +1,7 @@
+HTTP/2 401
+date: Sat, 30 May 2026 09:48:43 GMT
+content-type: application/json; charset=utf-8
+content-length: 81
+request-id: f4f10924-f242-4b4d-b5a1-3c27b2966af1
+
+{"statusCode":401,"error":"Unauthorized","message":"Missing x-bb-api-key header"}

@@ -1,0 +1,294 @@
+{
+  "chunkCount": 1,
+  "itemCount": 442,
+  "cidUrlCount": 4,
+  "blockCount": 121,
+  "tableShapes": [
+    [
+      5,
+      5,
+      5,
+      5
+    ],
+    [
+      5,
+      5,
+      5,
+      5
+    ],
+    [
+      5,
+      5,
+      5,
+      5
+    ],
+    [
+      5,
+      3,
+      4
+    ],
+    [
+      5,
+      5
+    ]
+  ],
+  "imageCount": 26,
+  "listStyles": [
+    {
+      "needle": "Feature",
+      "end": 31,
+      "styles": []
+    },
+    {
+      "needle": "A",
+      "end": 1597,
+      "styles": [
+        {
+          "ls_ts": {
+            "ts_un": false,
+            "ts_un_i": true,
+            "ts_sc": false,
+            "ts_it_i": true,
+            "ts_fgc2": {
+              "hclr_color": "#000000",
+              "clr_type": 0
+            },
+            "ts_st_i": true,
+            "ts_bgc2": {
+              "hclr_color": null,
+              "clr_type": 0
+            },
+            "ts_fs_i": true,
+            "ts_ff_i": true,
+            "ts_bgc2_i": true,
+            "ts_it": false,
+            "ts_va": "nor",
+            "ts_bd_i": true,
+            "ts_va_i": true,
+            "ts_fs": 11,
+            "ts_ff": "Arial",
+            "ts_st": false,
+            "ts_bd": false,
+            "ts_fgc2_i": true,
+            "ts_sc_i": true,
+            "ts_tw": 400
+          },
+          "ls_id": "kix.list.12",
+          "ls_nest": 1
+        }
+      ]
+    },
+    {
+      "needle": "Parent item 1",
+      "end": 1133,
+      "styles": [
+        {
+          "ls_ts": {
+            "ts_un": false,
+            "ts_un_i": true,
+            "ts_sc": false,
+            "ts_it_i": true,
+            "ts_fgc2": {
+              "hclr_color": "#000000",
+              "clr_type": 0
+            },
+            "ts_st_i": true,
+            "ts_bgc2": {
+              "hclr_color": null,
+              "clr_type": 0
+            },
+            "ts_fs_i": true,
+            "ts_ff_i": true,
+            "ts_bgc2_i": true,
+            "ts_it": false,
+            "ts_va": "nor",
+            "ts_bd_i": true,
+            "ts_va_i": true,
+            "ts_fs": 11,
+            "ts_ff": "Arial",
+            "ts_st": false,
+            "ts_bd": false,
+            "ts_fgc2_i": true,
+            "ts_sc_i": true,
+            "ts_tw": 400
+          },
+          "ls_id": "kix.list.4"
+        }
+      ]
+    },
+    {
+      "needle": "Child item 1.1",
+      "end": 1384,
+      "styles": [
+        {
+          "ls_ts": {
+            "ts_un": false,
+            "ts_un_i": true,
+            "ts_sc": false,
+            "ts_it_i": true,
+            "ts_fgc2": {
+              "hclr_color": "#000000",
+              "clr_type": 0
+            },
+            "ts_st_i": true,
+            "ts_bgc2": {
+              "hclr_color": null,
+              "clr_type": 0
+            },
+            "ts_fs_i": true,
+            "ts_ff_i": true,
+            "ts_bgc2_i": true,
+            "ts_it": false,
+            "ts_va": "nor",
+            "ts_bd_i": true,
+            "ts_va_i": true,
+            "ts_fs": 11,
+            "ts_ff": "Arial",
+            "ts_st": false,
+            "ts_bd": false,
+            "ts_fgc2_i": true,
+            "ts_sc_i": true,
+            "ts_tw": 400
+          },
+          "ls_id": "kix.list.9",
+          "ls_nest": 1
+        }
+      ]
+    },
+    {
+      "needle": "Grandchild item 1.2.1",
+      "end": 1421,
+      "styles": [
+        {
+          "ls_ts": {
+            "ts_un": false,
+            "ts_un_i": true,
+            "ts_sc": false,
+            "ts_it_i": true,
+            "ts_fgc2": {
+              "hclr_color": "#000000",
+              "clr_type": 0
+            },
+            "ts_st_i": true,
+            "ts_bgc2": {
+              "hclr_color": null,
+              "clr_type": 0
+            },
+            "ts_fs_i": true,
+            "ts_ff_i": true,
+            "ts_bgc2_i": true,
+            "ts_it": false,
+            "ts_va": "nor",
+            "ts_bd_i": true,
+            "ts_va_i": true,
+            "ts_fs": 11,
+            "ts_ff": "Arial",
+            "ts_st": false,
+            "ts_bd": false,
+            "ts_fgc2_i": true,
+            "ts_sc_i": true,
+            "ts_tw": 400
+          },
+          "ls_id": "kix.list.10",
+          "ls_nest": 2
+        }
+      ]
+    },
+    {
+      "needle": "Unordered child A",
+      "end": 1597,
+      "styles": [
+        {
+          "ls_ts": {
+            "ts_un": false,
+            "ts_un_i": true,
+            "ts_sc": false,
+            "ts_it_i": true,
+            "ts_fgc2": {
+              "hclr_color": "#000000",
+              "clr_type": 0
+            },
+            "ts_st_i": true,
+            "ts_bgc2": {
+              "hclr_color": null,
+              "clr_type": 0
+            },
+            "ts_fs_i": true,
+            "ts_ff_i": true,
+            "ts_bgc2_i": true,
+            "ts_it": false,
+            "ts_va": "nor",
+            "ts_bd_i": true,
+            "ts_va_i": true,
+            "ts_fs": 11,
+            "ts_ff": "Arial",
+            "ts_st": false,
+            "ts_bd": false,
+            "ts_fgc2_i": true,
+            "ts_sc_i": true,
+            "ts_tw": 400
+          },
+          "ls_id": "kix.list.12",
+          "ls_nest": 1
+        }
+      ]
+    },
+    {
+      "needle": "Ordered child 2.1",
+      "end": 1653,
+      "styles": [
+        {
+          "ls_ts": {
+            "ts_un": false,
+            "ts_un_i": true,
+            "ts_sc": false,
+            "ts_it_i": true,
+            "ts_fgc2": {
+              "hclr_color": "#000000",
+              "clr_type": 0
+            },
+            "ts_st_i": true,
+            "ts_bgc2": {
+              "hclr_color": null,
+              "clr_type": 0
+            },
+            "ts_fs_i": true,
+            "ts_ff_i": true,
+            "ts_bgc2_i": true,
+            "ts_it": false,
+            "ts_va": "nor",
+            "ts_bd_i": true,
+            "ts_va_i": true,
+            "ts_fs": 11,
+            "ts_ff": "Arial",
+            "ts_st": false,
+            "ts_bd": false,
+            "ts_fgc2_i": true,
+            "ts_sc_i": true,
+            "ts_tw": 400
+          },
+          "ls_id": "kix.list.13",
+          "ls_nest": 1
+        }
+      ]
+    }
+  ],
+  "windows": [
+    {
+      "needle": "Feature",
+      "excerpt": "Markdown Feature Test Document<0x0a>This document tests Markdown features that survive round-trip conversion through DOCX and Google Docs. Each section demonstrates a specific feature.<0x0a>-<0x0a>1. Headings<0x0a>The lines above"
+    },
+    {
+      "needle": "A",
+      "excerpt": "ered and unordered lists combined:<0x0a>First ordered item<0x0a>Unordered child A<0x0a>Unordered child B<0x0a>Second ordered item<0x0a>Ordered child 2.1<0x0a>Ordered child 2.2<0x0a>Third ordered item<0x0a>-<0x0a>8. Tables<0x0a>Simple table<0x0a><0x10><0x12><0x1c>Feature<0x0a><0x1c>Supported<0x0a><0x"
+    },
+    {
+      "needle": "x",
+      "excerpt": "Markdown Feature Test Document<0x0a>This document tests Markdown features that survive round-trip conversion through DOCX and Google Docs. Each section demonstrates a specific feature.<0x0a>-<0x0a>1. Headings<0x0a>The lines above and below demonstrate "
+    },
+    {
+      "needle": "y",
+      "excerpt": " level 6<0x0a>-<0x0a>2. Inline Formatting<0x0a>This section tests inline text styling:<0x0a>This text is bold — two asterisks on each side<0x0a>This text is italic — one asterisk on each side<0x0a>This text is bold and italic — three asterisks on each side<0x0a>This text has strikethrough — two tild"
+    }
+  ]
+}

@@ -1,0 +1,172 @@
+    Blocking waiting for file lock on package cache
+   Compiling web-capture v0.3.1 (/tmp/gh-issue-solver-1776336600314/rust)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 4.26s
+     Running unittests src/lib.rs (target/debug/deps/web_capture-0cbb9eccc9d20354)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/main.rs (target/debug/deps/web_capture-31661f3b38bd271a)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/integration/mod.rs (target/debug/deps/integration-2667b3154f318f20)
+
+running 49 tests
+test animation::test_animation_options_default ... ok
+test animation::test_capture_mode_display ... ok
+test animation::test_capture_mode_from_str ... ok
+test animation::test_compare_frames_completely_different ... ok
+test animation::test_compare_frames_empty ... ok
+test animation::test_compare_frames_different_length ... ok
+test animation::test_compare_frames_identical ... ok
+test animation::test_compare_frames_partial ... ok
+test batch::test_create_config_from_urls ... ok
+test batch::test_get_all_articles ... ok
+test batch::test_get_article_merges_defaults ... ok
+test batch::test_get_all_versions ... ok
+test batch::test_validate_config_invalid_url ... ok
+test batch::test_get_article_unknown_version ... ok
+test batch::test_validate_config_missing_url ... ok
+test browser::test_browser_engine_default ... ok
+test browser::test_browser_engine_display ... ok
+test browser::test_browser_engine_from_str ... ok
+test batch::test_validate_config_valid ... ok
+test figures::test_extract_figures_no_img ... ok
+test figures::test_extract_figures_relative_url ... ok
+test gdocs::test_build_docs_api_url ... ok
+test gdocs::test_build_edit_url ... ok
+test gdocs::test_build_export_url ... ok
+test gdocs::test_capture_method_selection_honors_browser_flag ... ok
+test gdocs::test_create_archive_zip_empty_images ... ok
+test figures::test_extract_figures_basic ... ok
+test figures::test_extract_figures_russian_caption ... ok
+test figures::test_extract_figures_skips_data_uri ... ok
+test gdocs::test_create_archive_zip_produces_valid_zip ... ok
+test gdocs::test_extract_base64_images_no_images ... ok
+test gdocs::test_extract_base64_images_multiple ... ok
+test figures::test_extract_figures_skips_svg ... ok
+test gdocs::test_extract_base64_images_single ... ok
+test gdocs::test_extract_base64_images_preserves_non_data_images ... ok
+test gdocs::test_extract_document_id ... ok
+test gdocs::test_extract_bearer_token ... ok
+test figures::test_extract_figures_sequential_numbering ... ok
+test gdocs::test_parse_model_chunks_includes_suggestions_and_images ... ok
+test gdocs::test_is_google_docs_url_invalid ... ok
+test gdocs::test_is_google_docs_url_valid ... ok
+test gdocs::test_render_docs_api_document_paragraphs_tables_and_images ... ok
+test themed_image::test_theme_display ... ok
+test themed_image::test_theme_from_str ... ok
+test themed_image::test_themed_image_options_default ... ok
+test gdocs_image_parity::img_inside_heading_is_kept_in_markdown ... ok
+test gdocs_image_parity::image_count_parity_across_pipeline ... ok
+test gdocs_image_parity::gdocs_style_heading_with_spans_keeps_img ... ok
+test gdocs_image_parity::img_inside_all_heading_levels_is_kept ... ok
+
+test result: ok. 49 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.09s
+
+     Running tests/unit/mod.rs (target/debug/deps/unit-0f2a302584a40208)
+
+running 88 tests
+test extract_images::test_has_base64_images_false ... ok
+test extract_images::test_extract_base64_to_buffers ... ok
+test extract_images::test_extract_base64_to_buffers_custom_dir ... ok
+test extract_images::test_custom_images_dir ... ok
+test extract_images::test_no_base64_images ... ok
+test extract_images::test_extract_duplicate_images_same_hash ... ok
+test extract_images::test_has_base64_images_true ... ok
+test extract_images::test_preserves_alt_text ... ok
+test extract_images::test_strip_base64_images_empty_alt ... ok
+test extract_images::test_extract_single_png ... ok
+test extract_images::test_preserves_remote_urls ... ok
+test extract_images::test_strip_base64_images_with_alt ... ok
+test extract_images::test_strip_base64_multiple_images ... ok
+test extract_images::test_strip_base64_preserves_remote_urls ... ok
+test extract_images::test_svg_data_uri ... ok
+test html::test_convert_to_utf8_other_charset ... ok
+test html::test_decode_html_entities_basic ... ok
+test html::test_convert_to_utf8_already_utf8 ... ok
+test html::test_decode_html_entities_unicode ... ok
+test html::test_decode_html_entities_no_entities ... ok
+test html::test_has_javascript_with_script ... ok
+test html::test_has_javascript_without_script ... ok
+test html::test_is_html_invalid ... ok
+test html::test_convert_relative_urls_href ... ok
+test html::test_is_html_valid ... ok
+test html::test_normalize_url_already_absolute ... ok
+test html::test_normalize_url_empty ... ok
+test html::test_normalize_url_relative ... ok
+test html::test_pretty_print_html_empty ... ok
+test html::test_pretty_print_html_void_elements ... ok
+test latex::test_extract_formula_dispatches_correctly ... ok
+test html::test_convert_relative_urls_src ... ok
+test latex::test_extract_habr_formula_alt ... ok
+test latex::test_extract_habr_formula_source ... ok
+test html::test_pretty_print_html_basic ... ok
+test html::test_convert_relative_urls_absolute ... ok
+test latex::test_extract_mathjax_formula_data_tex ... ok
+test latex::test_is_formula_image_regular_img ... ok
+test latex::test_is_formula_image_with_class ... ok
+test latex::test_is_math_element_katex ... ok
+test latex::test_is_math_element_mathjax ... ok
+test latex::test_extract_katex_formula_annotation ... ok
+test latex::test_extract_katex_formula_data_tex ... ok
+test html::test_convert_relative_urls_data_url ... ok
+test localize_images::test_extract_image_references_no_match ... ok
+test lib_api::test_convert_to_utf8_already_utf8 ... ok
+test lib_api::test_version ... ok
+test localize_images::test_extract_image_references ... ok
+test lib_api::test_convert_relative_urls_basic ... ok
+test localize_images::test_get_extension_from_url_jpg ... ok
+test localize_images::test_localize_images_already_local ... ok
+test localize_images::test_get_extension_from_url_no_extension ... ok
+test localize_images::test_localize_images_exclude_domain ... ok
+test markdown::test_clean_markdown_removes_excessive_newlines ... ok
+test markdown::test_clean_markdown_adds_trailing_newline ... ok
+test localize_images::test_get_extension_from_url_png ... ok
+test localize_images::test_get_extension_from_url_with_query ... ok
+test localize_images::test_generate_local_filename ... ok
+test localize_images::test_localize_images_dry_run ... ok
+test metadata::test_extract_metadata_author ... ok
+test metadata::test_extract_metadata_date ... ok
+test metadata::test_extract_metadata_empty_html ... ok
+test metadata::test_extract_metadata_ld_json ... ok
+test metadata::test_extract_metadata_tags ... ok
+test metadata::test_format_footer_block_tags ... ok
+test metadata::test_format_metadata_block_author ... ok
+test postprocess::test_bold_formatting_empty_bold ... ok
+test postprocess::test_latex_spacing_adds_space_before ... ok
+test postprocess::test_latex_spacing_handles_no_formulas ... ok
+test postprocess::test_latex_spacing_skips_block_formulas ... ok
+test markdown::test_convert_html_to_markdown_basic ... ok
+test markdown::test_convert_html_to_markdown_removes_script ... ok
+test markdown::test_convert_html_to_markdown_removes_style ... ok
+test markdown::test_convert_html_to_markdown_with_link ... ok
+test postprocess::test_unicode_normalization_curly_quotes ... ok
+test postprocess::test_unicode_normalization_ellipsis ... ok
+test postprocess::test_unicode_normalization_nbsp ... ok
+test verify::test_normalize_code ... ok
+test postprocess::test_percent_sign_fix ... ok
+test markdown::test_convert_html_to_markdown_with_relative_url ... ok
+test verify::test_normalize_text_latex ... ok
+test verify::test_normalize_text_unicode ... ok
+test verify::test_normalize_text_whitespace ... ok
+test postprocess::test_post_process_markdown_full ... ok
+test verify::test_verify_empty_content ... ok
+test verify::test_verify_title_missing ... ok
+test verify::test_verify_title_present ... ok
+test verify::test_verify_headings ... ok
+
+test result: ok. 88 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.15s
+
+   Doc-tests web_capture
+
+running 2 tests
+test src/lib.rs - (line 15) - compile ... ok
+test src/gdocs.rs - gdocs (line 17) - compile ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.08s
+

@@ -1,0 +1,104 @@
+{
+  "result": {
+    "location": "https://docs.google.com/document/d/1f5zI2xOFpKa90v0GjamO_t7lqSdzMlaM/edit#bookmark=id.em10n11a9c5x",
+    "title": "markdown-test-document.docx - Google Docs",
+    "capturedLength": 1,
+    "latestIsArray": false,
+    "latestLength": null,
+    "firstChunkPreview": "{\"chunk\":[{\"ty\":\"is\",\"ibi\":1,\"s\":\"Markdown Feature Test Document\\nThis document tests Markdown features that survive round-trip conversion through DOCX and Google Docs. Each section demonstrates a specific feature.\\n-\\n1. Headings\\nThe lines above and below demonstrate heading levels H1 through H6.\\nHeading level 3\\nHeading level 4\\nHeading level 5\\nHeading level 6\\n-\\n2. Inline Formatting\\nThis section tests inline text styling:\\nThis text is bold — two asterisks on each side\\nThis text is italic — one asterisk on each side\\nThis text is bold and italic — three asterisks on each side\\nThis text has strikethrough — two tildes on each side\\n-\\n3. Paragraphs\\nThis is the first paragraph. It contains multiple sentences to demonstrate normal paragraph text flow.\\nThis is the second paragraph. It is separate from the first one.\\n-\\n4. Blockquotes\\nThis section tests blockquotes:\\nThis is a single-level blockquote. It represents quoted text from another source.\\nThis is a multi-paragraph blockquote.\\nThis is the second paragraph inside the same blockquote.\\n-\\n5. Unordered Lists\\nThis section tests bullet lists:\\nFirst item\\nSecond item\\nThird item\\nNested unordered list:\\nParent item 1\\nChild item 1a\\nChild item 1b\\nGrandchild item 1b-i\\nGrandchild item 1b-ii\\nChild item 1c\\nParent item 2\\nParent item 3\\n-\\n6. Ordered Lists\\nThis section tests numbered lists:\\nFirst item\\nSecond item\\nThird item\\nNested ordered list:\\nParent item 1\\nChild item 1.1\\nChild item 1.2\\nGrandchild item 1.2.1\\nGrandchild item 1.2.2\\nChild item 1.3\\nParent item 2\\nParent item 3\\n-\\n7. Mixed Lists\\nThis section tests ordered and unordered lists combined:\\nFirst ordered item\\nUnordered child A\\nUnordered child B\\nSecond ordered item\\nOrdered child 2.1\\nOrdered child 2.2\\nThird ordered item\\n-\\n8. Tables\\nSimple table\\n\\u0010\\u0012\\u001cFeature\\n\\u001cSupported\\n\\u001cNotes\\n\\u0012\\u001cBold\\n\\u001cYes\\n\\u001cUsing double asterisks\\n\\u0012\\u001cItalic\\n\\u001cYes\\n\\u001cUsing single asterisks\\n\\u001",
+    "scriptCount": 38,
+    "scriptsWithModel": [
+      {
+        "index": 32,
+        "length": 180,
+        "hasModelChunk": true,
+        "hasPush": false,
+        "preview": "DOCS_warmStartDocumentLoader.startLoad( 1.0 ,'4ClTno87JeR1Hg', 45.0 , 20.0 ,[45,\"\"], null , 1.0 ); var DOCS_modelChunkLoadStart; var DOCS_modelChunkParseStart; var DOCS_modelChunk;"
+      },
+      {
+        "index": 33,
+        "length": 49,
+        "hasModelChunk": true,
+        "hasPush": false,
+        "preview": "DOCS_modelChunkParseStart = new Date().getTime();"
+      },
+      {
+        "index": 34,
+        "length": 198368,
+        "hasModelChunk": true,
+        "hasPush": false,
+        "preview": "DOCS_modelChunk = {\"chunk\":[{\"ty\":\"is\",\"ibi\":1,\"s\":\"Markdown Feature Test Document\\nThis document tests Markdown features that survive round-trip conversion through DOCX and Google Docs. Each section demonstrates a specific feature.\\n-\\n1. Headings\\nThe lines above and below demonstrate heading levels H1 through H6.\\nHeading level 3\\nHeading level 4\\nHeading level 5\\nHeading level 6\\n-\\n2. Inline Formatting\\nThis section tests inline text styling:\\nThis text is bold — two asterisks on each side\\nThis text is italic — one asterisk on each side\\nThis text is bold and italic — three asterisks on each side\\nThis text has strikethrough — two tildes on each side\\n-\\n3. Paragraphs\\nThis is the first paragraph. It contains multiple sentences to demonstrate normal paragraph text flow.\\nThis is the second paragraph. It is separate from the first one.\\n-\\n4. Blockquotes\\nThis section tests blockquotes:\\nThis is a single-level blockquote. It represents quoted text from another source.\\nThis is a m"
+      }
+    ],
+    "browserContentHasModelChunk": true,
+    "editorResponseHasModelChunk": true,
+    "editorResponseBytes": 436539
+  },
+  "responses": [
+    {
+      "status": 200,
+      "url": "https://docs.google.com/document/d/1f5zI2xOFpKa90v0GjamO_t7lqSdzMlaM/edit",
+      "contentType": "text/html; charset=utf-8"
+    },
+    {
+      "status": 200,
+      "url": "https://docs.google.com/static/document/client/js/2937426112-client_js_prod_kix_core__de.js",
+      "contentType": "text/javascript"
+    },
+    {
+      "status": 200,
+      "url": "https://docs.google.com/static/document/client/js/2603541661-client_js_prod_kix_nestedsketchycore__de.js",
+      "contentType": "text/javascript"
+    },
+    {
+      "status": 200,
+      "url": "https://docs.google.com/static/document/client/js/2419854376-client_js_prod_kix_app__de.js",
+      "contentType": "text/javascript"
+    },
+    {
+      "status": 200,
+      "url": "https://docs.google.com/static/document/client/js/1519050065-client_js_prod_kix_docos__de.js",
+      "contentType": "text/javascript"
+    },
+    {
+      "status": 200,
+      "url": "https://docs.google.com/static/document/client/js/507193544-client_js_prod_kix_pre_tertiary_deps__de.js",
+      "contentType": "text/javascript"
+    },
+    {
+      "status": 200,
+      "url": "https://docs.google.com/static/document/client/js/3821099439-client_js_prod_kix_tertiary__de.js",
+      "contentType": "text/javascript"
+    },
+    {
+      "status": 200,
+      "url": "https://docs.google.com/static/document/client/js/1470825706-client_js_prod_kix_approvals__de.js",
+      "contentType": "text/javascript"
+    },
+    {
+      "status": 302,
+      "url": "https://docs.google.com/drivesharing/clientmodel?id=1f5zI2xOFpKa90v0GjamO_t7lqSdzMlaM&foreignService=kix&authuser=0&origin=https%3A%2F%2Fdocs.google.com",
+      "contentType": "application/binary"
+    },
+    {
+      "status": 302,
+      "url": "https://accounts.google.com/ServiceLogin?passive=1209600&continue=https://docs.google.com/drivesharing/clientmodel?id%3D1f5zI2xOFpKa90v0GjamO_t7lqSdzMlaM%26foreignService%3Dkix%26authuser%3D0%26origin%3Dhttps://docs.google.com&followup=https://docs.google.com/drivesharing/clientmodel?id%3D1f5zI2xOFpKa90v0GjamO_t7lqSdzMlaM%26foreignService%3Dkix%26authuser%3D0%26origin%3Dhttps://docs.google.com",
+      "contentType": "application/binary"
+    },
+    {
+      "status": 302,
+      "url": "https://accounts.google.com/InteractiveLogin?continue=https://docs.google.com/drivesharing/clientmodel?id%3D1f5zI2xOFpKa90v0GjamO_t7lqSdzMlaM%26foreignService%3Dkix%26authuser%3D0%26origin%3Dhttps://docs.google.com&followup=https://docs.google.com/drivesharing/clientmodel?id%3D1f5zI2xOFpKa90v0GjamO_t7lqSdzMlaM%26foreignService%3Dkix%26authuser%3D0%26origin%3Dhttps://docs.google.com&passive=1209600&dsh=S-836011541:1776698770615867",
+      "contentType": "text/html; charset=UTF-8"
+    },
+    {
+      "status": 403,
+      "url": "https://accounts.google.com/v3/signin/identifier?continue=https%3A%2F%2Fdocs.google.com%2Fdrivesharing%2Fclientmodel%3Fid%3D1f5zI2xOFpKa90v0GjamO_t7lqSdzMlaM%26foreignService%3Dkix%26authuser%3D0%26origin%3Dhttps%3A%2F%2Fdocs.google.com&dsh=S-836011541%3A1776698770615867&followup=https%3A%2F%2Fdocs.google.com%2Fdrivesharing%2Fclientmodel%3Fid%3D1f5zI2xOFpKa90v0GjamO_t7lqSdzMlaM%26foreignService%3Dkix%26authuser%3D0%26origin%3Dhttps%3A%2F%2Fdocs.google.com&passive=1209600&flowName=GlifWebSignIn&flowEntry=ServiceLogin&ifkv=AT1y2_UOU31hwh0X1SGnhIht4LKZAEJtumQSDXMUSxde2m5lFJ9wvBO2OYfdLdhjJbM5WNNrQEhU1A",
+      "contentType": "text/html; charset=utf-8"
+    },
+    {
+      "status": 200,
+      "url": "https://ssl.gstatic.com/docs/documents/images/kix-favicon-2023q4.ico",
+      "contentType": "image/x-icon"
+    }
+  ]
+}

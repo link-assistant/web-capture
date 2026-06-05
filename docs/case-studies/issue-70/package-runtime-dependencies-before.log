@@ -1,0 +1,54 @@
+
+> @link-assistant/web-capture@1.7.3 test
+> node --experimental-vm-modules ./node_modules/.bin/jest --runTestsByPath tests/unit/package-runtime-dependencies.test.js
+
+(node:686970) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+FAIL tests/unit/package-runtime-dependencies.test.js
+  runtime package dependencies
+    ✕ turndown-plugin-gfm is declared as a production dependency (4 ms)
+    ✕ turndown-plugin-gfm is not marked dev-only in package-lock.json (4 ms)
+
+  ● runtime package dependencies › turndown-plugin-gfm is declared as a production dependency
+
+    expect(received).toHaveProperty(path)
+
+    Expected path: "turndown-plugin-gfm"
+    Received path: []
+
+    Received value: {"archiver": "^7.0.1", "browser-commander": "^0.8.0", "cheerio": "^1.0.0", "docx": "^9.6.1", "express": "^4.18.2", "he": "^1.2.0", "iconv-lite": "^0.6.3", "lino-arguments": "^0.3.0", "node-fetch": "^2.7.0", "playwright": "^1.49.0", "puppeteer": "^24.8.2", "puppeteer-core": "^24.40.0", "turndown": "^7.1.1"}
+
+      26 |
+      27 |       expect(source).toContain(`from '${packageName}'`);
+    > 28 |       expect(packageJson.dependencies).toHaveProperty(packageName);
+         |                                        ^
+      29 |       expect(packageJson.devDependencies || {}).not.toHaveProperty(packageName);
+      30 |     }
+      31 |   );
+
+      at toHaveProperty (tests/unit/package-runtime-dependencies.test.js:28:40)
+
+  ● runtime package dependencies › turndown-plugin-gfm is not marked dev-only in package-lock.json
+
+    expect(received).toHaveProperty(path)
+
+    Expected path: "turndown-plugin-gfm"
+    Received path: []
+
+    Received value: {"archiver": "^7.0.1", "browser-commander": "^0.8.0", "cheerio": "^1.0.0", "docx": "^9.6.1", "express": "^4.18.2", "he": "^1.2.0", "iconv-lite": "^0.6.3", "lino-arguments": "^0.3.0", "node-fetch": "^2.7.0", "playwright": "^1.49.0", "puppeteer": "^24.8.2", "puppeteer-core": "^24.40.0", "turndown": "^7.1.1"}
+
+      36 |       const packageLock = readJson('package-lock.json');
+      37 |
+    > 38 |       expect(packageLock.packages[''].dependencies).toHaveProperty(packageName);
+         |                                                     ^
+      39 |       expect(packageLock.packages[`node_modules/${packageName}`]).toBeDefined();
+      40 |       expect(packageLock.packages[`node_modules/${packageName}`].dev).not.toBe(
+      41 |         true
+
+      at toHaveProperty (tests/unit/package-runtime-dependencies.test.js:38:53)
+
+Test Suites: 1 failed, 1 total
+Tests:       2 failed, 2 total
+Snapshots:   0 total
+Time:        0.483 s
+Ran all test suites within paths "tests/unit/package-runtime-dependencies.test.js".
