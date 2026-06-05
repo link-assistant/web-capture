@@ -517,27 +517,28 @@ async fn markdown_handler(Query(params): Query<MarkdownQuery>) -> Response {
         .as_deref()
         .unwrap_or("html2md")
         .to_ascii_lowercase();
-    if converter != "html2md" && converter != "kreuzberg" {
-        return (StatusCode::BAD_REQUEST, "Unsupported `converter` parameter").into_response();
-    }
-
     let format = params
         .format
         .as_deref()
         .unwrap_or("text")
         .to_ascii_lowercase();
-    if format != "text" && format != "json" {
-        return (StatusCode::BAD_REQUEST, "Unsupported `format` parameter").into_response();
-    }
-    if format == "json" && converter != "kreuzberg" {
-        return (
-            StatusCode::BAD_REQUEST,
-            "`format=json` is only supported with `converter=kreuzberg`",
-        )
-            .into_response();
+    if let Some(response) = validate_markdown_query(&converter, &format) {
+        return response;
     }
 
     let page_url = web_capture::xpaste::normalize_url_for_text_page(&url);
+    let has_selector = params.content_selector.is_some() || params.body_selector.is_some();
+    if let Some(response) = maybe_github_repository_markdown_response(
+        &page_url,
+        &format,
+        has_selector,
+        params.embed_images,
+    )
+    .await
+    {
+        return response;
+    }
+
     let html = match fetch_html(&page_url).await {
         Ok(html) => html,
         Err(e) => {
@@ -565,12 +566,11 @@ async fn markdown_handler(Query(params): Query<MarkdownQuery>) -> Response {
             }
         };
 
-        let mode = if params.embed_images {
-            ImageMode::Embed
-        } else {
-            ImageMode::Default
-        };
-        if let Ok(image_result) = apply_image_mode(&result.content, mode, Some(&page_url)) {
+        if let Ok(image_result) = apply_image_mode(
+            &result.content,
+            server_markdown_image_mode(params.embed_images),
+            Some(&page_url),
+        ) {
             result.content = image_result.markdown;
         }
 
@@ -597,12 +597,11 @@ async fn markdown_handler(Query(params): Query<MarkdownQuery>) -> Response {
 
     // Route through the unified chokepoint. The server returns a single
     // response body, so only Default (strip base64) and Embed apply.
-    let mode = if params.embed_images {
-        ImageMode::Embed
-    } else {
-        ImageMode::Default
-    };
-    if let Ok(result) = apply_image_mode(&markdown, mode, Some(&page_url)) {
+    if let Ok(result) = apply_image_mode(
+        &markdown,
+        server_markdown_image_mode(params.embed_images),
+        Some(&page_url),
+    ) {
         markdown = result.markdown;
     }
 
@@ -611,6 +610,70 @@ async fn markdown_handler(Query(params): Query<MarkdownQuery>) -> Response {
     }
 
     markdown_response(markdown)
+}
+
+fn validate_markdown_query(converter: &str, format: &str) -> Option<Response> {
+    if converter != "html2md" && converter != "kreuzberg" {
+        return Some(
+            (StatusCode::BAD_REQUEST, "Unsupported `converter` parameter").into_response(),
+        );
+    }
+    if format != "text" && format != "json" {
+        return Some((StatusCode::BAD_REQUEST, "Unsupported `format` parameter").into_response());
+    }
+    if format == "json" && converter != "kreuzberg" {
+        return Some(
+            (
+                StatusCode::BAD_REQUEST,
+                "`format=json` is only supported with `converter=kreuzberg`",
+            )
+                .into_response(),
+        );
+    }
+    None
+}
+
+async fn maybe_github_repository_markdown_response(
+    page_url: &str,
+    format: &str,
+    has_selector: bool,
+    embed_images: bool,
+) -> Option<Response> {
+    if format != "text" || has_selector || !web_capture::github::is_github_repository_url(page_url)
+    {
+        return None;
+    }
+
+    let snapshot = match web_capture::github::fetch_github_repository_snapshot(page_url).await {
+        Ok(snapshot) => snapshot,
+        Err(e) => {
+            error!("Failed to fetch GitHub repository snapshot: {}", e);
+            return Some(
+                (
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    "Error fetching GitHub repository snapshot",
+                )
+                    .into_response(),
+            );
+        }
+    };
+    let mut markdown = web_capture::github::format_github_repository_markdown(&snapshot);
+    if let Ok(result) = apply_image_mode(
+        &markdown,
+        server_markdown_image_mode(embed_images),
+        Some(page_url),
+    ) {
+        markdown = result.markdown;
+    }
+    Some(markdown_response(markdown))
+}
+
+const fn server_markdown_image_mode(embed_images: bool) -> ImageMode {
+    if embed_images {
+        ImageMode::Embed
+    } else {
+        ImageMode::Default
+    }
 }
 
 /// Text download endpoint handler
@@ -636,6 +699,13 @@ async fn txt_handler(Query(params): Query<UrlQuery>) -> Response {
 }
 
 async fn fetch_text_content(url: &str) -> anyhow::Result<String> {
+    if web_capture::github::is_github_repository_url(url) {
+        let snapshot = web_capture::github::fetch_github_repository_snapshot(url).await?;
+        return Ok(web_capture::github::format_github_repository_text(
+            &snapshot,
+        ));
+    }
+
     let text_url = web_capture::xpaste::normalize_url_for_text_content(url);
     let response = reqwest::get(&text_url).await?;
     if !response.status().is_success() {
@@ -653,7 +723,8 @@ async fn fetch_text_content(url: &str) -> anyhow::Result<String> {
 }
 
 fn text_response(url: &str, text: String) -> Response {
-    let filename = web_capture::xpaste::filename_for_text_url(url);
+    let filename = web_capture::github::github_repository_text_filename(url)
+        .unwrap_or_else(|| web_capture::xpaste::filename_for_text_url(url));
     let mut response = (StatusCode::OK, text).into_response();
     response.headers_mut().insert(
         header::CONTENT_TYPE,
@@ -1198,6 +1269,36 @@ async fn capture_url(
             }
         }
         "markdown" | "md" => {
+            if args.content_selector.is_none()
+                && args.body_selector.is_none()
+                && web_capture::github::is_github_repository_url(&absolute_url)
+            {
+                let snapshot =
+                    web_capture::github::fetch_github_repository_snapshot(&absolute_url).await?;
+                let markdown = web_capture::github::format_github_repository_markdown(&snapshot);
+
+                let is_stdout = output.is_some_and(|p| p.as_os_str() == "-");
+                let derived;
+                let effective_output = if is_stdout {
+                    None
+                } else if let Some(path) = output {
+                    Some(path.clone())
+                } else {
+                    derived = derive_output_path(&absolute_url, "md", &args.data_dir);
+                    Some(derived)
+                };
+                if let Some(ref path) = effective_output {
+                    let markdown =
+                        process_output_markdown(markdown, args, path, "GitHub repository Markdown")
+                            .await?;
+                    write_text_capture_to_path(&markdown, path, "GitHub repository Markdown")
+                        .await?;
+                } else {
+                    print!("{markdown}");
+                }
+                return Ok(());
+            }
+
             let html = capture_html_content(&absolute_url, args).await?;
 
             // Enhanced conversion is now the default

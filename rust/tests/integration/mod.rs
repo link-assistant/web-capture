@@ -8,6 +8,7 @@ mod figures;
 mod gdocs;
 mod gdocs_image_parity;
 mod gdocs_public_doc;
+mod github_repository;
 mod heading_numbering;
 mod html2md_br_in_list_item;
 mod html2md_ol_numbering;

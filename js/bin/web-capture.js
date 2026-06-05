@@ -614,6 +614,12 @@ async function captureUrl(url, options) {
     captureGoogleDocWithBrowserOrFallback,
     selectGoogleDocsCaptureMethod,
   } = await import('../src/gdocs.js');
+  const {
+    fetchGithubRepositorySnapshot,
+    formatGithubRepositoryMarkdown,
+    formatGithubRepositoryText,
+    isGithubRepositoryUrl,
+  } = await import('../src/github.js');
 
   const normalizedFormat = format.toLowerCase();
   log.debug(() => ({
@@ -921,15 +927,22 @@ async function captureUrl(url, options) {
 
   try {
     if (normalizedFormat === 'txt' || normalizedFormat === 'text') {
-      const response = await fetch(normalizeUrlForTextContent(absoluteUrl));
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      let text;
+      if (isGithubRepositoryUrl(absoluteUrl)) {
+        const snapshot = await fetchGithubRepositorySnapshot(absoluteUrl);
+        text = formatGithubRepositoryText(snapshot);
+      } else {
+        const response = await fetch(normalizeUrlForTextContent(absoluteUrl));
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        const contentType =
+          response.headers.get('content-type') || 'text/plain';
+        if (!contentType.includes('text/')) {
+          throw new Error(`Expected text content, got ${contentType}`);
+        }
+        text = await response.text();
       }
-      const contentType = response.headers.get('content-type') || 'text/plain';
-      if (!contentType.includes('text/')) {
-        throw new Error(`Expected text content, got ${contentType}`);
-      }
-      const text = await response.text();
       const output =
         explicitOutput === '-'
           ? null
@@ -1151,17 +1164,27 @@ async function captureUrl(url, options) {
       console.error(`Archive saved to: ${outPath}`);
     } else if (normalizedFormat === 'markdown' || normalizedFormat === 'md') {
       // Markdown format — enhanced conversion is now the default
-      const html = await fetchHtml(absoluteUrl);
-      const { convertHtmlToMarkdownEnhanced } = await import('../src/lib.js');
-      const result = convertHtmlToMarkdownEnhanced(html, absoluteUrl, {
-        extractLatex: options.extractLatex,
-        extractMetadata: options.extractMetadata,
-        postProcess: options.postProcess,
-        detectCodeLanguage: options.detectCodeLanguage,
-        contentSelector: options.contentSelector,
-        bodySelector: options.bodySelector,
-      });
-      const markdown = result.markdown;
+      let markdown;
+      if (
+        isGithubRepositoryUrl(absoluteUrl) &&
+        !options.contentSelector &&
+        !options.bodySelector
+      ) {
+        const snapshot = await fetchGithubRepositorySnapshot(absoluteUrl);
+        markdown = formatGithubRepositoryMarkdown(snapshot);
+      } else {
+        const html = await fetchHtml(absoluteUrl);
+        const { convertHtmlToMarkdownEnhanced } = await import('../src/lib.js');
+        const result = convertHtmlToMarkdownEnhanced(html, absoluteUrl, {
+          extractLatex: options.extractLatex,
+          extractMetadata: options.extractMetadata,
+          postProcess: options.postProcess,
+          detectCodeLanguage: options.detectCodeLanguage,
+          contentSelector: options.contentSelector,
+          bodySelector: options.bodySelector,
+        });
+        markdown = result.markdown;
+      }
 
       const output =
         explicitOutput === '-'

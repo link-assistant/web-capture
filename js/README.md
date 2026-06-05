@@ -52,6 +52,10 @@ web-capture https://example.com --format html -o page.html
 # Capture raw paste text
 web-capture https://xpaste.pro/p/t4q0Lsp0 --format txt -o paste.txt
 
+# Capture a GitHub repository as compact text or Markdown
+web-capture https://github.com/link-assistant/web-capture --format txt -o repository.txt
+web-capture https://github.com/link-assistant/web-capture --format markdown -o repository.md
+
 # Take a PNG screenshot
 web-capture https://example.com --format png -o screenshot.png
 
@@ -153,6 +157,11 @@ containing `index.md`, `xpaste-pro-<id>.md`, and `xpaste-pro-<id>.txt`.
 Canonical `/p/<id>`, `/p/<id>/raw`, `/ru/p/<id>`, and `/en/p/<id>` URLs are
 normalized before capture.
 
+For plain GitHub repository URLs such as `https://github.com/owner/repo`,
+`/markdown` returns a compact repository snapshot with repository metadata, the
+root file tree, and README content. GitHub subpages continue through the regular
+HTML-to-Markdown conversion path.
+
 | Parameter           | Required | Description                                                               | Default  |
 | ------------------- | -------- | ------------------------------------------------------------------------- | -------- |
 | `url`               | Yes      | URL to fetch                                                              | -        |
@@ -170,6 +179,9 @@ GET /txt?url=<URL>
 Returns raw text content as a `.txt` attachment. xpaste.pro paste URLs are
 normalized to their `/raw` endpoint, including localized `/ru/p/<id>` and
 `/en/p/<id>` URLs.
+
+Plain GitHub repository URLs return a compact `.txt` snapshot with repository
+metadata, the root file tree, and README content.
 
 | Parameter | Required | Description  | Default |
 | --------- | -------- | ------------ | ------- |
@@ -489,6 +501,9 @@ with environment variables:
 ```bash
 # Download the Wikipedia page (markdown + image) in every supported engine
 WIKIPEDIA_INTEGRATION=true npm test -- --testPathPattern="wikipedia-download"
+
+# Download a GitHub repository page as compact txt/markdown, original HTML, and screenshots
+GITHUB_REPOSITORY_INTEGRATION=true npm test -- --testPathPattern="github-readme"
 
 # Habr articles and public Google Docs live suites
 HABR_INTEGRATION=true npm test -- --testPathPattern="habr-article"

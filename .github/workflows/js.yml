@@ -320,6 +320,12 @@ jobs:
         run: npm test -- --testPathPattern="wikipedia-download" --testTimeout=120000
         timeout-minutes: 10
 
+      - name: Run GitHub repository capture live integration tests (issue #5)
+        env:
+          GITHUB_REPOSITORY_INTEGRATION: 'true'
+        run: npm test -- --testPathPattern="github-readme" --testTimeout=120000
+        timeout-minutes: 10
+
       - name: Build Docker image for e2e tests
         run: docker compose build
         timeout-minutes: 10

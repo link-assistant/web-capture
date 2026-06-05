@@ -1,4 +1,5 @@
 mod extract_images;
+mod github;
 mod html;
 mod latex;
 mod lib_api;

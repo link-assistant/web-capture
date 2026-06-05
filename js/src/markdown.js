@@ -8,6 +8,11 @@ import {
   normalizeUrlForTextPage,
   scopeHtmlForMarkdown,
 } from './lib.js';
+import {
+  fetchGithubRepositorySnapshot,
+  formatGithubRepositoryMarkdown,
+  isGithubRepositoryUrl,
+} from './github.js';
 import { convertWithKreuzberg, isKreuzbergAvailable } from './kreuzberg.js';
 import { applyImageMode } from './extract-images.js';
 import archiver from 'archiver';
@@ -39,6 +44,21 @@ export async function markdownHandler(req, res) {
 
   try {
     const pageUrl = normalizeUrlForTextPage(url);
+    if (
+      format === 'text' &&
+      !req.query.contentSelector &&
+      !req.query.bodySelector &&
+      isGithubRepositoryUrl(pageUrl)
+    ) {
+      const snapshot = await fetchGithubRepositorySnapshot(pageUrl);
+      let markdown = formatGithubRepositoryMarkdown(snapshot);
+      const result = await applyImageMode(markdown, {
+        mode: embedImages ? 'embed' : 'default',
+      });
+      markdown = result.markdown;
+      return await sendMarkdownResponse(res, url, markdown);
+    }
+
     const html = await fetchHtml(pageUrl);
 
     if (converter === 'kreuzberg') {

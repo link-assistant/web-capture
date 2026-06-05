@@ -52,6 +52,10 @@ web-capture https://example.com --format html
 # Capture raw paste text
 web-capture https://xpaste.pro/p/t4q0Lsp0 --format txt -o paste.txt
 
+# Capture a GitHub repository as compact text or Markdown
+web-capture https://github.com/link-assistant/web-capture --format txt -o repository.txt
+web-capture https://github.com/link-assistant/web-capture --format markdown -o repository.md
+
 # Take a screenshot
 web-capture https://example.com --format png -o screenshot.png
 
@@ -88,6 +92,11 @@ order and appends the raw paste text as `xpaste-pro-<id>.txt` when the final
 Markdown stays under 1500 lines. Larger paste pages return a ZIP containing
 `index.md`, `xpaste-pro-<id>.md`, and `xpaste-pro-<id>.txt`. Canonical,
 localized, and `/raw` paste URLs are normalized before capture.
+
+For plain GitHub repository URLs such as `https://github.com/owner/repo`,
+`/markdown` and `/txt` return compact repository snapshots with repository
+metadata, the root file tree, and README content. GitHub subpages continue
+through the regular capture path.
 
 ### Search Endpoint
 
@@ -208,6 +217,10 @@ web-capture https://example.com -f html -o page.html
 # Raw paste text
 web-capture https://xpaste.pro/p/t4q0Lsp0 -f txt -o paste.txt
 
+# GitHub repository snapshot
+web-capture https://github.com/link-assistant/web-capture -f markdown -o repository.md
+web-capture https://github.com/link-assistant/web-capture -f txt -o repository.txt
+
 # Google Docs live editor model
 web-capture https://docs.google.com/document/d/DOC_ID/edit --capture browser
 
@@ -304,6 +317,9 @@ with environment variables:
 ```bash
 # Download the Wikipedia page (markdown + image) via the browser engine
 WIKIPEDIA_INTEGRATION=1 cargo test --test integration wikipedia_download::live -- --nocapture
+
+# Download a GitHub repository page as compact txt/markdown, original HTML, and screenshot
+GITHUB_REPOSITORY_INTEGRATION=1 cargo test --test integration github_repository::live -- --nocapture
 
 # Public Google Docs live suite
 GDOCS_INTEGRATION=1 cargo test --test integration gdocs_public_doc::live -- --nocapture

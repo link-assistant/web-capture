@@ -25,6 +25,50 @@ const MOCK_HTML = `<!DOCTYPE html>
 <img src="https://example.com/image.png" alt="test">
 </body></html>`;
 
+function mockGithubRepository(owner = 'octocat', repo = 'Hello-World') {
+  const readme = '# Hello World\n\nThis README came from GitHub.';
+  nock('https://api.github.com')
+    .get(`/repos/${owner}/${repo}`)
+    .reply(200, {
+      full_name: `${owner}/${repo}`,
+      description: 'A friendly test repository',
+      html_url: `https://github.com/${owner}/${repo}`,
+      default_branch: 'master',
+      language: 'JavaScript',
+      stargazers_count: 42,
+      forks_count: 7,
+      open_issues_count: 3,
+      license: { spdx_id: 'MIT' },
+      topics: ['demo', 'capture'],
+    })
+    .get(`/repos/${owner}/${repo}/readme`)
+    .query({ ref: 'master' })
+    .reply(200, {
+      name: 'README.md',
+      path: 'README.md',
+      encoding: 'base64',
+      content: Buffer.from(readme, 'utf8').toString('base64'),
+      html_url: `https://github.com/${owner}/${repo}/blob/master/README.md`,
+    })
+    .get(`/repos/${owner}/${repo}/contents`)
+    .query({ ref: 'master' })
+    .reply(200, [
+      {
+        name: 'src',
+        path: 'src',
+        type: 'dir',
+        html_url: `https://github.com/${owner}/${repo}/tree/master/src`,
+      },
+      {
+        name: 'README.md',
+        path: 'README.md',
+        type: 'file',
+        size: readme.length,
+        html_url: `https://github.com/${owner}/${repo}/blob/master/README.md`,
+      },
+    ]);
+}
+
 afterEach(() => {
   nock.cleanAll();
 });
@@ -68,6 +112,44 @@ describe('API Endpoint Tests', () => {
       expect(res.headers['content-type']).toMatch(/text\/markdown/);
       expect(res.text).toContain('Test Page');
       expect(res.text).toContain('Hello world');
+    });
+
+    it('returns a compact GitHub repository markdown snapshot', async () => {
+      mockGithubRepository();
+
+      const res = await request(app)
+        .get('/markdown')
+        .query({ url: 'https://github.com/octocat/Hello-World' })
+        .expect(200);
+
+      expect(res.headers['content-type']).toMatch(/text\/markdown/);
+      expect(res.text).toContain('# octocat/Hello-World');
+      expect(res.text).toContain('## Repository');
+      expect(res.text).toContain('## Files');
+      expect(res.text).toContain('- [src/](');
+      expect(res.text).toContain('## README.md');
+      expect(res.text).toContain('This README came from GitHub.');
+      expect(res.text).not.toContain('Skip to content');
+      expect(nock.isDone()).toBe(true);
+    });
+
+    it('returns a compact GitHub repository markdown snapshot for kreuzberg text format', async () => {
+      mockGithubRepository();
+
+      const res = await request(app)
+        .get('/markdown')
+        .query({
+          url: 'https://github.com/octocat/Hello-World',
+          converter: 'kreuzberg',
+          format: 'text',
+        })
+        .expect(200);
+
+      expect(res.headers['content-type']).toMatch(/text\/markdown/);
+      expect(res.text).toContain('# octocat/Hello-World');
+      expect(res.text).toContain('## Files');
+      expect(res.text).toContain('This README came from GitHub.');
+      expect(nock.isDone()).toBe(true);
     });
 
     it('rejects unsupported converter names', async () => {
@@ -130,6 +212,28 @@ describe('API Endpoint Tests', () => {
       expect(res.body.content).toContain('Wanted body');
       expect(res.body.content).toContain('https://example.com/about');
       expect(res.body.content).not.toContain('Navigation');
+    });
+  });
+
+  describe('GET /txt', () => {
+    it('returns a compact GitHub repository plain-text snapshot', async () => {
+      mockGithubRepository();
+
+      const res = await request(app)
+        .get('/txt')
+        .query({ url: 'https://github.com/octocat/Hello-World' })
+        .expect(200);
+
+      expect(res.headers['content-type']).toMatch(/text\/plain/);
+      expect(res.headers['content-disposition']).toContain(
+        'filename="octocat-Hello-World.txt"'
+      );
+      expect(res.text).toContain('Repository: octocat/Hello-World');
+      expect(res.text).toContain('Files:');
+      expect(res.text).toContain('- src/');
+      expect(res.text).toContain('README.md:');
+      expect(res.text).toContain('This README came from GitHub.');
+      expect(nock.isDone()).toBe(true);
     });
   });
 
