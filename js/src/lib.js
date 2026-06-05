@@ -14,11 +14,17 @@ import { retry } from './retry.js';
 
 const STACKPRINTER_RETRIES = 3;
 const STACKPRINTER_RETRY_BASE_DELAY_MS = 1000;
+const GOOGLE_DRIVE_FILE_ID_RE = /^[A-Za-z0-9_-]+$/;
 
 export async function fetchHtml(url) {
   if (!url) {
     throw new Error('Missing URL parameter');
   }
+  const googleDriveImageHtml = await fetchGoogleDriveImageHtml(url);
+  if (googleDriveImageHtml) {
+    return googleDriveImageHtml;
+  }
+
   const stackPrinterUrl = stackPrinterUrlForQuestion(url);
   if (stackPrinterUrl) {
     return await fetchStackPrinterHtml(stackPrinterUrl);
@@ -26,6 +32,163 @@ export async function fetchHtml(url) {
 
   const response = await fetch(url);
   return response.text();
+}
+
+export function getGoogleDriveFileId(url) {
+  if (!url) {
+    return null;
+  }
+
+  try {
+    const parsed = new URL(url);
+    const hostname = parsed.hostname.toLowerCase();
+    const pathnameParts = parsed.pathname.split('/').filter(Boolean);
+    let fileId = null;
+
+    if (
+      hostname === 'drive.google.com' ||
+      hostname === 'www.drive.google.com'
+    ) {
+      if (pathnameParts[0] === 'file' && pathnameParts[1] === 'd') {
+        fileId = pathnameParts[2] || null;
+      } else if (pathnameParts[0] === 'open' || pathnameParts[0] === 'uc') {
+        fileId = parsed.searchParams.get('id');
+      }
+    } else if (
+      hostname === 'drive.usercontent.google.com' &&
+      pathnameParts[0] === 'download'
+    ) {
+      fileId = parsed.searchParams.get('id');
+    }
+
+    return fileId && GOOGLE_DRIVE_FILE_ID_RE.test(fileId) ? fileId : null;
+  } catch {
+    return null;
+  }
+}
+
+export function isGoogleDriveFileUrl(url) {
+  return Boolean(getGoogleDriveFileId(url));
+}
+
+export function convertGoogleDriveUrl(url) {
+  const fileId = getGoogleDriveFileId(url);
+  if (!fileId) {
+    return url;
+  }
+
+  return `https://drive.google.com/uc?export=download&id=${fileId}`;
+}
+
+export function googleDriveImageHtmlForUrl(url, options = {}) {
+  const fileId = getGoogleDriveFileId(url);
+  if (!fileId) {
+    return null;
+  }
+
+  const imageUrl = options.imageSrc || convertGoogleDriveUrl(url);
+  const escapedImageUrl = he.escape(imageUrl);
+  const escapedSourceUrl = he.escape(url);
+  const extensionAttribute = options.imageExtension
+    ? ` data-web-capture-extension="${he.escape(options.imageExtension)}"`
+    : '';
+
+  return `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Google Drive image</title>
+</head>
+<body>
+  <h1>Google Drive image</h1>
+  <p><a href="${escapedSourceUrl}">Original Google Drive file</a></p>
+  <img src="${escapedImageUrl}" alt="Google Drive image"${extensionAttribute}>
+</body>
+</html>`;
+}
+
+export function googleDriveImageTextForUrl(url) {
+  if (!isGoogleDriveFileUrl(url)) {
+    return null;
+  }
+
+  return [
+    'Google Drive image',
+    '',
+    `Original Google Drive file: ${url}`,
+    `Image: ${convertGoogleDriveUrl(url)}`,
+    '',
+  ].join('\n');
+}
+
+export async function fetchGoogleDriveImage(url) {
+  const fileId = getGoogleDriveFileId(url);
+  if (!fileId) {
+    return null;
+  }
+
+  const downloadUrl = convertGoogleDriveUrl(url);
+  const response = await fetch(downloadUrl);
+  if (!response.ok) {
+    throw new Error(`Google Drive returned HTTP ${response.status}`);
+  }
+
+  const contentType = response.headers.get('content-type') || '';
+  if (!isImageContentType(contentType)) {
+    throw new Error(`Google Drive file is not an image (${contentType})`);
+  }
+
+  return {
+    buffer: await response.buffer(),
+    contentType,
+    downloadUrl,
+    filename: `google-drive-${fileId}.${imageExtensionForContentType(contentType)}`,
+  };
+}
+
+export async function fetchGoogleDriveImageHtml(url) {
+  if (!isGoogleDriveFileUrl(url)) {
+    return null;
+  }
+
+  const downloadUrl = convertGoogleDriveUrl(url);
+  let imageExtension = null;
+  try {
+    const response = await fetch(downloadUrl, { method: 'HEAD' });
+    if (response.ok) {
+      const contentType = response.headers.get('content-type');
+      if (!isImageContentType(contentType)) {
+        return null;
+      }
+      imageExtension = imageExtensionForContentType(contentType);
+    }
+  } catch {
+    // Some public Drive responses reject HEAD even though GET works. In that
+    // case still render the direct image document and let consumers fetch it.
+  }
+
+  return googleDriveImageHtmlForUrl(url, { imageExtension });
+}
+
+function isImageContentType(contentType) {
+  return (contentType || '').toLowerCase().startsWith('image/');
+}
+
+function imageExtensionForContentType(contentType) {
+  const normalized = (contentType || '').toLowerCase().split(';')[0].trim();
+  if (normalized === 'image/jpeg' || normalized === 'image/jpg') {
+    return 'jpg';
+  }
+  if (normalized === 'image/gif') {
+    return 'gif';
+  }
+  if (normalized === 'image/webp') {
+    return 'webp';
+  }
+  if (normalized === 'image/svg+xml') {
+    return 'svg';
+  }
+  return 'png';
 }
 
 async function fetchStackPrinterHtml(url) {

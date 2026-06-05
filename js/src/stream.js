@@ -1,5 +1,6 @@
 import fetch from 'node-fetch';
 import { pipeline } from 'stream';
+import { convertGoogleDriveUrl } from './lib.js';
 
 export async function streamHandler(req, res) {
   const url = req.query.url;
@@ -7,7 +8,7 @@ export async function streamHandler(req, res) {
     return res.status(400).send('Missing `url` parameter');
   }
   try {
-    const response = await fetch(url);
+    const response = await fetch(convertGoogleDriveUrl(url));
     // Copy status and headers
     res.status(response.status);
 

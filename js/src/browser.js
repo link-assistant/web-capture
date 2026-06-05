@@ -23,7 +23,7 @@ const SERVER_CHROME_ARGS = [
  * Unified page interface wrapping browser-commander's makeBrowserCommander.
  *
  * Exposes:
- * - setExtraHTTPHeaders / setUserAgent / setViewport / goto / content / screenshot / close
+ * - setExtraHTTPHeaders / setUserAgent / setViewport / goto / setContent / content / screenshot / close
  *   (via the underlying raw page for cross-engine compatibility)
  * - commander.pdf()           – PDF generation (browser-commander v0.8.0)
  * - commander.emulateMedia()  – Color scheme emulation (browser-commander v0.7.0)
@@ -37,6 +37,7 @@ const SERVER_CHROME_ARGS = [
  * @property {Function} setUserAgent - Set user agent
  * @property {Function} setViewport - Set viewport size
  * @property {Function} goto - Navigate to URL
+ * @property {Function} setContent - Set page HTML content
  * @property {Function} content - Get page HTML content
  * @property {Function} screenshot - Take screenshot
  * @property {Function} close - Close the page
@@ -161,6 +162,16 @@ function createPageAdapter(rawPage, commander, engineType) {
       } else {
         await rawPage.goto(url, options);
       }
+    },
+    async setContent(html, options = {}) {
+      const contentOptions = { ...options };
+      if (
+        engineType === 'playwright' &&
+        contentOptions.waitUntil === 'networkidle0'
+      ) {
+        contentOptions.waitUntil = 'networkidle';
+      }
+      await rawPage.setContent(html, contentOptions);
     },
     async content() {
       return await rawPage.content();

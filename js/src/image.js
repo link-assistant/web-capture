@@ -1,5 +1,5 @@
 import { createBrowser, getBrowserEngine } from './browser.js';
-import { isStackOverflowQuestionUrl } from './lib.js';
+import { fetchGoogleDriveImage, isStackOverflowQuestionUrl } from './lib.js';
 import { dismissPopups, scrollToLoadContent } from './popups.js';
 
 /**
@@ -39,6 +39,17 @@ export async function imageHandler(req, res) {
 
   try {
     const absoluteUrl = url.startsWith('http') ? url : `https://${url}`;
+    const googleDriveImage = await fetchGoogleDriveImage(absoluteUrl);
+    if (googleDriveImage) {
+      res.set('Content-Type', googleDriveImage.contentType);
+      res.set(
+        'Content-Disposition',
+        `inline; filename="${googleDriveImage.filename}"`
+      );
+      res.end(googleDriveImage.buffer);
+      return;
+    }
+
     const engine = getBrowserEngine(req);
     const waitUntil =
       engine === 'playwright' && isStackOverflowQuestionUrl(absoluteUrl)

@@ -497,6 +497,17 @@ function archiveExtension(archiveFormat) {
   return 'zip';
 }
 
+function sanitizeImageExtension(extension) {
+  if (!extension) {
+    return null;
+  }
+
+  const normalized = extension.toLowerCase().replace(/^\./, '');
+  return ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'].includes(normalized)
+    ? normalized
+    : null;
+}
+
 function writeGoogleDocsTextOutput({
   content,
   absoluteUrl,
@@ -601,6 +612,10 @@ async function captureUrl(url, options) {
   // Import required modules
   const {
     fetchHtml,
+    fetchGoogleDriveImage,
+    fetchGoogleDriveImageHtml,
+    googleDriveImageHtmlForUrl,
+    googleDriveImageTextForUrl,
     convertToUtf8,
     convertRelativeUrls,
     normalizeUrlForTextContent,
@@ -926,22 +941,42 @@ async function captureUrl(url, options) {
   }
 
   try {
+    if (['image', 'png', 'jpeg', 'screenshot'].includes(normalizedFormat)) {
+      const googleDriveImage = await fetchGoogleDriveImage(absoluteUrl);
+      if (googleDriveImage) {
+        if (explicitOutput === '-') {
+          process.stdout.write(googleDriveImage.buffer);
+        } else {
+          const outPath = explicitOutput || googleDriveImage.filename;
+          fs.writeFileSync(outPath, googleDriveImage.buffer);
+          console.error(`Google Drive image saved to: ${outPath}`);
+        }
+        return;
+      }
+    }
+
     if (normalizedFormat === 'txt' || normalizedFormat === 'text') {
       let text;
       if (isGithubRepositoryUrl(absoluteUrl)) {
         const snapshot = await fetchGithubRepositorySnapshot(absoluteUrl);
         text = formatGithubRepositoryText(snapshot);
       } else {
-        const response = await fetch(normalizeUrlForTextContent(absoluteUrl));
-        if (!response.ok) {
-          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        const googleDriveImageHtml =
+          await fetchGoogleDriveImageHtml(absoluteUrl);
+        if (googleDriveImageHtml) {
+          text = googleDriveImageTextForUrl(absoluteUrl);
+        } else {
+          const response = await fetch(normalizeUrlForTextContent(absoluteUrl));
+          if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+          }
+          const contentType =
+            response.headers.get('content-type') || 'text/plain';
+          if (!contentType.includes('text/')) {
+            throw new Error(`Expected text content, got ${contentType}`);
+          }
+          text = await response.text();
         }
-        const contentType =
-          response.headers.get('content-type') || 'text/plain';
-        if (!contentType.includes('text/')) {
-          throw new Error(`Expected text content, got ${contentType}`);
-        }
-        text = await response.text();
       }
       const output =
         explicitOutput === '-'
@@ -992,17 +1027,30 @@ async function captureUrl(url, options) {
       const { dismissPopups, scrollToLoadContent } =
         await import('../src/popups.js');
       const browserOpts = theme ? { colorScheme: theme } : {};
+      const googleDriveImage = await fetchGoogleDriveImage(absoluteUrl);
+      const googleDriveHtml = googleDriveImage
+        ? googleDriveImageHtmlForUrl(absoluteUrl, {
+            imageSrc: `data:${googleDriveImage.contentType};base64,${googleDriveImage.buffer.toString('base64')}`,
+          })
+        : null;
       const browser = await createBrowser(engine, browserOpts);
       try {
         const page = await browser.newPage();
         await page.setViewport({ width, height });
-        await page.goto(absoluteUrl, {
-          waitUntil: 'networkidle0',
-          timeout: 30000,
-        });
-        await new Promise((resolve) => setTimeout(resolve, 5000));
-        await scrollToLoadContent(page);
-        await dismissPopups(page);
+        if (googleDriveHtml) {
+          await page.setContent(googleDriveHtml, {
+            waitUntil: 'networkidle0',
+            timeout: 30000,
+          });
+        } else {
+          await page.goto(absoluteUrl, {
+            waitUntil: 'networkidle0',
+            timeout: 30000,
+          });
+          await new Promise((resolve) => setTimeout(resolve, 5000));
+          await scrollToLoadContent(page);
+          await dismissPopups(page);
+        }
         const rawPage = page.rawPage || page;
         const pdfBuffer = await rawPage.pdf({
           format: 'A4',
@@ -1079,11 +1127,19 @@ async function captureUrl(url, options) {
       // Collect images
       const $ = cheerio.load(html);
       const images = [];
+      const imageExtensionByUrl = new Map();
       $('img').each(function () {
         const src = $(this).attr('src');
         if (src && !src.startsWith('data:') && !src.startsWith('blob:')) {
           try {
-            images.push(new URL(src, absoluteUrl).href);
+            const imgUrl = new URL(src, absoluteUrl).href;
+            images.push(imgUrl);
+            const hintedExtension = sanitizeImageExtension(
+              $(this).attr('data-web-capture-extension')
+            );
+            if (hintedExtension && !imageExtensionByUrl.has(imgUrl)) {
+              imageExtensionByUrl.set(imgUrl, hintedExtension);
+            }
           } catch {
             /* skip */
           }
@@ -1100,7 +1156,10 @@ async function captureUrl(url, options) {
       ) {
         let idx = 1;
         for (const imgUrl of uniqueImages) {
-          const ext = imgUrl.match(/\.(jpe?g|gif|webp|svg|png)/i)?.[1] || 'png';
+          const ext =
+            imageExtensionByUrl.get(imgUrl) ||
+            imgUrl.match(/\.(jpe?g|gif|webp|svg|png)/i)?.[1] ||
+            'png';
           imageMap.set(imgUrl, `images/image-${idx}.${ext}`);
           idx++;
         }

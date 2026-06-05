@@ -58,12 +58,19 @@ export async function archiveHandler(req, res) {
     // Collect images from the HTML
     const $ = cheerio.load(html);
     const images = [];
+    const imageExtensionByUrl = new Map();
     $('img').each(function () {
       const src = $(this).attr('src');
       if (src && !src.startsWith('data:') && !src.startsWith('blob:')) {
         try {
           const imgUrl = new URL(src, absoluteUrl).href;
           images.push(imgUrl);
+          const hintedExtension = sanitizeImageExtension(
+            $(this).attr('data-web-capture-extension')
+          );
+          if (hintedExtension && !imageExtensionByUrl.has(imgUrl)) {
+            imageExtensionByUrl.set(imgUrl, hintedExtension);
+          }
         } catch {
           /* skip invalid URLs */
         }
@@ -89,7 +96,8 @@ export async function archiveHandler(req, res) {
     if (localImages && uniqueImages.length > 0) {
       let idx = 1;
       for (const imgUrl of uniqueImages) {
-        const ext = guessImageExtension(imgUrl);
+        const ext =
+          imageExtensionByUrl.get(imgUrl) || guessImageExtension(imgUrl);
         const filename = `image-${idx}.${ext}`;
         imageMap.set(imgUrl, `images/${filename}`);
         idx++;
@@ -276,4 +284,15 @@ function guessImageExtension(url) {
     return 'svg';
   }
   return 'png';
+}
+
+function sanitizeImageExtension(extension) {
+  if (!extension) {
+    return null;
+  }
+
+  const normalized = extension.toLowerCase().replace(/^\./, '');
+  return ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'].includes(normalized)
+    ? normalized
+    : null;
 }

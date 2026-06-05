@@ -2,7 +2,10 @@ import fetch from 'node-fetch';
 import { URL } from 'node:url';
 import {
   fetchHtml,
+  fetchGoogleDriveImageHtml,
+  googleDriveImageTextForUrl,
   getTextPasteFilename,
+  isGoogleDriveFileUrl,
   isStackOverflowQuestionUrl,
   normalizeUrlForTextContent,
 } from './lib.js';
@@ -29,6 +32,13 @@ export async function txtHandler(req, res) {
     if (isStackOverflowQuestionUrl(url)) {
       const text = await fetchHtml(url);
       return sendTextResponse(res, url, text);
+    }
+
+    if (isGoogleDriveFileUrl(url)) {
+      const googleDriveImageHtml = await fetchGoogleDriveImageHtml(url);
+      if (googleDriveImageHtml) {
+        return sendTextResponse(res, url, googleDriveImageTextForUrl(url));
+      }
     }
 
     // Normalize URL to get text content (e.g., xpaste.pro -> xpaste.pro/raw)

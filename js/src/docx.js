@@ -76,13 +76,14 @@ export async function docxHandler(req, res) {
             const imgResp = await fetch(imgUrl);
             if (imgResp.ok) {
               const buffer = await imgResp.buffer();
+              const contentType = imgResp.headers.get('content-type') || '';
               children.push(
                 new Paragraph({
                   children: [
                     new ImageRun({
                       data: buffer,
                       transformation: { width: 600, height: 400 },
-                      type: guessImageType(imgUrl),
+                      type: guessImageType(imgUrl, contentType),
                     }),
                   ],
                 })
@@ -170,7 +171,24 @@ export async function docxHandler(req, res) {
   }
 }
 
-function guessImageType(url) {
+function guessImageType(url, contentType = '') {
+  const normalizedContentType = contentType.toLowerCase().split(';')[0].trim();
+  if (normalizedContentType === 'image/jpeg') {
+    return 'jpg';
+  }
+  if (normalizedContentType === 'image/png') {
+    return 'png';
+  }
+  if (normalizedContentType === 'image/gif') {
+    return 'gif';
+  }
+  if (normalizedContentType === 'image/bmp') {
+    return 'bmp';
+  }
+  if (normalizedContentType === 'image/svg+xml') {
+    return 'svg';
+  }
+
   const pathname = new URL(url).pathname.toLowerCase();
   if (pathname.endsWith('.jpg') || pathname.endsWith('.jpeg')) {
     return 'jpg';

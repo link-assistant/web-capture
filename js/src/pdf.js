@@ -15,6 +15,7 @@
 
 import { createBrowser, getBrowserEngine } from './browser.js';
 import { dismissPopups, scrollToLoadContent } from './popups.js';
+import { fetchGoogleDriveImage, googleDriveImageHtmlForUrl } from './lib.js';
 
 export async function pdfHandler(req, res) {
   const url = req.query.url;
@@ -29,6 +30,12 @@ export async function pdfHandler(req, res) {
 
   try {
     const absoluteUrl = url.startsWith('http') ? url : `https://${url}`;
+    const googleDriveImage = await fetchGoogleDriveImage(absoluteUrl);
+    const googleDriveHtml = googleDriveImage
+      ? googleDriveImageHtmlForUrl(absoluteUrl, {
+          imageSrc: `data:${googleDriveImage.contentType};base64,${googleDriveImage.buffer.toString('base64')}`,
+        })
+      : null;
     const engine = getBrowserEngine(req);
     const browserOpts = theme ? { colorScheme: theme } : {};
     const browser = await createBrowser(engine, browserOpts);
@@ -42,16 +49,23 @@ export async function pdfHandler(req, res) {
         'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
       );
       await page.setViewport({ width, height });
-      await page.goto(absoluteUrl, {
-        waitUntil: 'networkidle0',
-        timeout: 30000,
-      });
+      if (googleDriveHtml) {
+        await page.setContent(googleDriveHtml, {
+          waitUntil: 'networkidle0',
+          timeout: 30000,
+        });
+      } else {
+        await page.goto(absoluteUrl, {
+          waitUntil: 'networkidle0',
+          timeout: 30000,
+        });
 
-      await new Promise((resolve) => setTimeout(resolve, 5000));
-      await scrollToLoadContent(page);
+        await new Promise((resolve) => setTimeout(resolve, 5000));
+        await scrollToLoadContent(page);
 
-      if (shouldDismissPopups) {
-        await dismissPopups(page);
+        if (shouldDismissPopups) {
+          await dismissPopups(page);
+        }
       }
 
       // Generate PDF using browser-commander's unified pdf() API (v0.8.0+)
