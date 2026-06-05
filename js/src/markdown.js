@@ -15,10 +15,19 @@ import {
 } from './github.js';
 import { convertWithKreuzberg, isKreuzbergAvailable } from './kreuzberg.js';
 import { applyImageMode } from './extract-images.js';
+import { createBrowser, getBrowserEngine } from './browser.js';
+import { retry } from './retry.js';
 import archiver from 'archiver';
 import fetch from 'node-fetch';
+import * as cheerio from 'cheerio';
 
 const INLINE_MARKDOWN_LINE_LIMIT = 1500;
+const RENDERED_PAGE_SETTLE_TIMEOUT_MS = 5000;
+const RENDERED_PAGE_STABLE_FOR_MS = 1000;
+const RENDERED_PAGE_POLL_MS = 250;
+const RENDERED_PAGE_MIN_TEXT_LENGTH = 200;
+const DESKTOP_USER_AGENT =
+  'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
 
 export async function markdownHandler(req, res) {
   const url = req.query.url;
@@ -43,7 +52,7 @@ export async function markdownHandler(req, res) {
   }
 
   try {
-    const pageUrl = normalizeUrlForTextPage(url);
+    const pageUrl = ensureAbsoluteUrl(normalizeUrlForTextPage(url));
     if (
       format === 'text' &&
       !req.query.contentSelector &&
@@ -56,10 +65,10 @@ export async function markdownHandler(req, res) {
         mode: embedImages ? 'embed' : 'default',
       });
       markdown = result.markdown;
-      return await sendMarkdownResponse(res, url, markdown);
+      return await sendMarkdownResponse(res, pageUrl, markdown);
     }
 
-    const html = await fetchHtml(pageUrl);
+    const html = await fetchMarkdownHtml(req, pageUrl);
 
     if (converter === 'kreuzberg') {
       const available = await isKreuzbergAvailable();
@@ -86,7 +95,7 @@ export async function markdownHandler(req, res) {
       if (format === 'json') {
         return res.json(result);
       }
-      return await sendMarkdownResponse(res, url, result.content);
+      return await sendMarkdownResponse(res, pageUrl, result.content);
     }
 
     let { markdown } = convertHtmlToMarkdownEnhanced(html, pageUrl, {
@@ -100,11 +109,168 @@ export async function markdownHandler(req, res) {
       mode: embedImages ? 'embed' : 'default',
     });
     markdown = result.markdown;
-    return await sendMarkdownResponse(res, url, markdown);
+    return await sendMarkdownResponse(res, pageUrl, markdown);
   } catch (err) {
     console.error(err);
     res.status(500).send('Error converting to Markdown');
   }
+}
+
+function ensureAbsoluteUrl(url) {
+  return /^https?:\/\//i.test(url) ? url : `https://${url}`;
+}
+
+async function fetchMarkdownHtml(req, pageUrl) {
+  const html = await fetchHtml(pageUrl);
+  if (!shouldRenderHtmlWithBrowser(html)) {
+    return html;
+  }
+  return await renderHtmlWithBrowser(req, pageUrl);
+}
+
+export function shouldRenderHtmlWithBrowser(html) {
+  const isCompleteHtml = /<html[\s>][\s\S]*<\/html>/i.test(html);
+  if (!isCompleteHtml) {
+    return true;
+  }
+
+  if (!hasClientRenderedAppMarkers(html)) {
+    return false;
+  }
+
+  return getStaticBodyTextLength(html) < RENDERED_PAGE_MIN_TEXT_LENGTH;
+}
+
+function hasClientRenderedAppMarkers(html) {
+  return /(?:__NEXT_DATA__|self\.__next_f|\/_next\/static|id=["']__(?:next|nuxt)["']|id=["']root["']|window\.__NUXT__|ng-version=|\/@vite\/client)/i.test(
+    html
+  );
+}
+
+function getStaticBodyTextLength(html) {
+  const $ = cheerio.load(html);
+  $('script, style, noscript, template').remove();
+  return $('body').text().replace(/\s+/g, ' ').trim().length;
+}
+
+async function renderHtmlWithBrowser(req, pageUrl) {
+  const engine = getBrowserEngine(req);
+  const browser = await createBrowser(engine, {
+    args: [
+      `--user-agent=${DESKTOP_USER_AGENT}`,
+      '--window-size=1280,800',
+      '--disable-blink-features=AutomationControlled',
+    ],
+  });
+  try {
+    const page = await browser.newPage();
+    await prepareRenderedPage(page);
+    await navigateRenderedPage(page, pageUrl);
+    await waitForRenderedPageToSettle(page);
+    return await page.content();
+  } finally {
+    await browser.close();
+  }
+}
+
+async function prepareRenderedPage(page) {
+  await page.setViewport({ width: 1280, height: 800 });
+  if (page.type === 'playwright') {
+    await page.setExtraHTTPHeaders({
+      'Accept-Language': 'en-US,en;q=0.9',
+      'Accept-Charset': 'utf-8',
+      'User-Agent': DESKTOP_USER_AGENT,
+    });
+    return;
+  }
+
+  await page.setExtraHTTPHeaders({
+    'Accept-Language': 'en-US,en;q=0.9',
+    'Accept-Charset': 'utf-8',
+  });
+  await page.setUserAgent(DESKTOP_USER_AGENT);
+}
+
+async function navigateRenderedPage(page, pageUrl) {
+  await retry(
+    async () => {
+      try {
+        await page.goto(pageUrl, {
+          waitUntil: 'networkidle0',
+          timeout: 60000,
+        });
+      } catch (err) {
+        if (!/timeout/i.test(err.message || '')) {
+          throw err;
+        }
+        await page.goto(pageUrl, {
+          waitUntil: 'domcontentloaded',
+          timeout: 60000,
+        });
+      }
+    },
+    {
+      retries: 2,
+      baseDelay: 2000,
+      onRetry: (err, attempt, delay) => {
+        console.log(
+          `Rendered markdown navigation retry ${attempt} for ${pageUrl} after ${delay}ms: ${err.message}`
+        );
+      },
+    }
+  );
+}
+
+async function waitForRenderedPageToSettle(page) {
+  const deadline = Date.now() + RENDERED_PAGE_SETTLE_TIMEOUT_MS;
+  let lastTextLength = -1;
+  let stableSince = 0;
+
+  while (Date.now() < deadline) {
+    let textLength;
+    try {
+      textLength = await getBodyTextLength(page);
+    } catch (err) {
+      if (!isTransientPageEvaluationError(err)) {
+        throw err;
+      }
+      lastTextLength = -1;
+      stableSince = 0;
+      await page.waitForTimeout(RENDERED_PAGE_POLL_MS);
+      continue;
+    }
+    const now = Date.now();
+    if (
+      textLength === lastTextLength &&
+      textLength >= RENDERED_PAGE_MIN_TEXT_LENGTH
+    ) {
+      if (!stableSince) {
+        stableSince = now;
+      }
+      if (now - stableSince >= RENDERED_PAGE_STABLE_FOR_MS) {
+        return;
+      }
+    } else {
+      lastTextLength = textLength;
+      stableSince = now;
+    }
+    await page.waitForTimeout(RENDERED_PAGE_POLL_MS);
+  }
+}
+
+async function getBodyTextLength(page) {
+  const rawPage = page.rawPage || page;
+  return await rawPage.evaluate(() => {
+    // eslint-disable-next-line no-undef
+    const text = document.body?.innerText || '';
+    return text.trim().length;
+  });
+}
+
+function isTransientPageEvaluationError(err) {
+  return /execution context was destroyed|context was destroyed|cannot find context/i.test(
+    err.message || ''
+  );
 }
 
 async function sendMarkdownResponse(res, url, markdown) {

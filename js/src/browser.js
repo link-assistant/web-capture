@@ -65,7 +65,7 @@ export async function createBrowser(engine = 'puppeteer', options = {}) {
       ? 'playwright'
       : 'puppeteer';
 
-  const { colorScheme, ...launchOpts } = options;
+  const { colorScheme, args = [], ...launchOpts } = options;
 
   // Generate unique userDataDir for this session to avoid conflicts
   const userDataDir = path.join(
@@ -76,7 +76,7 @@ export async function createBrowser(engine = 'puppeteer', options = {}) {
   // Use browser-commander's launchBrowser with server-specific args
   const { browser, page: initialPage } = await launchBrowser({
     engine: engineType,
-    args: SERVER_CHROME_ARGS,
+    args: [...SERVER_CHROME_ARGS, ...args],
     headless: true,
     userDataDir,
     slowMo: 0,
