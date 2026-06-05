@@ -1,5 +1,11 @@
 # @link-assistant/web-capture
 
+## 1.10.6
+
+### Patch Changes
+
+- Render JavaScript-heavy pages before Markdown conversion so DeepWiki search pages capture their full content.
+
 ## 1.10.5
 
 ### Patch Changes
