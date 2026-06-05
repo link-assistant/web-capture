@@ -145,12 +145,3 @@ examples/js/downloaded.png
 
 # project
 .DS_Store
-
-# Playwright MCP artifacts
-.playwright-mcp/
-
-# Test artifacts
-issue-17-details.json
-pr-18-details.json
-ci-runs.json
-test-output.log
