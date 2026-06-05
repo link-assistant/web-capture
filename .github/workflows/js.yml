@@ -323,6 +323,7 @@ jobs:
       - name: Run GitHub repository capture live integration tests (issue #5)
         env:
           GITHUB_REPOSITORY_INTEGRATION: 'true'
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: npm test -- --testPathPattern="github-readme" --testTimeout=120000
         timeout-minutes: 10
 
