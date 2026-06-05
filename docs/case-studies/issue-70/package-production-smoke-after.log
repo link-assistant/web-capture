@@ -1,0 +1,15 @@
+npm warn EBADENGINE Unsupported engine {
+npm warn EBADENGINE   package: '@link-assistant/web-capture@1.7.3',
+npm warn EBADENGINE   required: { node: '>=22.0.0 <23.0.0' },
+npm warn EBADENGINE   current: { node: 'v20.20.2', npm: '11.12.1' }
+npm warn EBADENGINE }
+npm warn deprecated whatwg-encoding@3.1.1: Use @exodus/bytes instead for a more spec-conformant and faster implementation
+npm warn deprecated glob@10.5.0: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
+
+added 311 packages, and audited 312 packages in 8s
+
+55 packages are looking for funding
+  run `npm fund` for details
+
+found 0 vulnerabilities
+runtime import ok

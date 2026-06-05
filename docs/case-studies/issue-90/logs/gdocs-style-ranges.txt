@@ -1,0 +1,325 @@
+PARAGRAPH STYLES
+31-31 hd=1 il= ifl= bl_i=true bb_i=true :: This document tests Markdown features that survive round-trip conversion through DOCX and Google Docs. Each section demonstrates a specific feature.
+194-194 hd=2 il= ifl= bl_i=true bb_i=true :: The lines above and below demonstrate heading levels H1 through H6.
+278-278 hd=3 il= ifl= bl_i=true bb_i=true :: Heading level 4
+294-294 hd=4 il= ifl= bl_i=true bb_i=true :: Heading level 5
+310-310 hd=5 il= ifl= bl_i=true bb_i=true :: Heading level 6
+326-326 hd=6 il= ifl= bl_i=true bb_i=true :: -
+349-349 hd=2 il= ifl= bl_i=true bb_i=true :: This section tests inline text styling:
+436-436 hd= il=36 ifl=18 bl_i=undefined bb_i=undefined :: This text is italic — one asterisk on each side
+484-484 hd= il=36 ifl=18 bl_i=undefined bb_i=undefined :: This text is bold and italic — three asterisks on each side
+544-544 hd= il=36 ifl=18 bl_i=undefined bb_i=undefined :: This text has strikethrough — two tildes on each side
+598-598 hd= il=36 ifl=18 bl_i=undefined bb_i=undefined :: -
+614-614 hd=2 il= ifl= bl_i=true bb_i=true :: This is the first paragraph. It contains multiple sentences to demonstrate normal paragraph text flow.
+799-799 hd=2 il= ifl= bl_i=true bb_i=true :: This section tests blockquotes:
+913-913 hd= il=24 ifl=24 bl_i=undefined bb_i=undefined :: This is a multi-paragraph blockquote.
+951-951 hd= il=24 ifl=24 bl_i=undefined bb_i=undefined :: This is the second paragraph inside the same blockquote.
+1008-1008 hd= il=24 ifl=24 bl_i=undefined bb_i=undefined :: -
+1029-1029 hd=2 il= ifl= bl_i=true bb_i=true :: This section tests bullet lists:
+1073-1073 hd= il=36 ifl=18 bl_i=undefined bb_i=undefined :: Second item
+1085-1085 hd= il=36 ifl=18 bl_i=undefined bb_i=undefined :: Third item
+1096-1096 hd= il=36 ifl=18 bl_i=undefined bb_i=undefined :: Nested unordered list:
+1133-1133 hd= il=36 ifl=18 bl_i=undefined bb_i=undefined :: Child item 1a
+1147-1147 hd= il=72 ifl=54 bl_i=undefined bb_i=undefined :: Child item 1b
+1161-1161 hd= il=72 ifl=54 bl_i=undefined bb_i=undefined :: Grandchild item 1b-i
+1182-1182 hd= il=108 ifl=90 bl_i=undefined bb_i=undefined :: Grandchild item 1b-ii
+1204-1204 hd= il=108 ifl=90 bl_i=undefined bb_i=undefined :: Child item 1c
+1218-1218 hd= il=72 ifl=54 bl_i=undefined bb_i=undefined :: Parent item 2
+1232-1232 hd= il=36 ifl=18 bl_i=undefined bb_i=undefined :: Parent item 3
+1246-1246 hd= il=36 ifl=18 bl_i=undefined bb_i=undefined :: -
+1265-1265 hd=2 il= ifl= bl_i=true bb_i=true :: This section tests numbered lists:
+1311-1311 hd= il=36 ifl=18 bl_i=undefined bb_i=undefined :: Second item
+1323-1323 hd= il=36 ifl=18 bl_i=undefined bb_i=undefined :: Third item
+1334-1334 hd= il=36 ifl=18 bl_i=undefined bb_i=undefined :: Nested ordered list:
+1369-1369 hd= il=36 ifl=18 bl_i=undefined bb_i=undefined :: Child item 1.1
+1384-1384 hd= il=72 ifl=54 bl_i=undefined bb_i=undefined :: Child item 1.2
+1399-1399 hd= il=72 ifl=54 bl_i=undefined bb_i=undefined :: Grandchild item 1.2.1
+1421-1421 hd= il=108 ifl=90 bl_i=undefined bb_i=undefined :: Grandchild item 1.2.2
+1443-1443 hd= il=108 ifl=90 bl_i=undefined bb_i=undefined :: Child item 1.3
+1458-1458 hd= il=72 ifl=54 bl_i=undefined bb_i=undefined :: Parent item 2
+1472-1472 hd= il=36 ifl=18 bl_i=undefined bb_i=undefined :: Parent item 3
+1486-1486 hd= il=36 ifl=18 bl_i=undefined bb_i=undefined :: -
+1503-1503 hd=2 il= ifl= bl_i=true bb_i=true :: This section tests ordered and unordered lists combined:
+1579-1579 hd= il=36 ifl=18 bl_i=undefined bb_i=undefined :: Unordered child A
+1597-1597 hd= il=72 ifl=54 bl_i=undefined bb_i=undefined :: Unordered child B
+1615-1615 hd= il=72 ifl=54 bl_i=undefined bb_i=undefined :: Second ordered item
+1635-1635 hd= il=36 ifl=18 bl_i=undefined bb_i=undefined :: Ordered child 2.1
+1653-1653 hd= il=72 ifl=54 bl_i=undefined bb_i=undefined :: Ordered child 2.2
+1671-1671 hd= il=72 ifl=54 bl_i=undefined bb_i=undefined :: Third ordered item
+1690-1690 hd= il=36 ifl=18 bl_i=undefined bb_i=undefined :: -
+1702-1702 hd=2 il= ifl= bl_i=true bb_i=true :: Simple table
+1715-1715 hd=3 il= ifl= bl_i=true bb_i=true :: Feature
+1882-1882 hd=3 il= ifl= bl_i=true bb_i=true :: Left-aligned
+2043-2043 hd=3 il= ifl= bl_i=true bb_i=true :: Column A
+2213-2213 hd=2 il= ifl= bl_i=true bb_i=true :: This section tests hyperlinks:
+2257-2257 hd= il=36 ifl=18 bl_i=undefined bb_i=undefined :: Link with bold text
+2277-2277 hd= il=36 ifl=18 bl_i=undefined bb_i=undefined :: -
+2290-2290 hd=2 il= ifl= bl_i=true bb_i=true :: This section tests image embedding. Each image is a solid color rectangle for easy visual verification.
+2525-2525 hd=2 il= ifl= bl_i=true bb_i=true :: The lines between sections are horizontal rules. They should appear as visible separators.
+2641-2641 hd=2 il= ifl= bl_i=true bb_i=true :: This section tests special characters and symbols:
+2703-2703 hd= il=36 ifl=18 bl_i=undefined bb_i=undefined :: En dash: –
+2714-2714 hd= il=36 ifl=18 bl_i=undefined bb_i=undefined :: Ellipsis: …
+2726-2726 hd= il=36 ifl=18 bl_i=undefined bb_i=undefined :: Copyright: ©
+2739-2739 hd= il=36 ifl=18 bl_i=undefined bb_i=undefined :: Trademark: ™
+2752-2752 hd= il=36 ifl=18 bl_i=undefined bb_i=undefined :: Registered: ®
+2766-2766 hd= il=36 ifl=18 bl_i=undefined bb_i=undefined :: Degree: 90°
+2778-2778 hd= il=36 ifl=18 bl_i=undefined bb_i=undefined :: Arrows: ← → ↑ ↓
+2794-2794 hd= il=36 ifl=18 bl_i=undefined bb_i=undefined :: Math symbols: ± × ÷ ≠ ≤ ≥ ≈
+2822-2822 hd= il=36 ifl=18 bl_i=undefined bb_i=undefined :: Currency: € £ ¥ ₽
+2840-2840 hd= il=36 ifl=18 bl_i=undefined bb_i=undefined :: Quotes: "double curly" and 'single curly'
+2882-2882 hd= il=36 ifl=18 bl_i=undefined bb_i=undefined :: Emoji: 🚀 ✅ ❌ ⚠️ 📝
+2902-2902 hd= il=36 ifl=18 bl_i=undefined bb_i=undefined :: -
+2937-2937 hd=2 il= ifl= bl_i=true bb_i=true :: This section tests nesting combinations that commonly break:
+3044-3044 hd= il=36 ifl=18 bl_i=undefined bb_i=undefined :: Italic with bold inside and back to italic
+3087-3087 hd= il=36 ifl=18 bl_i=undefined bb_i=undefined :: -
+3125-3125 hd=2 il= ifl= bl_i=true bb_i=true :: Empty table cells:
+
+LIST STYLES
+436-436 id=kix.list.2 nest=0 :: This text is italic — one asterisk on each side
+484-484 id=kix.list.2 nest=0 :: This text is bold and italic — three asterisks on each side
+544-544 id=kix.list.2 nest=0 :: This text has strikethrough — two tildes on each side
+598-598 id=kix.list.2 nest=0 :: -
+1073-1073 id=kix.list.3 nest=0 :: Second item
+1085-1085 id=kix.list.3 nest=0 :: Third item
+1096-1096 id=kix.list.3 nest=0 :: Nested unordered list:
+1133-1133 id=kix.list.4 nest=0 :: Child item 1a
+1147-1147 id=kix.list.5 nest=1 :: Child item 1b
+1161-1161 id=kix.list.5 nest=1 :: Grandchild item 1b-i
+1182-1182 id=kix.list.6 nest=2 :: Grandchild item 1b-ii
+1204-1204 id=kix.list.6 nest=2 :: Child item 1c
+1218-1218 id=kix.list.5 nest=1 :: Parent item 2
+1232-1232 id=kix.list.4 nest=0 :: Parent item 3
+1246-1246 id=kix.list.4 nest=0 :: -
+1311-1311 id=kix.list.7 nest=0 :: Second item
+1323-1323 id=kix.list.7 nest=0 :: Third item
+1334-1334 id=kix.list.7 nest=0 :: Nested ordered list:
+1369-1369 id=kix.list.8 nest=0 :: Child item 1.1
+1384-1384 id=kix.list.9 nest=1 :: Child item 1.2
+1399-1399 id=kix.list.9 nest=1 :: Grandchild item 1.2.1
+1421-1421 id=kix.list.10 nest=2 :: Grandchild item 1.2.2
+1443-1443 id=kix.list.10 nest=2 :: Child item 1.3
+1458-1458 id=kix.list.9 nest=1 :: Parent item 2
+1472-1472 id=kix.list.8 nest=0 :: Parent item 3
+1486-1486 id=kix.list.8 nest=0 :: -
+1579-1579 id=kix.list.11 nest=0 :: Unordered child A
+1597-1597 id=kix.list.12 nest=1 :: Unordered child B
+1615-1615 id=kix.list.12 nest=1 :: Second ordered item
+1635-1635 id=kix.list.11 nest=0 :: Ordered child 2.1
+1653-1653 id=kix.list.13 nest=1 :: Ordered child 2.2
+1671-1671 id=kix.list.13 nest=1 :: Third ordered item
+1690-1690 id=kix.list.11 nest=0 :: -
+2257-2257 id=kix.list.14 nest=0 :: Link with bold text
+2277-2277 id=kix.list.14 nest=0 :: -
+2703-2703 id=kix.list.15 nest=0 :: En dash: –
+2714-2714 id=kix.list.15 nest=0 :: Ellipsis: …
+2726-2726 id=kix.list.15 nest=0 :: Copyright: ©
+2739-2739 id=kix.list.15 nest=0 :: Trademark: ™
+2752-2752 id=kix.list.15 nest=0 :: Registered: ®
+2766-2766 id=kix.list.15 nest=0 :: Degree: 90°
+2778-2778 id=kix.list.15 nest=0 :: Arrows: ← → ↑ ↓
+2794-2794 id=kix.list.15 nest=0 :: Math symbols: ± × ÷ ≠ ≤ ≥ ≈
+2822-2822 id=kix.list.15 nest=0 :: Currency: € £ ¥ ₽
+2840-2840 id=kix.list.15 nest=0 :: Quotes: "double curly" and 'single curly'
+2882-2882 id=kix.list.15 nest=0 :: Emoji: 🚀 ✅ ❌ ⚠️ 📝
+2902-2902 id=kix.list.15 nest=0 :: -
+3044-3044 id=kix.list.16 nest=0 :: Italic with bold inside and back to italic
+3087-3087 id=kix.list.16 nest=0 :: -
+
+TEXT STYLES
+0-0 bd=false it=false st=false un=false :: "" line="Markdown Feature Test Document"
+32-181 bd=false it=false st=false un=false :: "his document tests Markdown features that survive round-trip conversion through DOCX and Google Docs. Each section demonstrates a specific feature.
+-" line="This document tests Markdown features that survive round-trip conversion through DOCX and Google Docs. Each section demonstrates a specific feature."
+195-262 bd=false it=false st=false un=false :: "he lines above and below demonstrate heading levels H1 through H6.
+" line="The lines above and below demonstrate heading levels H1 through H6."
+350-389 bd=false it=false st=false un=false :: "his section tests inline text styling:
+" line="This section tests inline text styling:"
+390-406 bd=true it=false st=false un=false :: "his text is bold" line="This text is bold — two asterisks on each side"
+407-436 bd=false it=false st=false un=false :: "— two asterisks on each side
+" line="This text is bold — two asterisks on each side"
+437-455 bd=false it=true st=false un=false :: "his text is italic" line="This text is italic — one asterisk on each side"
+456-484 bd=false it=false st=false un=false :: "— one asterisk on each side
+" line="This text is italic — one asterisk on each side"
+485-512 bd=true it=true st=false un=false :: "his text is bold and italic" line="This text is bold and italic — three asterisks on each side"
+513-544 bd=false it=false st=false un=false :: "— three asterisks on each side
+" line="This text is bold and italic — three asterisks on each side"
+545-571 bd=false it=false st=true un=false :: "his text has strikethrough" line="This text has strikethrough — two tildes on each side"
+572-599 bd=false it=false st=false un=false :: "— two tildes on each side
+-" line="This text has strikethrough — two tildes on each side"
+615-783 bd=false it=false st=false un=false :: "his is the first paragraph. It contains multiple sentences to demonstrate normal paragraph text flow.
+This is the second paragraph. It is separate from the first one.
+-" line="This is the first paragraph. It contains multiple sentences to demonstrate normal paragraph text flow."
+800-1009 bd=false it=false st=false un=false :: "his section tests blockquotes:
+This is a single-level blockquote. It represents quoted text from another source.
+This is a multi-paragraph blockquote.
+This is the second paragraph inside the same blockquote.
+-" line="This section tests blockquotes:"
+1030-1247 bd=false it=false st=false un=false :: "his section tests bullet lists:
+First item
+Second item
+Third item
+Nested unordered list:
+Parent item 1
+Child item 1a
+Child item 1b
+Grandchild item 1b-i
+Grandchild item 1b-ii
+Child item 1c
+Parent item 2
+Parent item 3
+-" line="This section tests bullet lists:"
+1266-1487 bd=false it=false st=false un=false :: "his section tests numbered lists:
+First item
+Second item
+Third item
+Nested ordered list:
+Parent item 1
+Child item 1.1
+Child item 1.2
+Grandchild item 1.2.1
+Grandchild item 1.2.2
+Child item 1.3
+Parent item 2
+Parent item 3
+-" line="This section tests numbered lists:"
+1504-1691 bd=false it=false st=false un=false :: "his section tests ordered and unordered lists combined:
+First ordered item
+Unordered child A
+Unordered child B
+Second ordered item
+Ordered child 2.1
+Ordered child 2.2
+Third ordered item
+-" line="This section tests ordered and unordered lists combined:"
+1719-1861 bd=false it=false st=false un=false :: "eature
+Supported
+Notes
+Bold
+Yes
+Using double asterisks
+Italic
+Yes
+Using single asterisks
+Strikethrough
+Yes
+Using double tildes
+" line="Feature"
+1886-2014 bd=false it=false st=false un=false :: "eft-aligned
+Center-aligned
+Right-aligned
+Left 1
+Center 1
+Right 1
+Left 2
+Center 2
+Right 2
+Left 3
+Center 3
+Right 3
+" line="Left-aligned"
+2047-2077 bd=false it=false st=false un=false :: "olumn A
+Column B
+Column C
+" line="Column A"
+2078-2086 bd=true it=false st=false un=false :: "old text" line="Bold text"
+2087-2088 bd=false it=false st=false un=false :: "" line="Italic text"
+2089-2099 bd=false it=true st=false un=false :: "talic text" line="Italic text"
+2100-2115 bd=false it=false st=false un=false :: "Normal text
+" line="Normal text"
+2116-2128 bd=false it=false st=true un=false :: "trikethrough" line="Strikethrough"
+2129-2130 bd=false it=false st=false un=false :: "" line="Link"
+2131-2134 bd=false it=false st=false un=false :: "ink" line="Link"
+2135-2136 bd=false it=false st=false un=false :: "" line="Bold italic"
+2137-2147 bd=true it=true st=false un=false :: "old italic" line="Bold italic"
+2148-2160 bd=false it=false st=false un=false :: "Text with " line="Text with mixed formatting"
+2161-2165 bd=true it=false st=false un=false :: "ixed" line="Text with mixed formatting"
+2166-2166 bd=false it=false st=false un=false :: "" line="Text with mixed formatting"
+2167-2176 bd=false it=true st=false un=false :: "ormatting" line="Text with mixed formatting"
+2177-2203 bd=false it=false st=false un=false :: "Simple text
+Last cell
+-" line="Simple text"
+2214-2244 bd=false it=false st=false un=false :: "his section tests hyperlinks:
+" line="This section tests hyperlinks:"
+2245-2256 bd=false it=false st=false un=false :: "egular link" line="Regular link"
+2257-2257 bd=false it=false st=false un=false :: "" line="Link with bold text"
+2258-2267 bd=false it=false st=false un=false :: "ink with " line="Link with bold text"
+2268-2271 bd=true it=false st=false un=false :: "old" line="Link with bold text"
+2272-2276 bd=false it=false st=false un=false :: "text" line="Link with bold text"
+2277-2278 bd=false it=false st=false un=false :: "-" line="-"
+2291-2503 bd=false it=false st=false un=false :: "his section tests image embedding. Each image is a solid color rectangle for easy visual verification.
+Blue rectangle (200x100):
+*
+Red rectangle (300x150):
+*
+Green square (150x150):
+*
+Yellow square (150x150):
+*
+-" line="This section tests image embedding. Each image is a solid color rectangle for easy visual verification."
+2526-2617 bd=false it=false st=false un=false :: "he lines between sections are horizontal rules. They should appear as visible separators.
+-" line="The lines between sections are horizontal rules. They should appear as visible separators."
+2642-2903 bd=false it=false st=false un=false :: "his section tests special characters and symbols:
+Em dash: —
+En dash: –
+Ellipsis: …
+Copyright: ©
+Trademark: ™
+Registered: ®
+Degree: 90°
+Arrows: ← → ↑ ↓
+Math symbols: ± × ÷ ≠ ≤ ≥ ≈
+Currency: € £ ¥ ₽
+Quotes: "double curly" and 'single curly'
+Emoji: 🚀 ✅ ❌ ⚠️ 📝
+-" line="This section tests special characters and symbols:"
+2938-2998 bd=false it=false st=false un=false :: "his section tests nesting combinations that commonly break:
+" line="This section tests nesting combinations that commonly break:"
+2999-3013 bd=true it=false st=false un=false :: "old text with " line="Bold text with italic inside and back to bold"
+3014-3026 bd=true it=true st=false un=false :: "talic inside" line="Bold text with italic inside and back to bold"
+3027-3043 bd=true it=false st=false un=false :: "and back to bold" line="Bold text with italic inside and back to bold"
+3044-3044 bd=false it=false st=false un=false :: "" line="Italic with bold inside and back to italic"
+3045-3056 bd=false it=true st=false un=false :: "talic with " line="Italic with bold inside and back to italic"
+3057-3067 bd=true it=true st=false un=false :: "old inside" line="Italic with bold inside and back to italic"
+3068-3086 bd=false it=true st=false un=false :: "and back to italic" line="Italic with bold inside and back to italic"
+3087-3088 bd=false it=false st=false un=false :: "-" line="-"
+3126-3220 bd=false it=false st=false un=false :: "mpty table cells:
+A
+B
+C
+
+x
+
+y
+
+z
+Single-character cells:
+1
+2
+3
+a
+b
+c
+-" line="Empty table cells:"
+3222-3258 bd=false it=true st=false un=false :: "nd of Markdown Feature Test Document" line="End of Markdown Feature Test Document"
+3259-3259 bd=false it=false st=false un=false :: "" line="End of Markdown Feature Test Document"
+
+LINKS
+2131-2134 link={"lnk_type":0,"ulnk_url":"https://example.com"} :: "ink"
+2245-2256 link={"lnk_type":0,"ulnk_url":"https://example.com"} :: "egular link"
+2258-2276 link={"lnk_type":0,"ulnk_url":"https://example.com"} :: "ink with bold text"
+
+HORIZONTAL_RULES
+181-181 :: {} near="feature.\n-\n1. Headin"
+327-327 :: {} near=" level 6\n-\n2. Inline"
+599-599 :: {} near="ach side\n-\n3. Paragr"
+783-783 :: {} near="rst one.\n-\n4. Blockq"
+1009-1009 :: {} near="ckquote.\n-\n5. Unorde"
+1247-1247 :: {} near="t item 3\n-\n6. Ordere"
+1487-1487 :: {} near="t item 3\n-\n7. Mixed "
+1691-1691 :: {} near="red item\n-\n8. Tables"
+2203-2203 :: {} near="st cell\n\u0011-\n9. Links\n"
+2278-2278 :: {} near="old text\n-\n10. Image"
+2503-2503 :: {} near="x150):\n*\n-\n11. Horiz"
+2617-2617 :: {} near="arators.\n-\n12. Speci"
+2903-2903 :: {} near=" ❌ ⚠️ 📝\n-\n13. Neste"
+3088-3088 :: {} near="o italic\n-\n14. Empty"
+3220-3220 :: {} near="a\n\u001cb\n\u001cc\n\u0011-\nEnd of Ma"

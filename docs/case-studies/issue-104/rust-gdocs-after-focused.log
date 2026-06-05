@@ -1,0 +1,10 @@
+   Compiling web-capture v0.3.6 (/tmp/gh-issue-solver-1777052151265/rust)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 4.73s
+     Running tests/integration/mod.rs (target/debug/deps/integration-1605a3b8ff1fae98)
+
+running 2 tests
+test gdocs::test_render_markdown_and_html_close_marks_around_embedded_newlines_issue_104 ... ok
+test gdocs::test_parse_model_chunks_renders_soft_breaks_and_image_dimensions_issue_104 ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 86 filtered out; finished in 0.00s
+
