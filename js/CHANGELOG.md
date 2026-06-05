@@ -1,5 +1,11 @@
 # @link-assistant/web-capture
 
+## 1.10.4
+
+### Patch Changes
+
+- Add live StackOverflow download coverage across JavaScript output formats and browser engines.
+
 ## 1.10.3
 
 ### Patch Changes
