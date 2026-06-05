@@ -1,5 +1,11 @@
 # @link-assistant/web-capture
 
+## 1.10.3
+
+### Patch Changes
+
+- Add compact GitHub repository capture for txt and markdown output, including repository metadata, the root file tree, and README content.
+
 ## 1.10.2
 
 ### Patch Changes
