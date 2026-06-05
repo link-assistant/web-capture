@@ -1,5 +1,11 @@
 # @link-assistant/web-capture
 
+## 1.10.5
+
+### Patch Changes
+
+- 05132b4: Support public Google Drive image file URLs across capture formats.
+
 ## 1.10.4
 
 ### Patch Changes
