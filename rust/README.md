@@ -77,6 +77,9 @@ web-capture --serve --port 8080
 
 ### API Endpoints (Server Mode)
 
+FormalAI integration should use the stable HTTP/CLI contract documented in
+[`../docs/formalai-contract.md`](../docs/formalai-contract.md).
+
 - **Markdown**: `GET /markdown?url=<URL>` (original links kept, base64 stripped by default)
 - **Markdown (kreuzberg)**: `GET /markdown?url=<URL>&converter=kreuzberg`
 - **Markdown (structured JSON)**: `GET /markdown?url=<URL>&converter=kreuzberg&format=json`
@@ -85,6 +88,7 @@ web-capture --serve --port 8080
 - **HTML**: `GET /html?url=<URL>`
 - **Text**: `GET /txt?url=<URL>` (xpaste.pro paste URLs normalize to `/raw`)
 - **PNG screenshot**: `GET /image?url=<URL>`
+- **Archive**: `GET /archive?url=<URL>` (ZIP containing `document.md` and `document.html`)
 - **Search**: `GET /search?q=<QUERY>&provider=<PROVIDER>&format=json|markdown`
 
 For xpaste.pro paste URLs, `/markdown` captures the visual paste page in visible

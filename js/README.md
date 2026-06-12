@@ -127,6 +127,8 @@ parsing. For very large or slow documents, tune the wait with
 ## API Endpoints (Server Mode)
 
 Start the server with `web-capture --serve` and use the endpoints below.
+FormalAI integration should use the stable HTTP/CLI contract documented in
+[`../docs/formalai-contract.md`](../docs/formalai-contract.md).
 
 ### HTML Endpoint
 

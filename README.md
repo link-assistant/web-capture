@@ -61,6 +61,9 @@ Both implementations expose the same API:
 | `GET /stream?url=<URL>`                                   | Stream content                                                                                                 |
 | `GET /search?q=<QUERY>`                                   | Capture structured search-provider results                                                                     |
 
+FormalAI integration should use the stable HTTP/CLI contract documented in
+[`docs/formalai-contract.md`](docs/formalai-contract.md).
+
 ## CLI Usage
 
 ```bash
