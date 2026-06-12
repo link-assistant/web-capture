@@ -1,5 +1,11 @@
 # @link-assistant/web-capture
 
+## 1.10.7
+
+### Patch Changes
+
+- 5311a23: Document the FormalAI-compatible capture/search contract and add smoke tests for stable HTTP and CLI response shapes.
+
 ## 1.10.6
 
 ### Patch Changes
