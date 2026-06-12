@@ -1,7 +1,7 @@
 // Unit tests for CLI argument parsing and functionality
 import { spawn } from 'child_process';
 import http from 'node:http';
-import { mkdtempSync, rmSync, writeFileSync } from 'fs';
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'fs';
 import { fileURLToPath } from 'url';
 import { dirname, join, resolve } from 'path';
 import packageJson from '../../package.json' with { type: 'json' };
@@ -9,11 +9,12 @@ import packageJson from '../../package.json' with { type: 'json' };
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const cliPath = resolve(__dirname, '../../bin/web-capture.js');
+const searchFixturePath = resolve(__dirname, '../helpers/search-fixture.cjs');
 
 // Helper function to run CLI and capture output
 function runCli(args, options = {}) {
   return new Promise((resolve, reject) => {
-    const proc = spawn('node', [cliPath, ...args], {
+    const proc = spawn(process.execPath, [cliPath, ...args], {
       cwd: options.cwd || dirname(cliPath),
       env: { ...process.env, ...options.env },
     });
@@ -36,13 +37,14 @@ function runCli(args, options = {}) {
   });
 }
 
-function startFixtureServer() {
+function startFixtureServer({
+  body = '<!doctype html><html><body><h1>Issue 68</h1><p>Captured from positional URL.</p></body></html>',
+  contentType = 'text/html; charset=utf-8',
+} = {}) {
   return new Promise((resolve, reject) => {
     const server = http.createServer((req, res) => {
-      res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
-      res.end(
-        '<!doctype html><html><body><h1>Issue 68</h1><p>Captured from positional URL.</p></body></html>'
-      );
+      res.writeHead(200, { 'Content-Type': contentType });
+      res.end(body);
     });
 
     server.on('error', reject);
@@ -254,5 +256,100 @@ describe('CLI', () => {
       expect(result.stdout).toContain('--output');
       expect(result.stdout).toContain('-o');
     });
+  });
+
+  describe('FormalAI-compatible CLI contract', () => {
+    test('writes HTML, Markdown, and text captures to stdout with -o -', async () => {
+      const { server, url } = await startFixtureServer({
+        body: '<!doctype html><html><body><h1>FormalAI Fixture</h1><p>Stable CLI shape.</p></body></html>',
+      });
+
+      try {
+        const html = await runCli([url, '--format', 'html', '--output', '-']);
+        expect(html.code).toBe(0);
+        expect(html.stdout).toContain('<h1>FormalAI Fixture</h1>');
+
+        const markdown = await runCli([
+          url,
+          '--format',
+          'markdown',
+          '--output',
+          '-',
+        ]);
+        expect(markdown.code).toBe(0);
+        expect(markdown.stdout).toContain('FormalAI Fixture');
+        expect(markdown.stdout).toContain('Stable CLI shape.');
+
+        const text = await runCli([url, '--format', 'txt', '--output', '-']);
+        expect(text.code).toBe(0);
+        expect(text.stdout).toContain('FormalAI Fixture');
+      } finally {
+        await stopFixtureServer(server);
+      }
+    }, 20000);
+
+    test('writes archive captures as ZIP files for binary CLI consumers', async () => {
+      const outputDir = mkdtempSync(join(process.cwd(), 'formalai-cli-'));
+      const outputPath = join(outputDir, 'capture.zip');
+      const { server, url } = await startFixtureServer({
+        body: '<!doctype html><html><body><h1>FormalAI Archive</h1></body></html>',
+      });
+
+      try {
+        const result = await runCli([
+          url,
+          '--archive',
+          'zip',
+          '--output',
+          outputPath,
+        ]);
+
+        expect(result.code).toBe(0);
+        const zipBytes = readFileSync(outputPath);
+        expect(zipBytes.length).toBeGreaterThan(50);
+        expect(zipBytes[0]).toBe(0x50);
+        expect(zipBytes[1]).toBe(0x4b);
+      } finally {
+        await stopFixtureServer(server);
+        rmSync(outputDir, { recursive: true, force: true });
+      }
+    }, 20000);
+
+    test('emits normalized search JSON from the search subcommand', async () => {
+      const nodeOptions = [
+        process.env.NODE_OPTIONS,
+        `--require=${searchFixturePath}`,
+      ]
+        .filter(Boolean)
+        .join(' ');
+      const result = await runCli(
+        ['search', 'formal-ai', '--provider', 'wikipedia', '--limit', '1'],
+        {
+          env: { NODE_OPTIONS: nodeOptions },
+        }
+      );
+
+      expect(result.code).toBe(0);
+      const body = JSON.parse(result.stdout);
+      expect(body).toMatchObject({
+        query: 'formal-ai',
+        provider: 'wikipedia',
+        captureMode: 'fetch',
+      });
+      expect(body.results).toEqual([
+        {
+          rank: 1,
+          title: 'Formal methods',
+          url: 'https://en.wikipedia.org/wiki/Formal_methods',
+          snippet: 'the study of formal methods',
+        },
+      ]);
+      expect(body.diagnostics).toMatchObject({
+        status: 200,
+        blockedByCors: false,
+        blockedByCaptcha: false,
+      });
+      expect(body.diagnostics.sourceUrl).toContain('en.wikipedia.org');
+    }, 20000);
   });
 });
