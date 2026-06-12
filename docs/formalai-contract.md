@@ -190,7 +190,12 @@ The contract is covered by smoke tests in:
 
 - `js/tests/integration/formalai-contract.test.js`
 - `js/tests/unit/cli.test.js`
+- `rust/tests/integration/formalai_contract.rs`
 
 These tests assert the stable HTTP content types, binary signatures, ZIP
 contents, search JSON diagnostics, provider allow-list, and CLI output shapes
 that FormalAI should depend on.
+
+The `JS/Rust Parity` CI workflow runs `scripts/check-js-rust-parity.mjs` on pull
+requests. It fails when `js/src` or `js/tests` changes without a corresponding
+`rust/src` or `rust/tests` change, and also fails for the reverse direction.

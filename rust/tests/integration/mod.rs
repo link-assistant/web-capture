@@ -5,6 +5,7 @@ mod bold_coalesce_and_leakage;
 mod browser;
 mod extract_images_with_title;
 mod figures;
+mod formalai_contract;
 mod gdocs;
 mod gdocs_image_parity;
 mod gdocs_public_doc;

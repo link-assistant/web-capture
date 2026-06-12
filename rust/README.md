@@ -88,6 +88,7 @@ FormalAI integration should use the stable HTTP/CLI contract documented in
 - **HTML**: `GET /html?url=<URL>`
 - **Text**: `GET /txt?url=<URL>` (xpaste.pro paste URLs normalize to `/raw`)
 - **PNG screenshot**: `GET /image?url=<URL>`
+- **Archive**: `GET /archive?url=<URL>` (ZIP containing `document.md` and `document.html`)
 - **Search**: `GET /search?q=<QUERY>&provider=<PROVIDER>&format=json|markdown`
 
 For xpaste.pro paste URLs, `/markdown` captures the visual paste page in visible

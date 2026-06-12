@@ -419,6 +419,7 @@ async fn start_server(port: u16) -> anyhow::Result<()> {
         .route("/markdown", get(markdown_handler))
         .route("/txt", get(txt_handler))
         .route("/image", get(image_handler))
+        .route("/archive", get(archive_handler))
         .route("/fetch", get(fetch_handler))
         .route("/stream", get(stream_handler))
         .route("/animation", get(animation_handler))
@@ -436,6 +437,7 @@ async fn start_server(port: u16) -> anyhow::Result<()> {
     info!("  GET /markdown?url=<URL>&converter=kreuzberg&format=json - Structured Markdown conversion");
     info!("  GET /txt?url=<URL>        - Fetch text content");
     info!("  GET /image?url=<URL>      - Screenshot page as PNG");
+    info!("  GET /archive?url=<URL>    - Capture page as ZIP archive");
     info!("  GET /fetch?url=<URL>      - Proxy fetch content");
     info!("  GET /stream?url=<URL>     - Stream content");
     info!("  GET /animation?url=<URL>  - Capture animation frames");
@@ -832,6 +834,47 @@ fn zip_response(url: &str, bytes: Vec<u8>) -> Response {
             .insert(header::CONTENT_DISPOSITION, value);
     }
     response
+}
+
+/// Archive endpoint handler
+async fn archive_handler(Query(params): Query<UrlQuery>) -> Response {
+    let url = match normalize_url(&params.url) {
+        Ok(url) => url,
+        Err(e) => return (StatusCode::BAD_REQUEST, e).into_response(),
+    };
+
+    let html = match fetch_html(&url).await {
+        Ok(html) => html,
+        Err(e) => {
+            error!("Failed to fetch HTML for archive: {}", e);
+            return (StatusCode::INTERNAL_SERVER_ERROR, "Error fetching HTML").into_response();
+        }
+    };
+
+    let bytes = match web_capture::archive::build_zip_from_html(&html, &url) {
+        Ok(bytes) => bytes,
+        Err(e) => {
+            error!("Failed to create archive: {}", e);
+            return (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                "Error creating ZIP archive",
+            )
+                .into_response();
+        }
+    };
+
+    (
+        StatusCode::OK,
+        [
+            ("Content-Type", "application/zip"),
+            (
+                "Content-Disposition",
+                "attachment; filename=\"capture.zip\"",
+            ),
+        ],
+        bytes,
+    )
+        .into_response()
 }
 
 /// Image/screenshot endpoint handler
