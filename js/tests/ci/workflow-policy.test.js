@@ -12,8 +12,12 @@ const workflowFiles = [
   '.github/workflows/parity.yml',
 ];
 
-function readWorkflow(relativePath) {
+function readRootFile(relativePath) {
   return readFileSync(resolve(repoRoot, relativePath), 'utf8');
+}
+
+function readWorkflow(relativePath) {
+  return readRootFile(relativePath);
 }
 
 describe('workflow policy', () => {
@@ -46,5 +50,14 @@ describe('workflow policy', () => {
 
     expect(workflow).toContain('uses: actions/cache@v5');
     expect(workflow).not.toContain('uses: actions/cache@v4');
+  });
+
+  test('parity check ignores repository-level CI tests', () => {
+    const parityScript = readRootFile('scripts/check-js-rust-parity.mjs');
+
+    expect(parityScript).toContain('"js/tests/ci/"');
+    expect(parityScript).toContain(
+      'matchingFiles(files, JS_PARITY_PATHS, JS_PARITY_IGNORE_PATHS)'
+    );
   });
 });

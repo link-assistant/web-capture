@@ -119,31 +119,35 @@ this repository. Upstream issues were filed:
 - The Rust workflow now uses `actions/cache@v5`.
 - Workflow concurrency now preserves in-flight `main` release runs and cancels
   stale PR branch runs.
+- Repository-level CI tests now live under `js/tests/ci/`, and the JS/Rust
+  product parity guard ignores that directory while Jest still runs it.
 
 ## Regression Tests
 
 Added tests:
 
-- `js/tests/unit/detect-code-changes.test.js`
+- `js/tests/ci/detect-code-changes.test.js`
   - reproduces a real merge commit pushed to `main` where the final feature
     commit is docs-only but an earlier feature commit changed Rust code;
   - verifies that `pull_request` merge commits keep the existing PR-head
     per-commit behavior;
   - verifies first-commit pushes fall back to listing files in `HEAD`.
-- `js/tests/unit/rust-dockerfile.test.js`
-  - verifies the Docker builder Rust version matches `rust/Cargo.toml`.
-- `js/tests/unit/workflow-policy.test.js`
+- `js/tests/ci/rust-dockerfile.test.js`
+  - verifies the Docker builder Rust version satisfies `rust/Cargo.toml`.
+- `js/tests/ci/workflow-policy.test.js`
   - verifies current checkout/cache action versions and release-safe
-    concurrency.
+    concurrency;
+  - verifies repository-level CI tests are ignored by the JS/Rust product
+    parity guard.
 
 Focused verification:
 
 ```sh
 cd js
-npm test -- --runTestsByPath tests/unit/detect-code-changes.test.js tests/unit/rust-dockerfile.test.js tests/unit/workflow-policy.test.js
+npm test -- --runTestsByPath tests/ci/detect-code-changes.test.js tests/ci/rust-dockerfile.test.js tests/ci/workflow-policy.test.js
 ```
 
-Result: 3 suites passed, 11 tests passed. The log is preserved at
+Result: 3 suites passed, 12 tests passed. The log is preserved at
 `data/verification-focused-jest.log`.
 
 Additional local verification:
@@ -160,6 +164,8 @@ Additional local verification:
   `data/verification-cargo-test.log`.
 - `docker build -t web-capture-rust-issue-139 .` from `rust/`: passed. Log:
   `data/verification-docker-build-rust.log`.
+- `node scripts/check-js-rust-parity.mjs` against the PR diff: passed. Log:
+  `data/verification-parity-check.log`.
 
 The full local `npm test` command was also attempted. It is not a clean local
 signal in this workspace because the browser integration tests require
@@ -170,3 +176,18 @@ normally prepared by the workflow before those tests run. The failures were:
 - Docker e2e `beforeAll` hook timeout.
 
 The full-test attempt log is preserved at `data/verification-npm-test.log`.
+
+## CI Follow-up
+
+The first current-head PR run on `1a68073b1dc290ba8f99b079ef03839fb4db4dbd`
+exposed a second false positive in `JS/Rust Parity` run `27511525135`.
+
+The parity checker is intended to enforce product source/test parity, while
+ignoring workflows and scripts. The new CI-policy tests originally lived under
+`js/tests/unit/`, so the checker reported a JavaScript-only product test change.
+The failure log is preserved at `data/verification-parity-false-positive.log`.
+
+The tests were moved to `js/tests/ci/`, Jest was configured to include that
+directory, and `scripts/check-js-rust-parity.mjs` now excludes that directory
+from product parity matching. A local parity rerun against the PR diff passed
+with no JS or Rust product source/test changes detected.

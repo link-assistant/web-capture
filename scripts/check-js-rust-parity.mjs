@@ -12,6 +12,7 @@
 import { execFileSync } from "child_process";
 
 const JS_PARITY_PATHS = ["js/src/", "js/tests/"];
+const JS_PARITY_IGNORE_PATHS = ["js/tests/ci/"];
 const RUST_PARITY_PATHS = ["rust/src/", "rust/tests/"];
 
 function git(args) {
@@ -51,9 +52,11 @@ function changedFiles() {
   }
 }
 
-function matchingFiles(files, prefixes) {
-  return files.filter((file) =>
-    prefixes.some((prefix) => file.startsWith(prefix)),
+function matchingFiles(files, prefixes, ignoredPrefixes = []) {
+  return files.filter(
+    (file) =>
+      prefixes.some((prefix) => file.startsWith(prefix)) &&
+      !ignoredPrefixes.some((prefix) => file.startsWith(prefix)),
   );
 }
 
@@ -69,7 +72,7 @@ function printFiles(title, files) {
 }
 
 const files = changedFiles();
-const jsFiles = matchingFiles(files, JS_PARITY_PATHS);
+const jsFiles = matchingFiles(files, JS_PARITY_PATHS, JS_PARITY_IGNORE_PATHS);
 const rustFiles = matchingFiles(files, RUST_PARITY_PATHS);
 const issues = [];
 

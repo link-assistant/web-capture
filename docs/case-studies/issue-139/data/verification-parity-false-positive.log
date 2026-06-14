@@ -1,0 +1,377 @@
+JS/Rust Source and Test Parity	UNKNOWN STEP	﻿2026-06-14T20:45:50.3315835Z Current runner version: '2.335.1'
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:50.3340187Z ##[group]Runner Image Provisioner
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:50.3341076Z Hosted Compute Agent
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:50.3341743Z Version: 20260527.539
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:50.3342404Z Commit: a891dd388383b896fa6ac04a82c0b75cec981078
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:50.3343156Z Build Date: 2026-05-27T21:39:57Z
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:50.3343915Z Worker ID: {46a2cf66-2117-40ed-991d-9bbb12bcca01}
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:50.3345071Z Azure Region: northcentralus
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:50.3345855Z ##[endgroup]
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:50.3347515Z ##[group]Operating System
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:50.3348186Z Ubuntu
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:50.3348834Z 24.04.4
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:50.3349397Z LTS
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:50.3349902Z ##[endgroup]
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:50.3350521Z ##[group]Runner Image
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:50.3351129Z Image: ubuntu-24.04
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:50.3351746Z Version: 20260607.184.1
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:50.3353113Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20260607.184/images/ubuntu/Ubuntu2404-Readme.md
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:50.3354969Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20260607.184
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:50.3356198Z ##[endgroup]
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:50.3357824Z ##[group]GITHUB_TOKEN Permissions
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:50.3359825Z Contents: read
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:50.3360608Z Metadata: read
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:50.3361209Z Packages: read
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:50.3361782Z ##[endgroup]
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:50.3363924Z Secret source: Actions
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:50.3364979Z Prepare workflow directory
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:50.3709950Z Prepare all required actions
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:50.3747943Z Getting action download info
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:50.7684310Z Download action repository 'actions/checkout@v6' (SHA:df4cb1c069e1874edd31b4311f1884172cec0e10)
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:51.1115106Z Download action repository 'actions/setup-node@v6' (SHA:48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e)
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:51.2939545Z Complete job name: JS/Rust Source and Test Parity
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:51.3723065Z ##[group]Run actions/checkout@v6
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:51.3724049Z with:
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:51.3724773Z   fetch-depth: 0
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:51.3725330Z   repository: link-assistant/web-capture
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:51.3730148Z   token: ***
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:51.3730640Z   ssh-strict: true
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:51.3731134Z   ssh-user: git
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:51.3731635Z   persist-credentials: true
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:51.3732180Z   clean: true
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:51.3732681Z   sparse-checkout-cone-mode: true
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:51.3733281Z   fetch-tags: false
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:51.3733792Z   show-progress: true
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:51.3734310Z   lfs: false
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:51.3734930Z   submodules: false
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:51.3735532Z   set-safe-directory: true
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:51.3736375Z ##[endgroup]
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:51.4739848Z Syncing repository: link-assistant/web-capture
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:51.4742160Z ##[group]Getting Git version info
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:51.4743116Z Working directory is '/home/runner/work/web-capture/web-capture'
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:51.4744294Z [command]/usr/bin/git version
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:51.4799067Z git version 2.54.0
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:51.4823770Z ##[endgroup]
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:51.4839237Z Temporarily overriding HOME='/home/runner/work/_temp/1827d7b7-7b3a-4c0d-bfb8-4199207b6c62' before making global git config changes
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:51.4842777Z Adding repository directory to the temporary git global config as a safe directory
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:51.4846128Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/web-capture/web-capture
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:51.4893579Z Deleting the contents of '/home/runner/work/web-capture/web-capture'
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:51.4898314Z ##[group]Determining repository object format
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:51.4900519Z ##[endgroup]
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:51.4901503Z ##[group]Initializing the repository
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:51.4905761Z [command]/usr/bin/git init /home/runner/work/web-capture/web-capture
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:51.5012596Z hint: Using 'master' as the name for the initial branch. This default branch name
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:51.5014460Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:51.5016639Z hint: to use in all of your new repositories, which will suppress this warning,
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:51.5018052Z hint: call:
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:51.5018846Z hint:
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:51.5019680Z hint: 	git config --global init.defaultBranch <name>
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:51.5021192Z hint:
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:51.5022593Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:51.5025316Z hint: 'development'. The just-created branch can be renamed via this command:
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:51.5027191Z hint:
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:51.5028040Z hint: 	git branch -m <name>
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:51.5029010Z hint:
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:51.5030397Z hint: Disable this message with "git config set advice.defaultBranchName false"
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:51.5032688Z Initialized empty Git repository in /home/runner/work/web-capture/web-capture/.git/
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:51.5036281Z [command]/usr/bin/git remote add origin https://github.com/link-assistant/web-capture
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:51.5108367Z ##[endgroup]
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:51.5109898Z ##[group]Disabling automatic garbage collection
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:51.5112863Z [command]/usr/bin/git config --local gc.auto 0
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:51.5144081Z ##[endgroup]
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:51.5146361Z ##[group]Setting up auth
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:51.5147730Z Removing SSH command configuration
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:51.5151726Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:51.5186948Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:51.5515778Z Removing HTTP extra header
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:51.5520549Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:51.5553325Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:51.5763926Z Removing includeIf entries pointing to credentials config files
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:51.5769446Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:51.5799021Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:51.6019871Z [command]/usr/bin/git config --file /home/runner/work/_temp/git-credentials-84ebce00-45de-466e-b177-990a374ac5b8.config http.https://github.com/.extraheader AUTHORIZATION: basic ***
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:51.6055807Z [command]/usr/bin/git config --local includeIf.gitdir:/home/runner/work/web-capture/web-capture/.git.path /home/runner/work/_temp/git-credentials-84ebce00-45de-466e-b177-990a374ac5b8.config
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:51.6083728Z [command]/usr/bin/git config --local includeIf.gitdir:/home/runner/work/web-capture/web-capture/.git/worktrees/*.path /home/runner/work/_temp/git-credentials-84ebce00-45de-466e-b177-990a374ac5b8.config
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:51.6116480Z [command]/usr/bin/git config --local includeIf.gitdir:/github/workspace/.git.path /github/runner_temp/git-credentials-84ebce00-45de-466e-b177-990a374ac5b8.config
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:51.6146272Z [command]/usr/bin/git config --local includeIf.gitdir:/github/workspace/.git/worktrees/*.path /github/runner_temp/git-credentials-84ebce00-45de-466e-b177-990a374ac5b8.config
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:51.6173004Z ##[endgroup]
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:51.6174153Z ##[group]Fetching the repository
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:51.6181972Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules origin +refs/heads/*:refs/remotes/origin/* +refs/tags/*:refs/tags/* +f284facb4d6c50709fa3aed5071374f31b0bb1f3:refs/remotes/pull/140/merge
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.4433701Z From https://github.com/link-assistant/web-capture
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.4437106Z  * [new branch]      issue-1-5017a66c05a8                     -> origin/issue-1-5017a66c05a8
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.4439676Z  * [new branch]      issue-100-99e0a350ea14                   -> origin/issue-100-99e0a350ea14
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.4441729Z  * [new branch]      issue-102-7f05baee1eea                   -> origin/issue-102-7f05baee1eea
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.4443745Z  * [new branch]      issue-104-5d910a68a250                   -> origin/issue-104-5d910a68a250
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.4446365Z  * [new branch]      issue-106-44f7ed55b657                   -> origin/issue-106-44f7ed55b657
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.4448718Z  * [new branch]      issue-108-a4baf412d9cb                   -> origin/issue-108-a4baf412d9cb
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.4450950Z  * [new branch]      issue-11-2861fe92                        -> origin/issue-11-2861fe92
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.4453117Z  * [new branch]      issue-110-9712e1c70a94                   -> origin/issue-110-9712e1c70a94
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.4455765Z  * [new branch]      issue-112-53d54c67d8bb                   -> origin/issue-112-53d54c67d8bb
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.4458424Z  * [new branch]      issue-113-d6d2b9cf59e9                   -> origin/issue-113-d6d2b9cf59e9
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.4461164Z  * [new branch]      issue-114-b51d47bfd71f                   -> origin/issue-114-b51d47bfd71f
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.4463912Z  * [new branch]      issue-116-e68be1382988                   -> origin/issue-116-e68be1382988
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.4466803Z  * [new branch]      issue-117-6f9cc6105c70                   -> origin/issue-117-6f9cc6105c70
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.4469514Z  * [new branch]      issue-118-e11d2cc48206                   -> origin/issue-118-e11d2cc48206
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.4472198Z  * [new branch]      issue-119-9b5c645fa6d7                   -> origin/issue-119-9b5c645fa6d7
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.4475117Z  * [new branch]      issue-120-2cd62cbc1692                   -> origin/issue-120-2cd62cbc1692
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.4477963Z  * [new branch]      issue-121-71566b31e0d5                   -> origin/issue-121-71566b31e0d5
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.4480789Z  * [new branch]      issue-127-238ff237e28b                   -> origin/issue-127-238ff237e28b
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.4483697Z  * [new branch]      issue-13-a8f3466f6d79                    -> origin/issue-13-a8f3466f6d79
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.4486736Z  * [new branch]      issue-130-1bcc97d4a5a3                   -> origin/issue-130-1bcc97d4a5a3
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.4489658Z  * [new branch]      issue-135-fcb428bcce44                   -> origin/issue-135-fcb428bcce44
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.4492615Z  * [new branch]      issue-137-623d876e6e5f                   -> origin/issue-137-623d876e6e5f
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.4495670Z  * [new branch]      issue-139-24bf83def591                   -> origin/issue-139-24bf83def591
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.4498559Z  * [new branch]      issue-15-ba41292e60dd                    -> origin/issue-15-ba41292e60dd
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.4501432Z  * [new branch]      issue-17-d61fd69fb1d0                    -> origin/issue-17-d61fd69fb1d0
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.4504292Z  * [new branch]      issue-19-7350892c64e0                    -> origin/issue-19-7350892c64e0
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.4507232Z  * [new branch]      issue-21-ae540dd05ccf                    -> origin/issue-21-ae540dd05ccf
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.4510069Z  * [new branch]      issue-24-000cedc18c0c                    -> origin/issue-24-000cedc18c0c
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.4512968Z  * [new branch]      issue-26-f5bc08d1c062                    -> origin/issue-26-f5bc08d1c062
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.4515956Z  * [new branch]      issue-28-9ae2d8528d6f                    -> origin/issue-28-9ae2d8528d6f
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.4518810Z  * [new branch]      issue-29-1750ff5496be                    -> origin/issue-29-1750ff5496be
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.4521606Z  * [new branch]      issue-3-e1f5cfd3                         -> origin/issue-3-e1f5cfd3
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.4524401Z  * [new branch]      issue-31-e38e38b91777                    -> origin/issue-31-e38e38b91777
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.4527422Z  * [new branch]      issue-33-597c234012bd                    -> origin/issue-33-597c234012bd
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.4530437Z  * [new branch]      issue-36-4868dc6a6cd1                    -> origin/issue-36-4868dc6a6cd1
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.4533280Z  * [new branch]      issue-38-1c6b407f9682                    -> origin/issue-38-1c6b407f9682
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.4536329Z  * [new branch]      issue-40-aea0c7bbe29d                    -> origin/issue-40-aea0c7bbe29d
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.4539135Z  * [new branch]      issue-42-51e981719f34                    -> origin/issue-42-51e981719f34
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.4541897Z  * [new branch]      issue-44-5fc8fd3303bb                    -> origin/issue-44-5fc8fd3303bb
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.4544754Z  * [new branch]      issue-46-74be9b28b867                    -> origin/issue-46-74be9b28b867
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.4547500Z  * [new branch]      issue-48-fa0cc317013f                    -> origin/issue-48-fa0cc317013f
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.4550144Z  * [new branch]      issue-5-37ef445c                         -> origin/issue-5-37ef445c
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.4552885Z  * [new branch]      issue-50-accd5e4cfac0                    -> origin/issue-50-accd5e4cfac0
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.4555775Z  * [new branch]      issue-52-b275657642c1                    -> origin/issue-52-b275657642c1
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.4558537Z  * [new branch]      issue-53-ee04eb2d7520                    -> origin/issue-53-ee04eb2d7520
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.4561297Z  * [new branch]      issue-56-a89df19bbdc2                    -> origin/issue-56-a89df19bbdc2
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.4564050Z  * [new branch]      issue-58-c1217b0e73df                    -> origin/issue-58-c1217b0e73df
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.4566901Z  * [new branch]      issue-60-7c97a8e6f23e                    -> origin/issue-60-7c97a8e6f23e
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.4569624Z  * [new branch]      issue-62-5074090c911d                    -> origin/issue-62-5074090c911d
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.4572353Z  * [new branch]      issue-64-fc240b6b34c4                    -> origin/issue-64-fc240b6b34c4
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.4575383Z  * [new branch]      issue-66-d851400625b3                    -> origin/issue-66-d851400625b3
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.4578150Z  * [new branch]      issue-68-f537a341d162                    -> origin/issue-68-f537a341d162
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.4580734Z  * [new branch]      issue-7-c22ac3d5                         -> origin/issue-7-c22ac3d5
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.4583318Z  * [new branch]      issue-70-46e0722472f6                    -> origin/issue-70-46e0722472f6
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.4586119Z  * [new branch]      issue-72-531c48705fe1                    -> origin/issue-72-531c48705fe1
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.4588754Z  * [new branch]      issue-73-3365a59a0651                    -> origin/issue-73-3365a59a0651
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.4591428Z  * [new branch]      issue-76-4c3ce2d4c38d                    -> origin/issue-76-4c3ce2d4c38d
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.4594111Z  * [new branch]      issue-77-9d57d4be5f06                    -> origin/issue-77-9d57d4be5f06
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.4596922Z  * [new branch]      issue-78-06df01a6d67d                    -> origin/issue-78-06df01a6d67d
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.4599618Z  * [new branch]      issue-79-0f3c100bef61                    -> origin/issue-79-0f3c100bef61
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.4602183Z  * [new branch]      issue-8-2bf69acf                         -> origin/issue-8-2bf69acf
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.4604866Z  * [new branch]      issue-80-65a47c9900f7                    -> origin/issue-80-65a47c9900f7
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.4607754Z  * [new branch]      issue-81-95139eb5d319                    -> origin/issue-81-95139eb5d319
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.4610525Z  * [new branch]      issue-88-fa5db9d51224                    -> origin/issue-88-fa5db9d51224
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.4613205Z  * [new branch]      issue-90-401b508c5c66                    -> origin/issue-90-401b508c5c66
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.4616256Z  * [new branch]      issue-92-42b86cc335df                    -> origin/issue-92-42b86cc335df
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.4618957Z  * [new branch]      issue-94-2e4653a0a183                    -> origin/issue-94-2e4653a0a183
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.4621661Z  * [new branch]      issue-96-3180a89c0b82                    -> origin/issue-96-3180a89c0b82
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.4624657Z  * [new branch]      issue-98-c765b5595cf4                    -> origin/issue-98-c765b5595cf4
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.4627145Z  * [new branch]      main                                     -> origin/main
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.4629181Z  * [new tag]         js-v1.10.0                               -> js-v1.10.0
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.4631167Z  * [new tag]         js-v1.10.1                               -> js-v1.10.1
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.4633150Z  * [new tag]         js-v1.10.2                               -> js-v1.10.2
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.4636271Z  * [new tag]         js-v1.10.3                               -> js-v1.10.3
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.4638850Z  * [new tag]         js-v1.10.4                               -> js-v1.10.4
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.4640848Z  * [new tag]         js-v1.10.5                               -> js-v1.10.5
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.4643649Z  * [new tag]         js-v1.10.6                               -> js-v1.10.6
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.4646279Z  * [new tag]         js-v1.10.7                               -> js-v1.10.7
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.4649257Z  * [new tag]         js-v1.10.8                               -> js-v1.10.8
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.4652405Z  * [new tag]         js-v1.7.10                               -> js-v1.7.10
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.4655697Z  * [new tag]         js-v1.7.11                               -> js-v1.7.11
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.4658743Z  * [new tag]         js-v1.7.12                               -> js-v1.7.12
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.4661992Z  * [new tag]         js-v1.7.13                               -> js-v1.7.13
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.4664026Z  * [new tag]         js-v1.7.14                               -> js-v1.7.14
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.4668385Z  * [new tag]         js-v1.7.15                               -> js-v1.7.15
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.4671557Z  * [new tag]         js-v1.7.16                               -> js-v1.7.16
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.4674475Z  * [new tag]         js-v1.7.17                               -> js-v1.7.17
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.4677646Z  * [new tag]         js-v1.7.18                               -> js-v1.7.18
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.4680526Z  * [new tag]         js-v1.7.19                               -> js-v1.7.19
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.4683400Z  * [new tag]         js-v1.7.20                               -> js-v1.7.20
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.4686566Z  * [new tag]         js-v1.7.21                               -> js-v1.7.21
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.4689433Z  * [new tag]         js-v1.7.22                               -> js-v1.7.22
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.4692293Z  * [new tag]         js-v1.7.23                               -> js-v1.7.23
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.4695338Z  * [new tag]         js-v1.7.24                               -> js-v1.7.24
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.4698206Z  * [new tag]         js-v1.7.25                               -> js-v1.7.25
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.4701046Z  * [new tag]         js-v1.7.26                               -> js-v1.7.26
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.4703922Z  * [new tag]         js-v1.7.27                               -> js-v1.7.27
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.4707054Z  * [new tag]         js-v1.7.9                                -> js-v1.7.9
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.4710183Z  * [new tag]         js-v1.8.0                                -> js-v1.8.0
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.4713023Z  * [new tag]         js-v1.8.1                                -> js-v1.8.1
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.4716064Z  * [new tag]         js-v1.9.0                                -> js-v1.9.0
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.4718969Z  * [new tag]         rust-v0.1.0                              -> rust-v0.1.0
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.4721985Z  * [new tag]         rust-v0.2.0                              -> rust-v0.2.0
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.4725116Z  * [new tag]         rust-v0.2.1                              -> rust-v0.2.1
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.4728050Z  * [new tag]         rust-v0.3.0                              -> rust-v0.3.0
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.4730994Z  * [new tag]         rust-v0.3.1                              -> rust-v0.3.1
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.4734002Z  * [new tag]         rust-v0.3.10                             -> rust-v0.3.10
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.4737274Z  * [new tag]         rust-v0.3.11                             -> rust-v0.3.11
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.4739617Z  * [new tag]         rust-v0.3.12                             -> rust-v0.3.12
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.4741825Z  * [new tag]         rust-v0.3.13                             -> rust-v0.3.13
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.4744802Z  * [new tag]         rust-v0.3.14                             -> rust-v0.3.14
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.4747866Z  * [new tag]         rust-v0.3.15                             -> rust-v0.3.15
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.4750532Z  * [new tag]         rust-v0.3.16                             -> rust-v0.3.16
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.4753085Z  * [new tag]         rust-v0.3.17                             -> rust-v0.3.17
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.4755436Z  * [new tag]         rust-v0.3.18                             -> rust-v0.3.18
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.4757454Z  * [new tag]         rust-v0.3.19                             -> rust-v0.3.19
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.4759419Z  * [new tag]         rust-v0.3.2                              -> rust-v0.3.2
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.4761361Z  * [new tag]         rust-v0.3.20                             -> rust-v0.3.20
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.4763332Z  * [new tag]         rust-v0.3.21                             -> rust-v0.3.21
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.4765598Z  * [new tag]         rust-v0.3.22                             -> rust-v0.3.22
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.4767560Z  * [new tag]         rust-v0.3.23                             -> rust-v0.3.23
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.4769497Z  * [new tag]         rust-v0.3.24                             -> rust-v0.3.24
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.4771449Z  * [new tag]         rust-v0.3.25                             -> rust-v0.3.25
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.4773462Z  * [new tag]         rust-v0.3.26                             -> rust-v0.3.26
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.4775921Z  * [new tag]         rust-v0.3.27                             -> rust-v0.3.27
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.4777907Z  * [new tag]         rust-v0.3.28                             -> rust-v0.3.28
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.4779864Z  * [new tag]         rust-v0.3.29                             -> rust-v0.3.29
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.4781813Z  * [new tag]         rust-v0.3.3                              -> rust-v0.3.3
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.4783737Z  * [new tag]         rust-v0.3.30                             -> rust-v0.3.30
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.4786021Z  * [new tag]         rust-v0.3.4                              -> rust-v0.3.4
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.4787949Z  * [new tag]         rust-v0.3.5                              -> rust-v0.3.5
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.4789879Z  * [new tag]         rust-v0.3.6                              -> rust-v0.3.6
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.4862053Z  * [new tag]         rust-v0.3.7                              -> rust-v0.3.7
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.4864868Z  * [new tag]         rust-v0.3.8                              -> rust-v0.3.8
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.4866912Z  * [new tag]         rust-v0.3.9                              -> rust-v0.3.9
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.4868793Z  * [new tag]         v1.1.1                                   -> v1.1.1
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.4870561Z  * [new tag]         v1.1.2                                   -> v1.1.2
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.4872327Z  * [new tag]         v1.1.3                                   -> v1.1.3
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.4874061Z  * [new tag]         v1.2.0                                   -> v1.2.0
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.4876131Z  * [new tag]         v1.3.0                                   -> v1.3.0
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.4877879Z  * [new tag]         v1.7.2                                   -> v1.7.2
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.4879612Z  * [new tag]         v1.7.3                                   -> v1.7.3
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.4881353Z  * [new tag]         v1.7.4                                   -> v1.7.4
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.4883075Z  * [new tag]         v1.7.5                                   -> v1.7.5
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.4885049Z  * [new tag]         v1.7.6                                   -> v1.7.6
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.4887022Z  * [new tag]         v1.7.7                                   -> v1.7.7
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.4888776Z  * [new tag]         v1.7.8                                   -> v1.7.8
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.4890733Z  * [new ref]         f284facb4d6c50709fa3aed5071374f31b0bb1f3 -> pull/140/merge
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.4895257Z ##[endgroup]
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.4897074Z ##[group]Determining the checkout info
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.4899094Z ##[endgroup]
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.4900099Z [command]/usr/bin/git sparse-checkout disable
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.4903246Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.4907371Z ##[group]Checking out the ref
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.4908953Z [command]/usr/bin/git checkout --progress --force refs/remotes/pull/140/merge
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.5720921Z Note: switching to 'refs/remotes/pull/140/merge'.
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.5722181Z
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.5723262Z You are in 'detached HEAD' state. You can look around, make experimental
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.5726114Z changes and commit them, and you can discard any commits you make in this
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.5728250Z state without impacting any branches by switching back to a branch.
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.5729496Z
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.5730300Z If you want to create a new branch to retain commits you create, you may
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.5732258Z do so (now or later) by using -c with the switch command. Example:
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.5733392Z
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.5733851Z   git switch -c <new-branch-name>
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.5734754Z
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.5735295Z Or undo this operation with:
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.5736398Z
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.5737040Z   git switch -
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.5737627Z
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.5738524Z Turn off this advice by setting config variable advice.detachedHead to false
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.5739803Z
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.5741444Z HEAD is now at f284fac Merge 1a68073b1dc290ba8f99b079ef03839fb4db4dbd into 7387a4c8b7f244b50358b5f536c708c6e3feb856
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.5745843Z ##[endgroup]
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.5784160Z [command]/usr/bin/git log -1 --format=%H
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.5809088Z f284facb4d6c50709fa3aed5071374f31b0bb1f3
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.6161202Z ##[group]Run actions/setup-node@v6
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.6162326Z with:
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.6163155Z   node-version: 24.x
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.6164075Z   check-latest: false
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.6175536Z   token: ***
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.6176468Z   package-manager-cache: true
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.6177499Z ##[endgroup]
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.7744940Z Found in cache @ /opt/hostedtoolcache/node/24.16.0/x64
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:52.7748208Z ##[group]Environment details
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:53.2014184Z node: v24.16.0
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:53.2015694Z npm: 11.13.0
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:53.2018684Z yarn: 1.22.22
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:53.2020203Z ##[endgroup]
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:53.2177504Z ##[group]Run node scripts/check-js-rust-parity.mjs
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:53.2178028Z ^[[36;1mnode scripts/check-js-rust-parity.mjs^[[0m
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:53.2378280Z shell: /usr/bin/bash -e {0}
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:53.2378638Z env:
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:53.2378959Z   GITHUB_BASE_SHA: 7387a4c8b7f244b50358b5f536c708c6e3feb856
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:53.2379415Z   GITHUB_HEAD_SHA: 1a68073b1dc290ba8f99b079ef03839fb4db4dbd
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:53.2379800Z   GITHUB_BASE_REF: main
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:53.2380080Z ##[endgroup]
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:53.2766970Z Checking JS/Rust source and test parity.
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:53.2767552Z
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:53.2767798Z Changed files:
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:53.2768330Z   .github/workflows/js.yml
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:53.2768900Z   .github/workflows/parity.yml
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:53.2769471Z   .github/workflows/rust.yml
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:53.2770006Z   .gitkeep
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:53.2770553Z   docs/case-studies/issue-139/README.md
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:53.2771506Z   docs/case-studies/issue-139/data/issue-139.json
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:53.2772651Z   docs/case-studies/issue-139/data/js-detect-script-vs-template.diff
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:53.2773773Z   docs/case-studies/issue-139/data/js-run-27504645820.json
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:53.2775396Z   docs/case-studies/issue-139/data/js-run-27504645820.log
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:53.2776232Z   docs/case-studies/issue-139/data/js-template-issue.md
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:53.2776808Z   docs/case-studies/issue-139/data/js-workflow-vs-template.diff
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:53.2777299Z   docs/case-studies/issue-139/data/pr-140.json
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:53.2777745Z   docs/case-studies/issue-139/data/recent-runs.json
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:53.2800380Z ##[error]JavaScript source/tests changed without corresponding Rust source/tests.
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:53.2810718Z Update the other implementation or add equivalent tests so both language packages stay in sync.
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:53.2812240Z   docs/case-studies/issue-139/data/rust-detect-script-vs-template.diff
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:53.2813072Z   docs/case-studies/issue-139/data/rust-run-27504645835.json
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:53.2813594Z   docs/case-studies/issue-139/data/rust-run-27504645835.log
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:53.2814090Z   docs/case-studies/issue-139/data/rust-template-issue.md
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:53.2815054Z   docs/case-studies/issue-139/data/rust-workflow-vs-template.diff
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:53.2815601Z   docs/case-studies/issue-139/data/template-ci-files.txt
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:53.2816126Z   docs/case-studies/issue-139/data/verification-cargo-clippy.log
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:53.2816670Z   docs/case-studies/issue-139/data/verification-cargo-fmt.log
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:53.2817194Z   docs/case-studies/issue-139/data/verification-cargo-test.log
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:53.2817765Z   docs/case-studies/issue-139/data/verification-docker-build-rust.log
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:53.2818359Z   docs/case-studies/issue-139/data/verification-focused-jest.log
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:53.2818898Z   docs/case-studies/issue-139/data/verification-npm-lint.log
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:53.2819414Z   docs/case-studies/issue-139/data/verification-npm-test.log
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:53.2820002Z   docs/case-studies/issue-139/data/verification-prettier-check.log
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:53.2820510Z   js/tests/unit/detect-code-changes.test.js
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:53.2820918Z   js/tests/unit/rust-dockerfile.test.js
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:53.2821311Z   js/tests/unit/workflow-policy.test.js
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:53.2821645Z   rust/Dockerfile
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:53.2821981Z   scripts/detect-code-changes.mjs
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:53.2822193Z
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:53.2822350Z JS source/test changes:
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:53.2822710Z   js/tests/unit/detect-code-changes.test.js
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:53.2823110Z   js/tests/unit/rust-dockerfile.test.js
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:53.2823499Z   js/tests/unit/workflow-policy.test.js
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:53.2823725Z
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:53.2823879Z Rust source/test changes:
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:53.2824170Z   (none)
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:53.2824306Z
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:53.2829619Z ##[error]Process completed with exit code 1.
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:53.2972245Z Post job cleanup.
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:53.3806732Z [command]/usr/bin/git version
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:53.3874832Z git version 2.54.0
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:53.3914146Z Temporarily overriding HOME='/home/runner/work/_temp/0f01b834-e3bb-4c2a-9893-346b40d6dedf' before making global git config changes
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:53.3916212Z Adding repository directory to the temporary git global config as a safe directory
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:53.3920689Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/web-capture/web-capture
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:53.3950892Z Removing SSH command configuration
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:53.3958734Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:53.3992332Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:53.4213397Z Removing HTTP extra header
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:53.4218825Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:53.4250973Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:53.4464312Z Removing includeIf entries pointing to credentials config files
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:53.4471729Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:53.4498150Z includeif.gitdir:/home/runner/work/web-capture/web-capture/.git.path
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:53.4499676Z includeif.gitdir:/home/runner/work/web-capture/web-capture/.git/worktrees/*.path
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:53.4500907Z includeif.gitdir:/github/workspace/.git.path
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:53.4501971Z includeif.gitdir:/github/workspace/.git/worktrees/*.path
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:53.4508997Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/home/runner/work/web-capture/web-capture/.git.path
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:53.4530937Z /home/runner/work/_temp/git-credentials-84ebce00-45de-466e-b177-990a374ac5b8.config
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:53.4542542Z [command]/usr/bin/git config --local --unset includeif.gitdir:/home/runner/work/web-capture/web-capture/.git.path /home/runner/work/_temp/git-credentials-84ebce00-45de-466e-b177-990a374ac5b8.config
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:53.4576781Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/home/runner/work/web-capture/web-capture/.git/worktrees/*.path
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:53.4597747Z /home/runner/work/_temp/git-credentials-84ebce00-45de-466e-b177-990a374ac5b8.config
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:53.4609178Z [command]/usr/bin/git config --local --unset includeif.gitdir:/home/runner/work/web-capture/web-capture/.git/worktrees/*.path /home/runner/work/_temp/git-credentials-84ebce00-45de-466e-b177-990a374ac5b8.config
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:53.4639340Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/github/workspace/.git.path
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:53.4659891Z /github/runner_temp/git-credentials-84ebce00-45de-466e-b177-990a374ac5b8.config
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:53.4668608Z [command]/usr/bin/git config --local --unset includeif.gitdir:/github/workspace/.git.path /github/runner_temp/git-credentials-84ebce00-45de-466e-b177-990a374ac5b8.config
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:53.4699864Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/github/workspace/.git/worktrees/*.path
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:53.4721231Z /github/runner_temp/git-credentials-84ebce00-45de-466e-b177-990a374ac5b8.config
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:53.4732942Z [command]/usr/bin/git config --local --unset includeif.gitdir:/github/workspace/.git/worktrees/*.path /github/runner_temp/git-credentials-84ebce00-45de-466e-b177-990a374ac5b8.config
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:53.4778872Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:53.4981738Z Removing credentials config '/home/runner/work/_temp/git-credentials-84ebce00-45de-466e-b177-990a374ac5b8.config'
+JS/Rust Source and Test Parity	UNKNOWN STEP	2026-06-14T20:45:53.5124331Z Cleaning up orphan processes
