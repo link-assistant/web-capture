@@ -1,0 +1,46 @@
+Checking JS/Rust source and test parity.
+
+Changed files:
+  .github/workflows/js.yml
+  .github/workflows/parity.yml
+  .github/workflows/rust.yml
+  .gitkeep
+  docs/case-studies/issue-139/README.md
+  docs/case-studies/issue-139/data/issue-139.json
+  docs/case-studies/issue-139/data/js-detect-script-vs-template.diff
+  docs/case-studies/issue-139/data/js-run-27504645820.json
+  docs/case-studies/issue-139/data/js-run-27504645820.log
+  docs/case-studies/issue-139/data/js-template-issue.md
+  docs/case-studies/issue-139/data/js-workflow-vs-template.diff
+  docs/case-studies/issue-139/data/pr-140.json
+  docs/case-studies/issue-139/data/recent-runs.json
+  docs/case-studies/issue-139/data/rust-detect-script-vs-template.diff
+  docs/case-studies/issue-139/data/rust-run-27504645835.json
+  docs/case-studies/issue-139/data/rust-run-27504645835.log
+  docs/case-studies/issue-139/data/rust-template-issue.md
+  docs/case-studies/issue-139/data/rust-workflow-vs-template.diff
+  docs/case-studies/issue-139/data/template-ci-files.txt
+  docs/case-studies/issue-139/data/verification-cargo-clippy.log
+  docs/case-studies/issue-139/data/verification-cargo-fmt.log
+  docs/case-studies/issue-139/data/verification-cargo-test.log
+  docs/case-studies/issue-139/data/verification-docker-build-rust.log
+  docs/case-studies/issue-139/data/verification-focused-jest.log
+  docs/case-studies/issue-139/data/verification-npm-lint.log
+  docs/case-studies/issue-139/data/verification-npm-test.log
+  docs/case-studies/issue-139/data/verification-parity-false-positive.log
+  docs/case-studies/issue-139/data/verification-prettier-check.log
+  js/jest.config.mjs
+  js/tests/ci/detect-code-changes.test.js
+  js/tests/ci/rust-dockerfile.test.js
+  js/tests/ci/workflow-policy.test.js
+  rust/Dockerfile
+  scripts/check-js-rust-parity.mjs
+  scripts/detect-code-changes.mjs
+
+JS source/test changes:
+  (none)
+
+Rust source/test changes:
+  (none)
+
+JS/Rust source and test parity check passed.

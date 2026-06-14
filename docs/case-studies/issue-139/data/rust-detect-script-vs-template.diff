@@ -1,0 +1,453 @@
+diff --git a/scripts/detect-code-changes.mjs b/tmp/issue-139-templates/rust-ai-driven-development-pipeline-template/scripts/detect-code-changes.rs
+index 1ab015c..9acdfbc 100644
+--- a/scripts/detect-code-changes.mjs
++++ b/tmp/issue-139-templates/rust-ai-driven-development-pipeline-template/scripts/detect-code-changes.rs
+@@ -1,222 +1,244 @@
+-#!/usr/bin/env node
+-
+-// Detect code changes for CI/CD pipeline
+-//
+-// Detects what types of files changed in the latest commit and outputs
+-// results for use in GitHub Actions workflow conditions.
+-//
+-// For PRs: GitHub Actions checks out a synthetic merge commit, so we
+-// compare HEAD^2^ to HEAD^2 (the PR head's per-commit diff).
+-// For pushes: compares HEAD^ to HEAD. A real merge commit pushed to main
+-// uses HEAD^1 to HEAD so the whole merged branch is detected.
+-// This ensures a commit touching only non-code files skips tests in PRs,
+-// while main merge pushes still see all files introduced by the merge.
+-//
+-// Excluded from code changes (don't require changesets):
+-// - Markdown files in any folder
+-// - .changeset/ folder (changeset metadata)
+-// - docs/ folder (documentation)
+-// - experiments/ folder (experimental scripts)
+-// - examples/ folder (example scripts)
+-//
+-// Outputs (written to GITHUB_OUTPUT):
+-//   js-code-changed, js-changed, rust-code-changed, rust-changed,
+-//   scripts-changed, js-scripts-changed, rust-scripts-changed,
+-//   workflow-changed, js-workflow-changed, rust-workflow-changed,
+-//   docs-changed, any-code-changed, any-js-code-changed, any-rust-code-changed
+-
+-import { execSync } from 'child_process';
+-import { appendFileSync } from 'fs';
+-
+-function exec(command, options = {}) {
+-  try {
+-    return execSync(command, { encoding: 'utf-8' }).trim();
+-  } catch (error) {
+-    console.error(`Error executing command: ${command}`);
+-    console.error(error.message);
+-    if (options.throwOnError) {
+-      throw error;
++#!/usr/bin/env rust-script
++//! Detect code changes for CI/CD pipeline
++//!
++//! This script detects what types of files have changed in the latest commit
++//! and outputs the results for use in GitHub Actions workflow conditions.
++//!
++//! Key behavior:
++//! - For PRs: detects GitHub Actions' synthetic merge commit and uses
++//!   HEAD^2^..HEAD^2 to get the per-commit diff of the actual PR head,
++//!   so a commit touching only non-code files correctly skips CI jobs
++//!   even when earlier commits in the same PR touched code files.
++//! - For pushes: compares HEAD against HEAD^
++//! - Excludes certain folders and file types from "code changes" detection
++//!
++//! Excluded from code changes (don't require changelog fragments):
++//! - Markdown files (*.md) in any folder
++//! - changelog.d/ folder (changelog fragments)
++//! - docs/ folder (documentation)
++//! - experiments/ folder (experimental scripts)
++//! - examples/ folder (example scripts)
++//!
++//! Usage: rust-script scripts/detect-code-changes.rs
++//!
++//! Environment variables (set by GitHub Actions):
++//!   - GITHUB_EVENT_NAME: 'pull_request' or 'push'
++//!
++//! Outputs (written to GITHUB_OUTPUT):
++//!   - rs-changed: 'true' if any .rs files changed
++//!   - toml-changed: 'true' if any .toml files changed
++//!   - mjs-changed: 'true' if any .mjs files changed
++//!   - docs-changed: 'true' if any .md files changed
++//!   - workflow-changed: 'true' if any .github/workflows/ files changed
++//!   - any-code-changed: 'true' if any code files changed (excludes docs, changelog.d, experiments, examples)
++//!
++//! ```cargo
++//! [dependencies]
++//! regex = "1"
++//! ```
++
++use regex::Regex;
++use std::env;
++use std::fs;
++use std::io::Write;
++use std::process::Command;
++
++fn exec(command: &str, args: &[&str]) -> String {
++    match Command::new(command).args(args).output() {
++        Ok(output) => {
++            if output.status.success() {
++                String::from_utf8_lossy(&output.stdout).trim().to_string()
++            } else {
++                eprintln!("Error executing {} {:?}", command, args);
++                eprintln!("{}", String::from_utf8_lossy(&output.stderr));
++                String::new()
++            }
++        }
++        Err(e) => {
++            eprintln!("Failed to execute {} {:?}: {}", command, args, e);
++            String::new()
++        }
+     }
+-    return '';
+-  }
+ }
+
+-function setOutput(name, value) {
+-  const outputFile = process.env.GITHUB_OUTPUT;
+-  if (outputFile) {
+-    appendFileSync(outputFile, `${name}=${value}\n`);
+-  }
+-  console.log(`${name}=${value}`);
++fn set_output(name: &str, value: &str) {
++    if let Ok(output_file) = env::var("GITHUB_OUTPUT") {
++        if let Ok(mut file) = fs::OpenOptions::new()
++            .create(true)
++            .append(true)
++            .open(&output_file)
++        {
++            let _ = writeln!(file, "{}={}", name, value);
++        }
++    }
++    println!("{}={}", name, value);
+ }
+
+-function isMergeCommit() {
+-  const parentCount = exec('git cat-file -p HEAD')
+-    .split('\n')
+-    .filter((line) => line.startsWith('parent ')).length;
+-  return parentCount > 1;
++fn is_merge_commit() -> bool {
++    let output = exec("git", &["cat-file", "-p", "HEAD"]);
++    output
++        .lines()
++        .filter(|line| line.starts_with("parent "))
++        .count()
++        > 1
+ }
+
+-function getChangedFiles() {
+-  // GitHub Actions checks out a synthetic merge commit for pull_request
+-  // events: HEAD is the merge commit, HEAD^ is the base branch, HEAD^2
+-  // is the actual PR head. To get the per-commit diff (what the latest
+-  // push actually changed), we compare HEAD^2^ to HEAD^2.
+-  // For push events, HEAD is the real commit. A merge commit pushed to
+-  // main must compare the first parent to HEAD so earlier commits from the
+-  // merged branch are not hidden by a docs-only final commit.
+-  const eventName = process.env.GITHUB_EVENT_NAME || 'push';
+-
+-  if (eventName === 'pull_request' && isMergeCommit()) {
+-    console.log('Merge commit detected (pull_request event)');
+-    console.log('Comparing HEAD^2^ to HEAD^2 (per-commit diff of PR head)');
+-    try {
+-      const output = exec('git diff --name-only HEAD^2^ HEAD^2', {
+-        throwOnError: true,
+-      });
+-      return output ? output.split('\n').filter(Boolean) : [];
+-    } catch {
+-      console.log(
+-        'HEAD^2^ not available (first commit in PR), listing files in HEAD^2'
+-      );
+-      const output = exec('git diff --name-only HEAD^ HEAD^2');
+-      return output ? output.split('\n').filter(Boolean) : [];
++fn get_changed_files() -> Vec<String> {
++    // GitHub Actions checks out a synthetic merge commit for pull_request
++    // events: HEAD is the merge commit, HEAD^ is the base branch, HEAD^2
++    // is the actual PR head. To get the per-commit diff (what the latest
++    // push actually changed), we compare HEAD^2^ to HEAD^2.
++    // For push events, HEAD is the real commit, so HEAD^ to HEAD works.
++    if is_merge_commit() {
++        println!("Merge commit detected (pull_request event)");
++        println!("Comparing HEAD^2^ to HEAD^2 (per-commit diff of PR head)");
++        let output = exec("git", &["diff", "--name-only", "HEAD^2^", "HEAD^2"]);
++        if !output.is_empty() {
++            return output
++                .lines()
++                .filter(|s| !s.is_empty())
++                .map(String::from)
++                .collect();
++        }
++        // Fallback: first commit in PR, compare base to PR head
++        println!("HEAD^2^ not available (first commit in PR), comparing HEAD^ to HEAD^2");
++        let output = exec("git", &["diff", "--name-only", "HEAD^", "HEAD^2"]);
++        if !output.is_empty() {
++            return output
++                .lines()
++                .filter(|s| !s.is_empty())
++                .map(String::from)
++                .collect();
++        }
++    }
++
++    println!("Comparing HEAD^ to HEAD");
++    let output = exec("git", &["diff", "--name-only", "HEAD^", "HEAD"]);
++
++    if output.is_empty() {
++        println!("HEAD^ not available, listing all files in HEAD");
++        let output = exec("git", &["ls-tree", "--name-only", "-r", "HEAD"]);
++        return output
++            .lines()
++            .filter(|s| !s.is_empty())
++            .map(String::from)
++            .collect();
+     }
+-  }
+-
+-  if (isMergeCommit()) {
+-    console.log(`Merge commit detected (${eventName} event)`);
+-    console.log('Comparing HEAD^1 to HEAD (full merge diff)');
+-    const output = exec('git diff --name-only HEAD^1 HEAD');
+-    return output ? output.split('\n').filter(Boolean) : [];
+-  }
+-
+-  console.log('Comparing HEAD^ to HEAD');
+-  try {
+-    const output = exec('git diff --name-only HEAD^ HEAD', {
+-      throwOnError: true,
+-    });
+-    return output ? output.split('\n').filter(Boolean) : [];
+-  } catch {
+-    console.log('HEAD^ not available, listing all files in HEAD');
+-    const output = exec('git ls-tree --name-only -r HEAD');
+-    return output ? output.split('\n').filter(Boolean) : [];
+-  }
++
++    output
++        .lines()
++        .filter(|s| !s.is_empty())
++        .map(String::from)
++        .collect()
+ }
+
+-function isExcludedFromCodeChanges(filePath) {
+-  if (filePath.endsWith('.md')) {
+-    return true;
+-  }
++fn is_excluded_from_code_changes(file_path: &str) -> bool {
++    // Exclude markdown files in any folder
++    if file_path.ends_with(".md") {
++        return true;
++    }
+
+-  const excludedFolders = ['.changeset/', 'docs/', 'experiments/', 'examples/'];
++    // Exclude specific folders from code changes
++    let excluded_folders = ["changelog.d/", "docs/", "experiments/", "examples/"];
+
+-  for (const folder of excludedFolders) {
+-    if (filePath.startsWith(folder)) {
+-      return true;
++    for folder in &excluded_folders {
++        if file_path.starts_with(folder) {
++            return true;
++        }
+     }
+-  }
+
+-  return false;
++    false
+ }
+
+-function detectChanges() {
+-  console.log('Detecting file changes for CI/CD...\n');
+-
+-  const changedFiles = getChangedFiles();
+-
+-  console.log('Changed files:');
+-  if (changedFiles.length === 0) {
+-    console.log('  (none)');
+-  } else {
+-    changedFiles.forEach((file) => console.log(`  ${file}`));
+-  }
+-  console.log('');
+-
+-  // JS-specific detection
+-  const jsCodeChanged = changedFiles.some(
+-    (f) => f.startsWith('js/') && /\.(js|mjs|json)$/.test(f)
+-  );
+-  setOutput('js-code-changed', jsCodeChanged ? 'true' : 'false');
+-
+-  const jsChanged = changedFiles.some((f) => f.startsWith('js/'));
+-  setOutput('js-changed', jsChanged ? 'true' : 'false');
+-
+-  // Rust-specific detection
+-  const rustCodeChanged = changedFiles.some(
+-    (f) => f.startsWith('rust/') && /\.(rs|toml)$/.test(f)
+-  );
+-  setOutput('rust-code-changed', rustCodeChanged ? 'true' : 'false');
+-
+-  const rustChanged = changedFiles.some((f) => f.startsWith('rust/'));
+-  setOutput('rust-changed', rustChanged ? 'true' : 'false');
+-
+-  // Scripts detection
+-  const scriptsChanged = changedFiles.some((f) => f.startsWith('scripts/'));
+-  setOutput('scripts-changed', scriptsChanged ? 'true' : 'false');
+-
+-  const jsScriptsChanged = changedFiles.some(
+-    (f) =>
+-      f.startsWith('scripts/') &&
+-      !f.startsWith('scripts/rust-') &&
+-      f.endsWith('.mjs')
+-  );
+-  setOutput('js-scripts-changed', jsScriptsChanged ? 'true' : 'false');
+-
+-  const rustScriptsChanged = changedFiles.some(
+-    (f) => f.startsWith('scripts/rust-') && f.endsWith('.mjs')
+-  );
+-  setOutput('rust-scripts-changed', rustScriptsChanged ? 'true' : 'false');
+-
+-  // Workflow detection
+-  const workflowChanged = changedFiles.some((f) =>
+-    f.startsWith('.github/workflows/')
+-  );
+-  setOutput('workflow-changed', workflowChanged ? 'true' : 'false');
+-
+-  const jsWorkflowChanged = changedFiles.some(
+-    (f) => f === '.github/workflows/js.yml'
+-  );
+-  setOutput('js-workflow-changed', jsWorkflowChanged ? 'true' : 'false');
+-
+-  const rustWorkflowChanged = changedFiles.some(
+-    (f) => f === '.github/workflows/rust.yml'
+-  );
+-  setOutput('rust-workflow-changed', rustWorkflowChanged ? 'true' : 'false');
+-
+-  // Docs detection
+-  const docsChanged = changedFiles.some((f) => f.endsWith('.md'));
+-  setOutput('docs-changed', docsChanged ? 'true' : 'false');
+-
+-  // Code changes (excluding docs, changesets, experiments, examples)
+-  const codeChangedFiles = changedFiles.filter(
+-    (file) => !isExcludedFromCodeChanges(file)
+-  );
+-
+-  console.log('\nFiles considered as code changes:');
+-  if (codeChangedFiles.length === 0) {
+-    console.log('  (none)');
+-  } else {
+-    codeChangedFiles.forEach((file) => console.log(`  ${file}`));
+-  }
+-  console.log('');
+-
+-  const codePattern =
+-    /\.(mjs|js|json|rs|toml|yml|yaml|sh|lock)$|\.github\/workflows\//;
+-  const anyCodeChanged = codeChangedFiles.some((file) =>
+-    codePattern.test(file)
+-  );
+-  setOutput('any-code-changed', anyCodeChanged ? 'true' : 'false');
+-
+-  // Composite flags for workflow gating
+-  const anyJsCodeChanged =
+-    jsCodeChanged || jsScriptsChanged || jsWorkflowChanged;
+-  setOutput('any-js-code-changed', anyJsCodeChanged ? 'true' : 'false');
+-
+-  const anyRustCodeChanged =
+-    rustCodeChanged || rustScriptsChanged || rustWorkflowChanged;
+-  setOutput('any-rust-code-changed', anyRustCodeChanged ? 'true' : 'false');
+-
+-  console.log('\nChange detection completed.');
++fn is_manifest_or_lockfile_change(file_path: &str) -> bool {
++    file_path.ends_with(".toml") || file_path.ends_with("Cargo.lock")
+ }
+
+-detectChanges();
++fn code_change_pattern() -> Regex {
++    Regex::new(r"(\.(rs|toml|mjs|js|yml|yaml)$|(^|/)Cargo\.lock$|^\.github/workflows/)").unwrap()
++}
++
++fn main() {
++    println!("Detecting file changes for CI/CD...\n");
++
++    let changed_files = get_changed_files();
++
++    println!("Changed files:");
++    if changed_files.is_empty() {
++        println!("  (none)");
++    } else {
++        for file in &changed_files {
++            println!("  {}", file);
++        }
++    }
++    println!();
++
++    // Detect .rs file changes (Rust source)
++    let rs_changed = changed_files.iter().any(|f| f.ends_with(".rs"));
++    set_output("rs-changed", if rs_changed { "true" } else { "false" });
++
++    // Detect manifest/lockfile changes (Cargo.toml, Cargo.lock, etc.)
++    let toml_changed = changed_files
++        .iter()
++        .any(|f| is_manifest_or_lockfile_change(f));
++    set_output("toml-changed", if toml_changed { "true" } else { "false" });
++
++    // Detect .mjs file changes (scripts)
++    let mjs_changed = changed_files.iter().any(|f| f.ends_with(".mjs"));
++    set_output("mjs-changed", if mjs_changed { "true" } else { "false" });
++
++    // Detect documentation changes (any .md file)
++    let docs_changed = changed_files.iter().any(|f| f.ends_with(".md"));
++    set_output("docs-changed", if docs_changed { "true" } else { "false" });
++
++    // Detect workflow changes
++    let workflow_changed = changed_files
++        .iter()
++        .any(|f| f.starts_with(".github/workflows/"));
++    set_output(
++        "workflow-changed",
++        if workflow_changed { "true" } else { "false" },
++    );
++
++    // Detect code changes (excluding docs, changelog.d, experiments, examples folders, and markdown files)
++    let code_changed_files: Vec<&String> = changed_files
++        .iter()
++        .filter(|f| !is_excluded_from_code_changes(f))
++        .collect();
++
++    println!("\nFiles considered as code changes:");
++    if code_changed_files.is_empty() {
++        println!("  (none)");
++    } else {
++        for file in &code_changed_files {
++            println!("  {}", file);
++        }
++    }
++    println!();
++
++    // Check if any code files changed (.rs, .toml, Cargo.lock, .mjs, .yml, .yaml, or workflow files)
++    let code_pattern = code_change_pattern();
++    let code_changed = code_changed_files.iter().any(|f| code_pattern.is_match(f));
++    set_output(
++        "any-code-changed",
++        if code_changed { "true" } else { "false" },
++    );
++
++    println!("\nChange detection completed.");
++}
++
++#[cfg(test)]
++mod tests {
++    use super::*;
++
++    #[test]
++    fn cargo_lock_changes_count_as_manifest_and_code_changes() {
++        let code_pattern = code_change_pattern();
++
++        for path in ["Cargo.lock", "rust/Cargo.lock"] {
++            assert!(is_manifest_or_lockfile_change(path));
++            assert!(code_pattern.is_match(path));
++            assert!(!is_excluded_from_code_changes(path));
++        }
++    }
++}

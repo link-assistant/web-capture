@@ -9,6 +9,7 @@ export default {
   testEnvironment: 'node',
   verbose: true,
   testMatch: [
+    '**/tests/ci/**/*.test.js',
     '**/tests/unit/**/*.test.js',
     '**/tests/mock/**/*.test.js',
     '**/tests/e2e/**/*.test.js',
