@@ -1,0 +1,1349 @@
+
+> @link-assistant/web-capture@1.10.8 test
+> node --experimental-vm-modules ./node_modules/.bin/jest
+
+(node:1564420) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:1564427) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:1564428) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:1564421) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:1564434) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+PASS tests/unit/html2md.test.js
+  convertHtmlToMarkdown
+    ✓ removes empty links and anchor headings (37 ms)
+    ✓ removes empty links in complex content (8 ms)
+    ✓ removes empty links with only whitespace (5 ms)
+    ✓ removes empty links with only child elements (4 ms)
+    ✓ removes headings with only whitespace (2 ms)
+    ✓ converts relative links to absolute if baseUrl is provided (5 ms)
+    ✓ does not change links if no baseUrl is provided (2 ms)
+    ✓ converts ARIA role table to Markdown table (23 ms)
+    ✓ converts a regular HTML table to Markdown table (5 ms)
+    ✓ handles empty tables gracefully (10 ms)
+    ✓ handles specific ARIA table example (31 ms)
+  convertHtmlToMarkdownEnhanced content selectors
+    ✓ scopes Habr-shaped article markdown while keeping full-page metadata (8 ms)
+  convertHtmlToMarkdownEnhanced Habr compatibility
+    ✓ preserves article code line breaks and extracts formulas from a Habr fixture (5 ms)
+
+PASS tests/integration/gdocs-public-doc.test.js
+  Google Docs public test document (issue #90)
+    URL variations
+      ✓ accepts https://docs.google.com/document/d/1f5zI2xOFpKa90v0GjamO_t7lqSdzMlaM as a Google Docs URL (7 ms)
+      ✓ accepts https://docs.google.com/document/d/1f5zI2xOFpKa90v0GjamO_t7lqSdzMlaM/edit as a Google Docs URL
+      ✓ accepts https://docs.google.com/document/d/1f5zI2xOFpKa90v0GjamO_t7lqSdzMlaM/edit?usp=sharing as a Google Docs URL
+      ✓ accepts https://docs.google.com/document/d/1f5zI2xOFpKa90v0GjamO_t7lqSdzMlaM/edit?usp=sharing&ouid=102030405060708090100&rtpof=true&sd=true as a Google Docs URL (1 ms)
+      ✓ accepts https://docs.google.com/document/d/1f5zI2xOFpKa90v0GjamO_t7lqSdzMlaM/edit?tab=t.0 as a Google Docs URL
+      ✓ extracts the public document ID from https://docs.google.com/document/d/1f5zI2xOFpKa90v0GjamO_t7lqSdzMlaM
+      ✓ extracts the public document ID from https://docs.google.com/document/d/1f5zI2xOFpKa90v0GjamO_t7lqSdzMlaM/edit
+      ✓ extracts the public document ID from https://docs.google.com/document/d/1f5zI2xOFpKa90v0GjamO_t7lqSdzMlaM/edit?usp=sharing (1 ms)
+      ✓ extracts the public document ID from https://docs.google.com/document/d/1f5zI2xOFpKa90v0GjamO_t7lqSdzMlaM/edit?usp=sharing&ouid=102030405060708090100&rtpof=true&sd=true
+      ✓ extracts the public document ID from https://docs.google.com/document/d/1f5zI2xOFpKa90v0GjamO_t7lqSdzMlaM/edit?tab=t.0
+      ✓ builds the expected export URL for the public document
+      ✓ builds the expected editor URL for the public document
+      ✓ builds the expected Docs API URL for the public document (1 ms)
+    Capture method selection (issue #72 regression guard)
+      ✓ routes --capture browser to the editor-model backend
+      ✓ routes --capture api to the public-export backend when no token
+      ✓ routes --capture api with a token to the Docs REST API backend
+    Reference markdown fixture
+      ✓ contains every feature category documented in issue #90 (5 ms)
+      ✓ embeds the four test images referenced by the issue (1 ms)
+    Live capture against the public document
+      ○ skipped fetches the public document via --capture api and returns markdown
+      ○ skipped resolves https://docs.google.com/document/d/1f5zI2xOFpKa90v0GjamO_t7lqSdzMlaM to the same document when capturing
+      ○ skipped resolves https://docs.google.com/document/d/1f5zI2xOFpKa90v0GjamO_t7lqSdzMlaM/edit to the same document when capturing
+      ○ skipped resolves https://docs.google.com/document/d/1f5zI2xOFpKa90v0GjamO_t7lqSdzMlaM/edit?usp=sharing to the same document when capturing
+      ○ skipped resolves https://docs.google.com/document/d/1f5zI2xOFpKa90v0GjamO_t7lqSdzMlaM/edit?usp=sharing&ouid=102030405060708090100&rtpof=true&sd=true to the same document when capturing
+      ○ skipped resolves https://docs.google.com/document/d/1f5zI2xOFpKa90v0GjamO_t7lqSdzMlaM/edit?tab=t.0 to the same document when capturing
+      ○ skipped captures the public document via --capture browser and renders DOCS_modelChunk markdown
+      ○ skipped fetches the issue #108 v2 document via --capture api and preserves Section 15 semantics
+      ○ skipped captures the issue #108 v2 document via --capture browser and preserves Section 15 semantics
+
+PASS tests/unit/gdocs.test.js
+  gdocs
+    isGoogleDocsUrl
+      ✓ returns true for standard Google Docs edit URL (5 ms)
+      ✓ returns true for URL with query parameters (1 ms)
+      ✓ returns true for URL without /edit
+      ✓ returns false for non-Google Docs URL (1 ms)
+      ✓ returns false for Google Sheets URL
+      ✓ returns false for empty string (1 ms)
+      ✓ returns false for null
+      ✓ returns false for undefined (1 ms)
+      ✓ returns false for non-string input
+    extractDocumentId
+      ✓ extracts document ID from standard URL
+      ✓ extracts document ID from URL with query params
+      ✓ extracts document ID with hyphens and underscores (1 ms)
+      ✓ returns null for non-Google Docs URL
+      ✓ returns null for empty string
+      ✓ returns null for null input
+    buildExportUrl
+      ✓ builds HTML export URL
+      ✓ builds Markdown export URL
+      ✓ builds PDF export URL
+      ✓ builds TXT export URL (1 ms)
+      ✓ defaults to html for unknown format
+      ✓ defaults to html when format is omitted
+      ✓ uses the real document ID from test document
+    capture method selection (issue #72)
+      ✓ honors explicit browser capture for Google Docs URLs
+      ✓ uses public export for API capture without token
+      ✓ uses Docs REST API for API capture with token (5 ms)
+    buildEditUrl
+      ✓ builds the fresh Google Docs editor URL
+    buildDocsApiUrl
+      ✓ builds the Google Docs REST API URL
+    parseGoogleDocsModelChunks (issue #72)
+      ✓ includes regular and suggested text from DOCS_modelChunk data (2 ms)
+      ✓ accepts individual DOCS_modelChunk items captured from push calls
+      ✓ extracts table cells and suggested images from DOCS_modelChunk data (2 ms)
+      ✓ parses multi-column tables when rows are separated by 0x0a (issue #92 R2) (1 ms)
+      ✓ does not create empty columns when Docs emits both 0x1c and 0x0a cell separators (issue #96)
+      ✓ does not create ghost columns from the live Google Docs 0x0a+0x1c table separator pattern (issue #100) (1 ms)
+      ✓ preserves intentionally empty table cells without shifting following cells (issue #100)
+      ✓ numbers ordered list items sequentially (issue #92 R3) (23 ms)
+      ✓ joins consecutive list items with a single newline (issue #92 R4) (6 ms)
+      ✓ keeps nested ordered lists ordered and tight when Google Docs uses separate list ids per level (issue #100) (8 ms)
+      ✓ uses export semantics for ambiguous browser-model lists and continuation paragraphs (issue #108) (21 ms)
+      ✓ renders model style records for headings, inline formatting, links, lists, blockquotes, rules, and images (1 ms)
+      ✓ renders soft breaks outside marks and preserves image dimensions (issue #104) (5 ms)
+      ✓ does not keep inline marks open across embedded newlines (issue #104)
+      ✓ keeps nested bold and italic markers balanced (issue #96) (1 ms)
+      ✓ keeps styled same-target link segments in one link label (issue #96)
+      ✓ keeps consecutive blockquote paragraphs in the same quote block (issue #96)
+      ✓ ends rendered markdown with a newline (issue #96) (1 ms)
+    renderDocsApiDocument (issue #72)
+      ✓ renders Google Docs REST API paragraphs, tables, and inline images (1 ms)
+    captureGoogleDocWithBrowserOrFallback (issue #81)
+      ✓ falls back to public export archive when the editor exposes no model chunks (57 ms)
+    captureGoogleDocWithBrowser (issue #106)
+      ✓ waits for DOCS_modelChunk data to stop changing before parsing (12 ms)
+    GDOCS_EXPORT_FORMATS
+      ✓ contains all expected formats (1 ms)
+    localizeGoogleDocsModelImages (issue #92 R5)
+      ✓ downloads docs-images-rt URLs and rewrites markdown/html (1 ms)
+      ✓ keeps original URL when download fails (1 ms)
+    preprocessGoogleDocsExportHtml (issue #92 R6)
+      ✓ hoists font-weight:700 spans into <strong> (5 ms)
+      ✓ hoists font-style:italic spans into <em> (3 ms)
+      ✓ hoists text-decoration:line-through spans into <del> (1 ms)
+      ✓ hoists Google Docs CSS class styles into semantic inline tags (5 ms)
+      ✓ combines multiple styles on a single span (1 ms)
+      ✓ unwraps google.com/url?q= redirect links (4 ms)
+      ✓ strips leading empty anchors and numbering span inside headings (7 ms)
+      ✓ strips standalone empty anchors before headings (1 ms)
+      ✓ turns class-indented Google Docs paragraphs into blockquotes (1 ms)
+      ✓ replaces &nbsp; entity and U+00A0 with regular spaces
+      ✓ is a no-op for HTML without Google Docs markers (6 ms)
+      ✓ recovers public-export markdown structure for issue #102 (14 ms)
+    extractBase64Images
+      ✓ extracts a single PNG data URI image (1 ms)
+      ✓ extracts multiple images with correct numbering and extensions (1 ms)
+      ✓ returns empty array when no data URI images
+      ✓ preserves non-data-URI images
+    image extraction pipeline (issue #53)
+      ✓ extractBase64Images from HTML produces images with data buffers (1 ms)
+      ✓ default markdown mode extracts base64 images to disk (not strip) (2 ms)
+      ✓ keepOriginalLinks strips base64 images (1 ms)
+      ✓ extractBase64ToBuffers produces in-memory buffers for archive (1 ms)
+
+PASS tests/integration/api-endpoints.test.js
+  API Endpoint Tests
+    unsupported routes
+      ✓ does not expose /gdocs as an output-format endpoint (61 ms)
+    GET /image
+      ✓ rejects invalid format (6 ms)
+      ✓ returns 400 without url (6 ms)
+    GET /markdown
+      ✓ returns markdown (88 ms)
+      ✓ returns a compact GitHub repository markdown snapshot (59 ms)
+      ✓ returns a compact GitHub repository markdown snapshot for kreuzberg text format (22 ms)
+      ✓ rejects unsupported converter names (18 ms)
+      ✓ rejects JSON format without the kreuzberg converter (8 ms)
+      ✓ returns structured kreuzberg JSON with selectors and absolute links (61 ms)
+    GET /txt
+      ✓ returns a compact GitHub repository plain-text snapshot (27 ms)
+    GET /archive
+      ✓ returns a ZIP archive with remote images (markdown format) (68 ms)
+      ✓ returns a ZIP archive with HTML format (28 ms)
+      ✓ returns a ZIP archive with local images and folders (41 ms)
+      ✓ returns a ZIP archive with HTML format and local CSS (31 ms)
+      ✓ returns 400 without url (4 ms)
+    GET /docx
+      ✓ returns a DOCX document (117 ms)
+      ✓ returns 400 without url (12 ms)
+    GET /pdf
+      ✓ returns 400 without url (10 ms)
+
+  console.log
+    ✓ Element ordering verified: heading (line 5) -> languages (line 7) -> metadata (line 10) -> content (line 20)
+
+      at Object.log (tests/xpaste/xpaste-screenshot-markdown.mock.test.js:285:15)
+
+  console.log
+    ✓ All 30 screenshot text elements found in markdown
+
+      at Object.log (tests/xpaste/xpaste-screenshot-markdown.mock.test.js:369:17)
+
+PASS tests/xpaste/xpaste-screenshot-markdown.mock.test.js
+  xpaste.pro screenshot-to-markdown content matching
+    GET /markdown for t4q0Lsp0
+      ✓ should include all header/metadata text visible in screenshot (300 ms)
+      ✓ should include all SQL query content visible in screenshot (99 ms)
+      ✓ should include all footer text visible in screenshot (61 ms)
+      ✓ should include language selector links visible in screenshot (91 ms)
+      ✓ should include RAW link visible in screenshot (76 ms)
+      ✓ should embed the raw text file as a markdown text block (80 ms)
+      ✓ should verify correct element ordering - heading and languages at top (159 ms)
+      ✓ should verify markdown extraction matches screenshot - comprehensive check (87 ms)
+
+PASS tests/unit/kreuzberg.test.js
+  kreuzberg html-to-markdown integration
+    ✓ reports availability correctly (1 ms)
+    ✓ converts basic HTML to Markdown (1 ms)
+    ✓ returns structured result with all fields (1 ms)
+    ✓ extracts metadata from HTML (1 ms)
+    ✓ extracts headings from metadata (1 ms)
+    ✓ extracts links from metadata
+    ✓ converts tables to Markdown
+    ✓ converts links correctly
+    ✓ resolves relative links with baseUrl (1 ms)
+    ✓ converts bold and italic correctly (2 ms)
+    ✓ converts code blocks correctly
+    ✓ handles empty HTML gracefully
+    ✓ removes script tags from output
+    ✓ removes style tags from output (1 ms)
+    ✓ handles GFM strikethrough
+    ✓ handles lists correctly
+  kreuzberg structured key normalization (issue #137 parity)
+    ✓ preserves width/height keys on inline image dimensions (4 ms)
+    ✓ leaves images without dimensions untouched
+    ✓ snake_cases nested structured keys (1 ms)
+
+PASS tests/unit/extract-images.test.js
+  extract-images module
+    extractAndSaveImages
+      ✓ extracts a single PNG image from markdown (18 ms)
+      ✓ extracts multiple images with content-hash filenames (5 ms)
+      ✓ produces stable filenames for duplicate images (2 ms)
+      ✓ handles JPEG mime type correctly (2 ms)
+      ✓ uses custom imagesDir (3 ms)
+      ✓ returns markdown unchanged when no base64 images (1 ms)
+      ✓ preserves non-base64 image references (1 ms)
+      ✓ preserves alt text during extraction (4 ms)
+      ✓ extracts a base64 image even when followed by an empty markdown title (2 ms)
+      ✓ extracts a base64 image with a non-empty markdown title (1 ms)
+      ✓ handles SVG data URIs (3 ms)
+    extractBase64ToBuffers
+      ✓ extracts base64 images to in-memory buffers (4 ms)
+      ✓ uses custom imagesDir prefix
+      ✓ does not write files to disk (1 ms)
+    stripBase64Images
+      ✓ strips base64 images and leaves alt text placeholder (4 ms)
+      ✓ leaves a visible placeholder when stripping a base64 image with empty alt (1 ms)
+      ✓ preserves remote image URLs
+      ✓ strips multiple base64 images (3 ms)
+    hasBase64Images
+      ✓ returns true when markdown has base64 images (1 ms)
+      ✓ returns false when no base64 images (1 ms)
+      ✓ returns false for empty string
+
+PASS tests/unit/search.test.js
+  search module (#130)
+    ✓ exposes the documented provider list (8 ms)
+    buildSearchUrl
+      ✓ builds the Wikipedia REST API url with limit (2 ms)
+      ✓ builds the DuckDuckGo HTML url
+      ✓ throws for an unknown provider (68 ms)
+    parseSearchResults
+      ✓ normalizes Wikipedia REST JSON and strips markup (7 ms)
+      ✓ respects the limit (1 ms)
+      ✓ decodes DuckDuckGo redirect hrefs and entities (13 ms)
+      ✓ parses Bing algorithmic results (3 ms)
+      ✓ returns empty results for malformed JSON (1 ms)
+      ✓ flags CAPTCHA pages (1 ms)
+    looksLikeCaptcha
+      ✓ detects common bot-block phrases
+    search()
+      ✓ returns the normalized contract for a provider (1 ms)
+      ✓ defaults to the Wikipedia provider (1 ms)
+      ✓ records transport failures in diagnostics without throwing (1 ms)
+      ✓ rejects an empty query (5 ms)
+      ✓ rejects an unknown provider (1 ms)
+    formatSearchAsMarkdown
+      ✓ renders a markdown document with ranked links
+      ✓ reports no results
+
+PASS tests/xpaste/xpaste.mock.test.js
+  xpaste.pro integration tests
+    GET /txt with xpaste.pro URL
+      ✓ should fetch and return text content from xpaste.pro (50 ms)
+      ✓ should return 400 when URL is missing (7 ms)
+      ✓ should return 500 when fetch fails (10 ms)
+    GET /markdown with xpaste.pro URL (small content)
+      ✓ should convert HTML to markdown with all page elements when content is less than 1500 lines (90 ms)
+      ✓ should normalize raw xpaste URLs before markdown conversion (32 ms)
+    GET /markdown with xpaste.pro URL (large content)
+      ✓ should create a zip archive when content is 1500 lines or more (430 ms)
+      ✓ should create a zip archive for content with more than 1500 lines (441 ms)
+    GET /markdown with non-xpaste.pro URL
+      ✓ should process regular HTML URLs normally (18 ms)
+
+  console.log
+    Checking if Docker service is already running...
+
+      at Object.log (tests/e2e/docker.test.js:47:11)
+
+  console.log
+    Service not running, starting Docker container...
+
+      at Object.log (tests/e2e/docker.test.js:50:13)
+
+PASS tests/integration/formalai-contract.test.js
+  FormalAI HTTP contract (#135)
+    ✓ returns stable text artifact shapes for /html, /txt, and /markdown (132 ms)
+    ✓ preserves upstream status and content for /fetch and /stream (36 ms)
+    ✓ returns stable binary artifact shapes for /image and /archive (58 ms)
+    ✓ returns normalized /search JSON diagnostics and the documented provider catalog (12 ms)
+    ✓ keeps normalized /search diagnostics when provider capture fails (8 ms)
+
+PASS tests/integration/google-drive-image.test.js (5.607 s)
+  Google Drive public image links
+    ✓ /image downloads image bytes for first issue URL with /view (66 ms)
+    ✓ /image downloads image bytes for first issue URL without /view (14 ms)
+    ✓ /image downloads image bytes for second issue URL with /view (12 ms)
+    ✓ /image downloads image bytes for second issue URL without /view (11 ms)
+    ✓ /fetch proxies direct image bytes for first issue URL with /view (19 ms)
+    ✓ /fetch proxies direct image bytes for first issue URL without /view (20 ms)
+    ✓ /fetch proxies direct image bytes for second issue URL with /view (17 ms)
+    ✓ /fetch proxies direct image bytes for second issue URL without /view (14 ms)
+    ✓ /stream proxies direct image bytes for first issue URL with /view (14 ms)
+    ✓ /stream proxies direct image bytes for first issue URL without /view (15 ms)
+    ✓ /stream proxies direct image bytes for second issue URL with /view (14 ms)
+    ✓ /stream proxies direct image bytes for second issue URL without /view (19 ms)
+    ✓ /markdown includes a direct image link for first issue URL with /view (99 ms)
+    ✓ /markdown includes a direct image link for first issue URL without /view (44 ms)
+    ✓ /markdown includes a direct image link for second issue URL with /view (37 ms)
+    ✓ /markdown includes a direct image link for second issue URL without /view (30 ms)
+    ✓ /txt includes the original and direct image links for first issue URL with /view (13 ms)
+    ✓ /txt includes the original and direct image links for first issue URL without /view (11 ms)
+    ✓ /txt includes the original and direct image links for second issue URL with /view (5 ms)
+    ✓ /txt includes the original and direct image links for second issue URL without /view (7 ms)
+    ✓ /html includes a direct image tag for first issue URL with /view (9 ms)
+    ✓ /html includes a direct image tag for first issue URL without /view (10 ms)
+    ✓ /html includes a direct image tag for second issue URL with /view (6 ms)
+    ✓ /html includes a direct image tag for second issue URL without /view (8 ms)
+    ✓ archive includes markdown and the downloaded Drive image (58 ms)
+    ✓ docx includes the downloaded Drive image (64 ms)
+    ✓ pdf renders the downloaded Drive image document (3960 ms)
+
+PASS tests/unit/verify.test.js
+  verify module
+    normalizeText
+      ✓ lowercases text (3 ms)
+      ✓ normalizes unicode spaces (1 ms)
+      ✓ normalizes curly quotes
+      ✓ removes LaTeX delimiters
+      ✓ normalizes arrows
+      ✓ removes \displaystyle
+      ✓ extracts text from \text{} (1 ms)
+    normalizeCode
+      ✓ lowercases and collapses whitespace
+      ✓ normalizes multiplication sign
+    verifyMarkdownContent
+      ✓ verifies title presence (4 ms)
+      ✓ detects missing title
+      ✓ verifies headings (1 ms)
+      ✓ detects missing headings
+      ✓ verifies code blocks with fuzzy matching (1 ms)
+      ✓ calculates pass rate (1 ms)
+      ✓ checks figure images when hasLocalImages is set (1 ms)
+
+PASS tests/integration/deepwiki-download.test.js
+  DeepWiki committed reference fixtures (issue #17)
+    ✓ stores markdown split into inline-sized reference documents (10 ms)
+    ✓ keeps the full-page screenshot fixture as a PNG visual reference (18 ms)
+  DeepWiki search page markdown capture (issue #17)
+    ○ skipped matches the committed markdown fixture split from the rendered page
+
+PASS tests/unit/metadata.test.js
+  metadata module
+    extractMetadata
+      ✓ extracts author information (35 ms)
+      ✓ extracts publication date (30 ms)
+      ✓ extracts hubs (10 ms)
+      ✓ extracts tags from meta keywords (2 ms)
+      ✓ extracts LD+JSON author name (4 ms)
+      ✓ extracts votes and comments (4 ms)
+      ✓ returns empty object for minimal HTML (1 ms)
+    formatMetadataBlock
+      ✓ formats author line with link (1 ms)
+      ✓ formats author with full name
+      ✓ formats publication date (32 ms)
+      ✓ includes hubs and tags (1 ms)
+      ✓ returns empty array for null metadata (4 ms)
+    formatFooterBlock
+      ✓ includes separator line
+      ✓ formats tag links
+      ✓ formats article stats
+      ✓ returns empty array for null metadata
+
+FAIL tests/unit/browser.test.js (8.678 s)
+  Browser Abstraction Layer
+    getBrowserEngine
+      ✓ returns puppeteer by default (1 ms)
+      ✓ returns playwright when engine=playwright query param is provided (1 ms)
+      ✓ returns playwright when engine=pw query param is provided
+      ✓ returns puppeteer when engine=puppeteer query param is provided
+      ✓ returns puppeteer when engine=pptr query param is provided
+      ✓ returns playwright when browser=playwright query param is provided (1 ms)
+      ✓ is case insensitive
+      ✓ returns playwright from BROWSER_ENGINE env var
+      ✓ prefers query param over env var
+    createBrowser - Puppeteer
+      ✓ creates a puppeteer browser with type field (1887 ms)
+      ✓ can create and use a page (1815 ms)
+    createBrowser - Playwright
+      ✕ creates a playwright browser with type field (1450 ms)
+      ✕ can create and use a page (22 ms)
+    Page Adapter Compatibility
+      ✕ both adapters support the same interface (1677 ms)
+      ✕ both adapters expose browser-commander v0.7.0+ APIs (1674 ms)
+
+  ● Browser Abstraction Layer › createBrowser - Playwright › creates a playwright browser with type field
+
+    browserType.launchPersistentContext: Executable doesn't exist at /home/box/.cache/ms-playwright/chromium_headless_shell-1194/chrome-linux/headless_shell
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     npx playwright install                                              ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+      75 |
+      76 |   // Use browser-commander's launchBrowser with server-specific args
+    > 77 |   const { browser, page: initialPage } = await launchBrowser({
+         |                                          ^
+      78 |     engine: engineType,
+      79 |     args: [...SERVER_CHROME_ARGS, ...args],
+      80 |     headless: true,
+
+      at launchBrowser (node_modules/browser-commander/src/browser/launcher.js:68:15)
+      at createBrowser (src/browser.js:77:42)
+      at Object.<anonymous> (tests/unit/browser.test.js:90:23)
+
+  ● Browser Abstraction Layer › createBrowser - Playwright › can create and use a page
+
+    browserType.launchPersistentContext: Executable doesn't exist at /home/box/.cache/ms-playwright/chromium_headless_shell-1194/chrome-linux/headless_shell
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     npx playwright install                                              ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+      75 |
+      76 |   // Use browser-commander's launchBrowser with server-specific args
+    > 77 |   const { browser, page: initialPage } = await launchBrowser({
+         |                                          ^
+      78 |     engine: engineType,
+      79 |     args: [...SERVER_CHROME_ARGS, ...args],
+      80 |     headless: true,
+
+      at launchBrowser (node_modules/browser-commander/src/browser/launcher.js:68:15)
+      at createBrowser (src/browser.js:77:42)
+      at Object.<anonymous> (tests/unit/browser.test.js:98:23)
+
+  ● Browser Abstraction Layer › Page Adapter Compatibility › both adapters support the same interface
+
+    browserType.launchPersistentContext: Executable doesn't exist at /home/box/.cache/ms-playwright/chromium_headless_shell-1194/chrome-linux/headless_shell
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     npx playwright install                                              ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+      75 |
+      76 |   // Use browser-commander's launchBrowser with server-specific args
+    > 77 |   const { browser, page: initialPage } = await launchBrowser({
+         |                                          ^
+      78 |     engine: engineType,
+      79 |     args: [...SERVER_CHROME_ARGS, ...args],
+      80 |     headless: true,
+
+      at launchBrowser (node_modules/browser-commander/src/browser/launcher.js:68:15)
+      at createBrowser (src/browser.js:77:42)
+      at Object.<anonymous> (tests/unit/browser.test.js:112:33)
+
+  ● Browser Abstraction Layer › Page Adapter Compatibility › both adapters expose browser-commander v0.7.0+ APIs
+
+    browserType.launchPersistentContext: Executable doesn't exist at /home/box/.cache/ms-playwright/chromium_headless_shell-1194/chrome-linux/headless_shell
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     npx playwright install                                              ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+      75 |
+      76 |   // Use browser-commander's launchBrowser with server-specific args
+    > 77 |   const { browser, page: initialPage } = await launchBrowser({
+         |                                          ^
+      78 |     engine: engineType,
+      79 |     args: [...SERVER_CHROME_ARGS, ...args],
+      80 |     headless: true,
+
+      at launchBrowser (node_modules/browser-commander/src/browser/launcher.js:68:15)
+      at createBrowser (src/browser.js:77:42)
+      at Object.<anonymous> (tests/unit/browser.test.js:138:33)
+
+PASS tests/unit/cli.test.js (12.345 s)
+  CLI
+    --help
+      ✓ shows help message with --help flag (227 ms)
+      ✓ shows help message with -h flag (273 ms)
+      ✓ shows error and exits with code 1 when no arguments provided (303 ms)
+    --version
+      ✓ shows version with --version flag (243 ms)
+      ✓ shows version with -v flag (338 ms)
+      ✓ shows web-capture version when run from another npm project (213 ms)
+    URL validation
+      ✓ accepts a URL as a positional argument (847 ms)
+      ✓ accepts a URL after the -- argument separator (629 ms)
+      ✓ rejects unknown options (223 ms)
+      ✓ rejects invalid URL (114 ms)
+    format options
+      ✓ accepts --format html (224 ms)
+      ✓ accepts --format markdown (230 ms)
+      ✓ accepts --format image (273 ms)
+    engine options
+      ✓ help shows engine options (182 ms)
+      ✓ accepts --engine option (323 ms)
+    server mode options
+      ✓ help shows --serve option (235 ms)
+      ✓ help shows --port option (431 ms)
+      ✓ help shows API endpoints (278 ms)
+    output options
+      ✓ help shows --output option (340 ms)
+    FormalAI-compatible CLI contract
+      ✓ writes HTML, Markdown, and text captures to stdout with -o - (3535 ms)
+      ✓ writes archive captures as ZIP files for binary CLI consumers (1433 ms)
+      ✓ emits normalized search JSON from the search subcommand (1160 ms)
+
+PASS tests/xpaste/xpaste.unit.test.js
+  xpaste.pro URL handling utilities
+    normalizeUrlForTextContent
+      ✓ should convert xpaste.pro URL to raw endpoint (5 ms)
+      ✓ should convert localized xpaste.pro URLs to localized raw endpoints
+      ✓ should not modify xpaste.pro URL that already has /raw
+      ✓ should not modify non-xpaste.pro URLs
+      ✓ should handle invalid URLs gracefully (1 ms)
+    normalizeUrlForTextPage
+      ✓ should convert xpaste.pro raw URLs back to visual page URLs (1 ms)
+      ✓ should not modify non-xpaste.pro URLs
+    isTextPasteUrl
+      ✓ should return true for xpaste.pro paste URLs
+      ✓ should return false for non-xpaste.pro URLs
+      ✓ should return false for xpaste.pro URLs without /p/ path
+      ✓ should return false for invalid URLs
+    getTextPasteFilename
+      ✓ should derive a canonical text filename for paste URLs (1 ms)
+      ✓ should return null for non-paste URLs (4 ms)
+    appendTextPasteMarkdownAttachment
+      ✓ should embed raw text as a named fenced attachment block
+
+PASS tests/unit/latex.test.js
+  latex module
+    extractHabrFormula
+      ✓ extracts LaTeX from Habr formula img source attribute (11 ms)
+      ✓ falls back to alt text when source is missing (1 ms)
+      ✓ returns null when no source or alt
+    extractKatexFormula
+      ✓ extracts from annotation element (6 ms)
+      ✓ extracts from data-tex attribute (2 ms)
+      ✓ returns null when no TeX source found (1 ms)
+    extractMathJaxFormula
+      ✓ extracts from data-tex attribute (1 ms)
+    isFormulaImage
+      ✓ identifies img.formula elements
+      ✓ identifies img with source attribute (4 ms)
+      ✓ rejects regular images (1 ms)
+    isMathElement
+      ✓ identifies katex elements (1 ms)
+      ✓ identifies math elements (1 ms)
+      ✓ identifies mjx-container (4 ms)
+      ✓ rejects regular elements (1 ms)
+    extractFormula
+      ✓ extracts from Habr formula image (4 ms)
+      ✓ extracts from KaTeX element
+      ✓ returns null for regular elements
+
+PASS tests/mock/index.test.js (12.196 s)
+  Web Capture Microservice
+    GET /html
+      ✓ should return HTML content when URL is provided (38 ms)
+      ✓ should return 400 when URL is missing (4 ms)
+      ✓ should return 500 when fetch fails (11 ms)
+    GET /markdown
+      ✓ should convert HTML to Markdown when URL is provided (49 ms)
+      ✓ should remove CSS from the markdown output (13 ms)
+      ✓ should return 400 when URL is missing (3 ms)
+      ✓ should return 500 when fetch fails (5 ms)
+    GET /image
+      ✓ should return PNG image when URL is provided (10645 ms)
+      ✓ should return 400 when URL is missing (53 ms)
+    GET /stream
+      ✓ should stream content from the given URL (73 ms)
+      ✓ should return 400 when URL is missing (13 ms)
+      ✓ should return 500 when fetch fails (137 ms)
+    GET /fetch
+      ✓ should return content when URL is provided (19 ms)
+      ✓ should return 400 when URL is missing (6 ms)
+      ✓ should return 500 when fetch fails (20 ms)
+
+PASS tests/unit/localize-images.test.js
+  localize-images module
+    extractImageReferences
+      ✓ extracts markdown image references (5 ms)
+      ✓ ignores local image references (1 ms)
+      ✓ ignores non-image links
+      ✓ returns empty array for no images
+    getExtensionFromUrl
+      ✓ detects .png extension
+      ✓ detects .jpg extension
+      ✓ detects .gif extension (1 ms)
+      ✓ handles query parameters
+      ✓ defaults to .png for unknown extension
+    generateLocalFilename
+      ✓ generates zero-padded filename
+      ✓ preserves file extension from URL
+    generateFigureFilename
+      ✓ generates figure-numbered filenames while preserving extensions (4 ms)
+    localizeImages
+      ✓ accepts a custom filename generator for archive-compatible paths (1 ms)
+
+PASS tests/unit/postprocess.test.js
+  postprocess module
+    applyUnicodeNormalization
+      ✓ preserves non-breaking spaces as &nbsp; entities (13 ms)
+      ✓ normalizes curly quotes to straight quotes
+      ✓ normalizes en-dash to hyphen
+      ✓ normalizes ellipsis (11 ms)
+    applyLatexSpacingFixes
+      ✓ adds space before formula after word character (1 ms)
+      ✓ trims whitespace inside formula delimiters
+      ✓ does not modify block formulas
+      ✓ does not modify blockquote block formulas (1 ms)
+      ✓ handles multiple formulas on one line
+    applyPercentSignFix
+      ✓ fixes percent sign in inline formulas (15 ms)
+      ✓ fixes \text{%} notation (1 ms)
+    applyBoldFormattingFixes
+      ✓ removes empty bold markers
+      ✓ trims content inside bold markers (1 ms)
+      ✓ adds space between word and bold
+    postProcessMarkdown
+      ✓ applies all transformations by default (1 ms)
+      ✓ respects option flags (9 ms)
+      ✓ removes stray standalone $ signs
+
+PASS tests/unit/batch.test.js
+  batch module
+    getArticle
+      ✓ returns article config by version (3 ms)
+      ✓ merges defaults into article config
+      ✓ throws for unknown version (44 ms)
+    getAllVersions
+      ✓ returns all version keys (1 ms)
+    getAllArticles
+      ✓ returns all articles with defaults merged (1 ms)
+    createConfigFromUrls
+      ✓ creates config from URL list (1 ms)
+      ✓ sets default archive paths (88 ms)
+    validateConfig
+      ✓ validates correct config
+      ✓ rejects config without articles (1 ms)
+      ✓ rejects article without url
+      ✓ rejects article with invalid url (1 ms)
+
+PASS tests/unit/github.test.js
+  GitHub repository URLs
+    ✓ detects plain GitHub repository pages (2 ms)
+    ✓ derives repository text filenames
+  GitHub repository snapshot formatting
+    ✓ formats a compact markdown snapshot with metadata, file tree, and README (1 ms)
+    ✓ formats a compact plain-text snapshot with metadata, file tree, and README (1 ms)
+
+PASS tests/integration/deepwiki-rendered-page.mock.test.js
+  DeepWiki rendered markdown endpoint behavior
+    ✓ converts browser-rendered content when the initial fetch is a Next.js shell (1397 ms)
+
+PASS tests/unit/convertGoogleDriveUrl.test.js
+  Google Drive URL helpers
+    ✓ extracts and converts issue URL with /view (1 ms)
+    ✓ extracts and converts issue URL without /view (3 ms)
+    ✓ extracts and converts second issue URL with /view
+    ✓ extracts and converts second issue URL without /view
+    ✓ extracts and converts open?id URL
+    ✓ extracts and converts direct uc URL
+    ✓ extracts and converts redirected usercontent URL
+    ✓ ignores non-Google Drive URLs and malformed Drive IDs (3 ms)
+    ✓ keeps empty or missing inputs unchanged when converting (1 ms)
+    ✓ renders text output with the original file URL and direct image URL
+
+PASS tests/integration/search-endpoint.test.js
+  GET /search
+    ✓ returns structured JSON for the wikipedia provider (89 ms)
+    ✓ returns markdown when format=markdown (21 ms)
+    ✓ defaults to the wikipedia provider (15 ms)
+    ✓ rejects a missing query (7 ms)
+    ✓ rejects an unknown provider (4 ms)
+
+PASS tests/unit/retry.test.js
+  retry
+    ✓ returns result on first success (2 ms)
+    ✓ retries on failure and succeeds eventually (153 ms)
+    ✓ throws after exhausting retries (174 ms)
+    ✓ calls onRetry callback before each retry (52 ms)
+    ✓ uses exponential backoff delays (707 ms)
+    ✓ caps delay at maxDelay (1105 ms)
+    ✓ passes attempt number to fn (155 ms)
+
+PASS tests/unit/figures.test.js
+  figures module
+    extractFigures
+      ✓ extracts figures with captions (43 ms)
+      ✓ handles Russian figure captions (11 ms)
+      ✓ uses sequential numbering when no caption number (10 ms)
+      ✓ skips SVG images (4 ms)
+      ✓ resolves relative URLs (5 ms)
+      ✓ returns empty array for no figures (6 ms)
+
+PASS tests/unit/heading-image.test.js
+  heading image parity
+    ✓ <img> inside <h1> survives Turndown and stays in sync with extraction (19 ms)
+    ✓ <img> inside all heading levels is preserved (22 ms)
+    ✓ image count parity across full pipeline (11 ms)
+
+PASS tests/unit/paragraph-vs-line-break.test.js
+  <br><br> coalesces to a paragraph break (not two hard breaks)
+    ✓ renders a paragraph break between Caption A and Caption B (convertHtmlToMarkdown) (110 ms)
+    ✓ renders a paragraph break between Caption A and Caption B (convertHtmlToMarkdownEnhanced) (69 ms)
+    ✓ CommonMark renders Caption A and Caption B as separate paragraphs (32 ms)
+
+PASS tests/unit/image-mode-defaults.test.js
+  image-mode contract
+    ✓ default mode keeps remote URLs (12 ms)
+    ✓ --extract-images writes files (10 ms)
+    ✓ --embed-images keeps base64 (4 ms)
+    ✓ flags have observable effect on every input (3 ms)
+
+PASS tests/unit/bold-coalesce-and-leakage.test.js
+  bold-run coalescing and block boundary handling (issue #120)
+    ✓ A: coalesces adjacent bold spans into a single bold run (7 ms)
+    ✓ B: never emits an empty "****" pair between adjacent bold runs
+    ✓ C: closes bold at block-level boundaries (<br>, <img>) (1 ms)
+    ✓ D: every "**" opener has a matching closer (balanced asterisks)
+
+PASS tests/unit/package-runtime-dependencies.test.js
+  runtime package dependencies
+    ✓ turndown-plugin-gfm is declared as a production dependency (4 ms)
+    ✓ turndown-plugin-gfm is not marked dev-only in package-lock.json (4 ms)
+
+PASS tests/unit/convertRelativeUrls.test.js
+  convertRelativeUrls
+    ✓ should NOT inject runtimeHook if there are no <script> tags (9 ms)
+    ✓ should inject runtimeHook if there is a <script> tag (1 ms)
+    ✓ should inject runtimeHook if there is an inline <script>
+
+  console.log
+    Using explicitly configured JavaScript root: js
+
+      at getJsRoot (../scripts/js-paths.mjs:28:15)
+
+  console.log
+    Verifying publish (attempt 1 of 12)...
+
+      at verifyPublishedVersionWithRunner (../scripts/publish-to-npm.mjs:119:13)
+
+  console.log
+    Version not visible on npm yet: npm error code E404
+
+      at verifyPublishedVersionWithRunner (../scripts/publish-to-npm.mjs:130:17)
+
+  console.log
+    Verifying publish (attempt 2 of 12)...
+
+      at verifyPublishedVersionWithRunner (../scripts/publish-to-npm.mjs:119:13)
+
+  console.log
+    Version not visible on npm yet: npm error code E404
+
+      at verifyPublishedVersionWithRunner (../scripts/publish-to-npm.mjs:130:17)
+
+  console.log
+    Verifying publish (attempt 3 of 12)...
+
+      at verifyPublishedVersionWithRunner (../scripts/publish-to-npm.mjs:119:13)
+
+PASS tests/unit/publish-verification.test.js
+  publish verification
+    ✓ keeps polling verification through transient npm 404s (50 ms)
+
+PASS tests/xpaste/xpaste.integration.test.js
+  xpaste.pro fixture integration
+    ✓ converts the captured page fixture with the same visual ordering as the screenshot (99 ms)
+
+PASS tests/integration/archive-default-layout.test.js
+  ✓ default archive contains document.md, document.html, and images/ folder (91 ms)
+
+PASS tests/unit/markdown.test.js
+  markdown rendering decisions
+    ✓ uses browser rendering for JavaScript-heavy HTML shells (9 ms)
+    ✓ keeps plain HTML on the direct fetch path (1 ms)
+    ✓ keeps static pages with incidental scripts on the direct fetch path
+
+PASS tests/unit/animation.test.js
+  animation module
+    compareFrames
+      ✓ returns 1.0 for identical frames (1 ms)
+      ✓ returns 0 for completely different frames
+      ✓ returns 0 for different sized frames
+      ✓ returns 0 for null frames (1 ms)
+      ✓ calculates partial similarity
+
+PASS tests/unit/gdocs-preprocess.test.js
+  preprocessGoogleDocsExportHtml
+    ✓ keeps multi-paragraph table cells on one GFM row (issue #110) (63 ms)
+
+PASS tests/xpaste/xpaste.e2e.test.js
+  xpaste.pro HTTP e2e
+    ✓ serves raw paste text through the real HTTP server (96 ms)
+
+PASS tests/unit/heading-numbering.test.js
+  ✓ preserves hierarchical heading numbering (13, 13.1, 13.2, 13.3) (95 ms)
+
+PASS tests/unit/stackoverflow.test.js
+  Stack Overflow URL helpers
+    ✓ recognizes Stack Overflow question URLs (9 ms)
+    ✓ builds a StackPrinter URL for direct captures (3 ms)
+
+PASS tests/unit/html2md-br-in-list-item.test.js
+  ✓ preserves <br> as a line separator inside list items (45 ms)
+
+PASS tests/unit/html2md-ol-numbering.test.js
+  ✓ numbers consecutive top-level ordered lists continuously (17 ms)
+
+PASS tests/unit/workflow-policy.test.js
+  workflow policy
+    ✓ .github/workflows/js.yml does not cancel in-flight main release runs (5 ms)
+    ✓ .github/workflows/rust.yml does not cancel in-flight main release runs (1 ms)
+    ✓ .github/workflows/parity.yml does not cancel in-flight main release runs
+    ✓ .github/workflows/js.yml uses the current checkout action (1 ms)
+    ✓ .github/workflows/rust.yml uses the current checkout action (3 ms)
+    ✓ .github/workflows/parity.yml uses the current checkout action (1 ms)
+    ✓ Rust workflow uses the current cache action
+
+PASS tests/unit/rust-dockerfile.test.js
+  Rust Dockerfile
+    ✓ uses a Rust builder image that satisfies Cargo.toml rust-version (2 ms)
+
+PASS tests/unit/detect-code-changes.test.js
+  detect-code-changes
+    ✓ detects code introduced by a real merge commit pushed to main (466 ms)
+    ✓ keeps pull request merge commits scoped to the PR head commit (586 ms)
+    ✓ detects files when a push only has one commit (321 ms)
+
+PASS tests/e2e/process.test.js (13.462 s)
+  E2E: Web Capture Microservice
+    ✓ should return HTML from /html endpoint (288 ms)
+    ✓ should return Markdown from /markdown endpoint (115 ms)
+    ✓ should return PNG from /image endpoint (10947 ms)
+    ✓ should stream content from /stream endpoint (45 ms)
+    ✓ should return content from /fetch endpoint (16 ms)
+
+FAIL tests/integration/browser-engines.test.js (15.37 s)
+  Browser Engine Integration Tests
+    Puppeteer Engine
+      ✓ can navigate to a page and get content (5566 ms)
+      ✓ can take a screenshot (3832 ms)
+      ✓ can set custom headers and user agent (3937 ms)
+    Playwright Engine
+      ✕ can navigate to a page and get content (512 ms)
+      ✕ can take a screenshot (3 ms)
+      ✕ can set custom headers and user agent (3 ms)
+    Engine Parity
+      ✕ both engines produce similar content for the same page (1142 ms)
+
+  ● Browser Engine Integration Tests › Playwright Engine › can navigate to a page and get content
+
+    browserType.launchPersistentContext: Executable doesn't exist at /home/box/.cache/ms-playwright/chromium_headless_shell-1194/chrome-linux/headless_shell
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     npx playwright install                                              ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+      75 |
+      76 |   // Use browser-commander's launchBrowser with server-specific args
+    > 77 |   const { browser, page: initialPage } = await launchBrowser({
+         |                                          ^
+      78 |     engine: engineType,
+      79 |     args: [...SERVER_CHROME_ARGS, ...args],
+      80 |     headless: true,
+
+      at launchBrowser (node_modules/browser-commander/src/browser/launcher.js:68:15)
+      at createBrowser (src/browser.js:77:42)
+      at Object.<anonymous> (tests/integration/browser-engines.test.js:56:17)
+
+  ● Browser Engine Integration Tests › Playwright Engine › can take a screenshot
+
+    browserType.launchPersistentContext: Executable doesn't exist at /home/box/.cache/ms-playwright/chromium_headless_shell-1194/chrome-linux/headless_shell
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     npx playwright install                                              ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+      75 |
+      76 |   // Use browser-commander's launchBrowser with server-specific args
+    > 77 |   const { browser, page: initialPage } = await launchBrowser({
+         |                                          ^
+      78 |     engine: engineType,
+      79 |     args: [...SERVER_CHROME_ARGS, ...args],
+      80 |     headless: true,
+
+      at launchBrowser (node_modules/browser-commander/src/browser/launcher.js:68:15)
+      at createBrowser (src/browser.js:77:42)
+      at Object.<anonymous> (tests/integration/browser-engines.test.js:56:17)
+
+  ● Browser Engine Integration Tests › Playwright Engine › can set custom headers and user agent
+
+    browserType.launchPersistentContext: Executable doesn't exist at /home/box/.cache/ms-playwright/chromium_headless_shell-1194/chrome-linux/headless_shell
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     npx playwright install                                              ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+      75 |
+      76 |   // Use browser-commander's launchBrowser with server-specific args
+    > 77 |   const { browser, page: initialPage } = await launchBrowser({
+         |                                          ^
+      78 |     engine: engineType,
+      79 |     args: [...SERVER_CHROME_ARGS, ...args],
+      80 |     headless: true,
+
+      at launchBrowser (node_modules/browser-commander/src/browser/launcher.js:68:15)
+      at createBrowser (src/browser.js:77:42)
+      at Object.<anonymous> (tests/integration/browser-engines.test.js:56:17)
+
+  ● Browser Engine Integration Tests › Engine Parity › both engines produce similar content for the same page
+
+    browserType.launchPersistentContext: Executable doesn't exist at /home/box/.cache/ms-playwright/chromium_headless_shell-1194/chrome-linux/headless_shell
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     npx playwright install                                              ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+      75 |
+      76 |   // Use browser-commander's launchBrowser with server-specific args
+    > 77 |   const { browser, page: initialPage } = await launchBrowser({
+         |                                          ^
+      78 |     engine: engineType,
+      79 |     args: [...SERVER_CHROME_ARGS, ...args],
+      80 |     headless: true,
+
+      at launchBrowser (node_modules/browser-commander/src/browser/launcher.js:68:15)
+      at createBrowser (src/browser.js:77:42)
+      at Object.<anonymous> (tests/integration/browser-engines.test.js:103:33)
+
+FAIL tests/e2e/docker.test.js (30.551 s)
+  E2E (Docker): Web Capture Microservice
+    ✕ should return HTML from /html endpoint
+    ✕ should return Markdown from /markdown endpoint
+    ✕ should return PNG from /image endpoint
+    ✕ should stream content from /stream endpoint
+    ✕ should return content from /fetch endpoint (1 ms)
+
+  ● E2E (Docker): Web Capture Microservice › should return HTML from /html endpoint
+
+    thrown: "Exceeded timeout of 30000 ms for a hook.
+    Add a timeout value to this test to increase the timeout, if this is a long-running test. See https://jestjs.io/docs/api#testname-fn-timeout."
+
+      29 | }
+      30 |
+    > 31 | beforeAll(async () => {
+         | ^
+      32 |   timings.start = Date.now();
+      33 |
+      34 |   // Start a local mock server to avoid depending on external network
+
+      at beforeAll (tests/e2e/docker.test.js:31:1)
+
+  ● E2E (Docker): Web Capture Microservice › should return Markdown from /markdown endpoint
+
+    thrown: "Exceeded timeout of 30000 ms for a hook.
+    Add a timeout value to this test to increase the timeout, if this is a long-running test. See https://jestjs.io/docs/api#testname-fn-timeout."
+
+      29 | }
+      30 |
+    > 31 | beforeAll(async () => {
+         | ^
+      32 |   timings.start = Date.now();
+      33 |
+      34 |   // Start a local mock server to avoid depending on external network
+
+      at beforeAll (tests/e2e/docker.test.js:31:1)
+
+  ● E2E (Docker): Web Capture Microservice › should return PNG from /image endpoint
+
+    thrown: "Exceeded timeout of 30000 ms for a hook.
+    Add a timeout value to this test to increase the timeout, if this is a long-running test. See https://jestjs.io/docs/api#testname-fn-timeout."
+
+      29 | }
+      30 |
+    > 31 | beforeAll(async () => {
+         | ^
+      32 |   timings.start = Date.now();
+      33 |
+      34 |   // Start a local mock server to avoid depending on external network
+
+      at beforeAll (tests/e2e/docker.test.js:31:1)
+
+  ● E2E (Docker): Web Capture Microservice › should stream content from /stream endpoint
+
+    thrown: "Exceeded timeout of 30000 ms for a hook.
+    Add a timeout value to this test to increase the timeout, if this is a long-running test. See https://jestjs.io/docs/api#testname-fn-timeout."
+
+      29 | }
+      30 |
+    > 31 | beforeAll(async () => {
+         | ^
+      32 |   timings.start = Date.now();
+      33 |
+      34 |   // Start a local mock server to avoid depending on external network
+
+      at beforeAll (tests/e2e/docker.test.js:31:1)
+
+  ● E2E (Docker): Web Capture Microservice › should return content from /fetch endpoint
+
+    thrown: "Exceeded timeout of 30000 ms for a hook.
+    Add a timeout value to this test to increase the timeout, if this is a long-running test. See https://jestjs.io/docs/api#testname-fn-timeout."
+
+      29 | }
+      30 |
+    > 31 | beforeAll(async () => {
+         | ^
+      32 |   timings.start = Date.now();
+      33 |
+      34 |   // Start a local mock server to avoid depending on external network
+
+      at beforeAll (tests/e2e/docker.test.js:31:1)
+
+A worker process has failed to exit gracefully and has been force exited. This is likely caused by tests leaking due to improper teardown. Try running with --detectOpenHandles to find leaks. Active timers can also cause this, ensure that .unref() was called on them.
+Summary of all failing tests
+FAIL tests/unit/browser.test.js (8.678 s)
+  ● Browser Abstraction Layer › createBrowser - Playwright › creates a playwright browser with type field
+
+    browserType.launchPersistentContext: Executable doesn't exist at /home/box/.cache/ms-playwright/chromium_headless_shell-1194/chrome-linux/headless_shell
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     npx playwright install                                              ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+      75 |
+      76 |   // Use browser-commander's launchBrowser with server-specific args
+    > 77 |   const { browser, page: initialPage } = await launchBrowser({
+         |                                          ^
+      78 |     engine: engineType,
+      79 |     args: [...SERVER_CHROME_ARGS, ...args],
+      80 |     headless: true,
+
+      at launchBrowser (node_modules/browser-commander/src/browser/launcher.js:68:15)
+      at createBrowser (src/browser.js:77:42)
+      at Object.<anonymous> (tests/unit/browser.test.js:90:23)
+
+  ● Browser Abstraction Layer › createBrowser - Playwright › can create and use a page
+
+    browserType.launchPersistentContext: Executable doesn't exist at /home/box/.cache/ms-playwright/chromium_headless_shell-1194/chrome-linux/headless_shell
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     npx playwright install                                              ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+      75 |
+      76 |   // Use browser-commander's launchBrowser with server-specific args
+    > 77 |   const { browser, page: initialPage } = await launchBrowser({
+         |                                          ^
+      78 |     engine: engineType,
+      79 |     args: [...SERVER_CHROME_ARGS, ...args],
+      80 |     headless: true,
+
+      at launchBrowser (node_modules/browser-commander/src/browser/launcher.js:68:15)
+      at createBrowser (src/browser.js:77:42)
+      at Object.<anonymous> (tests/unit/browser.test.js:98:23)
+
+  ● Browser Abstraction Layer › Page Adapter Compatibility › both adapters support the same interface
+
+    browserType.launchPersistentContext: Executable doesn't exist at /home/box/.cache/ms-playwright/chromium_headless_shell-1194/chrome-linux/headless_shell
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     npx playwright install                                              ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+      75 |
+      76 |   // Use browser-commander's launchBrowser with server-specific args
+    > 77 |   const { browser, page: initialPage } = await launchBrowser({
+         |                                          ^
+      78 |     engine: engineType,
+      79 |     args: [...SERVER_CHROME_ARGS, ...args],
+      80 |     headless: true,
+
+      at launchBrowser (node_modules/browser-commander/src/browser/launcher.js:68:15)
+      at createBrowser (src/browser.js:77:42)
+      at Object.<anonymous> (tests/unit/browser.test.js:112:33)
+
+  ● Browser Abstraction Layer › Page Adapter Compatibility › both adapters expose browser-commander v0.7.0+ APIs
+
+    browserType.launchPersistentContext: Executable doesn't exist at /home/box/.cache/ms-playwright/chromium_headless_shell-1194/chrome-linux/headless_shell
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     npx playwright install                                              ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+      75 |
+      76 |   // Use browser-commander's launchBrowser with server-specific args
+    > 77 |   const { browser, page: initialPage } = await launchBrowser({
+         |                                          ^
+      78 |     engine: engineType,
+      79 |     args: [...SERVER_CHROME_ARGS, ...args],
+      80 |     headless: true,
+
+      at launchBrowser (node_modules/browser-commander/src/browser/launcher.js:68:15)
+      at createBrowser (src/browser.js:77:42)
+      at Object.<anonymous> (tests/unit/browser.test.js:138:33)
+
+FAIL tests/integration/browser-engines.test.js (15.37 s)
+  ● Browser Engine Integration Tests › Playwright Engine › can navigate to a page and get content
+
+    browserType.launchPersistentContext: Executable doesn't exist at /home/box/.cache/ms-playwright/chromium_headless_shell-1194/chrome-linux/headless_shell
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     npx playwright install                                              ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+      75 |
+      76 |   // Use browser-commander's launchBrowser with server-specific args
+    > 77 |   const { browser, page: initialPage } = await launchBrowser({
+         |                                          ^
+      78 |     engine: engineType,
+      79 |     args: [...SERVER_CHROME_ARGS, ...args],
+      80 |     headless: true,
+
+      at launchBrowser (node_modules/browser-commander/src/browser/launcher.js:68:15)
+      at createBrowser (src/browser.js:77:42)
+      at Object.<anonymous> (tests/integration/browser-engines.test.js:56:17)
+
+  ● Browser Engine Integration Tests › Playwright Engine › can take a screenshot
+
+    browserType.launchPersistentContext: Executable doesn't exist at /home/box/.cache/ms-playwright/chromium_headless_shell-1194/chrome-linux/headless_shell
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     npx playwright install                                              ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+      75 |
+      76 |   // Use browser-commander's launchBrowser with server-specific args
+    > 77 |   const { browser, page: initialPage } = await launchBrowser({
+         |                                          ^
+      78 |     engine: engineType,
+      79 |     args: [...SERVER_CHROME_ARGS, ...args],
+      80 |     headless: true,
+
+      at launchBrowser (node_modules/browser-commander/src/browser/launcher.js:68:15)
+      at createBrowser (src/browser.js:77:42)
+      at Object.<anonymous> (tests/integration/browser-engines.test.js:56:17)
+
+  ● Browser Engine Integration Tests › Playwright Engine › can set custom headers and user agent
+
+    browserType.launchPersistentContext: Executable doesn't exist at /home/box/.cache/ms-playwright/chromium_headless_shell-1194/chrome-linux/headless_shell
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     npx playwright install                                              ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+      75 |
+      76 |   // Use browser-commander's launchBrowser with server-specific args
+    > 77 |   const { browser, page: initialPage } = await launchBrowser({
+         |                                          ^
+      78 |     engine: engineType,
+      79 |     args: [...SERVER_CHROME_ARGS, ...args],
+      80 |     headless: true,
+
+      at launchBrowser (node_modules/browser-commander/src/browser/launcher.js:68:15)
+      at createBrowser (src/browser.js:77:42)
+      at Object.<anonymous> (tests/integration/browser-engines.test.js:56:17)
+
+  ● Browser Engine Integration Tests › Engine Parity › both engines produce similar content for the same page
+
+    browserType.launchPersistentContext: Executable doesn't exist at /home/box/.cache/ms-playwright/chromium_headless_shell-1194/chrome-linux/headless_shell
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     npx playwright install                                              ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+      75 |
+      76 |   // Use browser-commander's launchBrowser with server-specific args
+    > 77 |   const { browser, page: initialPage } = await launchBrowser({
+         |                                          ^
+      78 |     engine: engineType,
+      79 |     args: [...SERVER_CHROME_ARGS, ...args],
+      80 |     headless: true,
+
+      at launchBrowser (node_modules/browser-commander/src/browser/launcher.js:68:15)
+      at createBrowser (src/browser.js:77:42)
+      at Object.<anonymous> (tests/integration/browser-engines.test.js:103:33)
+
+FAIL tests/e2e/docker.test.js (30.551 s)
+  ● E2E (Docker): Web Capture Microservice › should return HTML from /html endpoint
+
+    thrown: "Exceeded timeout of 30000 ms for a hook.
+    Add a timeout value to this test to increase the timeout, if this is a long-running test. See https://jestjs.io/docs/api#testname-fn-timeout."
+
+      29 | }
+      30 |
+    > 31 | beforeAll(async () => {
+         | ^
+      32 |   timings.start = Date.now();
+      33 |
+      34 |   // Start a local mock server to avoid depending on external network
+
+      at beforeAll (tests/e2e/docker.test.js:31:1)
+
+  ● E2E (Docker): Web Capture Microservice › should return Markdown from /markdown endpoint
+
+    thrown: "Exceeded timeout of 30000 ms for a hook.
+    Add a timeout value to this test to increase the timeout, if this is a long-running test. See https://jestjs.io/docs/api#testname-fn-timeout."
+
+      29 | }
+      30 |
+    > 31 | beforeAll(async () => {
+         | ^
+      32 |   timings.start = Date.now();
+      33 |
+      34 |   // Start a local mock server to avoid depending on external network
+
+      at beforeAll (tests/e2e/docker.test.js:31:1)
+
+  ● E2E (Docker): Web Capture Microservice › should return PNG from /image endpoint
+
+    thrown: "Exceeded timeout of 30000 ms for a hook.
+    Add a timeout value to this test to increase the timeout, if this is a long-running test. See https://jestjs.io/docs/api#testname-fn-timeout."
+
+      29 | }
+      30 |
+    > 31 | beforeAll(async () => {
+         | ^
+      32 |   timings.start = Date.now();
+      33 |
+      34 |   // Start a local mock server to avoid depending on external network
+
+      at beforeAll (tests/e2e/docker.test.js:31:1)
+
+  ● E2E (Docker): Web Capture Microservice › should stream content from /stream endpoint
+
+    thrown: "Exceeded timeout of 30000 ms for a hook.
+    Add a timeout value to this test to increase the timeout, if this is a long-running test. See https://jestjs.io/docs/api#testname-fn-timeout."
+
+      29 | }
+      30 |
+    > 31 | beforeAll(async () => {
+         | ^
+      32 |   timings.start = Date.now();
+      33 |
+      34 |   // Start a local mock server to avoid depending on external network
+
+      at beforeAll (tests/e2e/docker.test.js:31:1)
+
+  ● E2E (Docker): Web Capture Microservice › should return content from /fetch endpoint
+
+    thrown: "Exceeded timeout of 30000 ms for a hook.
+    Add a timeout value to this test to increase the timeout, if this is a long-running test. See https://jestjs.io/docs/api#testname-fn-timeout."
+
+      29 | }
+      30 |
+    > 31 | beforeAll(async () => {
+         | ^
+      32 |   timings.start = Date.now();
+      33 |
+      34 |   // Start a local mock server to avoid depending on external network
+
+      at beforeAll (tests/e2e/docker.test.js:31:1)
+
+
+Test Suites: 3 failed, 4 skipped, 48 passed, 51 of 55 total
+Tests:       13 failed, 42 skipped, 469 passed, 524 total
+Snapshots:   0 total
+Time:        36.149 s
+Ran all test suites.

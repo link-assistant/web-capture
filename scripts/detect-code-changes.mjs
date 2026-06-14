@@ -7,9 +7,10 @@
 //
 // For PRs: GitHub Actions checks out a synthetic merge commit, so we
 // compare HEAD^2^ to HEAD^2 (the PR head's per-commit diff).
-// For pushes: compares HEAD^ to HEAD.
-// This ensures a commit touching only non-code files skips tests,
-// even when earlier commits in the same PR changed code.
+// For pushes: compares HEAD^ to HEAD. A real merge commit pushed to main
+// uses HEAD^1 to HEAD so the whole merged branch is detected.
+// This ensures a commit touching only non-code files skips tests in PRs,
+// while main merge pushes still see all files introduced by the merge.
 //
 // Excluded from code changes (don't require changesets):
 // - Markdown files in any folder
@@ -27,12 +28,15 @@
 import { execSync } from 'child_process';
 import { appendFileSync } from 'fs';
 
-function exec(command) {
+function exec(command, options = {}) {
   try {
     return execSync(command, { encoding: 'utf-8' }).trim();
   } catch (error) {
     console.error(`Error executing command: ${command}`);
     console.error(error.message);
+    if (options.throwOnError) {
+      throw error;
+    }
     return '';
   }
 }
@@ -57,23 +61,40 @@ function getChangedFiles() {
   // events: HEAD is the merge commit, HEAD^ is the base branch, HEAD^2
   // is the actual PR head. To get the per-commit diff (what the latest
   // push actually changed), we compare HEAD^2^ to HEAD^2.
-  // For push events, HEAD is the real commit, so HEAD^ to HEAD works.
-  if (isMergeCommit()) {
+  // For push events, HEAD is the real commit. A merge commit pushed to
+  // main must compare the first parent to HEAD so earlier commits from the
+  // merged branch are not hidden by a docs-only final commit.
+  const eventName = process.env.GITHUB_EVENT_NAME || 'push';
+
+  if (eventName === 'pull_request' && isMergeCommit()) {
     console.log('Merge commit detected (pull_request event)');
     console.log('Comparing HEAD^2^ to HEAD^2 (per-commit diff of PR head)');
     try {
-      const output = exec('git diff --name-only HEAD^2^ HEAD^2');
+      const output = exec('git diff --name-only HEAD^2^ HEAD^2', {
+        throwOnError: true,
+      });
       return output ? output.split('\n').filter(Boolean) : [];
     } catch {
-      console.log('HEAD^2^ not available (first commit in PR), listing files in HEAD^2');
+      console.log(
+        'HEAD^2^ not available (first commit in PR), listing files in HEAD^2'
+      );
       const output = exec('git diff --name-only HEAD^ HEAD^2');
       return output ? output.split('\n').filter(Boolean) : [];
     }
   }
 
+  if (isMergeCommit()) {
+    console.log(`Merge commit detected (${eventName} event)`);
+    console.log('Comparing HEAD^1 to HEAD (full merge diff)');
+    const output = exec('git diff --name-only HEAD^1 HEAD');
+    return output ? output.split('\n').filter(Boolean) : [];
+  }
+
   console.log('Comparing HEAD^ to HEAD');
   try {
-    const output = exec('git diff --name-only HEAD^ HEAD');
+    const output = exec('git diff --name-only HEAD^ HEAD', {
+      throwOnError: true,
+    });
     return output ? output.split('\n').filter(Boolean) : [];
   } catch {
     console.log('HEAD^ not available, listing all files in HEAD');
