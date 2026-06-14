@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 0.3.31
+
+### Patch Changes
+
+- Fix fresh dependency resolution failures (issue #137). Update to
+  `html-to-markdown-rs` 3.6 and adapt `src/kreuzberg.rs` to the new
+  `InlineImage.dimensions` (`ImageDimensions { width, height }` instead of a
+  `(u32, u32)` tuple). Drop the unused `brotli` decompression feature from
+  `reqwest` to avoid the broken `brotli 8.0.3` / `alloc-no-stdlib` graph, which
+  lets a from-scratch `cargo add web-capture` build succeed again. Bump
+  `rust-version` to the latest stable (1.96) and add a CI job that builds the
+  crate against a freshly resolved lockfile to catch registry drift before
+  release.
+
 ## 0.3.30
 
 ### Patch Changes

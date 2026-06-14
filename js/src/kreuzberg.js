@@ -39,7 +39,19 @@ function toSnakeCase(key) {
   return key.replace(/[A-Z]/g, (match) => `_${match.toLowerCase()}`);
 }
 
-function normalizeStructuredKeys(value) {
+/**
+ * Recursively normalize object keys to snake_case.
+ *
+ * Used to give the structured `metadata`, `tables`, and `images` payloads a
+ * stable shape regardless of the casing the native binding emits. In
+ * particular, inline image `dimensions` are exposed as `{ width, height }` —
+ * mirroring the Rust `inline_image_to_json` mapping after the
+ * html-to-markdown 3.6 `ImageDimensions` change (see issue #137).
+ *
+ * @param {*} value - Value to normalize
+ * @returns {*} The value with all object keys converted to snake_case
+ */
+export function normalizeStructuredKeys(value) {
   if (Array.isArray(value)) {
     return value.map(normalizeStructuredKeys);
   }
