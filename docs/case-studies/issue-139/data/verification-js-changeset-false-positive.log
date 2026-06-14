@@ -1,0 +1,1377 @@
+JS - Detect Changes	Set up job	﻿2026-06-14T20:50:37.4712578Z Current runner version: '2.335.1'
+JS - Detect Changes	Set up job	2026-06-14T20:50:37.4747639Z ##[group]Runner Image Provisioner
+JS - Detect Changes	Set up job	2026-06-14T20:50:37.4748933Z Hosted Compute Agent
+JS - Detect Changes	Set up job	2026-06-14T20:50:37.4749898Z Version: 20260527.539
+JS - Detect Changes	Set up job	2026-06-14T20:50:37.4750841Z Commit: a891dd388383b896fa6ac04a82c0b75cec981078
+JS - Detect Changes	Set up job	2026-06-14T20:50:37.4752047Z Build Date: 2026-05-27T21:39:57Z
+JS - Detect Changes	Set up job	2026-06-14T20:50:37.4753142Z Worker ID: {15960009-2c65-4fda-b6e4-d62a4a88d570}
+JS - Detect Changes	Set up job	2026-06-14T20:50:37.4754292Z Azure Region: eastus
+JS - Detect Changes	Set up job	2026-06-14T20:50:37.4755213Z ##[endgroup]
+JS - Detect Changes	Set up job	2026-06-14T20:50:37.4757647Z ##[group]Operating System
+JS - Detect Changes	Set up job	2026-06-14T20:50:37.4758723Z Ubuntu
+JS - Detect Changes	Set up job	2026-06-14T20:50:37.4759522Z 24.04.4
+JS - Detect Changes	Set up job	2026-06-14T20:50:37.4760386Z LTS
+JS - Detect Changes	Set up job	2026-06-14T20:50:37.4761209Z ##[endgroup]
+JS - Detect Changes	Set up job	2026-06-14T20:50:37.4762231Z ##[group]Runner Image
+JS - Detect Changes	Set up job	2026-06-14T20:50:37.4763247Z Image: ubuntu-24.04
+JS - Detect Changes	Set up job	2026-06-14T20:50:37.4764133Z Version: 20260607.184.1
+JS - Detect Changes	Set up job	2026-06-14T20:50:37.4765773Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20260607.184/images/ubuntu/Ubuntu2404-Readme.md
+JS - Detect Changes	Set up job	2026-06-14T20:50:37.4768887Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20260607.184
+JS - Detect Changes	Set up job	2026-06-14T20:50:37.4770492Z ##[endgroup]
+JS - Detect Changes	Set up job	2026-06-14T20:50:37.4772377Z ##[group]GITHUB_TOKEN Permissions
+JS - Detect Changes	Set up job	2026-06-14T20:50:37.4775033Z Contents: read
+JS - Detect Changes	Set up job	2026-06-14T20:50:37.4775906Z Metadata: read
+JS - Detect Changes	Set up job	2026-06-14T20:50:37.4777087Z Packages: read
+JS - Detect Changes	Set up job	2026-06-14T20:50:37.4777920Z ##[endgroup]
+JS - Detect Changes	Set up job	2026-06-14T20:50:37.4780927Z Secret source: Actions
+JS - Detect Changes	Set up job	2026-06-14T20:50:37.4782092Z Prepare workflow directory
+JS - Detect Changes	Set up job	2026-06-14T20:50:37.5327640Z Prepare all required actions
+JS - Detect Changes	Set up job	2026-06-14T20:50:37.5380939Z Getting action download info
+JS - Detect Changes	Set up job	2026-06-14T20:50:37.7790879Z Download action repository 'actions/checkout@v6' (SHA:df4cb1c069e1874edd31b4311f1884172cec0e10)
+JS - Detect Changes	Set up job	2026-06-14T20:50:38.0246248Z Complete job name: JS - Detect Changes
+JS - Detect Changes	Run actions/checkout@v6	﻿2026-06-14T20:50:38.0961816Z ##[group]Run actions/checkout@v6
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:38.0962688Z with:
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:38.0963138Z   fetch-depth: 0
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:38.0963629Z   repository: link-assistant/web-capture
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:38.0968552Z   token: ***
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:38.0969010Z   ssh-strict: true
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:38.0969559Z   ssh-user: git
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:38.0970019Z   persist-credentials: true
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:38.0970509Z   clean: true
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:38.0970962Z   sparse-checkout-cone-mode: true
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:38.0971486Z   fetch-tags: false
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:38.0971957Z   show-progress: true
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:38.0972421Z   lfs: false
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:38.0972845Z   submodules: false
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:38.0973303Z   set-safe-directory: true
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:38.0974119Z ##[endgroup]
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:38.1949284Z Syncing repository: link-assistant/web-capture
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:38.1951175Z ##[group]Getting Git version info
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:38.1951925Z Working directory is '/home/runner/work/web-capture/web-capture'
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:38.1953144Z [command]/usr/bin/git version
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:38.2012157Z git version 2.54.0
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:38.2066253Z ##[endgroup]
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:38.2082005Z Temporarily overriding HOME='/home/runner/work/_temp/6c58f863-6b35-4776-a153-721b6e59c649' before making global git config changes
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:38.2084268Z Adding repository directory to the temporary git global config as a safe directory
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:38.2088257Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/web-capture/web-capture
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:38.2133283Z Deleting the contents of '/home/runner/work/web-capture/web-capture'
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:38.2137352Z ##[group]Determining repository object format
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:38.2139866Z ##[endgroup]
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:38.2140645Z ##[group]Initializing the repository
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:38.2144809Z [command]/usr/bin/git init /home/runner/work/web-capture/web-capture
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:38.2221610Z hint: Using 'master' as the name for the initial branch. This default branch name
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:38.2223201Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:38.2224166Z hint: to use in all of your new repositories, which will suppress this warning,
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:38.2225618Z hint: call:
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:38.2226118Z hint:
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:38.2226990Z hint: 	git config --global init.defaultBranch <name>
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:38.2227989Z hint:
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:38.2228932Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:38.2230445Z hint: 'development'. The just-created branch can be renamed via this command:
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:38.2231633Z hint:
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:38.2232335Z hint: 	git branch -m <name>
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:38.2233094Z hint:
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:38.2234077Z hint: Disable this message with "git config set advice.defaultBranchName false"
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:38.2235714Z Initialized empty Git repository in /home/runner/work/web-capture/web-capture/.git/
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:38.2238879Z [command]/usr/bin/git remote add origin https://github.com/link-assistant/web-capture
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:38.2280135Z ##[endgroup]
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:38.2281372Z ##[group]Disabling automatic garbage collection
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:38.2284600Z [command]/usr/bin/git config --local gc.auto 0
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:38.2314665Z ##[endgroup]
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:38.2316080Z ##[group]Setting up auth
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:38.2317163Z Removing SSH command configuration
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:38.2322731Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:38.2357048Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:38.2679478Z Removing HTTP extra header
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:38.2686859Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:38.2718189Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:38.2946993Z Removing includeIf entries pointing to credentials config files
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:38.2952464Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:38.2984024Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:38.3217863Z [command]/usr/bin/git config --file /home/runner/work/_temp/git-credentials-ad45b223-7e49-41d6-9799-1facfc3bf90b.config http.https://github.com/.extraheader AUTHORIZATION: basic ***
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:38.3253978Z [command]/usr/bin/git config --local includeIf.gitdir:/home/runner/work/web-capture/web-capture/.git.path /home/runner/work/_temp/git-credentials-ad45b223-7e49-41d6-9799-1facfc3bf90b.config
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:38.3283695Z [command]/usr/bin/git config --local includeIf.gitdir:/home/runner/work/web-capture/web-capture/.git/worktrees/*.path /home/runner/work/_temp/git-credentials-ad45b223-7e49-41d6-9799-1facfc3bf90b.config
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:38.3315582Z [command]/usr/bin/git config --local includeIf.gitdir:/github/workspace/.git.path /github/runner_temp/git-credentials-ad45b223-7e49-41d6-9799-1facfc3bf90b.config
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:38.3346078Z [command]/usr/bin/git config --local includeIf.gitdir:/github/workspace/.git/worktrees/*.path /github/runner_temp/git-credentials-ad45b223-7e49-41d6-9799-1facfc3bf90b.config
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:38.3373894Z ##[endgroup]
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:38.3374664Z ##[group]Fetching the repository
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:38.3382571Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules origin +refs/heads/*:refs/remotes/origin/* +refs/tags/*:refs/tags/* +b52444a17516dbd929078642d9e1bb88af3c1d7b:refs/remotes/pull/140/merge
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:38.9784438Z From https://github.com/link-assistant/web-capture
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:38.9786334Z  * [new branch]      issue-1-5017a66c05a8                     -> origin/issue-1-5017a66c05a8
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:38.9788076Z  * [new branch]      issue-100-99e0a350ea14                   -> origin/issue-100-99e0a350ea14
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:38.9789944Z  * [new branch]      issue-102-7f05baee1eea                   -> origin/issue-102-7f05baee1eea
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:38.9791404Z  * [new branch]      issue-104-5d910a68a250                   -> origin/issue-104-5d910a68a250
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:38.9793043Z  * [new branch]      issue-106-44f7ed55b657                   -> origin/issue-106-44f7ed55b657
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:38.9794869Z  * [new branch]      issue-108-a4baf412d9cb                   -> origin/issue-108-a4baf412d9cb
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:38.9796914Z  * [new branch]      issue-11-2861fe92                        -> origin/issue-11-2861fe92
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:38.9798721Z  * [new branch]      issue-110-9712e1c70a94                   -> origin/issue-110-9712e1c70a94
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:38.9800561Z  * [new branch]      issue-112-53d54c67d8bb                   -> origin/issue-112-53d54c67d8bb
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:38.9802429Z  * [new branch]      issue-113-d6d2b9cf59e9                   -> origin/issue-113-d6d2b9cf59e9
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:38.9804584Z  * [new branch]      issue-114-b51d47bfd71f                   -> origin/issue-114-b51d47bfd71f
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:38.9806867Z  * [new branch]      issue-116-e68be1382988                   -> origin/issue-116-e68be1382988
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:38.9809110Z  * [new branch]      issue-117-6f9cc6105c70                   -> origin/issue-117-6f9cc6105c70
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:38.9811465Z  * [new branch]      issue-118-e11d2cc48206                   -> origin/issue-118-e11d2cc48206
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:38.9814050Z  * [new branch]      issue-119-9b5c645fa6d7                   -> origin/issue-119-9b5c645fa6d7
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:38.9816713Z  * [new branch]      issue-120-2cd62cbc1692                   -> origin/issue-120-2cd62cbc1692
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:38.9819266Z  * [new branch]      issue-121-71566b31e0d5                   -> origin/issue-121-71566b31e0d5
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:38.9822021Z  * [new branch]      issue-127-238ff237e28b                   -> origin/issue-127-238ff237e28b
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:38.9824530Z  * [new branch]      issue-13-a8f3466f6d79                    -> origin/issue-13-a8f3466f6d79
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:38.9827161Z  * [new branch]      issue-130-1bcc97d4a5a3                   -> origin/issue-130-1bcc97d4a5a3
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:38.9829678Z  * [new branch]      issue-135-fcb428bcce44                   -> origin/issue-135-fcb428bcce44
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:38.9832475Z  * [new branch]      issue-137-623d876e6e5f                   -> origin/issue-137-623d876e6e5f
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:38.9835224Z  * [new branch]      issue-139-24bf83def591                   -> origin/issue-139-24bf83def591
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:38.9838172Z  * [new branch]      issue-15-ba41292e60dd                    -> origin/issue-15-ba41292e60dd
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:38.9840908Z  * [new branch]      issue-17-d61fd69fb1d0                    -> origin/issue-17-d61fd69fb1d0
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:38.9843610Z  * [new branch]      issue-19-7350892c64e0                    -> origin/issue-19-7350892c64e0
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:38.9846282Z  * [new branch]      issue-21-ae540dd05ccf                    -> origin/issue-21-ae540dd05ccf
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:38.9849128Z  * [new branch]      issue-24-000cedc18c0c                    -> origin/issue-24-000cedc18c0c
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:38.9852030Z  * [new branch]      issue-26-f5bc08d1c062                    -> origin/issue-26-f5bc08d1c062
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:38.9854725Z  * [new branch]      issue-28-9ae2d8528d6f                    -> origin/issue-28-9ae2d8528d6f
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:38.9857455Z  * [new branch]      issue-29-1750ff5496be                    -> origin/issue-29-1750ff5496be
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:38.9860024Z  * [new branch]      issue-3-e1f5cfd3                         -> origin/issue-3-e1f5cfd3
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:38.9862620Z  * [new branch]      issue-31-e38e38b91777                    -> origin/issue-31-e38e38b91777
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:38.9865297Z  * [new branch]      issue-33-597c234012bd                    -> origin/issue-33-597c234012bd
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:38.9868106Z  * [new branch]      issue-36-4868dc6a6cd1                    -> origin/issue-36-4868dc6a6cd1
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:38.9870947Z  * [new branch]      issue-38-1c6b407f9682                    -> origin/issue-38-1c6b407f9682
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:38.9873616Z  * [new branch]      issue-40-aea0c7bbe29d                    -> origin/issue-40-aea0c7bbe29d
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:38.9876288Z  * [new branch]      issue-42-51e981719f34                    -> origin/issue-42-51e981719f34
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:38.9879203Z  * [new branch]      issue-44-5fc8fd3303bb                    -> origin/issue-44-5fc8fd3303bb
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:38.9881880Z  * [new branch]      issue-46-74be9b28b867                    -> origin/issue-46-74be9b28b867
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:38.9884526Z  * [new branch]      issue-48-fa0cc317013f                    -> origin/issue-48-fa0cc317013f
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:38.9887185Z  * [new branch]      issue-5-37ef445c                         -> origin/issue-5-37ef445c
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:38.9889725Z  * [new branch]      issue-50-accd5e4cfac0                    -> origin/issue-50-accd5e4cfac0
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:38.9892257Z  * [new branch]      issue-52-b275657642c1                    -> origin/issue-52-b275657642c1
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:38.9894778Z  * [new branch]      issue-53-ee04eb2d7520                    -> origin/issue-53-ee04eb2d7520
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:38.9897428Z  * [new branch]      issue-56-a89df19bbdc2                    -> origin/issue-56-a89df19bbdc2
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:38.9899992Z  * [new branch]      issue-58-c1217b0e73df                    -> origin/issue-58-c1217b0e73df
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:38.9902547Z  * [new branch]      issue-60-7c97a8e6f23e                    -> origin/issue-60-7c97a8e6f23e
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:38.9905145Z  * [new branch]      issue-62-5074090c911d                    -> origin/issue-62-5074090c911d
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:38.9907894Z  * [new branch]      issue-64-fc240b6b34c4                    -> origin/issue-64-fc240b6b34c4
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:38.9910449Z  * [new branch]      issue-66-d851400625b3                    -> origin/issue-66-d851400625b3
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:38.9913158Z  * [new branch]      issue-68-f537a341d162                    -> origin/issue-68-f537a341d162
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:38.9915611Z  * [new branch]      issue-7-c22ac3d5                         -> origin/issue-7-c22ac3d5
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:38.9918254Z  * [new branch]      issue-70-46e0722472f6                    -> origin/issue-70-46e0722472f6
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:38.9920797Z  * [new branch]      issue-72-531c48705fe1                    -> origin/issue-72-531c48705fe1
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:38.9923337Z  * [new branch]      issue-73-3365a59a0651                    -> origin/issue-73-3365a59a0651
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:38.9925852Z  * [new branch]      issue-76-4c3ce2d4c38d                    -> origin/issue-76-4c3ce2d4c38d
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:38.9928487Z  * [new branch]      issue-77-9d57d4be5f06                    -> origin/issue-77-9d57d4be5f06
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:38.9930974Z  * [new branch]      issue-78-06df01a6d67d                    -> origin/issue-78-06df01a6d67d
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:38.9933509Z  * [new branch]      issue-79-0f3c100bef61                    -> origin/issue-79-0f3c100bef61
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:38.9935921Z  * [new branch]      issue-8-2bf69acf                         -> origin/issue-8-2bf69acf
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:38.9938516Z  * [new branch]      issue-80-65a47c9900f7                    -> origin/issue-80-65a47c9900f7
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:38.9940967Z  * [new branch]      issue-81-95139eb5d319                    -> origin/issue-81-95139eb5d319
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:38.9943438Z  * [new branch]      issue-88-fa5db9d51224                    -> origin/issue-88-fa5db9d51224
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:38.9945924Z  * [new branch]      issue-90-401b508c5c66                    -> origin/issue-90-401b508c5c66
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:38.9948478Z  * [new branch]      issue-92-42b86cc335df                    -> origin/issue-92-42b86cc335df
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:38.9950946Z  * [new branch]      issue-94-2e4653a0a183                    -> origin/issue-94-2e4653a0a183
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:38.9953518Z  * [new branch]      issue-96-3180a89c0b82                    -> origin/issue-96-3180a89c0b82
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:38.9956029Z  * [new branch]      issue-98-c765b5595cf4                    -> origin/issue-98-c765b5595cf4
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:38.9958636Z  * [new branch]      main                                     -> origin/main
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:38.9960521Z  * [new tag]         js-v1.10.0                               -> js-v1.10.0
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:38.9962718Z  * [new tag]         js-v1.10.1                               -> js-v1.10.1
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:38.9965412Z  * [new tag]         js-v1.10.2                               -> js-v1.10.2
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:38.9967727Z  * [new tag]         js-v1.10.3                               -> js-v1.10.3
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:38.9969562Z  * [new tag]         js-v1.10.4                               -> js-v1.10.4
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:38.9971860Z  * [new tag]         js-v1.10.5                               -> js-v1.10.5
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:38.9974417Z  * [new tag]         js-v1.10.6                               -> js-v1.10.6
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:38.9976880Z  * [new tag]         js-v1.10.7                               -> js-v1.10.7
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:38.9978750Z  * [new tag]         js-v1.10.8                               -> js-v1.10.8
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:38.9980597Z  * [new tag]         js-v1.7.10                               -> js-v1.7.10
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:38.9982573Z  * [new tag]         js-v1.7.11                               -> js-v1.7.11
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:38.9984905Z  * [new tag]         js-v1.7.12                               -> js-v1.7.12
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:38.9986984Z  * [new tag]         js-v1.7.13                               -> js-v1.7.13
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:38.9988827Z  * [new tag]         js-v1.7.14                               -> js-v1.7.14
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:38.9990644Z  * [new tag]         js-v1.7.15                               -> js-v1.7.15
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:38.9993130Z  * [new tag]         js-v1.7.16                               -> js-v1.7.16
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:38.9995911Z  * [new tag]         js-v1.7.17                               -> js-v1.7.17
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:38.9998624Z  * [new tag]         js-v1.7.18                               -> js-v1.7.18
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:39.0001284Z  * [new tag]         js-v1.7.19                               -> js-v1.7.19
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:39.0003813Z  * [new tag]         js-v1.7.20                               -> js-v1.7.20
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:39.0006312Z  * [new tag]         js-v1.7.21                               -> js-v1.7.21
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:39.0009081Z  * [new tag]         js-v1.7.22                               -> js-v1.7.22
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:39.0011577Z  * [new tag]         js-v1.7.23                               -> js-v1.7.23
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:39.0013959Z  * [new tag]         js-v1.7.24                               -> js-v1.7.24
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:39.0015882Z  * [new tag]         js-v1.7.25                               -> js-v1.7.25
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:39.0018090Z  * [new tag]         js-v1.7.26                               -> js-v1.7.26
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:39.0020660Z  * [new tag]         js-v1.7.27                               -> js-v1.7.27
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:39.0023254Z  * [new tag]         js-v1.7.9                                -> js-v1.7.9
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:39.0025854Z  * [new tag]         js-v1.8.0                                -> js-v1.8.0
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:39.0028580Z  * [new tag]         js-v1.8.1                                -> js-v1.8.1
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:39.0031170Z  * [new tag]         js-v1.9.0                                -> js-v1.9.0
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:39.0033001Z  * [new tag]         rust-v0.1.0                              -> rust-v0.1.0
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:39.0035162Z  * [new tag]         rust-v0.2.0                              -> rust-v0.2.0
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:39.0037576Z  * [new tag]         rust-v0.2.1                              -> rust-v0.2.1
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:39.0039563Z  * [new tag]         rust-v0.3.0                              -> rust-v0.3.0
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:39.0041594Z  * [new tag]         rust-v0.3.1                              -> rust-v0.3.1
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:39.0043441Z  * [new tag]         rust-v0.3.10                             -> rust-v0.3.10
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:39.0045221Z  * [new tag]         rust-v0.3.11                             -> rust-v0.3.11
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:39.0047456Z  * [new tag]         rust-v0.3.12                             -> rust-v0.3.12
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:39.0050223Z  * [new tag]         rust-v0.3.13                             -> rust-v0.3.13
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:39.0052296Z  * [new tag]         rust-v0.3.14                             -> rust-v0.3.14
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:39.0054123Z  * [new tag]         rust-v0.3.15                             -> rust-v0.3.15
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:39.0056384Z  * [new tag]         rust-v0.3.16                             -> rust-v0.3.16
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:39.0059249Z  * [new tag]         rust-v0.3.17                             -> rust-v0.3.17
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:39.0061918Z  * [new tag]         rust-v0.3.18                             -> rust-v0.3.18
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:39.0063788Z  * [new tag]         rust-v0.3.19                             -> rust-v0.3.19
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:39.0065562Z  * [new tag]         rust-v0.3.2                              -> rust-v0.3.2
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:39.0068120Z  * [new tag]         rust-v0.3.20                             -> rust-v0.3.20
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:39.0070624Z  * [new tag]         rust-v0.3.21                             -> rust-v0.3.21
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:39.0073143Z  * [new tag]         rust-v0.3.22                             -> rust-v0.3.22
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:39.0075720Z  * [new tag]         rust-v0.3.23                             -> rust-v0.3.23
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:39.0078395Z  * [new tag]         rust-v0.3.24                             -> rust-v0.3.24
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:39.0080896Z  * [new tag]         rust-v0.3.25                             -> rust-v0.3.25
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:39.0083495Z  * [new tag]         rust-v0.3.26                             -> rust-v0.3.26
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:39.0086196Z  * [new tag]         rust-v0.3.27                             -> rust-v0.3.27
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:39.0089184Z  * [new tag]         rust-v0.3.28                             -> rust-v0.3.28
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:39.0091680Z  * [new tag]         rust-v0.3.29                             -> rust-v0.3.29
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:39.0094202Z  * [new tag]         rust-v0.3.3                              -> rust-v0.3.3
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:39.0096929Z  * [new tag]         rust-v0.3.30                             -> rust-v0.3.30
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:39.0099103Z  * [new tag]         rust-v0.3.4                              -> rust-v0.3.4
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:39.0100884Z  * [new tag]         rust-v0.3.5                              -> rust-v0.3.5
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:39.0102674Z  * [new tag]         rust-v0.3.6                              -> rust-v0.3.6
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:39.0104425Z  * [new tag]         rust-v0.3.7                              -> rust-v0.3.7
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:39.0106177Z  * [new tag]         rust-v0.3.8                              -> rust-v0.3.8
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:39.0108144Z  * [new tag]         rust-v0.3.9                              -> rust-v0.3.9
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:39.0109862Z  * [new tag]         v1.1.1                                   -> v1.1.1
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:39.0111479Z  * [new tag]         v1.1.2                                   -> v1.1.2
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:39.0113193Z  * [new tag]         v1.1.3                                   -> v1.1.3
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:39.0114896Z  * [new tag]         v1.2.0                                   -> v1.2.0
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:39.0116692Z  * [new tag]         v1.3.0                                   -> v1.3.0
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:39.0119077Z  * [new tag]         v1.7.2                                   -> v1.7.2
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:39.0121459Z  * [new tag]         v1.7.3                                   -> v1.7.3
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:39.0123837Z  * [new tag]         v1.7.4                                   -> v1.7.4
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:39.0126298Z  * [new tag]         v1.7.5                                   -> v1.7.5
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:39.0128840Z  * [new tag]         v1.7.6                                   -> v1.7.6
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:39.0131267Z  * [new tag]         v1.7.7                                   -> v1.7.7
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:39.0133661Z  * [new tag]         v1.7.8                                   -> v1.7.8
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:39.0136740Z  * [new ref]         b52444a17516dbd929078642d9e1bb88af3c1d7b -> pull/140/merge
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:39.0142541Z ##[endgroup]
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:39.0144855Z ##[group]Determining the checkout info
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:39.0147718Z ##[endgroup]
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:39.0149250Z [command]/usr/bin/git sparse-checkout disable
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:39.0153527Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:39.0158852Z ##[group]Checking out the ref
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:39.0161100Z [command]/usr/bin/git checkout --progress --force refs/remotes/pull/140/merge
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:39.1124661Z Note: switching to 'refs/remotes/pull/140/merge'.
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:39.1126319Z
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:39.1127756Z You are in 'detached HEAD' state. You can look around, make experimental
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:39.1130768Z changes and commit them, and you can discard any commits you make in this
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:39.1133635Z state without impacting any branches by switching back to a branch.
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:39.1135364Z
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:39.1136631Z If you want to create a new branch to retain commits you create, you may
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:39.1139192Z do so (now or later) by using -c with the switch command. Example:
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:39.1140285Z
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:39.1140740Z   git switch -c <new-branch-name>
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:39.1141514Z
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:39.1142087Z Or undo this operation with:
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:39.1143067Z
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:39.1143482Z   git switch -
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:39.1144016Z
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:39.1144883Z Turn off this advice by setting config variable advice.detachedHead to false
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:39.1146183Z
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:39.1147923Z HEAD is now at b52444a Merge eb75681ce5c3ce4f837e2f289a505677d8a607c2 into 7387a4c8b7f244b50358b5f536c708c6e3feb856
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:39.1152800Z ##[endgroup]
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:39.1192245Z [command]/usr/bin/git log -1 --format=%H
+JS - Detect Changes	Run actions/checkout@v6	2026-06-14T20:50:39.1220216Z b52444a17516dbd929078642d9e1bb88af3c1d7b
+JS - Detect Changes	Detect changes	﻿2026-06-14T20:50:39.1551929Z ##[group]Run node scripts/detect-code-changes.mjs
+JS - Detect Changes	Detect changes	2026-06-14T20:50:39.1553537Z ^[[36;1mnode scripts/detect-code-changes.mjs^[[0m
+JS - Detect Changes	Detect changes	2026-06-14T20:50:39.1697666Z shell: /usr/bin/bash -e {0}
+JS - Detect Changes	Detect changes	2026-06-14T20:50:39.1698809Z env:
+JS - Detect Changes	Detect changes	2026-06-14T20:50:39.1699700Z   GITHUB_EVENT_NAME: pull_request
+JS - Detect Changes	Detect changes	2026-06-14T20:50:39.1701034Z   GITHUB_BASE_SHA: 7387a4c8b7f244b50358b5f536c708c6e3feb856
+JS - Detect Changes	Detect changes	2026-06-14T20:50:39.1702636Z   GITHUB_HEAD_SHA: eb75681ce5c3ce4f837e2f289a505677d8a607c2
+JS - Detect Changes	Detect changes	2026-06-14T20:50:39.1703993Z ##[endgroup]
+JS - Detect Changes	Detect changes	2026-06-14T20:50:39.3920988Z Detecting file changes for CI/CD...
+JS - Detect Changes	Detect changes	2026-06-14T20:50:39.3922806Z
+JS - Detect Changes	Detect changes	2026-06-14T20:50:39.4319121Z Merge commit detected (pull_request event)
+JS - Detect Changes	Detect changes	2026-06-14T20:50:39.4320535Z Comparing HEAD^2^ to HEAD^2 (per-commit diff of PR head)
+JS - Detect Changes	Detect changes	2026-06-14T20:50:39.4374480Z Changed files:
+JS - Detect Changes	Detect changes	2026-06-14T20:50:39.4375470Z   docs/case-studies/issue-139/README.md
+JS - Detect Changes	Detect changes	2026-06-14T20:50:39.4376753Z   docs/case-studies/issue-139/data/verification-focused-jest.log
+JS - Detect Changes	Detect changes	2026-06-14T20:50:39.4377637Z   docs/case-studies/issue-139/data/verification-parity-check.log
+JS - Detect Changes	Detect changes	2026-06-14T20:50:39.4378651Z   docs/case-studies/issue-139/data/verification-parity-false-positive.log
+JS - Detect Changes	Detect changes	2026-06-14T20:50:39.4379367Z   js/jest.config.mjs
+JS - Detect Changes	Detect changes	2026-06-14T20:50:39.4379861Z   js/tests/ci/detect-code-changes.test.js
+JS - Detect Changes	Detect changes	2026-06-14T20:50:39.4380414Z   js/tests/ci/rust-dockerfile.test.js
+JS - Detect Changes	Detect changes	2026-06-14T20:50:39.4380943Z   js/tests/ci/workflow-policy.test.js
+JS - Detect Changes	Detect changes	2026-06-14T20:50:39.4381484Z   scripts/check-js-rust-parity.mjs
+JS - Detect Changes	Detect changes	2026-06-14T20:50:39.4381835Z
+JS - Detect Changes	Detect changes	2026-06-14T20:50:39.4382067Z js-code-changed=true
+JS - Detect Changes	Detect changes	2026-06-14T20:50:39.4382525Z js-changed=true
+JS - Detect Changes	Detect changes	2026-06-14T20:50:39.4383068Z rust-code-changed=false
+JS - Detect Changes	Detect changes	2026-06-14T20:50:39.4383518Z rust-changed=false
+JS - Detect Changes	Detect changes	2026-06-14T20:50:39.4383953Z scripts-changed=true
+JS - Detect Changes	Detect changes	2026-06-14T20:50:39.4384413Z js-scripts-changed=true
+JS - Detect Changes	Detect changes	2026-06-14T20:50:39.4384884Z rust-scripts-changed=false
+JS - Detect Changes	Detect changes	2026-06-14T20:50:39.4385623Z workflow-changed=false
+JS - Detect Changes	Detect changes	2026-06-14T20:50:39.4395675Z js-workflow-changed=false
+JS - Detect Changes	Detect changes	2026-06-14T20:50:39.4396239Z rust-workflow-changed=false
+JS - Detect Changes	Detect changes	2026-06-14T20:50:39.4403629Z docs-changed=true
+JS - Detect Changes	Detect changes	2026-06-14T20:50:39.4403882Z
+JS - Detect Changes	Detect changes	2026-06-14T20:50:39.4404072Z Files considered as code changes:
+JS - Detect Changes	Detect changes	2026-06-14T20:50:39.4404540Z   js/jest.config.mjs
+JS - Detect Changes	Detect changes	2026-06-14T20:50:39.4404986Z   js/tests/ci/detect-code-changes.test.js
+JS - Detect Changes	Detect changes	2026-06-14T20:50:39.4405616Z   js/tests/ci/rust-dockerfile.test.js
+JS - Detect Changes	Detect changes	2026-06-14T20:50:39.4406149Z   js/tests/ci/workflow-policy.test.js
+JS - Detect Changes	Detect changes	2026-06-14T20:50:39.4406881Z   scripts/check-js-rust-parity.mjs
+JS - Detect Changes	Detect changes	2026-06-14T20:50:39.4407201Z
+JS - Detect Changes	Detect changes	2026-06-14T20:50:39.4407381Z any-code-changed=true
+JS - Detect Changes	Detect changes	2026-06-14T20:50:39.4407824Z any-js-code-changed=true
+JS - Detect Changes	Detect changes	2026-06-14T20:50:39.4408284Z any-rust-code-changed=false
+JS - Detect Changes	Detect changes	2026-06-14T20:50:39.4408566Z
+JS - Detect Changes	Detect changes	2026-06-14T20:50:39.4408755Z Change detection completed.
+JS - Detect Changes	Post Run actions/checkout@v6	﻿2026-06-14T20:50:39.5092559Z Post job cleanup.
+JS - Detect Changes	Post Run actions/checkout@v6	2026-06-14T20:50:39.5932655Z [command]/usr/bin/git version
+JS - Detect Changes	Post Run actions/checkout@v6	2026-06-14T20:50:39.5970497Z git version 2.54.0
+JS - Detect Changes	Post Run actions/checkout@v6	2026-06-14T20:50:39.6007838Z Temporarily overriding HOME='/home/runner/work/_temp/5afd9519-56d2-4279-805b-7203d0b3b237' before making global git config changes
+JS - Detect Changes	Post Run actions/checkout@v6	2026-06-14T20:50:39.6009256Z Adding repository directory to the temporary git global config as a safe directory
+JS - Detect Changes	Post Run actions/checkout@v6	2026-06-14T20:50:39.6018815Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/web-capture/web-capture
+JS - Detect Changes	Post Run actions/checkout@v6	2026-06-14T20:50:39.6047433Z Removing SSH command configuration
+JS - Detect Changes	Post Run actions/checkout@v6	2026-06-14T20:50:39.6053142Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+JS - Detect Changes	Post Run actions/checkout@v6	2026-06-14T20:50:39.6089445Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+JS - Detect Changes	Post Run actions/checkout@v6	2026-06-14T20:50:39.6365028Z Removing HTTP extra header
+JS - Detect Changes	Post Run actions/checkout@v6	2026-06-14T20:50:39.6370974Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+JS - Detect Changes	Post Run actions/checkout@v6	2026-06-14T20:50:39.6405611Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+JS - Detect Changes	Post Run actions/checkout@v6	2026-06-14T20:50:39.6637408Z Removing includeIf entries pointing to credentials config files
+JS - Detect Changes	Post Run actions/checkout@v6	2026-06-14T20:50:39.6644121Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+JS - Detect Changes	Post Run actions/checkout@v6	2026-06-14T20:50:39.6773694Z includeif.gitdir:/home/runner/work/web-capture/web-capture/.git.path
+JS - Detect Changes	Post Run actions/checkout@v6	2026-06-14T20:50:39.6774735Z includeif.gitdir:/home/runner/work/web-capture/web-capture/.git/worktrees/*.path
+JS - Detect Changes	Post Run actions/checkout@v6	2026-06-14T20:50:39.6775571Z includeif.gitdir:/github/workspace/.git.path
+JS - Detect Changes	Post Run actions/checkout@v6	2026-06-14T20:50:39.6776247Z includeif.gitdir:/github/workspace/.git/worktrees/*.path
+JS - Detect Changes	Post Run actions/checkout@v6	2026-06-14T20:50:39.6784484Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/home/runner/work/web-capture/web-capture/.git.path
+JS - Detect Changes	Post Run actions/checkout@v6	2026-06-14T20:50:39.6809840Z /home/runner/work/_temp/git-credentials-ad45b223-7e49-41d6-9799-1facfc3bf90b.config
+JS - Detect Changes	Post Run actions/checkout@v6	2026-06-14T20:50:39.6820351Z [command]/usr/bin/git config --local --unset includeif.gitdir:/home/runner/work/web-capture/web-capture/.git.path /home/runner/work/_temp/git-credentials-ad45b223-7e49-41d6-9799-1facfc3bf90b.config
+JS - Detect Changes	Post Run actions/checkout@v6	2026-06-14T20:50:39.6855829Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/home/runner/work/web-capture/web-capture/.git/worktrees/*.path
+JS - Detect Changes	Post Run actions/checkout@v6	2026-06-14T20:50:39.6879711Z /home/runner/work/_temp/git-credentials-ad45b223-7e49-41d6-9799-1facfc3bf90b.config
+JS - Detect Changes	Post Run actions/checkout@v6	2026-06-14T20:50:39.6888540Z [command]/usr/bin/git config --local --unset includeif.gitdir:/home/runner/work/web-capture/web-capture/.git/worktrees/*.path /home/runner/work/_temp/git-credentials-ad45b223-7e49-41d6-9799-1facfc3bf90b.config
+JS - Detect Changes	Post Run actions/checkout@v6	2026-06-14T20:50:39.7256664Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/github/workspace/.git.path
+JS - Detect Changes	Post Run actions/checkout@v6	2026-06-14T20:50:39.7282822Z /github/runner_temp/git-credentials-ad45b223-7e49-41d6-9799-1facfc3bf90b.config
+JS - Detect Changes	Post Run actions/checkout@v6	2026-06-14T20:50:39.7291633Z [command]/usr/bin/git config --local --unset includeif.gitdir:/github/workspace/.git.path /github/runner_temp/git-credentials-ad45b223-7e49-41d6-9799-1facfc3bf90b.config
+JS - Detect Changes	Post Run actions/checkout@v6	2026-06-14T20:50:39.7327815Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/github/workspace/.git/worktrees/*.path
+JS - Detect Changes	Post Run actions/checkout@v6	2026-06-14T20:50:39.7351747Z /github/runner_temp/git-credentials-ad45b223-7e49-41d6-9799-1facfc3bf90b.config
+JS - Detect Changes	Post Run actions/checkout@v6	2026-06-14T20:50:39.7363648Z [command]/usr/bin/git config --local --unset includeif.gitdir:/github/workspace/.git/worktrees/*.path /github/runner_temp/git-credentials-ad45b223-7e49-41d6-9799-1facfc3bf90b.config
+JS - Detect Changes	Post Run actions/checkout@v6	2026-06-14T20:50:39.7400981Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+JS - Detect Changes	Post Run actions/checkout@v6	2026-06-14T20:50:39.7651584Z Removing credentials config '/home/runner/work/_temp/git-credentials-ad45b223-7e49-41d6-9799-1facfc3bf90b.config'
+JS - Detect Changes	Complete job	﻿2026-06-14T20:50:39.7791015Z Evaluate and set job outputs
+JS - Detect Changes	Complete job	2026-06-14T20:50:39.7799650Z Set output 'js-code-changed'
+JS - Detect Changes	Complete job	2026-06-14T20:50:39.7801423Z Set output 'js-changed'
+JS - Detect Changes	Complete job	2026-06-14T20:50:39.7802209Z Set output 'scripts-changed'
+JS - Detect Changes	Complete job	2026-06-14T20:50:39.7802683Z Set output 'js-workflow-changed'
+JS - Detect Changes	Complete job	2026-06-14T20:50:39.7803131Z Set output 'any-js-code-changed'
+JS - Detect Changes	Complete job	2026-06-14T20:50:39.7803554Z Set output 'any-code-changed'
+JS - Detect Changes	Complete job	2026-06-14T20:50:39.7803960Z Set output 'docs-changed'
+JS - Detect Changes	Complete job	2026-06-14T20:50:39.7804913Z Cleaning up orphan processes
+JS - Check for Changesets	Set up job	﻿2026-06-14T20:50:49.9698912Z Current runner version: '2.335.1'
+JS - Check for Changesets	Set up job	2026-06-14T20:50:49.9726771Z ##[group]Runner Image Provisioner
+JS - Check for Changesets	Set up job	2026-06-14T20:50:49.9728687Z Hosted Compute Agent
+JS - Check for Changesets	Set up job	2026-06-14T20:50:49.9729636Z Version: 20260527.539
+JS - Check for Changesets	Set up job	2026-06-14T20:50:49.9730553Z Commit: a891dd388383b896fa6ac04a82c0b75cec981078
+JS - Check for Changesets	Set up job	2026-06-14T20:50:49.9731903Z Build Date: 2026-05-27T21:39:57Z
+JS - Check for Changesets	Set up job	2026-06-14T20:50:49.9733099Z Worker ID: {a2e0a0cf-62d1-4b7b-bbbb-a5d0eea7f014}
+JS - Check for Changesets	Set up job	2026-06-14T20:50:49.9734368Z Azure Region: eastus2
+JS - Check for Changesets	Set up job	2026-06-14T20:50:49.9735342Z ##[endgroup]
+JS - Check for Changesets	Set up job	2026-06-14T20:50:49.9737304Z ##[group]Operating System
+JS - Check for Changesets	Set up job	2026-06-14T20:50:49.9738342Z Ubuntu
+JS - Check for Changesets	Set up job	2026-06-14T20:50:49.9739337Z 24.04.4
+JS - Check for Changesets	Set up job	2026-06-14T20:50:49.9740154Z LTS
+JS - Check for Changesets	Set up job	2026-06-14T20:50:49.9740948Z ##[endgroup]
+JS - Check for Changesets	Set up job	2026-06-14T20:50:49.9742198Z ##[group]Runner Image
+JS - Check for Changesets	Set up job	2026-06-14T20:50:49.9743125Z Image: ubuntu-24.04
+JS - Check for Changesets	Set up job	2026-06-14T20:50:49.9744124Z Version: 20260607.184.1
+JS - Check for Changesets	Set up job	2026-06-14T20:50:49.9745698Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20260607.184/images/ubuntu/Ubuntu2404-Readme.md
+JS - Check for Changesets	Set up job	2026-06-14T20:50:49.9748273Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20260607.184
+JS - Check for Changesets	Set up job	2026-06-14T20:50:49.9749829Z ##[endgroup]
+JS - Check for Changesets	Set up job	2026-06-14T20:50:49.9751911Z ##[group]GITHUB_TOKEN Permissions
+JS - Check for Changesets	Set up job	2026-06-14T20:50:49.9754827Z Contents: read
+JS - Check for Changesets	Set up job	2026-06-14T20:50:49.9755794Z Metadata: read
+JS - Check for Changesets	Set up job	2026-06-14T20:50:49.9756666Z Packages: read
+JS - Check for Changesets	Set up job	2026-06-14T20:50:49.9757543Z ##[endgroup]
+JS - Check for Changesets	Set up job	2026-06-14T20:50:49.9760604Z Secret source: Actions
+JS - Check for Changesets	Set up job	2026-06-14T20:50:49.9762613Z Prepare workflow directory
+JS - Check for Changesets	Set up job	2026-06-14T20:50:50.0324744Z Prepare all required actions
+JS - Check for Changesets	Set up job	2026-06-14T20:50:50.0379484Z Getting action download info
+JS - Check for Changesets	Set up job	2026-06-14T20:50:50.3488882Z Download action repository 'actions/checkout@v6' (SHA:df4cb1c069e1874edd31b4311f1884172cec0e10)
+JS - Check for Changesets	Set up job	2026-06-14T20:50:50.5679225Z Download action repository 'actions/setup-node@v6' (SHA:48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e)
+JS - Check for Changesets	Set up job	2026-06-14T20:50:50.7449161Z Complete job name: JS - Check for Changesets
+JS - Check for Changesets	Run actions/checkout@v6	﻿2026-06-14T20:50:50.8219945Z ##[group]Run actions/checkout@v6
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:50.8221011Z with:
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:50.8221796Z   fetch-depth: 0
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:50.8222357Z   repository: link-assistant/web-capture
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:50.8227607Z   token: ***
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:50.8228113Z   ssh-strict: true
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:50.8228623Z   ssh-user: git
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:50.8229137Z   persist-credentials: true
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:50.8229704Z   clean: true
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:50.8230201Z   sparse-checkout-cone-mode: true
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:50.8230793Z   fetch-tags: false
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:50.8231297Z   show-progress: true
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:50.8231942Z   lfs: false
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:50.8232409Z   submodules: false
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:50.8232915Z   set-safe-directory: true
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:50.8233711Z ##[endgroup]
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:50.9257260Z Syncing repository: link-assistant/web-capture
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:50.9259490Z ##[group]Getting Git version info
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:50.9260341Z Working directory is '/home/runner/work/web-capture/web-capture'
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:50.9261903Z [command]/usr/bin/git version
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:50.9295764Z git version 2.54.0
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:50.9318850Z ##[endgroup]
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:50.9334668Z Temporarily overriding HOME='/home/runner/work/_temp/5641ea18-ec7a-4448-8828-c2f7c5e92bc0' before making global git config changes
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:50.9337390Z Adding repository directory to the temporary git global config as a safe directory
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:50.9340953Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/web-capture/web-capture
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:50.9391051Z Deleting the contents of '/home/runner/work/web-capture/web-capture'
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:50.9396157Z ##[group]Determining repository object format
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:50.9398375Z ##[endgroup]
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:50.9399727Z ##[group]Initializing the repository
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:50.9405985Z [command]/usr/bin/git init /home/runner/work/web-capture/web-capture
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:50.9486079Z hint: Using 'master' as the name for the initial branch. This default branch name
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:50.9488109Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:50.9490128Z hint: to use in all of your new repositories, which will suppress this warning,
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:50.9491443Z hint: call:
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:50.9492279Z hint:
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:50.9493274Z hint: 	git config --global init.defaultBranch <name>
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:50.9494274Z hint:
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:50.9495228Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:50.9496296Z hint: 'development'. The just-created branch can be renamed via this command:
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:50.9497135Z hint:
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:50.9497607Z hint: 	git branch -m <name>
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:50.9498223Z hint:
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:50.9499467Z hint: Disable this message with "git config set advice.defaultBranchName false"
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:50.9500929Z Initialized empty Git repository in /home/runner/work/web-capture/web-capture/.git/
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:50.9503339Z [command]/usr/bin/git remote add origin https://github.com/link-assistant/web-capture
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:50.9541269Z ##[endgroup]
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:50.9542497Z ##[group]Disabling automatic garbage collection
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:50.9544919Z [command]/usr/bin/git config --local gc.auto 0
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:50.9612258Z ##[endgroup]
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:50.9613918Z ##[group]Setting up auth
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:50.9615175Z Removing SSH command configuration
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:50.9618656Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:50.9659075Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:50.9993532Z Removing HTTP extra header
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.0000627Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.0038142Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.0303654Z Removing includeIf entries pointing to credentials config files
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.0310154Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.0348949Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.0608403Z [command]/usr/bin/git config --file /home/runner/work/_temp/git-credentials-95c4f5f1-0947-4c0b-9daa-a7c27f4197f7.config http.https://github.com/.extraheader AUTHORIZATION: basic ***
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.0647447Z [command]/usr/bin/git config --local includeIf.gitdir:/home/runner/work/web-capture/web-capture/.git.path /home/runner/work/_temp/git-credentials-95c4f5f1-0947-4c0b-9daa-a7c27f4197f7.config
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.0679404Z [command]/usr/bin/git config --local includeIf.gitdir:/home/runner/work/web-capture/web-capture/.git/worktrees/*.path /home/runner/work/_temp/git-credentials-95c4f5f1-0947-4c0b-9daa-a7c27f4197f7.config
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.0715457Z [command]/usr/bin/git config --local includeIf.gitdir:/github/workspace/.git.path /github/runner_temp/git-credentials-95c4f5f1-0947-4c0b-9daa-a7c27f4197f7.config
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.0747351Z [command]/usr/bin/git config --local includeIf.gitdir:/github/workspace/.git/worktrees/*.path /github/runner_temp/git-credentials-95c4f5f1-0947-4c0b-9daa-a7c27f4197f7.config
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.0777226Z ##[endgroup]
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.0778603Z ##[group]Fetching the repository
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.0789443Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules origin +refs/heads/*:refs/remotes/origin/* +refs/tags/*:refs/tags/* +b52444a17516dbd929078642d9e1bb88af3c1d7b:refs/remotes/pull/140/merge
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.7416100Z From https://github.com/link-assistant/web-capture
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.7417912Z  * [new branch]      issue-1-5017a66c05a8                     -> origin/issue-1-5017a66c05a8
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.7419820Z  * [new branch]      issue-100-99e0a350ea14                   -> origin/issue-100-99e0a350ea14
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.7421309Z  * [new branch]      issue-102-7f05baee1eea                   -> origin/issue-102-7f05baee1eea
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.7423656Z  * [new branch]      issue-104-5d910a68a250                   -> origin/issue-104-5d910a68a250
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.7425631Z  * [new branch]      issue-106-44f7ed55b657                   -> origin/issue-106-44f7ed55b657
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.7427442Z  * [new branch]      issue-108-a4baf412d9cb                   -> origin/issue-108-a4baf412d9cb
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.7429255Z  * [new branch]      issue-11-2861fe92                        -> origin/issue-11-2861fe92
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.7431040Z  * [new branch]      issue-110-9712e1c70a94                   -> origin/issue-110-9712e1c70a94
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.7433003Z  * [new branch]      issue-112-53d54c67d8bb                   -> origin/issue-112-53d54c67d8bb
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.7434856Z  * [new branch]      issue-113-d6d2b9cf59e9                   -> origin/issue-113-d6d2b9cf59e9
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.7436968Z  * [new branch]      issue-114-b51d47bfd71f                   -> origin/issue-114-b51d47bfd71f
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.7439119Z  * [new branch]      issue-116-e68be1382988                   -> origin/issue-116-e68be1382988
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.7441330Z  * [new branch]      issue-117-6f9cc6105c70                   -> origin/issue-117-6f9cc6105c70
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.7444260Z  * [new branch]      issue-118-e11d2cc48206                   -> origin/issue-118-e11d2cc48206
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.7446788Z  * [new branch]      issue-119-9b5c645fa6d7                   -> origin/issue-119-9b5c645fa6d7
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.7449336Z  * [new branch]      issue-120-2cd62cbc1692                   -> origin/issue-120-2cd62cbc1692
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.7452087Z  * [new branch]      issue-121-71566b31e0d5                   -> origin/issue-121-71566b31e0d5
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.7454857Z  * [new branch]      issue-127-238ff237e28b                   -> origin/issue-127-238ff237e28b
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.7457368Z  * [new branch]      issue-13-a8f3466f6d79                    -> origin/issue-13-a8f3466f6d79
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.7459885Z  * [new branch]      issue-130-1bcc97d4a5a3                   -> origin/issue-130-1bcc97d4a5a3
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.7462494Z  * [new branch]      issue-135-fcb428bcce44                   -> origin/issue-135-fcb428bcce44
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.7465302Z  * [new branch]      issue-137-623d876e6e5f                   -> origin/issue-137-623d876e6e5f
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.7468062Z  * [new branch]      issue-139-24bf83def591                   -> origin/issue-139-24bf83def591
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.7470809Z  * [new branch]      issue-15-ba41292e60dd                    -> origin/issue-15-ba41292e60dd
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.7473634Z  * [new branch]      issue-17-d61fd69fb1d0                    -> origin/issue-17-d61fd69fb1d0
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.7476351Z  * [new branch]      issue-19-7350892c64e0                    -> origin/issue-19-7350892c64e0
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.7479018Z  * [new branch]      issue-21-ae540dd05ccf                    -> origin/issue-21-ae540dd05ccf
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.7481880Z  * [new branch]      issue-24-000cedc18c0c                    -> origin/issue-24-000cedc18c0c
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.7484701Z  * [new branch]      issue-26-f5bc08d1c062                    -> origin/issue-26-f5bc08d1c062
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.7487357Z  * [new branch]      issue-28-9ae2d8528d6f                    -> origin/issue-28-9ae2d8528d6f
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.7489970Z  * [new branch]      issue-29-1750ff5496be                    -> origin/issue-29-1750ff5496be
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.7492861Z  * [new branch]      issue-3-e1f5cfd3                         -> origin/issue-3-e1f5cfd3
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.7495469Z  * [new branch]      issue-31-e38e38b91777                    -> origin/issue-31-e38e38b91777
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.7498176Z  * [new branch]      issue-33-597c234012bd                    -> origin/issue-33-597c234012bd
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.7501015Z  * [new branch]      issue-36-4868dc6a6cd1                    -> origin/issue-36-4868dc6a6cd1
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.7503794Z  * [new branch]      issue-38-1c6b407f9682                    -> origin/issue-38-1c6b407f9682
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.7506455Z  * [new branch]      issue-40-aea0c7bbe29d                    -> origin/issue-40-aea0c7bbe29d
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.7509158Z  * [new branch]      issue-42-51e981719f34                    -> origin/issue-42-51e981719f34
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.7511933Z  * [new branch]      issue-44-5fc8fd3303bb                    -> origin/issue-44-5fc8fd3303bb
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.7514598Z  * [new branch]      issue-46-74be9b28b867                    -> origin/issue-46-74be9b28b867
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.7517227Z  * [new branch]      issue-48-fa0cc317013f                    -> origin/issue-48-fa0cc317013f
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.7519771Z  * [new branch]      issue-5-37ef445c                         -> origin/issue-5-37ef445c
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.7522485Z  * [new branch]      issue-50-accd5e4cfac0                    -> origin/issue-50-accd5e4cfac0
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.7525061Z  * [new branch]      issue-52-b275657642c1                    -> origin/issue-52-b275657642c1
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.7527557Z  * [new branch]      issue-53-ee04eb2d7520                    -> origin/issue-53-ee04eb2d7520
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.7530081Z  * [new branch]      issue-56-a89df19bbdc2                    -> origin/issue-56-a89df19bbdc2
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.7532824Z  * [new branch]      issue-58-c1217b0e73df                    -> origin/issue-58-c1217b0e73df
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.7535398Z  * [new branch]      issue-60-7c97a8e6f23e                    -> origin/issue-60-7c97a8e6f23e
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.7537961Z  * [new branch]      issue-62-5074090c911d                    -> origin/issue-62-5074090c911d
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.7540505Z  * [new branch]      issue-64-fc240b6b34c4                    -> origin/issue-64-fc240b6b34c4
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.7543156Z  * [new branch]      issue-66-d851400625b3                    -> origin/issue-66-d851400625b3
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.7545856Z  * [new branch]      issue-68-f537a341d162                    -> origin/issue-68-f537a341d162
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.7548286Z  * [new branch]      issue-7-c22ac3d5                         -> origin/issue-7-c22ac3d5
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.7550742Z  * [new branch]      issue-70-46e0722472f6                    -> origin/issue-70-46e0722472f6
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.7553393Z  * [new branch]      issue-72-531c48705fe1                    -> origin/issue-72-531c48705fe1
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.7555920Z  * [new branch]      issue-73-3365a59a0651                    -> origin/issue-73-3365a59a0651
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.7558427Z  * [new branch]      issue-76-4c3ce2d4c38d                    -> origin/issue-76-4c3ce2d4c38d
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.7560945Z  * [new branch]      issue-77-9d57d4be5f06                    -> origin/issue-77-9d57d4be5f06
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.7563652Z  * [new branch]      issue-78-06df01a6d67d                    -> origin/issue-78-06df01a6d67d
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.7566174Z  * [new branch]      issue-79-0f3c100bef61                    -> origin/issue-79-0f3c100bef61
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.7568559Z  * [new branch]      issue-8-2bf69acf                         -> origin/issue-8-2bf69acf
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.7570947Z  * [new branch]      issue-80-65a47c9900f7                    -> origin/issue-80-65a47c9900f7
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.7573631Z  * [new branch]      issue-81-95139eb5d319                    -> origin/issue-81-95139eb5d319
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.7576115Z  * [new branch]      issue-88-fa5db9d51224                    -> origin/issue-88-fa5db9d51224
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.7578588Z  * [new branch]      issue-90-401b508c5c66                    -> origin/issue-90-401b508c5c66
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.7581043Z  * [new branch]      issue-92-42b86cc335df                    -> origin/issue-92-42b86cc335df
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.7583624Z  * [new branch]      issue-94-2e4653a0a183                    -> origin/issue-94-2e4653a0a183
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.7586088Z  * [new branch]      issue-96-3180a89c0b82                    -> origin/issue-96-3180a89c0b82
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.7588691Z  * [new branch]      issue-98-c765b5595cf4                    -> origin/issue-98-c765b5595cf4
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.7590847Z  * [new branch]      main                                     -> origin/main
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.7592840Z  * [new tag]         js-v1.10.0                               -> js-v1.10.0
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.7594679Z  * [new tag]         js-v1.10.1                               -> js-v1.10.1
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.7596510Z  * [new tag]         js-v1.10.2                               -> js-v1.10.2
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.7598351Z  * [new tag]         js-v1.10.3                               -> js-v1.10.3
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.7600163Z  * [new tag]         js-v1.10.4                               -> js-v1.10.4
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.7602208Z  * [new tag]         js-v1.10.5                               -> js-v1.10.5
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.7604063Z  * [new tag]         js-v1.10.6                               -> js-v1.10.6
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.7606479Z  * [new tag]         js-v1.10.7                               -> js-v1.10.7
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.7609198Z  * [new tag]         js-v1.10.8                               -> js-v1.10.8
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.7611084Z  * [new tag]         js-v1.7.10                               -> js-v1.7.10
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.7613210Z  * [new tag]         js-v1.7.11                               -> js-v1.7.11
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.7615415Z  * [new tag]         js-v1.7.12                               -> js-v1.7.12
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.7617964Z  * [new tag]         js-v1.7.13                               -> js-v1.7.13
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.7620049Z  * [new tag]         js-v1.7.14                               -> js-v1.7.14
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.7622101Z  * [new tag]         js-v1.7.15                               -> js-v1.7.15
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.7623929Z  * [new tag]         js-v1.7.16                               -> js-v1.7.16
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.7626098Z  * [new tag]         js-v1.7.17                               -> js-v1.7.17
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.7628636Z  * [new tag]         js-v1.7.18                               -> js-v1.7.18
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.7630980Z  * [new tag]         js-v1.7.19                               -> js-v1.7.19
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.7632998Z  * [new tag]         js-v1.7.20                               -> js-v1.7.20
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.7634771Z  * [new tag]         js-v1.7.21                               -> js-v1.7.21
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.7636926Z  * [new tag]         js-v1.7.22                               -> js-v1.7.22
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.7639480Z  * [new tag]         js-v1.7.23                               -> js-v1.7.23
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.7642189Z  * [new tag]         js-v1.7.24                               -> js-v1.7.24
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.7644841Z  * [new tag]         js-v1.7.25                               -> js-v1.7.25
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.7647441Z  * [new tag]         js-v1.7.26                               -> js-v1.7.26
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.7650082Z  * [new tag]         js-v1.7.27                               -> js-v1.7.27
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.7652901Z  * [new tag]         js-v1.7.9                                -> js-v1.7.9
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.7655464Z  * [new tag]         js-v1.8.0                                -> js-v1.8.0
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.7658006Z  * [new tag]         js-v1.8.1                                -> js-v1.8.1
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.7660556Z  * [new tag]         js-v1.9.0                                -> js-v1.9.0
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.7663272Z  * [new tag]         rust-v0.1.0                              -> rust-v0.1.0
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.7665959Z  * [new tag]         rust-v0.2.0                              -> rust-v0.2.0
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.7668622Z  * [new tag]         rust-v0.2.1                              -> rust-v0.2.1
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.7671298Z  * [new tag]         rust-v0.3.0                              -> rust-v0.3.0
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.7674108Z  * [new tag]         rust-v0.3.1                              -> rust-v0.3.1
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.7677090Z  * [new tag]         rust-v0.3.10                             -> rust-v0.3.10
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.7679795Z  * [new tag]         rust-v0.3.11                             -> rust-v0.3.11
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.7682752Z  * [new tag]         rust-v0.3.12                             -> rust-v0.3.12
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.7685696Z  * [new tag]         rust-v0.3.13                             -> rust-v0.3.13
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.7773773Z  * [new tag]         rust-v0.3.14                             -> rust-v0.3.14
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.7776995Z  * [new tag]         rust-v0.3.15                             -> rust-v0.3.15
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.7779419Z  * [new tag]         rust-v0.3.16                             -> rust-v0.3.16
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.7782726Z  * [new tag]         rust-v0.3.17                             -> rust-v0.3.17
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.7785477Z  * [new tag]         rust-v0.3.18                             -> rust-v0.3.18
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.7788244Z  * [new tag]         rust-v0.3.19                             -> rust-v0.3.19
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.7790931Z  * [new tag]         rust-v0.3.2                              -> rust-v0.3.2
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.7793827Z  * [new tag]         rust-v0.3.20                             -> rust-v0.3.20
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.7796142Z  * [new tag]         rust-v0.3.21                             -> rust-v0.3.21
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.7797954Z  * [new tag]         rust-v0.3.22                             -> rust-v0.3.22
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.7799745Z  * [new tag]         rust-v0.3.23                             -> rust-v0.3.23
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.7801820Z  * [new tag]         rust-v0.3.24                             -> rust-v0.3.24
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.7803634Z  * [new tag]         rust-v0.3.25                             -> rust-v0.3.25
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.7805419Z  * [new tag]         rust-v0.3.26                             -> rust-v0.3.26
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.7807198Z  * [new tag]         rust-v0.3.27                             -> rust-v0.3.27
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.7809254Z  * [new tag]         rust-v0.3.28                             -> rust-v0.3.28
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.7811016Z  * [new tag]         rust-v0.3.29                             -> rust-v0.3.29
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.7812968Z  * [new tag]         rust-v0.3.3                              -> rust-v0.3.3
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.7814740Z  * [new tag]         rust-v0.3.30                             -> rust-v0.3.30
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.7816526Z  * [new tag]         rust-v0.3.4                              -> rust-v0.3.4
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.7818294Z  * [new tag]         rust-v0.3.5                              -> rust-v0.3.5
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.7820058Z  * [new tag]         rust-v0.3.6                              -> rust-v0.3.6
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.7822210Z  * [new tag]         rust-v0.3.7                              -> rust-v0.3.7
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.7824054Z  * [new tag]         rust-v0.3.8                              -> rust-v0.3.8
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.7825841Z  * [new tag]         rust-v0.3.9                              -> rust-v0.3.9
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.7827580Z  * [new tag]         v1.1.1                                   -> v1.1.1
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.7829202Z  * [new tag]         v1.1.2                                   -> v1.1.2
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.7830828Z  * [new tag]         v1.1.3                                   -> v1.1.3
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.7832648Z  * [new tag]         v1.2.0                                   -> v1.2.0
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.7834281Z  * [new tag]         v1.3.0                                   -> v1.3.0
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.7835898Z  * [new tag]         v1.7.2                                   -> v1.7.2
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.7837518Z  * [new tag]         v1.7.3                                   -> v1.7.3
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.7839138Z  * [new tag]         v1.7.4                                   -> v1.7.4
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.7840757Z  * [new tag]         v1.7.5                                   -> v1.7.5
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.7842572Z  * [new tag]         v1.7.6                                   -> v1.7.6
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.7844380Z  * [new tag]         v1.7.7                                   -> v1.7.7
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.7845980Z  * [new tag]         v1.7.8                                   -> v1.7.8
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.7847773Z  * [new ref]         b52444a17516dbd929078642d9e1bb88af3c1d7b -> pull/140/merge
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.7851918Z ##[endgroup]
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.7853467Z ##[group]Determining the checkout info
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.7855231Z ##[endgroup]
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.7856257Z [command]/usr/bin/git sparse-checkout disable
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.7859099Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.7862777Z ##[group]Checking out the ref
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.7864344Z [command]/usr/bin/git checkout --progress --force refs/remotes/pull/140/merge
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.8740869Z Note: switching to 'refs/remotes/pull/140/merge'.
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.8742743Z
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.8743915Z You are in 'detached HEAD' state. You can look around, make experimental
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.8746949Z changes and commit them, and you can discard any commits you make in this
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.8749840Z state without impacting any branches by switching back to a branch.
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.8751712Z
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.8752860Z If you want to create a new branch to retain commits you create, you may
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.8755426Z do so (now or later) by using -c with the switch command. Example:
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.8756510Z
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.8756985Z   git switch -c <new-branch-name>
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.8757745Z
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.8758370Z Or undo this operation with:
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.8759377Z
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.8759946Z   git switch -
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.8760698Z
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.8762086Z Turn off this advice by setting config variable advice.detachedHead to false
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.8763570Z
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.8765166Z HEAD is now at b52444a Merge eb75681ce5c3ce4f837e2f289a505677d8a607c2 into 7387a4c8b7f244b50358b5f536c708c6e3feb856
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.8769727Z ##[endgroup]
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.8808937Z [command]/usr/bin/git log -1 --format=%H
+JS - Check for Changesets	Run actions/checkout@v6	2026-06-14T20:50:51.8836910Z b52444a17516dbd929078642d9e1bb88af3c1d7b
+JS - Check for Changesets	Setup Node.js	﻿2026-06-14T20:50:51.9237250Z ##[group]Run actions/setup-node@v6
+JS - Check for Changesets	Setup Node.js	2026-06-14T20:50:51.9238430Z with:
+JS - Check for Changesets	Setup Node.js	2026-06-14T20:50:51.9239272Z   node-version: 24.x
+JS - Check for Changesets	Setup Node.js	2026-06-14T20:50:51.9240214Z   check-latest: false
+JS - Check for Changesets	Setup Node.js	2026-06-14T20:50:51.9252057Z   token: ***
+JS - Check for Changesets	Setup Node.js	2026-06-14T20:50:51.9253064Z   package-manager-cache: true
+JS - Check for Changesets	Setup Node.js	2026-06-14T20:50:51.9254146Z ##[endgroup]
+JS - Check for Changesets	Setup Node.js	2026-06-14T20:50:52.1083059Z Found in cache @ /opt/hostedtoolcache/node/24.16.0/x64
+JS - Check for Changesets	Setup Node.js	2026-06-14T20:50:52.1094999Z ##[group]Environment details
+JS - Check for Changesets	Setup Node.js	2026-06-14T20:50:52.7078509Z node: v24.16.0
+JS - Check for Changesets	Setup Node.js	2026-06-14T20:50:52.7080987Z npm: 11.13.0
+JS - Check for Changesets	Setup Node.js	2026-06-14T20:50:52.7083036Z yarn: 1.22.22
+JS - Check for Changesets	Setup Node.js	2026-06-14T20:50:52.7085557Z ##[endgroup]
+JS - Check for Changesets	Install dependencies	﻿2026-06-14T20:50:52.7256114Z ##[group]Run npm install
+JS - Check for Changesets	Install dependencies	2026-06-14T20:50:52.7257206Z ^[[36;1mnpm install^[[0m
+JS - Check for Changesets	Install dependencies	2026-06-14T20:50:52.7394600Z shell: /usr/bin/bash -e {0}
+JS - Check for Changesets	Install dependencies	2026-06-14T20:50:52.7395714Z ##[endgroup]
+JS - Check for Changesets	Install dependencies	2026-06-14T20:50:53.4999703Z npm warn EBADENGINE Unsupported engine {
+JS - Check for Changesets	Install dependencies	2026-06-14T20:50:53.5001738Z npm warn EBADENGINE   package: '@link-assistant/web-capture@1.10.8',
+JS - Check for Changesets	Install dependencies	2026-06-14T20:50:53.5003342Z npm warn EBADENGINE   required: { node: '>=22.0.0 <23.0.0' },
+JS - Check for Changesets	Install dependencies	2026-06-14T20:50:53.5004495Z npm warn EBADENGINE   current: { node: 'v24.16.0', npm: '11.13.0' }
+JS - Check for Changesets	Install dependencies	2026-06-14T20:50:53.5005532Z npm warn EBADENGINE }
+JS - Check for Changesets	Install dependencies	2026-06-14T20:50:54.9361785Z npm warn deprecated supertest@6.3.4: Please upgrade to supertest v7.1.3+, see release notes at https://github.com/forwardemail/supertest/releases/tag/v7.1.3 - maintenance is supported by Forward Email @ https://forwardemail.net
+JS - Check for Changesets	Install dependencies	2026-06-14T20:50:55.7525430Z npm warn deprecated inflight@1.0.6: This module is not supported, and leaks memory. Do not use it. Check out lru-cache if you want a good and tested way to coalesce async requests by a key value, which is much more comprehensive and powerful.
+JS - Check for Changesets	Install dependencies	2026-06-14T20:50:55.8691715Z npm warn deprecated glob@7.2.3: Glob versions prior to v9 are no longer supported
+JS - Check for Changesets	Install dependencies	2026-06-14T20:50:56.5321239Z npm warn deprecated superagent@8.1.2: Please upgrade to superagent v10.2.2+, see release notes at https://github.com/forwardemail/superagent/releases/tag/v10.2.2 - maintenance is supported by Forward Email @ https://forwardemail.net
+JS - Check for Changesets	Install dependencies	2026-06-14T20:50:58.1311746Z npm warn deprecated puppeteer@24.8.2: < 24.15.0 is no longer supported
+JS - Check for Changesets	Install dependencies	2026-06-14T20:50:58.7355555Z npm warn deprecated glob@10.5.0: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
+JS - Check for Changesets	Install dependencies	2026-06-14T20:51:02.5518508Z
+JS - Check for Changesets	Install dependencies	2026-06-14T20:51:02.6105036Z > @link-assistant/web-capture@1.10.8 prepare
+JS - Check for Changesets	Install dependencies	2026-06-14T20:51:02.6105744Z > husky || true
+JS - Check for Changesets	Install dependencies	2026-06-14T20:51:02.6106028Z
+JS - Check for Changesets	Install dependencies	2026-06-14T20:51:02.6106218Z .git can't be found
+JS - Check for Changesets	Install dependencies	2026-06-14T20:51:02.6127502Z added 874 packages, and audited 875 packages in 10s
+JS - Check for Changesets	Install dependencies	2026-06-14T20:51:02.6128303Z
+JS - Check for Changesets	Install dependencies	2026-06-14T20:51:02.6132586Z 136 packages are looking for funding
+JS - Check for Changesets	Install dependencies	2026-06-14T20:51:02.6133680Z   run `npm fund` for details
+JS - Check for Changesets	Install dependencies	2026-06-14T20:51:02.6313071Z
+JS - Check for Changesets	Install dependencies	2026-06-14T20:51:02.6353050Z 18 vulnerabilities (9 moderate, 7 high, 2 critical)
+JS - Check for Changesets	Install dependencies	2026-06-14T20:51:02.6353889Z
+JS - Check for Changesets	Install dependencies	2026-06-14T20:51:02.6369105Z To address all issues, run:
+JS - Check for Changesets	Install dependencies	2026-06-14T20:51:02.6392447Z   npm audit fix
+JS - Check for Changesets	Install dependencies	2026-06-14T20:51:02.6412333Z
+JS - Check for Changesets	Install dependencies	2026-06-14T20:51:02.6412884Z Run `npm audit` for details.
+JS - Check for Changesets	Check for changesets	﻿2026-06-14T20:51:02.7071913Z ##[group]Run # Skip changeset check for automated version PRs
+JS - Check for Changesets	Check for changesets	2026-06-14T20:51:02.7072476Z ^[[36;1m# Skip changeset check for automated version PRs^[[0m
+JS - Check for Changesets	Check for changesets	2026-06-14T20:51:02.7072932Z ^[[36;1mif [[ "issue-139-24bf83def591" == "changeset-release/"* ]]; then^[[0m
+JS - Check for Changesets	Check for changesets	2026-06-14T20:51:02.7073397Z ^[[36;1m  echo "Skipping changeset check for automated release PR"^[[0m
+JS - Check for Changesets	Check for changesets	2026-06-14T20:51:02.7073745Z ^[[36;1m  exit 0^[[0m
+JS - Check for Changesets	Check for changesets	2026-06-14T20:51:02.7073968Z ^[[36;1mfi^[[0m
+JS - Check for Changesets	Check for changesets	2026-06-14T20:51:02.7074172Z ^[[36;1m^[[0m
+JS - Check for Changesets	Check for changesets	2026-06-14T20:51:02.7074403Z ^[[36;1m# Run changeset validation script^[[0m
+JS - Check for Changesets	Check for changesets	2026-06-14T20:51:02.7074756Z ^[[36;1mnode ../scripts/validate-changeset.mjs^[[0m
+JS - Check for Changesets	Check for changesets	2026-06-14T20:51:02.7112097Z shell: /usr/bin/bash -e {0}
+JS - Check for Changesets	Check for changesets	2026-06-14T20:51:02.7112390Z ##[endgroup]
+JS - Check for Changesets	Check for changesets	2026-06-14T20:51:02.7494465Z Found 0 changeset file(s)
+JS - Check for Changesets	Check for changesets	2026-06-14T20:51:02.7522904Z ##[error]No changeset found. Please add a changeset by running 'npm run changeset' and commit the result.
+JS - Check for Changesets	Check for changesets	2026-06-14T20:51:02.7542516Z ##[error]Process completed with exit code 1.
+JS - Check for Changesets	Post Run actions/checkout@v6	﻿2026-06-14T20:51:02.7675368Z Post job cleanup.
+JS - Check for Changesets	Post Run actions/checkout@v6	2026-06-14T20:51:02.8589025Z [command]/usr/bin/git version
+JS - Check for Changesets	Post Run actions/checkout@v6	2026-06-14T20:51:02.8633320Z git version 2.54.0
+JS - Check for Changesets	Post Run actions/checkout@v6	2026-06-14T20:51:02.8677377Z Temporarily overriding HOME='/home/runner/work/_temp/672a6020-01ba-4c63-b138-5f84242f3997' before making global git config changes
+JS - Check for Changesets	Post Run actions/checkout@v6	2026-06-14T20:51:02.8678752Z Adding repository directory to the temporary git global config as a safe directory
+JS - Check for Changesets	Post Run actions/checkout@v6	2026-06-14T20:51:02.8683406Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/web-capture/web-capture
+JS - Check for Changesets	Post Run actions/checkout@v6	2026-06-14T20:51:02.8721244Z Removing SSH command configuration
+JS - Check for Changesets	Post Run actions/checkout@v6	2026-06-14T20:51:02.8728886Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+JS - Check for Changesets	Post Run actions/checkout@v6	2026-06-14T20:51:02.8769489Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+JS - Check for Changesets	Post Run actions/checkout@v6	2026-06-14T20:51:02.9034247Z Removing HTTP extra header
+JS - Check for Changesets	Post Run actions/checkout@v6	2026-06-14T20:51:02.9036626Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+JS - Check for Changesets	Post Run actions/checkout@v6	2026-06-14T20:51:02.9079421Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+JS - Check for Changesets	Post Run actions/checkout@v6	2026-06-14T20:51:02.9326846Z Removing includeIf entries pointing to credentials config files
+JS - Check for Changesets	Post Run actions/checkout@v6	2026-06-14T20:51:02.9333881Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+JS - Check for Changesets	Post Run actions/checkout@v6	2026-06-14T20:51:03.0134030Z includeif.gitdir:/home/runner/work/web-capture/web-capture/.git.path
+JS - Check for Changesets	Post Run actions/checkout@v6	2026-06-14T20:51:03.0135462Z includeif.gitdir:/home/runner/work/web-capture/web-capture/.git/worktrees/*.path
+JS - Check for Changesets	Post Run actions/checkout@v6	2026-06-14T20:51:03.0136487Z includeif.gitdir:/github/workspace/.git.path
+JS - Check for Changesets	Post Run actions/checkout@v6	2026-06-14T20:51:03.0137397Z includeif.gitdir:/github/workspace/.git/worktrees/*.path
+JS - Check for Changesets	Post Run actions/checkout@v6	2026-06-14T20:51:03.0140621Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/home/runner/work/web-capture/web-capture/.git.path
+JS - Check for Changesets	Post Run actions/checkout@v6	2026-06-14T20:51:03.0164235Z /home/runner/work/_temp/git-credentials-95c4f5f1-0947-4c0b-9daa-a7c27f4197f7.config
+JS - Check for Changesets	Post Run actions/checkout@v6	2026-06-14T20:51:03.0177818Z [command]/usr/bin/git config --local --unset includeif.gitdir:/home/runner/work/web-capture/web-capture/.git.path /home/runner/work/_temp/git-credentials-95c4f5f1-0947-4c0b-9daa-a7c27f4197f7.config
+JS - Check for Changesets	Post Run actions/checkout@v6	2026-06-14T20:51:03.0230406Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/home/runner/work/web-capture/web-capture/.git/worktrees/*.path
+JS - Check for Changesets	Post Run actions/checkout@v6	2026-06-14T20:51:03.0249103Z /home/runner/work/_temp/git-credentials-95c4f5f1-0947-4c0b-9daa-a7c27f4197f7.config
+JS - Check for Changesets	Post Run actions/checkout@v6	2026-06-14T20:51:03.0267809Z [command]/usr/bin/git config --local --unset includeif.gitdir:/home/runner/work/web-capture/web-capture/.git/worktrees/*.path /home/runner/work/_temp/git-credentials-95c4f5f1-0947-4c0b-9daa-a7c27f4197f7.config
+JS - Check for Changesets	Post Run actions/checkout@v6	2026-06-14T20:51:03.0297332Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/github/workspace/.git.path
+JS - Check for Changesets	Post Run actions/checkout@v6	2026-06-14T20:51:03.0322827Z /github/runner_temp/git-credentials-95c4f5f1-0947-4c0b-9daa-a7c27f4197f7.config
+JS - Check for Changesets	Post Run actions/checkout@v6	2026-06-14T20:51:03.0333305Z [command]/usr/bin/git config --local --unset includeif.gitdir:/github/workspace/.git.path /github/runner_temp/git-credentials-95c4f5f1-0947-4c0b-9daa-a7c27f4197f7.config
+JS - Check for Changesets	Post Run actions/checkout@v6	2026-06-14T20:51:03.0379000Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/github/workspace/.git/worktrees/*.path
+JS - Check for Changesets	Post Run actions/checkout@v6	2026-06-14T20:51:03.0399439Z /github/runner_temp/git-credentials-95c4f5f1-0947-4c0b-9daa-a7c27f4197f7.config
+JS - Check for Changesets	Post Run actions/checkout@v6	2026-06-14T20:51:03.0409671Z [command]/usr/bin/git config --local --unset includeif.gitdir:/github/workspace/.git/worktrees/*.path /github/runner_temp/git-credentials-95c4f5f1-0947-4c0b-9daa-a7c27f4197f7.config
+JS - Check for Changesets	Post Run actions/checkout@v6	2026-06-14T20:51:03.0448417Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+JS - Check for Changesets	Post Run actions/checkout@v6	2026-06-14T20:51:03.0763894Z Removing credentials config '/home/runner/work/_temp/git-credentials-95c4f5f1-0947-4c0b-9daa-a7c27f4197f7.config'
+JS - Check for Changesets	Complete job	﻿2026-06-14T20:51:03.0937728Z Cleaning up orphan processes
+JS - Lint and Format Check	Set up job	﻿2026-06-14T20:50:43.5588088Z Current runner version: '2.335.1'
+JS - Lint and Format Check	Set up job	2026-06-14T20:50:43.5615113Z ##[group]Runner Image Provisioner
+JS - Lint and Format Check	Set up job	2026-06-14T20:50:43.5616039Z Hosted Compute Agent
+JS - Lint and Format Check	Set up job	2026-06-14T20:50:43.5616794Z Version: 20260527.539
+JS - Lint and Format Check	Set up job	2026-06-14T20:50:43.5617543Z Commit: a891dd388383b896fa6ac04a82c0b75cec981078
+JS - Lint and Format Check	Set up job	2026-06-14T20:50:43.5618347Z Build Date: 2026-05-27T21:39:57Z
+JS - Lint and Format Check	Set up job	2026-06-14T20:50:43.5619535Z Worker ID: {7afb5f24-7b59-4d36-b0a0-e93a3b1cb798}
+JS - Lint and Format Check	Set up job	2026-06-14T20:50:43.5620344Z Azure Region: eastus
+JS - Lint and Format Check	Set up job	2026-06-14T20:50:43.5621020Z ##[endgroup]
+JS - Lint and Format Check	Set up job	2026-06-14T20:50:43.5622577Z ##[group]Operating System
+JS - Lint and Format Check	Set up job	2026-06-14T20:50:43.5623274Z Ubuntu
+JS - Lint and Format Check	Set up job	2026-06-14T20:50:43.5623940Z 24.04.4
+JS - Lint and Format Check	Set up job	2026-06-14T20:50:43.5624582Z LTS
+JS - Lint and Format Check	Set up job	2026-06-14T20:50:43.5625157Z ##[endgroup]
+JS - Lint and Format Check	Set up job	2026-06-14T20:50:43.5626041Z ##[group]Runner Image
+JS - Lint and Format Check	Set up job	2026-06-14T20:50:43.5626770Z Image: ubuntu-24.04
+JS - Lint and Format Check	Set up job	2026-06-14T20:50:43.5627461Z Version: 20260607.184.1
+JS - Lint and Format Check	Set up job	2026-06-14T20:50:43.5628611Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20260607.184/images/ubuntu/Ubuntu2404-Readme.md
+JS - Lint and Format Check	Set up job	2026-06-14T20:50:43.5630850Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20260607.184
+JS - Lint and Format Check	Set up job	2026-06-14T20:50:43.5631968Z ##[endgroup]
+JS - Lint and Format Check	Set up job	2026-06-14T20:50:43.5633284Z ##[group]GITHUB_TOKEN Permissions
+JS - Lint and Format Check	Set up job	2026-06-14T20:50:43.5635603Z Contents: read
+JS - Lint and Format Check	Set up job	2026-06-14T20:50:43.5636406Z Metadata: read
+JS - Lint and Format Check	Set up job	2026-06-14T20:50:43.5637048Z Packages: read
+JS - Lint and Format Check	Set up job	2026-06-14T20:50:43.5637751Z ##[endgroup]
+JS - Lint and Format Check	Set up job	2026-06-14T20:50:43.5640479Z Secret source: Actions
+JS - Lint and Format Check	Set up job	2026-06-14T20:50:43.5641569Z Prepare workflow directory
+JS - Lint and Format Check	Set up job	2026-06-14T20:50:43.6046247Z Prepare all required actions
+JS - Lint and Format Check	Set up job	2026-06-14T20:50:43.6084668Z Getting action download info
+JS - Lint and Format Check	Set up job	2026-06-14T20:50:43.9109982Z Download action repository 'actions/checkout@v6' (SHA:df4cb1c069e1874edd31b4311f1884172cec0e10)
+JS - Lint and Format Check	Set up job	2026-06-14T20:50:44.0828695Z Download action repository 'actions/setup-node@v6' (SHA:48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e)
+JS - Lint and Format Check	Set up job	2026-06-14T20:50:44.2669133Z Complete job name: JS - Lint and Format Check
+JS - Lint and Format Check	Run actions/checkout@v6	﻿2026-06-14T20:50:44.3387554Z ##[group]Run actions/checkout@v6
+JS - Lint and Format Check	Run actions/checkout@v6	2026-06-14T20:50:44.3388441Z with:
+JS - Lint and Format Check	Run actions/checkout@v6	2026-06-14T20:50:44.3389161Z   repository: link-assistant/web-capture
+JS - Lint and Format Check	Run actions/checkout@v6	2026-06-14T20:50:44.3393659Z   token: ***
+JS - Lint and Format Check	Run actions/checkout@v6	2026-06-14T20:50:44.3394105Z   ssh-strict: true
+JS - Lint and Format Check	Run actions/checkout@v6	2026-06-14T20:50:44.3394544Z   ssh-user: git
+JS - Lint and Format Check	Run actions/checkout@v6	2026-06-14T20:50:44.3394990Z   persist-credentials: true
+JS - Lint and Format Check	Run actions/checkout@v6	2026-06-14T20:50:44.3395479Z   clean: true
+JS - Lint and Format Check	Run actions/checkout@v6	2026-06-14T20:50:44.3395922Z   sparse-checkout-cone-mode: true
+JS - Lint and Format Check	Run actions/checkout@v6	2026-06-14T20:50:44.3396443Z   fetch-depth: 1
+JS - Lint and Format Check	Run actions/checkout@v6	2026-06-14T20:50:44.3396880Z   fetch-tags: false
+JS - Lint and Format Check	Run actions/checkout@v6	2026-06-14T20:50:44.3397315Z   show-progress: true
+JS - Lint and Format Check	Run actions/checkout@v6	2026-06-14T20:50:44.3397756Z   lfs: false
+JS - Lint and Format Check	Run actions/checkout@v6	2026-06-14T20:50:44.3398162Z   submodules: false
+JS - Lint and Format Check	Run actions/checkout@v6	2026-06-14T20:50:44.3398608Z   set-safe-directory: true
+JS - Lint and Format Check	Run actions/checkout@v6	2026-06-14T20:50:44.3399456Z ##[endgroup]
+JS - Lint and Format Check	Run actions/checkout@v6	2026-06-14T20:50:44.4368729Z Syncing repository: link-assistant/web-capture
+JS - Lint and Format Check	Run actions/checkout@v6	2026-06-14T20:50:44.4371042Z ##[group]Getting Git version info
+JS - Lint and Format Check	Run actions/checkout@v6	2026-06-14T20:50:44.4371832Z Working directory is '/home/runner/work/web-capture/web-capture'
+JS - Lint and Format Check	Run actions/checkout@v6	2026-06-14T20:50:44.4373143Z [command]/usr/bin/git version
+JS - Lint and Format Check	Run actions/checkout@v6	2026-06-14T20:50:44.4405001Z git version 2.54.0
+JS - Lint and Format Check	Run actions/checkout@v6	2026-06-14T20:50:44.4458411Z ##[endgroup]
+JS - Lint and Format Check	Run actions/checkout@v6	2026-06-14T20:50:44.4472586Z Temporarily overriding HOME='/home/runner/work/_temp/02714c35-1d88-4aa2-ad83-ea578cba8743' before making global git config changes
+JS - Lint and Format Check	Run actions/checkout@v6	2026-06-14T20:50:44.4474062Z Adding repository directory to the temporary git global config as a safe directory
+JS - Lint and Format Check	Run actions/checkout@v6	2026-06-14T20:50:44.4477930Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/web-capture/web-capture
+JS - Lint and Format Check	Run actions/checkout@v6	2026-06-14T20:50:44.4521713Z Deleting the contents of '/home/runner/work/web-capture/web-capture'
+JS - Lint and Format Check	Run actions/checkout@v6	2026-06-14T20:50:44.4525873Z ##[group]Determining repository object format
+JS - Lint and Format Check	Run actions/checkout@v6	2026-06-14T20:50:44.4528081Z ##[endgroup]
+JS - Lint and Format Check	Run actions/checkout@v6	2026-06-14T20:50:44.4529062Z ##[group]Initializing the repository
+JS - Lint and Format Check	Run actions/checkout@v6	2026-06-14T20:50:44.4533154Z [command]/usr/bin/git init /home/runner/work/web-capture/web-capture
+JS - Lint and Format Check	Run actions/checkout@v6	2026-06-14T20:50:44.4609178Z hint: Using 'master' as the name for the initial branch. This default branch name
+JS - Lint and Format Check	Run actions/checkout@v6	2026-06-14T20:50:44.4610877Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+JS - Lint and Format Check	Run actions/checkout@v6	2026-06-14T20:50:44.4612658Z hint: to use in all of your new repositories, which will suppress this warning,
+JS - Lint and Format Check	Run actions/checkout@v6	2026-06-14T20:50:44.4614064Z hint: call:
+JS - Lint and Format Check	Run actions/checkout@v6	2026-06-14T20:50:44.4614645Z hint:
+JS - Lint and Format Check	Run actions/checkout@v6	2026-06-14T20:50:44.4615179Z hint: 	git config --global init.defaultBranch <name>
+JS - Lint and Format Check	Run actions/checkout@v6	2026-06-14T20:50:44.4615821Z hint:
+JS - Lint and Format Check	Run actions/checkout@v6	2026-06-14T20:50:44.4616400Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+JS - Lint and Format Check	Run actions/checkout@v6	2026-06-14T20:50:44.4617329Z hint: 'development'. The just-created branch can be renamed via this command:
+JS - Lint and Format Check	Run actions/checkout@v6	2026-06-14T20:50:44.4618060Z hint:
+JS - Lint and Format Check	Run actions/checkout@v6	2026-06-14T20:50:44.4618477Z hint: 	git branch -m <name>
+JS - Lint and Format Check	Run actions/checkout@v6	2026-06-14T20:50:44.4619187Z hint:
+JS - Lint and Format Check	Run actions/checkout@v6	2026-06-14T20:50:44.4619818Z hint: Disable this message with "git config set advice.defaultBranchName false"
+JS - Lint and Format Check	Run actions/checkout@v6	2026-06-14T20:50:44.4620852Z Initialized empty Git repository in /home/runner/work/web-capture/web-capture/.git/
+JS - Lint and Format Check	Run actions/checkout@v6	2026-06-14T20:50:44.4623982Z [command]/usr/bin/git remote add origin https://github.com/link-assistant/web-capture
+JS - Lint and Format Check	Run actions/checkout@v6	2026-06-14T20:50:44.4664004Z ##[endgroup]
+JS - Lint and Format Check	Run actions/checkout@v6	2026-06-14T20:50:44.4664826Z ##[group]Disabling automatic garbage collection
+JS - Lint and Format Check	Run actions/checkout@v6	2026-06-14T20:50:44.4667537Z [command]/usr/bin/git config --local gc.auto 0
+JS - Lint and Format Check	Run actions/checkout@v6	2026-06-14T20:50:44.4697359Z ##[endgroup]
+JS - Lint and Format Check	Run actions/checkout@v6	2026-06-14T20:50:44.4698542Z ##[group]Setting up auth
+JS - Lint and Format Check	Run actions/checkout@v6	2026-06-14T20:50:44.4699616Z Removing SSH command configuration
+JS - Lint and Format Check	Run actions/checkout@v6	2026-06-14T20:50:44.4705275Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+JS - Lint and Format Check	Run actions/checkout@v6	2026-06-14T20:50:44.4739545Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+JS - Lint and Format Check	Run actions/checkout@v6	2026-06-14T20:50:44.5041876Z Removing HTTP extra header
+JS - Lint and Format Check	Run actions/checkout@v6	2026-06-14T20:50:44.5048219Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+JS - Lint and Format Check	Run actions/checkout@v6	2026-06-14T20:50:44.5081517Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+JS - Lint and Format Check	Run actions/checkout@v6	2026-06-14T20:50:44.5310125Z Removing includeIf entries pointing to credentials config files
+JS - Lint and Format Check	Run actions/checkout@v6	2026-06-14T20:50:44.5315914Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+JS - Lint and Format Check	Run actions/checkout@v6	2026-06-14T20:50:44.5350774Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+JS - Lint and Format Check	Run actions/checkout@v6	2026-06-14T20:50:44.5598429Z [command]/usr/bin/git config --file /home/runner/work/_temp/git-credentials-50988a90-b71e-4e0f-a30c-a97ba5557faa.config http.https://github.com/.extraheader AUTHORIZATION: basic ***
+JS - Lint and Format Check	Run actions/checkout@v6	2026-06-14T20:50:44.5641888Z [command]/usr/bin/git config --local includeIf.gitdir:/home/runner/work/web-capture/web-capture/.git.path /home/runner/work/_temp/git-credentials-50988a90-b71e-4e0f-a30c-a97ba5557faa.config
+JS - Lint and Format Check	Run actions/checkout@v6	2026-06-14T20:50:44.5679240Z [command]/usr/bin/git config --local includeIf.gitdir:/home/runner/work/web-capture/web-capture/.git/worktrees/*.path /home/runner/work/_temp/git-credentials-50988a90-b71e-4e0f-a30c-a97ba5557faa.config
+JS - Lint and Format Check	Run actions/checkout@v6	2026-06-14T20:50:44.5720434Z [command]/usr/bin/git config --local includeIf.gitdir:/github/workspace/.git.path /github/runner_temp/git-credentials-50988a90-b71e-4e0f-a30c-a97ba5557faa.config
+JS - Lint and Format Check	Run actions/checkout@v6	2026-06-14T20:50:44.5757028Z [command]/usr/bin/git config --local includeIf.gitdir:/github/workspace/.git/worktrees/*.path /github/runner_temp/git-credentials-50988a90-b71e-4e0f-a30c-a97ba5557faa.config
+JS - Lint and Format Check	Run actions/checkout@v6	2026-06-14T20:50:44.5787846Z ##[endgroup]
+JS - Lint and Format Check	Run actions/checkout@v6	2026-06-14T20:50:44.5788781Z ##[group]Fetching the repository
+JS - Lint and Format Check	Run actions/checkout@v6	2026-06-14T20:50:44.5800294Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +b52444a17516dbd929078642d9e1bb88af3c1d7b:refs/remotes/pull/140/merge
+JS - Lint and Format Check	Run actions/checkout@v6	2026-06-14T20:50:45.1226961Z From https://github.com/link-assistant/web-capture
+JS - Lint and Format Check	Run actions/checkout@v6	2026-06-14T20:50:45.1228526Z  * [new ref]         b52444a17516dbd929078642d9e1bb88af3c1d7b -> pull/140/merge
+JS - Lint and Format Check	Run actions/checkout@v6	2026-06-14T20:50:45.1264245Z ##[endgroup]
+JS - Lint and Format Check	Run actions/checkout@v6	2026-06-14T20:50:45.1265826Z ##[group]Determining the checkout info
+JS - Lint and Format Check	Run actions/checkout@v6	2026-06-14T20:50:45.1266931Z ##[endgroup]
+JS - Lint and Format Check	Run actions/checkout@v6	2026-06-14T20:50:45.1273425Z [command]/usr/bin/git sparse-checkout disable
+JS - Lint and Format Check	Run actions/checkout@v6	2026-06-14T20:50:45.1322168Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+JS - Lint and Format Check	Run actions/checkout@v6	2026-06-14T20:50:45.1354554Z ##[group]Checking out the ref
+JS - Lint and Format Check	Run actions/checkout@v6	2026-06-14T20:50:45.1358486Z [command]/usr/bin/git checkout --progress --force refs/remotes/pull/140/merge
+JS - Lint and Format Check	Run actions/checkout@v6	2026-06-14T20:50:45.2386672Z Note: switching to 'refs/remotes/pull/140/merge'.
+JS - Lint and Format Check	Run actions/checkout@v6	2026-06-14T20:50:45.2388326Z
+JS - Lint and Format Check	Run actions/checkout@v6	2026-06-14T20:50:45.2389867Z You are in 'detached HEAD' state. You can look around, make experimental
+JS - Lint and Format Check	Run actions/checkout@v6	2026-06-14T20:50:45.2391564Z changes and commit them, and you can discard any commits you make in this
+JS - Lint and Format Check	Run actions/checkout@v6	2026-06-14T20:50:45.2392815Z state without impacting any branches by switching back to a branch.
+JS - Lint and Format Check	Run actions/checkout@v6	2026-06-14T20:50:45.2393512Z
+JS - Lint and Format Check	Run actions/checkout@v6	2026-06-14T20:50:45.2394170Z If you want to create a new branch to retain commits you create, you may
+JS - Lint and Format Check	Run actions/checkout@v6	2026-06-14T20:50:45.2395512Z do so (now or later) by using -c with the switch command. Example:
+JS - Lint and Format Check	Run actions/checkout@v6	2026-06-14T20:50:45.2396529Z
+JS - Lint and Format Check	Run actions/checkout@v6	2026-06-14T20:50:45.2397039Z   git switch -c <new-branch-name>
+JS - Lint and Format Check	Run actions/checkout@v6	2026-06-14T20:50:45.2397864Z
+JS - Lint and Format Check	Run actions/checkout@v6	2026-06-14T20:50:45.2398361Z Or undo this operation with:
+JS - Lint and Format Check	Run actions/checkout@v6	2026-06-14T20:50:45.2399311Z
+JS - Lint and Format Check	Run actions/checkout@v6	2026-06-14T20:50:45.2399733Z   git switch -
+JS - Lint and Format Check	Run actions/checkout@v6	2026-06-14T20:50:45.2400294Z
+JS - Lint and Format Check	Run actions/checkout@v6	2026-06-14T20:50:45.2401129Z Turn off this advice by setting config variable advice.detachedHead to false
+JS - Lint and Format Check	Run actions/checkout@v6	2026-06-14T20:50:45.2402374Z
+JS - Lint and Format Check	Run actions/checkout@v6	2026-06-14T20:50:45.2403860Z HEAD is now at b52444a Merge eb75681ce5c3ce4f837e2f289a505677d8a607c2 into 7387a4c8b7f244b50358b5f536c708c6e3feb856
+JS - Lint and Format Check	Run actions/checkout@v6	2026-06-14T20:50:45.2408991Z ##[endgroup]
+JS - Lint and Format Check	Run actions/checkout@v6	2026-06-14T20:50:45.2520920Z [command]/usr/bin/git log -1 --format=%H
+JS - Lint and Format Check	Run actions/checkout@v6	2026-06-14T20:50:45.2545841Z b52444a17516dbd929078642d9e1bb88af3c1d7b
+JS - Lint and Format Check	Setup Node.js	﻿2026-06-14T20:50:45.2979953Z ##[group]Run actions/setup-node@v6
+JS - Lint and Format Check	Setup Node.js	2026-06-14T20:50:45.2981210Z with:
+JS - Lint and Format Check	Setup Node.js	2026-06-14T20:50:45.2982127Z   node-version: 24.x
+JS - Lint and Format Check	Setup Node.js	2026-06-14T20:50:45.2983127Z   check-latest: false
+JS - Lint and Format Check	Setup Node.js	2026-06-14T20:50:45.2992509Z   token: ***
+JS - Lint and Format Check	Setup Node.js	2026-06-14T20:50:45.2993468Z   package-manager-cache: true
+JS - Lint and Format Check	Setup Node.js	2026-06-14T20:50:45.2994533Z ##[endgroup]
+JS - Lint and Format Check	Setup Node.js	2026-06-14T20:50:45.4566149Z Found in cache @ /opt/hostedtoolcache/node/24.16.0/x64
+JS - Lint and Format Check	Setup Node.js	2026-06-14T20:50:45.4567868Z ##[group]Environment details
+JS - Lint and Format Check	Setup Node.js	2026-06-14T20:50:45.7860853Z node: v24.16.0
+JS - Lint and Format Check	Setup Node.js	2026-06-14T20:50:45.7861436Z npm: 11.13.0
+JS - Lint and Format Check	Setup Node.js	2026-06-14T20:50:45.7861831Z yarn: 1.22.22
+JS - Lint and Format Check	Setup Node.js	2026-06-14T20:50:45.7862758Z ##[endgroup]
+JS - Lint and Format Check	Install dependencies	﻿2026-06-14T20:50:45.8012331Z ##[group]Run npm install
+JS - Lint and Format Check	Install dependencies	2026-06-14T20:50:45.8012775Z ^[[36;1mnpm install^[[0m
+JS - Lint and Format Check	Install dependencies	2026-06-14T20:50:45.8153791Z shell: /usr/bin/bash -e {0}
+JS - Lint and Format Check	Install dependencies	2026-06-14T20:50:45.8154170Z ##[endgroup]
+JS - Lint and Format Check	Install dependencies	2026-06-14T20:50:46.6047163Z npm warn EBADENGINE Unsupported engine {
+JS - Lint and Format Check	Install dependencies	2026-06-14T20:50:46.6048633Z npm warn EBADENGINE   package: '@link-assistant/web-capture@1.10.8',
+JS - Lint and Format Check	Install dependencies	2026-06-14T20:50:46.6049942Z npm warn EBADENGINE   required: { node: '>=22.0.0 <23.0.0' },
+JS - Lint and Format Check	Install dependencies	2026-06-14T20:50:46.6050962Z npm warn EBADENGINE   current: { node: 'v24.16.0', npm: '11.13.0' }
+JS - Lint and Format Check	Install dependencies	2026-06-14T20:50:46.6051796Z npm warn EBADENGINE }
+JS - Lint and Format Check	Install dependencies	2026-06-14T20:50:48.0245616Z npm warn deprecated supertest@6.3.4: Please upgrade to supertest v7.1.3+, see release notes at https://github.com/forwardemail/supertest/releases/tag/v7.1.3 - maintenance is supported by Forward Email @ https://forwardemail.net
+JS - Lint and Format Check	Install dependencies	2026-06-14T20:50:48.7587512Z npm warn deprecated inflight@1.0.6: This module is not supported, and leaks memory. Do not use it. Check out lru-cache if you want a good and tested way to coalesce async requests by a key value, which is much more comprehensive and powerful.
+JS - Lint and Format Check	Install dependencies	2026-06-14T20:50:48.9075249Z npm warn deprecated glob@7.2.3: Glob versions prior to v9 are no longer supported
+JS - Lint and Format Check	Install dependencies	2026-06-14T20:50:49.5601207Z npm warn deprecated superagent@8.1.2: Please upgrade to superagent v10.2.2+, see release notes at https://github.com/forwardemail/superagent/releases/tag/v10.2.2 - maintenance is supported by Forward Email @ https://forwardemail.net
+JS - Lint and Format Check	Install dependencies	2026-06-14T20:50:51.2863788Z npm warn deprecated puppeteer@24.8.2: < 24.15.0 is no longer supported
+JS - Lint and Format Check	Install dependencies	2026-06-14T20:50:51.7593271Z npm warn deprecated glob@10.5.0: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
+JS - Lint and Format Check	Install dependencies	2026-06-14T20:50:55.6232230Z
+JS - Lint and Format Check	Install dependencies	2026-06-14T20:50:55.6233215Z > @link-assistant/web-capture@1.10.8 prepare
+JS - Lint and Format Check	Install dependencies	2026-06-14T20:50:55.6233851Z > husky || true
+JS - Lint and Format Check	Install dependencies	2026-06-14T20:50:55.6234169Z
+JS - Lint and Format Check	Install dependencies	2026-06-14T20:50:55.6812733Z .git can't be found
+JS - Lint and Format Check	Install dependencies	2026-06-14T20:50:55.6813471Z added 874 packages, and audited 875 packages in 10s
+JS - Lint and Format Check	Install dependencies	2026-06-14T20:50:55.6814177Z
+JS - Lint and Format Check	Install dependencies	2026-06-14T20:50:55.6814790Z 136 packages are looking for funding
+JS - Lint and Format Check	Install dependencies	2026-06-14T20:50:55.6815318Z   run `npm fund` for details
+JS - Lint and Format Check	Install dependencies	2026-06-14T20:50:55.6981462Z
+JS - Lint and Format Check	Install dependencies	2026-06-14T20:50:55.6982418Z 18 vulnerabilities (9 moderate, 7 high, 2 critical)
+JS - Lint and Format Check	Install dependencies	2026-06-14T20:50:55.6983090Z
+JS - Lint and Format Check	Install dependencies	2026-06-14T20:50:55.6983546Z To address all issues, run:
+JS - Lint and Format Check	Install dependencies	2026-06-14T20:50:55.6983964Z   npm audit fix
+JS - Lint and Format Check	Install dependencies	2026-06-14T20:50:55.6984354Z
+JS - Lint and Format Check	Install dependencies	2026-06-14T20:50:55.6985143Z Run `npm audit` for details.
+JS - Lint and Format Check	Run ESLint	﻿2026-06-14T20:50:55.7649659Z ##[group]Run npm run lint
+JS - Lint and Format Check	Run ESLint	2026-06-14T20:50:55.7649997Z ^[[36;1mnpm run lint^[[0m
+JS - Lint and Format Check	Run ESLint	2026-06-14T20:50:55.7687222Z shell: /usr/bin/bash -e {0}
+JS - Lint and Format Check	Run ESLint	2026-06-14T20:50:55.7687609Z ##[endgroup]
+JS - Lint and Format Check	Run ESLint	2026-06-14T20:50:55.8760768Z
+JS - Lint and Format Check	Run ESLint	2026-06-14T20:50:55.8761566Z > @link-assistant/web-capture@1.10.8 lint
+JS - Lint and Format Check	Run ESLint	2026-06-14T20:50:55.8762128Z > eslint .
+JS - Lint and Format Check	Run ESLint	2026-06-14T20:50:55.8762325Z
+JS - Lint and Format Check	Run ESLint	2026-06-14T20:50:58.3427859Z
+JS - Lint and Format Check	Run ESLint	2026-06-14T20:50:58.3429003Z /home/runner/work/web-capture/web-capture/js/bin/web-capture.js
+JS - Lint and Format Check	Run ESLint	2026-06-14T20:50:58.3462342Z ##[warning]   32:10  warning  Method 'yargs' has too many lines (261). Maximum allowed is 150                   max-lines-per-function
+JS - Lint and Format Check	Run ESLint	2026-06-14T20:50:58.3470661Z ##[warning]  574:1   warning  Async function 'captureUrl' has too many lines (742). Maximum allowed is 150      max-lines-per-function
+JS - Lint and Format Check	Run ESLint	2026-06-14T20:50:58.3472405Z ##[warning]  574:1   warning  Async function 'captureUrl' has too many statements (311). Maximum allowed is 60  max-statements
+JS - Lint and Format Check	Run ESLint	2026-06-14T20:50:58.3473931Z ##[warning]  574:1   warning  Async function 'captureUrl' has a complexity of 136. Maximum allowed is 15        complexity
+JS - Lint and Format Check	Run ESLint	2026-06-14T20:50:58.3475421Z ##[warning]  858:13  warning  Blocks are nested too deeply (6). Maximum allowed is 5                            max-depth
+JS - Lint and Format Check	Run ESLint	2026-06-14T20:50:58.3476816Z ##[warning]  881:13  warning  Blocks are nested too deeply (6). Maximum allowed is 5                            max-depth
+JS - Lint and Format Check	Run ESLint	2026-06-14T20:50:58.3477589Z
+JS - Lint and Format Check	Run ESLint	2026-06-14T20:50:58.3477850Z /home/runner/work/web-capture/web-capture/js/src/animation.js
+JS - Lint and Format Check	Run ESLint	2026-06-14T20:50:58.3479128Z ##[warning]  93:8  warning  Async function 'captureAnimationFrames' has a complexity of 19. Maximum allowed is 15  complexity
+JS - Lint and Format Check	Run ESLint	2026-06-14T20:50:58.3479997Z
+JS - Lint and Format Check	Run ESLint	2026-06-14T20:50:58.3480246Z /home/runner/work/web-capture/web-capture/js/src/archive.js
+JS - Lint and Format Check	Run ESLint	2026-06-14T20:50:58.3481295Z ##[warning]  31:8  warning  Async function 'archiveHandler' has too many lines (151). Maximum allowed is 150     max-lines-per-function
+JS - Lint and Format Check	Run ESLint	2026-06-14T20:50:58.3482923Z ##[warning]  31:8  warning  Async function 'archiveHandler' has too many statements (65). Maximum allowed is 60  max-statements
+JS - Lint and Format Check	Run ESLint	2026-06-14T20:50:58.3484471Z ##[warning]  31:8  warning  Async function 'archiveHandler' has a complexity of 28. Maximum allowed is 15        complexity
+JS - Lint and Format Check	Run ESLint	2026-06-14T20:50:58.3485307Z
+JS - Lint and Format Check	Run ESLint	2026-06-14T20:50:58.3485534Z /home/runner/work/web-capture/web-capture/js/src/docx.js
+JS - Lint and Format Check	Run ESLint	2026-06-14T20:50:58.3486398Z ##[warning]  26:8   warning  Async function 'docxHandler' has a complexity of 36. Maximum allowed is 15  complexity
+JS - Lint and Format Check	Run ESLint	2026-06-14T20:50:58.3487804Z ##[warning]  77:13  warning  Blocks are nested too deeply (6). Maximum allowed is 5                      max-depth
+JS - Lint and Format Check	Run ESLint	2026-06-14T20:50:58.3488620Z
+JS - Lint and Format Check	Run ESLint	2026-06-14T20:50:58.3489105Z /home/runner/work/web-capture/web-capture/js/src/gdocs-images.js
+JS - Lint and Format Check	Run ESLint	2026-06-14T20:50:58.3490288Z ##[warning]  59:8  warning  Async function 'localizeGoogleDocsModelImages' has a complexity of 21. Maximum allowed is 15  complexity
+JS - Lint and Format Check	Run ESLint	2026-06-14T20:50:58.3491457Z
+JS - Lint and Format Check	Run ESLint	2026-06-14T20:50:58.3491689Z /home/runner/work/web-capture/web-capture/js/src/gdocs.js
+JS - Lint and Format Check	Run ESLint	2026-06-14T20:50:58.3492775Z ##[warning]  578:8  warning  Function 'parseGoogleDocsModelChunks' has too many lines (234). Maximum allowed is 150      max-lines-per-function
+JS - Lint and Format Check	Run ESLint	2026-06-14T20:50:58.3494445Z ##[warning]  578:8  warning  Function 'parseGoogleDocsModelChunks' has too many statements (113). Maximum allowed is 60  max-statements
+JS - Lint and Format Check	Run ESLint	2026-06-14T20:50:58.3496076Z ##[warning]  578:8  warning  Function 'parseGoogleDocsModelChunks' has a complexity of 48. Maximum allowed is 15         complexity
+JS - Lint and Format Check	Run ESLint	2026-06-14T20:50:58.3497679Z ##[warning]  851:1  warning  Function 'buildModelStyleMaps' has a complexity of 17. Maximum allowed is 15                complexity
+JS - Lint and Format Check	Run ESLint	2026-06-14T20:50:58.3498531Z
+JS - Lint and Format Check	Run ESLint	2026-06-14T20:50:58.3498761Z /home/runner/work/web-capture/web-capture/js/src/github.js
+JS - Lint and Format Check	Run ESLint	2026-06-14T20:50:58.3499957Z ##[warning]  117:8  warning  Function 'formatGithubRepositoryText' has a complexity of 17. Maximum allowed is 15  complexity
+JS - Lint and Format Check	Run ESLint	2026-06-14T20:50:58.3500848Z
+JS - Lint and Format Check	Run ESLint	2026-06-14T20:50:58.3501061Z /home/runner/work/web-capture/web-capture/js/src/image.js
+JS - Lint and Format Check	Run ESLint	2026-06-14T20:50:58.3502154Z ##[warning]  19:8  warning  Async function 'imageHandler' has a complexity of 20. Maximum allowed is 15  complexity
+JS - Lint and Format Check	Run ESLint	2026-06-14T20:50:58.3502963Z
+JS - Lint and Format Check	Run ESLint	2026-06-14T20:50:58.3503178Z /home/runner/work/web-capture/web-capture/js/src/lib.js
+JS - Lint and Format Check	Run ESLint	2026-06-14T20:50:58.3504222Z ##[warning]  921:8  warning  Function 'convertHtmlToMarkdownEnhanced' has too many lines (186). Maximum allowed is 150  max-lines-per-function
+JS - Lint and Format Check	Run ESLint	2026-06-14T20:50:58.3505113Z
+JS - Lint and Format Check	Run ESLint	2026-06-14T20:50:58.3505348Z /home/runner/work/web-capture/web-capture/js/src/markdown.js
+JS - Lint and Format Check	Run ESLint	2026-06-14T20:50:58.3506240Z ##[warning]  32:8  warning  Async function 'markdownHandler' has a complexity of 19. Maximum allowed is 15  complexity
+JS - Lint and Format Check	Run ESLint	2026-06-14T20:50:58.3507047Z
+JS - Lint and Format Check	Run ESLint	2026-06-14T20:50:58.3507315Z /home/runner/work/web-capture/web-capture/js/src/metadata.js
+JS - Lint and Format Check	Run ESLint	2026-06-14T20:50:58.3508214Z ##[warning]   24:8  warning  Function 'extractMetadata' has too many statements (64). Maximum allowed is 60  max-statements
+JS - Lint and Format Check	Run ESLint	2026-06-14T20:50:58.3509993Z ##[warning]   24:8  warning  Function 'extractMetadata' has a complexity of 25. Maximum allowed is 15        complexity
+JS - Lint and Format Check	Run ESLint	2026-06-14T20:50:58.3511614Z ##[warning]  172:8  warning  Function 'formatMetadataBlock' has a complexity of 20. Maximum allowed is 15    complexity
+JS - Lint and Format Check	Run ESLint	2026-06-14T20:50:58.3513048Z ##[warning]  264:8  warning  Function 'formatFooterBlock' has a complexity of 19. Maximum allowed is 15      complexity
+JS - Lint and Format Check	Run ESLint	2026-06-14T20:50:58.3513845Z
+JS - Lint and Format Check	Run ESLint	2026-06-14T20:50:58.3514107Z /home/runner/work/web-capture/web-capture/js/src/postprocess.js
+JS - Lint and Format Check	Run ESLint	2026-06-14T20:50:58.3514925Z ##[warning]  103:17  warning  Arrow function has a complexity of 18. Maximum allowed is 15  complexity
+JS - Lint and Format Check	Run ESLint	2026-06-14T20:50:58.3515706Z
+JS - Lint and Format Check	Run ESLint	2026-06-14T20:50:58.3515924Z /home/runner/work/web-capture/web-capture/js/src/verify.js
+JS - Lint and Format Check	Run ESLint	2026-06-14T20:50:58.3516930Z ##[warning]  91:8  warning  Function 'verifyMarkdownContent' has too many lines (190). Maximum allowed is 150     max-lines-per-function
+JS - Lint and Format Check	Run ESLint	2026-06-14T20:50:58.3518541Z ##[warning]  91:8  warning  Function 'verifyMarkdownContent' has too many statements (86). Maximum allowed is 60  max-statements
+JS - Lint and Format Check	Run ESLint	2026-06-14T20:50:58.3520261Z ##[warning]  91:8  warning  Function 'verifyMarkdownContent' has a complexity of 51. Maximum allowed is 15        complexity
+JS - Lint and Format Check	Run ESLint	2026-06-14T20:50:58.3521078Z
+JS - Lint and Format Check	Run ESLint	2026-06-14T20:50:58.3521510Z ✖ 29 problems (0 errors, 29 warnings)
+JS - Lint and Format Check	Run ESLint	2026-06-14T20:50:58.3521707Z
+JS - Lint and Format Check	Check formatting	﻿2026-06-14T20:50:58.4227285Z ##[group]Run npm run format:check
+JS - Lint and Format Check	Check formatting	2026-06-14T20:50:58.4227612Z ^[[36;1mnpm run format:check^[[0m
+JS - Lint and Format Check	Check formatting	2026-06-14T20:50:58.4261012Z shell: /usr/bin/bash -e {0}
+JS - Lint and Format Check	Check formatting	2026-06-14T20:50:58.4261284Z ##[endgroup]
+JS - Lint and Format Check	Check formatting	2026-06-14T20:50:58.5283812Z
+JS - Lint and Format Check	Check formatting	2026-06-14T20:50:58.5284874Z > @link-assistant/web-capture@1.10.8 format:check
+JS - Lint and Format Check	Check formatting	2026-06-14T20:50:58.5285358Z > prettier --check .
+JS - Lint and Format Check	Check formatting	2026-06-14T20:50:58.5285529Z
+JS - Lint and Format Check	Check formatting	2026-06-14T20:50:58.6149193Z Checking formatting...
+JS - Lint and Format Check	Check formatting	2026-06-14T20:51:00.1374120Z All matched files use Prettier code style!
+JS - Lint and Format Check	Check code duplication	﻿2026-06-14T20:51:00.1720392Z ##[group]Run npm run check:duplication
+JS - Lint and Format Check	Check code duplication	2026-06-14T20:51:00.1720754Z ^[[36;1mnpm run check:duplication^[[0m
+JS - Lint and Format Check	Check code duplication	2026-06-14T20:51:00.1754638Z shell: /usr/bin/bash -e {0}
+JS - Lint and Format Check	Check code duplication	2026-06-14T20:51:00.1754916Z ##[endgroup]
+JS - Lint and Format Check	Check code duplication	2026-06-14T20:51:00.2771962Z
+JS - Lint and Format Check	Check code duplication	2026-06-14T20:51:00.2772633Z > @link-assistant/web-capture@1.10.8 check:duplication
+JS - Lint and Format Check	Check code duplication	2026-06-14T20:51:00.2773131Z > jscpd .
+JS - Lint and Format Check	Check code duplication	2026-06-14T20:51:00.2773263Z
+JS - Lint and Format Check	Check code duplication	2026-06-14T20:51:00.6576168Z Detection time:: 0.169ms
+JS - Lint and Format Check	Post Setup Node.js	﻿2026-06-14T20:51:00.6839294Z Post job cleanup.
+JS - Lint and Format Check	Post Run actions/checkout@v6	﻿2026-06-14T20:51:00.8184636Z Post job cleanup.
+JS - Lint and Format Check	Post Run actions/checkout@v6	2026-06-14T20:51:00.9012643Z [command]/usr/bin/git version
+JS - Lint and Format Check	Post Run actions/checkout@v6	2026-06-14T20:51:00.9081344Z git version 2.54.0
+JS - Lint and Format Check	Post Run actions/checkout@v6	2026-06-14T20:51:00.9117745Z Temporarily overriding HOME='/home/runner/work/_temp/c9d4b0df-6097-44e2-8cee-645ce1eb90ab' before making global git config changes
+JS - Lint and Format Check	Post Run actions/checkout@v6	2026-06-14T20:51:00.9119291Z Adding repository directory to the temporary git global config as a safe directory
+JS - Lint and Format Check	Post Run actions/checkout@v6	2026-06-14T20:51:00.9122987Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/web-capture/web-capture
+JS - Lint and Format Check	Post Run actions/checkout@v6	2026-06-14T20:51:00.9154441Z Removing SSH command configuration
+JS - Lint and Format Check	Post Run actions/checkout@v6	2026-06-14T20:51:00.9160765Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+JS - Lint and Format Check	Post Run actions/checkout@v6	2026-06-14T20:51:00.9195101Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+JS - Lint and Format Check	Post Run actions/checkout@v6	2026-06-14T20:51:00.9430933Z Removing HTTP extra header
+JS - Lint and Format Check	Post Run actions/checkout@v6	2026-06-14T20:51:00.9435986Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+JS - Lint and Format Check	Post Run actions/checkout@v6	2026-06-14T20:51:00.9468236Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+JS - Lint and Format Check	Post Run actions/checkout@v6	2026-06-14T20:51:00.9696579Z Removing includeIf entries pointing to credentials config files
+JS - Lint and Format Check	Post Run actions/checkout@v6	2026-06-14T20:51:00.9704080Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+JS - Lint and Format Check	Post Run actions/checkout@v6	2026-06-14T20:51:00.9731273Z includeif.gitdir:/home/runner/work/web-capture/web-capture/.git.path
+JS - Lint and Format Check	Post Run actions/checkout@v6	2026-06-14T20:51:00.9732035Z includeif.gitdir:/home/runner/work/web-capture/web-capture/.git/worktrees/*.path
+JS - Lint and Format Check	Post Run actions/checkout@v6	2026-06-14T20:51:00.9732619Z includeif.gitdir:/github/workspace/.git.path
+JS - Lint and Format Check	Post Run actions/checkout@v6	2026-06-14T20:51:00.9733049Z includeif.gitdir:/github/workspace/.git/worktrees/*.path
+JS - Lint and Format Check	Post Run actions/checkout@v6	2026-06-14T20:51:00.9740167Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/home/runner/work/web-capture/web-capture/.git.path
+JS - Lint and Format Check	Post Run actions/checkout@v6	2026-06-14T20:51:00.9762329Z /home/runner/work/_temp/git-credentials-50988a90-b71e-4e0f-a30c-a97ba5557faa.config
+JS - Lint and Format Check	Post Run actions/checkout@v6	2026-06-14T20:51:00.9773669Z [command]/usr/bin/git config --local --unset includeif.gitdir:/home/runner/work/web-capture/web-capture/.git.path /home/runner/work/_temp/git-credentials-50988a90-b71e-4e0f-a30c-a97ba5557faa.config
+JS - Lint and Format Check	Post Run actions/checkout@v6	2026-06-14T20:51:00.9808727Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/home/runner/work/web-capture/web-capture/.git/worktrees/*.path
+JS - Lint and Format Check	Post Run actions/checkout@v6	2026-06-14T20:51:00.9831469Z /home/runner/work/_temp/git-credentials-50988a90-b71e-4e0f-a30c-a97ba5557faa.config
+JS - Lint and Format Check	Post Run actions/checkout@v6	2026-06-14T20:51:00.9840759Z [command]/usr/bin/git config --local --unset includeif.gitdir:/home/runner/work/web-capture/web-capture/.git/worktrees/*.path /home/runner/work/_temp/git-credentials-50988a90-b71e-4e0f-a30c-a97ba5557faa.config
+JS - Lint and Format Check	Post Run actions/checkout@v6	2026-06-14T20:51:00.9873738Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/github/workspace/.git.path
+JS - Lint and Format Check	Post Run actions/checkout@v6	2026-06-14T20:51:00.9896389Z /github/runner_temp/git-credentials-50988a90-b71e-4e0f-a30c-a97ba5557faa.config
+JS - Lint and Format Check	Post Run actions/checkout@v6	2026-06-14T20:51:00.9904859Z [command]/usr/bin/git config --local --unset includeif.gitdir:/github/workspace/.git.path /github/runner_temp/git-credentials-50988a90-b71e-4e0f-a30c-a97ba5557faa.config
+JS - Lint and Format Check	Post Run actions/checkout@v6	2026-06-14T20:51:00.9936990Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/github/workspace/.git/worktrees/*.path
+JS - Lint and Format Check	Post Run actions/checkout@v6	2026-06-14T20:51:00.9958187Z /github/runner_temp/git-credentials-50988a90-b71e-4e0f-a30c-a97ba5557faa.config
+JS - Lint and Format Check	Post Run actions/checkout@v6	2026-06-14T20:51:00.9967383Z [command]/usr/bin/git config --local --unset includeif.gitdir:/github/workspace/.git/worktrees/*.path /github/runner_temp/git-credentials-50988a90-b71e-4e0f-a30c-a97ba5557faa.config
+JS - Lint and Format Check	Post Run actions/checkout@v6	2026-06-14T20:51:01.0001718Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+JS - Lint and Format Check	Post Run actions/checkout@v6	2026-06-14T20:51:01.0239364Z Removing credentials config '/home/runner/work/_temp/git-credentials-50988a90-b71e-4e0f-a30c-a97ba5557faa.config'
+JS - Lint and Format Check	Complete job	﻿2026-06-14T20:51:01.0381922Z Cleaning up orphan processes
+JS - Publishable Changes Check	Set up job	﻿2026-06-14T20:50:44.4729873Z Current runner version: '2.335.1'
+JS - Publishable Changes Check	Set up job	2026-06-14T20:50:44.4756724Z ##[group]Runner Image Provisioner
+JS - Publishable Changes Check	Set up job	2026-06-14T20:50:44.4757730Z Hosted Compute Agent
+JS - Publishable Changes Check	Set up job	2026-06-14T20:50:44.4758338Z Version: 20260527.539
+JS - Publishable Changes Check	Set up job	2026-06-14T20:50:44.4758904Z Commit: a891dd388383b896fa6ac04a82c0b75cec981078
+JS - Publishable Changes Check	Set up job	2026-06-14T20:50:44.4759584Z Build Date: 2026-05-27T21:39:57Z
+JS - Publishable Changes Check	Set up job	2026-06-14T20:50:44.4760519Z Worker ID: {cc42a563-c606-4b2f-9109-8e74059ad59e}
+JS - Publishable Changes Check	Set up job	2026-06-14T20:50:44.4761230Z Azure Region: westus3
+JS - Publishable Changes Check	Set up job	2026-06-14T20:50:44.4761778Z ##[endgroup]
+JS - Publishable Changes Check	Set up job	2026-06-14T20:50:44.4763303Z ##[group]Operating System
+JS - Publishable Changes Check	Set up job	2026-06-14T20:50:44.4763889Z Ubuntu
+JS - Publishable Changes Check	Set up job	2026-06-14T20:50:44.4764425Z 24.04.4
+JS - Publishable Changes Check	Set up job	2026-06-14T20:50:44.4764889Z LTS
+JS - Publishable Changes Check	Set up job	2026-06-14T20:50:44.4765354Z ##[endgroup]
+JS - Publishable Changes Check	Set up job	2026-06-14T20:50:44.4765855Z ##[group]Runner Image
+JS - Publishable Changes Check	Set up job	2026-06-14T20:50:44.4766427Z Image: ubuntu-24.04
+JS - Publishable Changes Check	Set up job	2026-06-14T20:50:44.4766953Z Version: 20260607.184.1
+JS - Publishable Changes Check	Set up job	2026-06-14T20:50:44.4768054Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20260607.184/images/ubuntu/Ubuntu2404-Readme.md
+JS - Publishable Changes Check	Set up job	2026-06-14T20:50:44.4769665Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20260607.184
+JS - Publishable Changes Check	Set up job	2026-06-14T20:50:44.4770550Z ##[endgroup]
+JS - Publishable Changes Check	Set up job	2026-06-14T20:50:44.4771631Z ##[group]GITHUB_TOKEN Permissions
+JS - Publishable Changes Check	Set up job	2026-06-14T20:50:44.4773646Z Contents: read
+JS - Publishable Changes Check	Set up job	2026-06-14T20:50:44.4774249Z Metadata: read
+JS - Publishable Changes Check	Set up job	2026-06-14T20:50:44.4774775Z Packages: read
+JS - Publishable Changes Check	Set up job	2026-06-14T20:50:44.4775920Z ##[endgroup]
+JS - Publishable Changes Check	Set up job	2026-06-14T20:50:44.4779277Z Secret source: Actions
+JS - Publishable Changes Check	Set up job	2026-06-14T20:50:44.4780040Z Prepare workflow directory
+JS - Publishable Changes Check	Set up job	2026-06-14T20:50:44.5255483Z Prepare all required actions
+JS - Publishable Changes Check	Set up job	2026-06-14T20:50:44.5294733Z Getting action download info
+JS - Publishable Changes Check	Set up job	2026-06-14T20:50:44.8953778Z Download action repository 'actions/checkout@v6' (SHA:df4cb1c069e1874edd31b4311f1884172cec0e10)
+JS - Publishable Changes Check	Set up job	2026-06-14T20:50:47.1710221Z Complete job name: JS - Publishable Changes Check
+JS - Publishable Changes Check	Run actions/checkout@v6	﻿2026-06-14T20:50:47.2616802Z ##[group]Run actions/checkout@v6
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:47.2618778Z with:
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:47.2619733Z   fetch-depth: 0
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:47.2620834Z   repository: link-assistant/web-capture
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:47.2632249Z   token: ***
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:47.2633241Z   ssh-strict: true
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:47.2634277Z   ssh-user: git
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:47.2635267Z   persist-credentials: true
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:47.2636355Z   clean: true
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:47.2637662Z   sparse-checkout-cone-mode: true
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:47.2638939Z   fetch-tags: false
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:47.2639992Z   show-progress: true
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:47.2641003Z   lfs: false
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:47.2641934Z   submodules: false
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:47.2643003Z   set-safe-directory: true
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:47.2644481Z ##[endgroup]
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:47.3830675Z Syncing repository: link-assistant/web-capture
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:47.3833625Z ##[group]Getting Git version info
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:47.3835114Z Working directory is '/home/runner/work/web-capture/web-capture'
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:47.3837655Z [command]/usr/bin/git version
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:47.4611497Z git version 2.54.0
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:47.4635616Z ##[endgroup]
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:47.4650906Z Temporarily overriding HOME='/home/runner/work/_temp/5c3ccafa-f4c9-455d-aeb0-485b96b2881f' before making global git config changes
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:47.4654702Z Adding repository directory to the temporary git global config as a safe directory
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:47.4659121Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/web-capture/web-capture
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:47.4873121Z Deleting the contents of '/home/runner/work/web-capture/web-capture'
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:47.4875716Z ##[group]Determining repository object format
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:47.4882160Z ##[endgroup]
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:47.4884760Z ##[group]Initializing the repository
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:47.4887095Z [command]/usr/bin/git init /home/runner/work/web-capture/web-capture
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:47.5311201Z hint: Using 'master' as the name for the initial branch. This default branch name
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:47.5313962Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:47.5317010Z hint: to use in all of your new repositories, which will suppress this warning,
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:47.5320114Z hint: call:
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:47.5321338Z hint:
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:47.5323024Z hint: 	git config --global init.defaultBranch <name>
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:47.5325064Z hint:
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:47.5328617Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:47.5331834Z hint: 'development'. The just-created branch can be renamed via this command:
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:47.5334440Z hint:
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:47.5335784Z hint: 	git branch -m <name>
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:47.5337696Z hint:
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:47.5339982Z hint: Disable this message with "git config set advice.defaultBranchName false"
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:47.5343217Z Initialized empty Git repository in /home/runner/work/web-capture/web-capture/.git/
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:47.5349746Z [command]/usr/bin/git remote add origin https://github.com/link-assistant/web-capture
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:47.5541776Z ##[endgroup]
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:47.5543453Z ##[group]Disabling automatic garbage collection
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:47.5547839Z [command]/usr/bin/git config --local gc.auto 0
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:47.5581057Z ##[endgroup]
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:47.5582949Z ##[group]Setting up auth
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:47.5584064Z Removing SSH command configuration
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:47.5591166Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:47.5630626Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:47.7300480Z Removing HTTP extra header
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:47.7308295Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:47.7337192Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:47.7524233Z Removing includeIf entries pointing to credentials config files
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:47.7527109Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:47.7555719Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:47.7748066Z [command]/usr/bin/git config --file /home/runner/work/_temp/git-credentials-73c78203-1b02-419b-9386-656b065391fd.config http.https://github.com/.extraheader AUTHORIZATION: basic ***
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:47.7786597Z [command]/usr/bin/git config --local includeIf.gitdir:/home/runner/work/web-capture/web-capture/.git.path /home/runner/work/_temp/git-credentials-73c78203-1b02-419b-9386-656b065391fd.config
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:47.7812736Z [command]/usr/bin/git config --local includeIf.gitdir:/home/runner/work/web-capture/web-capture/.git/worktrees/*.path /home/runner/work/_temp/git-credentials-73c78203-1b02-419b-9386-656b065391fd.config
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:47.7881732Z [command]/usr/bin/git config --local includeIf.gitdir:/github/workspace/.git.path /github/runner_temp/git-credentials-73c78203-1b02-419b-9386-656b065391fd.config
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:47.7909317Z [command]/usr/bin/git config --local includeIf.gitdir:/github/workspace/.git/worktrees/*.path /github/runner_temp/git-credentials-73c78203-1b02-419b-9386-656b065391fd.config
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:47.7941757Z ##[endgroup]
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:47.7943293Z ##[group]Fetching the repository
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:47.7950605Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules origin +refs/heads/*:refs/remotes/origin/* +refs/tags/*:refs/tags/* +b52444a17516dbd929078642d9e1bb88af3c1d7b:refs/remotes/pull/140/merge
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.3589490Z From https://github.com/link-assistant/web-capture
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.3590953Z  * [new branch]      issue-1-5017a66c05a8                     -> origin/issue-1-5017a66c05a8
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.3591645Z  * [new branch]      issue-100-99e0a350ea14                   -> origin/issue-100-99e0a350ea14
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.3592546Z  * [new branch]      issue-102-7f05baee1eea                   -> origin/issue-102-7f05baee1eea
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.3593162Z  * [new branch]      issue-104-5d910a68a250                   -> origin/issue-104-5d910a68a250
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.3593756Z  * [new branch]      issue-106-44f7ed55b657                   -> origin/issue-106-44f7ed55b657
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.3594355Z  * [new branch]      issue-108-a4baf412d9cb                   -> origin/issue-108-a4baf412d9cb
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.3594964Z  * [new branch]      issue-11-2861fe92                        -> origin/issue-11-2861fe92
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.3595588Z  * [new branch]      issue-110-9712e1c70a94                   -> origin/issue-110-9712e1c70a94
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.3596186Z  * [new branch]      issue-112-53d54c67d8bb                   -> origin/issue-112-53d54c67d8bb
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.3596815Z  * [new branch]      issue-113-d6d2b9cf59e9                   -> origin/issue-113-d6d2b9cf59e9
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.3597693Z  * [new branch]      issue-114-b51d47bfd71f                   -> origin/issue-114-b51d47bfd71f
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.3598401Z  * [new branch]      issue-116-e68be1382988                   -> origin/issue-116-e68be1382988
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.3599319Z  * [new branch]      issue-117-6f9cc6105c70                   -> origin/issue-117-6f9cc6105c70
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.3600151Z  * [new branch]      issue-118-e11d2cc48206                   -> origin/issue-118-e11d2cc48206
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.3600852Z  * [new branch]      issue-119-9b5c645fa6d7                   -> origin/issue-119-9b5c645fa6d7
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.3601467Z  * [new branch]      issue-120-2cd62cbc1692                   -> origin/issue-120-2cd62cbc1692
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.3602056Z  * [new branch]      issue-121-71566b31e0d5                   -> origin/issue-121-71566b31e0d5
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.3602820Z  * [new branch]      issue-127-238ff237e28b                   -> origin/issue-127-238ff237e28b
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.3603416Z  * [new branch]      issue-13-a8f3466f6d79                    -> origin/issue-13-a8f3466f6d79
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.3604017Z  * [new branch]      issue-130-1bcc97d4a5a3                   -> origin/issue-130-1bcc97d4a5a3
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.3604605Z  * [new branch]      issue-135-fcb428bcce44                   -> origin/issue-135-fcb428bcce44
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.3605198Z  * [new branch]      issue-137-623d876e6e5f                   -> origin/issue-137-623d876e6e5f
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.3605777Z  * [new branch]      issue-139-24bf83def591                   -> origin/issue-139-24bf83def591
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.3606377Z  * [new branch]      issue-15-ba41292e60dd                    -> origin/issue-15-ba41292e60dd
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.3606975Z  * [new branch]      issue-17-d61fd69fb1d0                    -> origin/issue-17-d61fd69fb1d0
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.3607899Z  * [new branch]      issue-19-7350892c64e0                    -> origin/issue-19-7350892c64e0
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.3608496Z  * [new branch]      issue-21-ae540dd05ccf                    -> origin/issue-21-ae540dd05ccf
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.3609101Z  * [new branch]      issue-24-000cedc18c0c                    -> origin/issue-24-000cedc18c0c
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.3609809Z  * [new branch]      issue-26-f5bc08d1c062                    -> origin/issue-26-f5bc08d1c062
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.3610544Z  * [new branch]      issue-28-9ae2d8528d6f                    -> origin/issue-28-9ae2d8528d6f
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.3611134Z  * [new branch]      issue-29-1750ff5496be                    -> origin/issue-29-1750ff5496be
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.3611978Z  * [new branch]      issue-3-e1f5cfd3                         -> origin/issue-3-e1f5cfd3
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.3612589Z  * [new branch]      issue-31-e38e38b91777                    -> origin/issue-31-e38e38b91777
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.3613198Z  * [new branch]      issue-33-597c234012bd                    -> origin/issue-33-597c234012bd
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.3613799Z  * [new branch]      issue-36-4868dc6a6cd1                    -> origin/issue-36-4868dc6a6cd1
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.3614551Z  * [new branch]      issue-38-1c6b407f9682                    -> origin/issue-38-1c6b407f9682
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.3615131Z  * [new branch]      issue-40-aea0c7bbe29d                    -> origin/issue-40-aea0c7bbe29d
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.3615720Z  * [new branch]      issue-42-51e981719f34                    -> origin/issue-42-51e981719f34
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.3616297Z  * [new branch]      issue-44-5fc8fd3303bb                    -> origin/issue-44-5fc8fd3303bb
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.3616883Z  * [new branch]      issue-46-74be9b28b867                    -> origin/issue-46-74be9b28b867
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.3617572Z  * [new branch]      issue-48-fa0cc317013f                    -> origin/issue-48-fa0cc317013f
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.3618150Z  * [new branch]      issue-5-37ef445c                         -> origin/issue-5-37ef445c
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.3618740Z  * [new branch]      issue-50-accd5e4cfac0                    -> origin/issue-50-accd5e4cfac0
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.3619321Z  * [new branch]      issue-52-b275657642c1                    -> origin/issue-52-b275657642c1
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.3619928Z  * [new branch]      issue-53-ee04eb2d7520                    -> origin/issue-53-ee04eb2d7520
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.3620525Z  * [new branch]      issue-56-a89df19bbdc2                    -> origin/issue-56-a89df19bbdc2
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.3621129Z  * [new branch]      issue-58-c1217b0e73df                    -> origin/issue-58-c1217b0e73df
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.3621724Z  * [new branch]      issue-60-7c97a8e6f23e                    -> origin/issue-60-7c97a8e6f23e
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.3622314Z  * [new branch]      issue-62-5074090c911d                    -> origin/issue-62-5074090c911d
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.3622905Z  * [new branch]      issue-64-fc240b6b34c4                    -> origin/issue-64-fc240b6b34c4
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.3623498Z  * [new branch]      issue-66-d851400625b3                    -> origin/issue-66-d851400625b3
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.3624181Z  * [new branch]      issue-68-f537a341d162                    -> origin/issue-68-f537a341d162
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.3624769Z  * [new branch]      issue-7-c22ac3d5                         -> origin/issue-7-c22ac3d5
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.3625357Z  * [new branch]      issue-70-46e0722472f6                    -> origin/issue-70-46e0722472f6
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.3625954Z  * [new branch]      issue-72-531c48705fe1                    -> origin/issue-72-531c48705fe1
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.3626542Z  * [new branch]      issue-73-3365a59a0651                    -> origin/issue-73-3365a59a0651
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.3627146Z  * [new branch]      issue-76-4c3ce2d4c38d                    -> origin/issue-76-4c3ce2d4c38d
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.3627832Z  * [new branch]      issue-77-9d57d4be5f06                    -> origin/issue-77-9d57d4be5f06
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.3628430Z  * [new branch]      issue-78-06df01a6d67d                    -> origin/issue-78-06df01a6d67d
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.3629088Z  * [new branch]      issue-79-0f3c100bef61                    -> origin/issue-79-0f3c100bef61
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.3629674Z  * [new branch]      issue-8-2bf69acf                         -> origin/issue-8-2bf69acf
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.3630258Z  * [new branch]      issue-80-65a47c9900f7                    -> origin/issue-80-65a47c9900f7
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.3630853Z  * [new branch]      issue-81-95139eb5d319                    -> origin/issue-81-95139eb5d319
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.3631442Z  * [new branch]      issue-88-fa5db9d51224                    -> origin/issue-88-fa5db9d51224
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.3632044Z  * [new branch]      issue-90-401b508c5c66                    -> origin/issue-90-401b508c5c66
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.3632638Z  * [new branch]      issue-92-42b86cc335df                    -> origin/issue-92-42b86cc335df
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.3633234Z  * [new branch]      issue-94-2e4653a0a183                    -> origin/issue-94-2e4653a0a183
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.3633833Z  * [new branch]      issue-96-3180a89c0b82                    -> origin/issue-96-3180a89c0b82
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.3634433Z  * [new branch]      issue-98-c765b5595cf4                    -> origin/issue-98-c765b5595cf4
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.3635073Z  * [new branch]      main                                     -> origin/main
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.3635585Z  * [new tag]         js-v1.10.0                               -> js-v1.10.0
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.3636070Z  * [new tag]         js-v1.10.1                               -> js-v1.10.1
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.3636568Z  * [new tag]         js-v1.10.2                               -> js-v1.10.2
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.3637041Z  * [new tag]         js-v1.10.3                               -> js-v1.10.3
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.3637576Z  * [new tag]         js-v1.10.4                               -> js-v1.10.4
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.3638037Z  * [new tag]         js-v1.10.5                               -> js-v1.10.5
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.3638494Z  * [new tag]         js-v1.10.6                               -> js-v1.10.6
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.3638961Z  * [new tag]         js-v1.10.7                               -> js-v1.10.7
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.3639429Z  * [new tag]         js-v1.10.8                               -> js-v1.10.8
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.3639892Z  * [new tag]         js-v1.7.10                               -> js-v1.7.10
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.3640352Z  * [new tag]         js-v1.7.11                               -> js-v1.7.11
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.3640807Z  * [new tag]         js-v1.7.12                               -> js-v1.7.12
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.3641270Z  * [new tag]         js-v1.7.13                               -> js-v1.7.13
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.3641732Z  * [new tag]         js-v1.7.14                               -> js-v1.7.14
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.3642391Z  * [new tag]         js-v1.7.15                               -> js-v1.7.15
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.3642859Z  * [new tag]         js-v1.7.16                               -> js-v1.7.16
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.3643420Z  * [new tag]         js-v1.7.17                               -> js-v1.7.17
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.3643882Z  * [new tag]         js-v1.7.18                               -> js-v1.7.18
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.3644352Z  * [new tag]         js-v1.7.19                               -> js-v1.7.19
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.3644818Z  * [new tag]         js-v1.7.20                               -> js-v1.7.20
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.3645286Z  * [new tag]         js-v1.7.21                               -> js-v1.7.21
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.3645751Z  * [new tag]         js-v1.7.22                               -> js-v1.7.22
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.3646215Z  * [new tag]         js-v1.7.23                               -> js-v1.7.23
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.3646678Z  * [new tag]         js-v1.7.24                               -> js-v1.7.24
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.3647137Z  * [new tag]         js-v1.7.25                               -> js-v1.7.25
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.3647668Z  * [new tag]         js-v1.7.26                               -> js-v1.7.26
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.3648142Z  * [new tag]         js-v1.7.27                               -> js-v1.7.27
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.3648595Z  * [new tag]         js-v1.7.9                                -> js-v1.7.9
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.3649082Z  * [new tag]         js-v1.8.0                                -> js-v1.8.0
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.3649549Z  * [new tag]         js-v1.8.1                                -> js-v1.8.1
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.3650015Z  * [new tag]         js-v1.9.0                                -> js-v1.9.0
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.3650493Z  * [new tag]         rust-v0.1.0                              -> rust-v0.1.0
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.3650981Z  * [new tag]         rust-v0.2.0                              -> rust-v0.2.0
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.3651459Z  * [new tag]         rust-v0.2.1                              -> rust-v0.2.1
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.3651930Z  * [new tag]         rust-v0.3.0                              -> rust-v0.3.0
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.3652403Z  * [new tag]         rust-v0.3.1                              -> rust-v0.3.1
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.3652886Z  * [new tag]         rust-v0.3.10                             -> rust-v0.3.10
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.3653468Z  * [new tag]         rust-v0.3.11                             -> rust-v0.3.11
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.3653946Z  * [new tag]         rust-v0.3.12                             -> rust-v0.3.12
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.3654423Z  * [new tag]         rust-v0.3.13                             -> rust-v0.3.13
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.3654899Z  * [new tag]         rust-v0.3.14                             -> rust-v0.3.14
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.3655375Z  * [new tag]         rust-v0.3.15                             -> rust-v0.3.15
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.3655861Z  * [new tag]         rust-v0.3.16                             -> rust-v0.3.16
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.3656346Z  * [new tag]         rust-v0.3.17                             -> rust-v0.3.17
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.3656819Z  * [new tag]         rust-v0.3.18                             -> rust-v0.3.18
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.3657364Z  * [new tag]         rust-v0.3.19                             -> rust-v0.3.19
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.3657842Z  * [new tag]         rust-v0.3.2                              -> rust-v0.3.2
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.3658320Z  * [new tag]         rust-v0.3.20                             -> rust-v0.3.20
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.3658786Z  * [new tag]         rust-v0.3.21                             -> rust-v0.3.21
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.3659259Z  * [new tag]         rust-v0.3.22                             -> rust-v0.3.22
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.3659735Z  * [new tag]         rust-v0.3.23                             -> rust-v0.3.23
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.3660203Z  * [new tag]         rust-v0.3.24                             -> rust-v0.3.24
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.3660672Z  * [new tag]         rust-v0.3.25                             -> rust-v0.3.25
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.3661146Z  * [new tag]         rust-v0.3.26                             -> rust-v0.3.26
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.3661622Z  * [new tag]         rust-v0.3.27                             -> rust-v0.3.27
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.3662178Z  * [new tag]         rust-v0.3.28                             -> rust-v0.3.28
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.3662650Z  * [new tag]         rust-v0.3.29                             -> rust-v0.3.29
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.3663125Z  * [new tag]         rust-v0.3.3                              -> rust-v0.3.3
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.3663602Z  * [new tag]         rust-v0.3.30                             -> rust-v0.3.30
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.3664080Z  * [new tag]         rust-v0.3.4                              -> rust-v0.3.4
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.3664578Z  * [new tag]         rust-v0.3.5                              -> rust-v0.3.5
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.3665049Z  * [new tag]         rust-v0.3.6                              -> rust-v0.3.6
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.3665516Z  * [new tag]         rust-v0.3.7                              -> rust-v0.3.7
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.3665985Z  * [new tag]         rust-v0.3.8                              -> rust-v0.3.8
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.3666451Z  * [new tag]         rust-v0.3.9                              -> rust-v0.3.9
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.3666908Z  * [new tag]         v1.1.1                                   -> v1.1.1
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.3667437Z  * [new tag]         v1.1.2                                   -> v1.1.2
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.3667887Z  * [new tag]         v1.1.3                                   -> v1.1.3
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.3668331Z  * [new tag]         v1.2.0                                   -> v1.2.0
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.3668771Z  * [new tag]         v1.3.0                                   -> v1.3.0
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.3669211Z  * [new tag]         v1.7.2                                   -> v1.7.2
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.3669652Z  * [new tag]         v1.7.3                                   -> v1.7.3
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.3670083Z  * [new tag]         v1.7.4                                   -> v1.7.4
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.3670526Z  * [new tag]         v1.7.5                                   -> v1.7.5
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.3670959Z  * [new tag]         v1.7.6                                   -> v1.7.6
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.3671399Z  * [new tag]         v1.7.7                                   -> v1.7.7
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.3671941Z  * [new tag]         v1.7.8                                   -> v1.7.8
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.3672440Z  * [new ref]         b52444a17516dbd929078642d9e1bb88af3c1d7b -> pull/140/merge
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.3873565Z ##[endgroup]
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.3874452Z ##[group]Determining the checkout info
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.3875695Z ##[endgroup]
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.3882148Z [command]/usr/bin/git sparse-checkout disable
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.3995764Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.4019878Z ##[group]Checking out the ref
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.4024608Z [command]/usr/bin/git checkout --progress --force refs/remotes/pull/140/merge
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.4911943Z Note: switching to 'refs/remotes/pull/140/merge'.
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.4912576Z
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.4913038Z You are in 'detached HEAD' state. You can look around, make experimental
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.4914088Z changes and commit them, and you can discard any commits you make in this
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.4914995Z state without impacting any branches by switching back to a branch.
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.4915305Z
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.4915554Z If you want to create a new branch to retain commits you create, you may
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.4916182Z do so (now or later) by using -c with the switch command. Example:
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.4916601Z
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.4916843Z   git switch -c <new-branch-name>
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.4917152Z
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.4917547Z Or undo this operation with:
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.4917868Z
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.4918078Z   git switch -
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.4918348Z
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.4918756Z Turn off this advice by setting config variable advice.detachedHead to false
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.4919255Z
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.4919846Z HEAD is now at b52444a Merge eb75681ce5c3ce4f837e2f289a505677d8a607c2 into 7387a4c8b7f244b50358b5f536c708c6e3feb856
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.4922365Z ##[endgroup]
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.4961311Z [command]/usr/bin/git log -1 --format=%H
+JS - Publishable Changes Check	Run actions/checkout@v6	2026-06-14T20:50:49.4984689Z b52444a17516dbd929078642d9e1bb88af3c1d7b
+JS - Publishable Changes Check	Check for publishable changes without changeset	﻿2026-06-14T20:50:49.5200411Z ##[group]Run node scripts/check-publishable-changes.mjs
+JS - Publishable Changes Check	Check for publishable changes without changeset	2026-06-14T20:50:49.5201051Z ^[[36;1mnode scripts/check-publishable-changes.mjs^[[0m
+JS - Publishable Changes Check	Check for publishable changes without changeset	2026-06-14T20:50:49.6229651Z shell: /usr/bin/bash -e {0}
+JS - Publishable Changes Check	Check for publishable changes without changeset	2026-06-14T20:50:49.6230097Z env:
+JS - Publishable Changes Check	Check for publishable changes without changeset	2026-06-14T20:50:49.6230362Z   GITHUB_BASE_REF: main
+JS - Publishable Changes Check	Check for publishable changes without changeset	2026-06-14T20:50:49.6230657Z ##[endgroup]
+JS - Publishable Changes Check	Check for publishable changes without changeset	2026-06-14T20:50:51.9671384Z From https://github.com/link-assistant/web-capture
+JS - Publishable Changes Check	Check for publishable changes without changeset	2026-06-14T20:50:51.9672009Z  * branch            main       -> FETCH_HEAD
+JS - Publishable Changes Check	Check for publishable changes without changeset	2026-06-14T20:50:51.9712711Z Changed files (36):
+JS - Publishable Changes Check	Check for publishable changes without changeset	2026-06-14T20:50:51.9713652Z   .github/workflows/js.yml
+JS - Publishable Changes Check	Check for publishable changes without changeset	2026-06-14T20:50:51.9714074Z   .github/workflows/parity.yml
+JS - Publishable Changes Check	Check for publishable changes without changeset	2026-06-14T20:50:51.9714488Z   .github/workflows/rust.yml
+JS - Publishable Changes Check	Check for publishable changes without changeset	2026-06-14T20:50:51.9714876Z   .gitkeep
+JS - Publishable Changes Check	Check for publishable changes without changeset	2026-06-14T20:50:51.9715537Z   docs/case-studies/issue-139/README.md
+JS - Publishable Changes Check	Check for publishable changes without changeset	2026-06-14T20:50:51.9716089Z   docs/case-studies/issue-139/data/issue-139.json
+JS - Publishable Changes Check	Check for publishable changes without changeset	2026-06-14T20:50:51.9716757Z   docs/case-studies/issue-139/data/js-detect-script-vs-template.diff
+JS - Publishable Changes Check	Check for publishable changes without changeset	2026-06-14T20:50:51.9718042Z   docs/case-studies/issue-139/data/js-run-27504645820.json
+JS - Publishable Changes Check	Check for publishable changes without changeset	2026-06-14T20:50:51.9719034Z   docs/case-studies/issue-139/data/js-run-27504645820.log
+JS - Publishable Changes Check	Check for publishable changes without changeset	2026-06-14T20:50:51.9719412Z   docs/case-studies/issue-139/data/js-template-issue.md
+JS - Publishable Changes Check	Check for publishable changes without changeset	2026-06-14T20:50:51.9719888Z   docs/case-studies/issue-139/data/js-workflow-vs-template.diff
+JS - Publishable Changes Check	Check for publishable changes without changeset	2026-06-14T20:50:51.9720309Z   docs/case-studies/issue-139/data/pr-140.json
+JS - Publishable Changes Check	Check for publishable changes without changeset	2026-06-14T20:50:51.9720698Z   docs/case-studies/issue-139/data/recent-runs.json
+JS - Publishable Changes Check	Check for publishable changes without changeset	2026-06-14T20:50:51.9721146Z   docs/case-studies/issue-139/data/rust-detect-script-vs-template.diff
+JS - Publishable Changes Check	Check for publishable changes without changeset	2026-06-14T20:50:51.9721614Z   docs/case-studies/issue-139/data/rust-run-27504645835.json
+JS - Publishable Changes Check	Check for publishable changes without changeset	2026-06-14T20:50:51.9722059Z   docs/case-studies/issue-139/data/rust-run-27504645835.log
+JS - Publishable Changes Check	Check for publishable changes without changeset	2026-06-14T20:50:51.9722484Z   docs/case-studies/issue-139/data/rust-template-issue.md
+JS - Publishable Changes Check	Check for publishable changes without changeset	2026-06-14T20:50:51.9722964Z   docs/case-studies/issue-139/data/rust-workflow-vs-template.diff
+JS - Publishable Changes Check	Check for publishable changes without changeset	2026-06-14T20:50:51.9723430Z   docs/case-studies/issue-139/data/template-ci-files.txt
+JS - Publishable Changes Check	Check for publishable changes without changeset	2026-06-14T20:50:51.9724175Z   docs/case-studies/issue-139/data/verification-cargo-clippy.log
+JS - Publishable Changes Check	Check for publishable changes without changeset	2026-06-14T20:50:51.9724650Z   docs/case-studies/issue-139/data/verification-cargo-fmt.log
+JS - Publishable Changes Check	Check for publishable changes without changeset	2026-06-14T20:50:51.9725098Z   docs/case-studies/issue-139/data/verification-cargo-test.log
+JS - Publishable Changes Check	Check for publishable changes without changeset	2026-06-14T20:50:51.9725577Z   docs/case-studies/issue-139/data/verification-docker-build-rust.log
+JS - Publishable Changes Check	Check for publishable changes without changeset	2026-06-14T20:50:51.9726056Z   docs/case-studies/issue-139/data/verification-focused-jest.log
+JS - Publishable Changes Check	Check for publishable changes without changeset	2026-06-14T20:50:51.9726517Z   docs/case-studies/issue-139/data/verification-npm-lint.log
+JS - Publishable Changes Check	Check for publishable changes without changeset	2026-06-14T20:50:51.9726980Z   docs/case-studies/issue-139/data/verification-npm-test.log
+JS - Publishable Changes Check	Check for publishable changes without changeset	2026-06-14T20:50:51.9728027Z   docs/case-studies/issue-139/data/verification-parity-check.log
+JS - Publishable Changes Check	Check for publishable changes without changeset	2026-06-14T20:50:51.9729008Z   docs/case-studies/issue-139/data/verification-parity-false-positive.log
+JS - Publishable Changes Check	Check for publishable changes without changeset	2026-06-14T20:50:51.9729480Z   docs/case-studies/issue-139/data/verification-prettier-check.log
+JS - Publishable Changes Check	Check for publishable changes without changeset	2026-06-14T20:50:51.9729834Z   js/jest.config.mjs
+JS - Publishable Changes Check	Check for publishable changes without changeset	2026-06-14T20:50:51.9730165Z   js/tests/ci/detect-code-changes.test.js
+JS - Publishable Changes Check	Check for publishable changes without changeset	2026-06-14T20:50:51.9730578Z   js/tests/ci/rust-dockerfile.test.js
+JS - Publishable Changes Check	Check for publishable changes without changeset	2026-06-14T20:50:51.9730960Z   js/tests/ci/workflow-policy.test.js
+JS - Publishable Changes Check	Check for publishable changes without changeset	2026-06-14T20:50:51.9731346Z   rust/Dockerfile
+JS - Publishable Changes Check	Check for publishable changes without changeset	2026-06-14T20:50:51.9731690Z   scripts/check-js-rust-parity.mjs
+JS - Publishable Changes Check	Check for publishable changes without changeset	2026-06-14T20:50:51.9732127Z   scripts/detect-code-changes.mjs
+JS - Publishable Changes Check	Check for publishable changes without changeset	2026-06-14T20:50:51.9733873Z
+JS - Publishable Changes Check	Check for publishable changes without changeset	2026-06-14T20:50:51.9734241Z All publishable changes have corresponding version bumps/changesets.
+JS - Publishable Changes Check	Post Run actions/checkout@v6	﻿2026-06-14T20:50:51.9945850Z Post job cleanup.
+JS - Publishable Changes Check	Post Run actions/checkout@v6	2026-06-14T20:50:52.0816413Z [command]/usr/bin/git version
+JS - Publishable Changes Check	Post Run actions/checkout@v6	2026-06-14T20:50:52.0857124Z git version 2.54.0
+JS - Publishable Changes Check	Post Run actions/checkout@v6	2026-06-14T20:50:52.0893523Z Temporarily overriding HOME='/home/runner/work/_temp/1583359e-c052-403f-b648-539ba47814bb' before making global git config changes
+JS - Publishable Changes Check	Post Run actions/checkout@v6	2026-06-14T20:50:52.0894257Z Adding repository directory to the temporary git global config as a safe directory
+JS - Publishable Changes Check	Post Run actions/checkout@v6	2026-06-14T20:50:52.0898761Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/web-capture/web-capture
+JS - Publishable Changes Check	Post Run actions/checkout@v6	2026-06-14T20:50:52.0926629Z Removing SSH command configuration
+JS - Publishable Changes Check	Post Run actions/checkout@v6	2026-06-14T20:50:52.0933427Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+JS - Publishable Changes Check	Post Run actions/checkout@v6	2026-06-14T20:50:52.0963613Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+JS - Publishable Changes Check	Post Run actions/checkout@v6	2026-06-14T20:50:52.1159651Z Removing HTTP extra header
+JS - Publishable Changes Check	Post Run actions/checkout@v6	2026-06-14T20:50:52.1178596Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+JS - Publishable Changes Check	Post Run actions/checkout@v6	2026-06-14T20:50:52.1200200Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+JS - Publishable Changes Check	Post Run actions/checkout@v6	2026-06-14T20:50:52.1387723Z Removing includeIf entries pointing to credentials config files
+JS - Publishable Changes Check	Post Run actions/checkout@v6	2026-06-14T20:50:52.1396785Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+JS - Publishable Changes Check	Post Run actions/checkout@v6	2026-06-14T20:50:52.1421606Z includeif.gitdir:/home/runner/work/web-capture/web-capture/.git.path
+JS - Publishable Changes Check	Post Run actions/checkout@v6	2026-06-14T20:50:52.1422769Z includeif.gitdir:/home/runner/work/web-capture/web-capture/.git/worktrees/*.path
+JS - Publishable Changes Check	Post Run actions/checkout@v6	2026-06-14T20:50:52.1423759Z includeif.gitdir:/github/workspace/.git.path
+JS - Publishable Changes Check	Post Run actions/checkout@v6	2026-06-14T20:50:52.1424560Z includeif.gitdir:/github/workspace/.git/worktrees/*.path
+JS - Publishable Changes Check	Post Run actions/checkout@v6	2026-06-14T20:50:52.1432055Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/home/runner/work/web-capture/web-capture/.git.path
+JS - Publishable Changes Check	Post Run actions/checkout@v6	2026-06-14T20:50:52.1451368Z /home/runner/work/_temp/git-credentials-73c78203-1b02-419b-9386-656b065391fd.config
+JS - Publishable Changes Check	Post Run actions/checkout@v6	2026-06-14T20:50:52.1463092Z [command]/usr/bin/git config --local --unset includeif.gitdir:/home/runner/work/web-capture/web-capture/.git.path /home/runner/work/_temp/git-credentials-73c78203-1b02-419b-9386-656b065391fd.config
+JS - Publishable Changes Check	Post Run actions/checkout@v6	2026-06-14T20:50:52.1493559Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/home/runner/work/web-capture/web-capture/.git/worktrees/*.path
+JS - Publishable Changes Check	Post Run actions/checkout@v6	2026-06-14T20:50:52.1513595Z /home/runner/work/_temp/git-credentials-73c78203-1b02-419b-9386-656b065391fd.config
+JS - Publishable Changes Check	Post Run actions/checkout@v6	2026-06-14T20:50:52.1524245Z [command]/usr/bin/git config --local --unset includeif.gitdir:/home/runner/work/web-capture/web-capture/.git/worktrees/*.path /home/runner/work/_temp/git-credentials-73c78203-1b02-419b-9386-656b065391fd.config
+JS - Publishable Changes Check	Post Run actions/checkout@v6	2026-06-14T20:50:52.1552780Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/github/workspace/.git.path
+JS - Publishable Changes Check	Post Run actions/checkout@v6	2026-06-14T20:50:52.1570154Z /github/runner_temp/git-credentials-73c78203-1b02-419b-9386-656b065391fd.config
+JS - Publishable Changes Check	Post Run actions/checkout@v6	2026-06-14T20:50:52.1576564Z [command]/usr/bin/git config --local --unset includeif.gitdir:/github/workspace/.git.path /github/runner_temp/git-credentials-73c78203-1b02-419b-9386-656b065391fd.config
+JS - Publishable Changes Check	Post Run actions/checkout@v6	2026-06-14T20:50:52.1601933Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/github/workspace/.git/worktrees/*.path
+JS - Publishable Changes Check	Post Run actions/checkout@v6	2026-06-14T20:50:52.1620777Z /github/runner_temp/git-credentials-73c78203-1b02-419b-9386-656b065391fd.config
+JS - Publishable Changes Check	Post Run actions/checkout@v6	2026-06-14T20:50:52.1626392Z [command]/usr/bin/git config --local --unset includeif.gitdir:/github/workspace/.git/worktrees/*.path /github/runner_temp/git-credentials-73c78203-1b02-419b-9386-656b065391fd.config
+JS - Publishable Changes Check	Post Run actions/checkout@v6	2026-06-14T20:50:52.1654614Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+JS - Publishable Changes Check	Post Run actions/checkout@v6	2026-06-14T20:50:52.1842083Z Removing credentials config '/home/runner/work/_temp/git-credentials-73c78203-1b02-419b-9386-656b065391fd.config'
+JS - Publishable Changes Check	Complete job	﻿2026-06-14T20:50:52.1992029Z Cleaning up orphan processes

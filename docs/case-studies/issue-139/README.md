@@ -132,6 +132,8 @@ Added tests:
   - verifies that `pull_request` merge commits keep the existing PR-head
     per-commit behavior;
   - verifies first-commit pushes fall back to listing files in `HEAD`.
+  - verifies repository-level CI test/config changes still run JS checks without
+    requiring an npm changeset.
 - `js/tests/ci/rust-dockerfile.test.js`
   - verifies the Docker builder Rust version satisfies `rust/Cargo.toml`.
 - `js/tests/ci/workflow-policy.test.js`
@@ -147,7 +149,7 @@ cd js
 npm test -- --runTestsByPath tests/ci/detect-code-changes.test.js tests/ci/rust-dockerfile.test.js tests/ci/workflow-policy.test.js
 ```
 
-Result: 3 suites passed, 12 tests passed. The log is preserved at
+Result: 3 suites passed, 13 tests passed. The log is preserved at
 `data/verification-focused-jest.log`.
 
 Additional local verification:
@@ -191,3 +193,14 @@ The tests were moved to `js/tests/ci/`, Jest was configured to include that
 directory, and `scripts/check-js-rust-parity.mjs` now excludes that directory
 from product parity matching. A local parity rerun against the PR diff passed
 with no JS or Rust product source/test changes detected.
+
+The next current-head JavaScript run `27511646578` exposed the same
+classification problem in the changeset gate. `js-code-changed` treated
+`js/tests/ci/` and `js/jest.config.mjs` as package code, so
+`JS - Check for Changesets` failed with no changeset present. The failure log
+is preserved at `data/verification-js-changeset-false-positive.log`.
+
+`scripts/detect-code-changes.mjs` now uses `js-code-changed` for publishable JS
+package paths only: `js/src/`, `js/bin/`, and `js/package.json`. The broader
+`any-js-code-changed` flag still includes JS tests, config, scripts, and
+workflows so lint/test jobs continue to run for CI-policy changes.

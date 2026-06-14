@@ -61,11 +61,19 @@ function createMergedFeatureRepo() {
 }
 
 function createSingleCommitRepo() {
+  return createSingleCommitRepoWithFiles({
+    'js/src/index.js': 'export const ok = true;\n',
+  });
+}
+
+function createSingleCommitRepoWithFiles(files) {
   const repoPath = mkdtempSync(join(tmpdir(), 'web-capture-detect-'));
 
   initializeRepo(repoPath);
-  writeTrackedFile(repoPath, 'js/src/index.js', 'export const ok = true;\n');
-  commitAll(repoPath, 'initial js commit');
+  for (const [relativePath, contents] of Object.entries(files)) {
+    writeTrackedFile(repoPath, relativePath, contents);
+  }
+  commitAll(repoPath, 'initial commit');
 
   return repoPath;
 }
@@ -145,6 +153,20 @@ describe('detect-code-changes', () => {
     const outputs = runDetector(repoPath, 'push');
 
     expect(outputs['js-code-changed']).toBe('true');
+    expect(outputs['js-changed']).toBe('true');
+    expect(outputs['any-js-code-changed']).toBe('true');
+    expect(outputs['any-code-changed']).toBe('true');
+  });
+
+  test('runs JS checks for CI tests without requiring a changeset', () => {
+    repoPath = createSingleCommitRepoWithFiles({
+      'js/jest.config.mjs': 'export default {};\n',
+      'js/tests/ci/workflow-policy.test.js': 'test("ok", () => {});\n',
+    });
+
+    const outputs = runDetector(repoPath, 'push');
+
+    expect(outputs['js-code-changed']).toBe('false');
     expect(outputs['js-changed']).toBe('true');
     expect(outputs['any-js-code-changed']).toBe('true');
     expect(outputs['any-code-changed']).toBe('true');

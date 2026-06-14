@@ -2,11 +2,11 @@
 > @link-assistant/web-capture@1.10.8 test
 > node --experimental-vm-modules ./node_modules/.bin/jest --runTestsByPath tests/ci/detect-code-changes.test.js tests/ci/rust-dockerfile.test.js tests/ci/workflow-policy.test.js
 
-(node:1686621) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(node:1704566) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
 (Use `node --trace-warnings ...` to show where the warning was created)
-(node:1686620) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(node:1704573) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
 (Use `node --trace-warnings ...` to show where the warning was created)
-(node:1686622) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(node:1704567) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
 (Use `node --trace-warnings ...` to show where the warning was created)
 PASS tests/ci/rust-dockerfile.test.js
   Rust Dockerfile
@@ -15,22 +15,23 @@ PASS tests/ci/rust-dockerfile.test.js
 PASS tests/ci/workflow-policy.test.js
   workflow policy
     ✓ .github/workflows/js.yml uses release-safe concurrency cancellation (4 ms)
-    ✓ .github/workflows/rust.yml uses release-safe concurrency cancellation (1 ms)
-    ✓ .github/workflows/parity.yml uses release-safe concurrency cancellation
+    ✓ .github/workflows/rust.yml uses release-safe concurrency cancellation
+    ✓ .github/workflows/parity.yml uses release-safe concurrency cancellation (1 ms)
     ✓ .github/workflows/js.yml uses the current checkout action
-    ✓ .github/workflows/rust.yml uses the current checkout action
+    ✓ .github/workflows/rust.yml uses the current checkout action (1 ms)
     ✓ .github/workflows/parity.yml uses the current checkout action
-    ✓ Rust workflow uses the current cache action (1 ms)
+    ✓ Rust workflow uses the current cache action
     ✓ parity check ignores repository-level CI tests
 
 PASS tests/ci/detect-code-changes.test.js
   detect-code-changes
-    ✓ detects code introduced by a real merge commit pushed to main (157 ms)
-    ✓ keeps pull request merge commits scoped to the PR head commit (142 ms)
-    ✓ detects files when a push only has one commit (105 ms)
+    ✓ detects code introduced by a real merge commit pushed to main (166 ms)
+    ✓ keeps pull request merge commits scoped to the PR head commit (174 ms)
+    ✓ detects files when a push only has one commit (104 ms)
+    ✓ runs JS checks for CI tests without requiring a changeset (96 ms)
 
 Test Suites: 3 passed, 3 total
-Tests:       12 passed, 12 total
+Tests:       13 passed, 13 total
 Snapshots:   0 total
-Time:        1.185 s
+Time:        1.025 s, estimated 2 s
 Ran all test suites within paths "tests/ci/detect-code-changes.test.js", "tests/ci/rust-dockerfile.test.js", "tests/ci/workflow-policy.test.js".

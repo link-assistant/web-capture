@@ -119,6 +119,20 @@ function isExcludedFromCodeChanges(filePath) {
   return false;
 }
 
+const JS_PACKAGE_CODE_DIRS = ['js/src/', 'js/bin/'];
+const JS_PACKAGE_CODE_FILES = ['js/package.json'];
+
+function isJsPackageCodeChange(filePath) {
+  if (!/\.(js|mjs|json)$/.test(filePath)) {
+    return false;
+  }
+
+  return (
+    JS_PACKAGE_CODE_FILES.includes(filePath) ||
+    JS_PACKAGE_CODE_DIRS.some((path) => filePath.startsWith(path))
+  );
+}
+
 function detectChanges() {
   console.log('Detecting file changes for CI/CD...\n');
 
@@ -132,8 +146,11 @@ function detectChanges() {
   }
   console.log('');
 
-  // JS-specific detection
-  const jsCodeChanged = changedFiles.some(
+  // JS-specific detection. `js-code-changed` gates changeset validation, so it
+  // only tracks publishable package code. `any-js-code-changed` below still
+  // includes JS tests/config so CI checks run for repo-level test changes.
+  const jsCodeChanged = changedFiles.some((f) => isJsPackageCodeChange(f));
+  const jsRelevantChanged = changedFiles.some(
     (f) => f.startsWith('js/') && /\.(js|mjs|json)$/.test(f)
   );
   setOutput('js-code-changed', jsCodeChanged ? 'true' : 'false');
@@ -209,7 +226,7 @@ function detectChanges() {
 
   // Composite flags for workflow gating
   const anyJsCodeChanged =
-    jsCodeChanged || jsScriptsChanged || jsWorkflowChanged;
+    jsRelevantChanged || jsScriptsChanged || jsWorkflowChanged;
   setOutput('any-js-code-changed', anyJsCodeChanged ? 'true' : 'false');
 
   const anyRustCodeChanged =
