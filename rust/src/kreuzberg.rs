@@ -104,10 +104,10 @@ pub fn convert_with_kreuzberg(html: &str, base_url: Option<&str>) -> Result<Kreu
 }
 
 fn inline_image_to_json(image: &html_to_markdown_rs::InlineImage) -> serde_json::Value {
-    let dimensions = image.dimensions.map(|(width, height)| {
+    let dimensions = image.dimensions.map(|dimensions| {
         serde_json::json!({
-            "width": width,
-            "height": height,
+            "width": dimensions.width,
+            "height": dimensions.height,
         })
     });
 
@@ -120,4 +120,57 @@ fn inline_image_to_json(image: &html_to_markdown_rs::InlineImage) -> serde_json:
         "source": image.source.to_string(),
         "attributes": &image.attributes,
     })
+}
+
+#[cfg(test)]
+mod tests {
+    use super::inline_image_to_json;
+    use html_to_markdown_rs::{ImageDimensions, InlineImage, InlineImageFormat, InlineImageSource};
+    use std::collections::BTreeMap;
+
+    /// Regression for issue #137: html-to-markdown-rs 3.6 replaced the
+    /// `Option<(u32, u32)>` tuple on `InlineImage.dimensions` with a structured
+    /// `Option<ImageDimensions>`. The extracted JSON must keep the
+    /// `{ "width", "height" }` shape consumers depend on.
+    #[test]
+    fn inline_image_dimensions_serialize_with_width_height_keys() {
+        let image = InlineImage {
+            data: vec![1, 2, 3],
+            format: InlineImageFormat::Png,
+            filename: Some("pixel.png".to_string()),
+            description: Some("one pixel".to_string()),
+            dimensions: Some(ImageDimensions {
+                width: 800,
+                height: 600,
+            }),
+            source: InlineImageSource::ImgDataUri,
+            attributes: BTreeMap::new(),
+        };
+
+        let json = inline_image_to_json(&image);
+
+        assert_eq!(json["dimensions"]["width"], 800);
+        assert_eq!(json["dimensions"]["height"], 600);
+        assert_eq!(json["format"], "png");
+        assert_eq!(json["filename"], "pixel.png");
+    }
+
+    /// Images without inferred dimensions must serialize `dimensions` as null
+    /// rather than panicking on the new `ImageDimensions` type.
+    #[test]
+    fn inline_image_without_dimensions_serializes_null() {
+        let image = InlineImage {
+            data: Vec::new(),
+            format: InlineImageFormat::Svg,
+            filename: None,
+            description: None,
+            dimensions: None,
+            source: InlineImageSource::SvgElement,
+            attributes: BTreeMap::new(),
+        };
+
+        let json = inline_image_to_json(&image);
+
+        assert!(json["dimensions"].is_null());
+    }
 }

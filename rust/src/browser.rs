@@ -63,7 +63,7 @@ impl std::str::FromStr for BrowserEngine {
 ///
 /// Returns an error if browser operations fail
 pub async fn render_html(url: &str) -> Result<String> {
-    render_html_with_timeout(url, Duration::from_secs(60)).await
+    render_html_with_timeout(url, Duration::from_mins(1)).await
 }
 
 /// Render HTML content from a URL using a headless browser and caller-provided timeout.
@@ -268,7 +268,7 @@ pub async fn capture_screenshot(url: &str) -> Result<Vec<u8>> {
     );
 
     let output_result = tokio::time::timeout(
-        Duration::from_secs(60),
+        Duration::from_mins(1),
         Command::new(&chrome).args(&args).output(),
     )
     .await;
