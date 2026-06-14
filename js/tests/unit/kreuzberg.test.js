@@ -1,6 +1,7 @@
 import {
   convertWithKreuzberg,
   isKreuzbergAvailable,
+  normalizeStructuredKeys,
 } from '../../src/kreuzberg.js';
 
 let available;
@@ -205,5 +206,44 @@ describe('kreuzberg html-to-markdown integration', () => {
     expect(result.content).toContain('Item 1');
     expect(result.content).toContain('Item 2');
     expect(result.content).toContain('Item 3');
+  });
+});
+
+describe('kreuzberg structured key normalization (issue #137 parity)', () => {
+  // Mirrors the Rust `inline_image_to_json` regression tests: after the
+  // html-to-markdown 3.6 change, inline image dimensions are a structured
+  // `{ width, height }` value rather than a tuple. The normalization pipeline
+  // that backs `result.images` must preserve those `width`/`height` keys.
+  it('preserves width/height keys on inline image dimensions', () => {
+    const images = normalizeStructuredKeys([
+      {
+        format: 'png',
+        filename: 'pixel.png',
+        description: 'one pixel',
+        dimensions: { width: 800, height: 600 },
+        source: 'ImgDataUri',
+      },
+    ]);
+
+    expect(images).toHaveLength(1);
+    expect(images[0].dimensions).toEqual({ width: 800, height: 600 });
+    expect(images[0].format).toBe('png');
+    expect(images[0].filename).toBe('pixel.png');
+  });
+
+  it('leaves images without dimensions untouched', () => {
+    const images = normalizeStructuredKeys([
+      { format: 'svg', source: 'SvgElement', dimensions: null },
+    ]);
+
+    expect(images[0].dimensions).toBeNull();
+  });
+
+  it('snake_cases nested structured keys', () => {
+    const normalized = normalizeStructuredKeys({
+      openGraph: { siteName: 'Example' },
+    });
+
+    expect(normalized).toEqual({ open_graph: { site_name: 'Example' } });
   });
 });
