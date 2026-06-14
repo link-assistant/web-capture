@@ -1,5 +1,14 @@
 # @link-assistant/web-capture
 
+## 1.10.8
+
+### Patch Changes
+
+- 8cee5e4: Keep JS/Rust kreuzberg parity for the html-to-markdown 3.6 image dimensions
+  change (issue #137). Export `normalizeStructuredKeys` and add regression tests
+  asserting inline image `dimensions` are exposed as `{ width, height }`, mirroring
+  the Rust `inline_image_to_json` fix.
+
 ## 1.10.7
 
 ### Patch Changes
