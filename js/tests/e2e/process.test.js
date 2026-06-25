@@ -23,11 +23,13 @@ beforeAll(async () => {
     res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
     res.end(MOCK_HTML);
   });
-  await new Promise((resolve) => mockServer.listen(mockPort, resolve));
-  mockUrl = `http://localhost:${mockPort}`;
+  await new Promise((resolve) =>
+    mockServer.listen(mockPort, '127.0.0.1', resolve)
+  );
+  mockUrl = `http://127.0.0.1:${mockPort}`;
 
   const port = await getPort();
-  baseUrl = `http://localhost:${port}`;
+  baseUrl = `http://127.0.0.1:${port}`;
 
   serverProcess = spawn(
     'node',
