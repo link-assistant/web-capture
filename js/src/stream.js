@@ -17,7 +17,9 @@ export async function streamHandler(req, res) {
     });
     // Copy status and headers
     res.status(response.status);
-    copyProxyResponseHeaders(response.headers, res);
+    copyProxyResponseHeaders(response.headers, res, {
+      preserveContentLength: true,
+    });
 
     // Stream the response body
     if (response.body) {

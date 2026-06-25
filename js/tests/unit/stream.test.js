@@ -24,7 +24,9 @@ describe('streamHandler', () => {
 
       expect(upstreamHeaders['accept-encoding']).toBe('identity');
       expect(res.headers['content-type']).toBe('text/html; charset=utf-8');
-      expect(res.headers['content-length']).toBeUndefined();
+      expect(res.headers['content-length']).toBe(
+        String(Buffer.byteLength(body))
+      );
       expect(res.text).toContain('Example Domain');
     } finally {
       await closeServer(server);
