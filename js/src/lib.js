@@ -15,6 +15,9 @@ import { retry } from './retry.js';
 const STACKPRINTER_RETRIES = 3;
 const STACKPRINTER_RETRY_BASE_DELAY_MS = 1000;
 const GOOGLE_DRIVE_FILE_ID_RE = /^[A-Za-z0-9_-]+$/;
+const HTML_FETCH_HEADERS = {
+  'accept-encoding': 'identity',
+};
 
 export async function fetchHtml(url) {
   if (!url) {
@@ -30,7 +33,7 @@ export async function fetchHtml(url) {
     return await fetchStackPrinterHtml(stackPrinterUrl);
   }
 
-  const response = await fetch(url);
+  const response = await fetchHtmlResponse(url);
   return response.text();
 }
 
@@ -194,7 +197,7 @@ function imageExtensionForContentType(contentType) {
 async function fetchStackPrinterHtml(url) {
   return await retry(
     async () => {
-      const response = await fetch(url);
+      const response = await fetchHtmlResponse(url);
       if (!response.ok) {
         throw new Error(`StackPrinter returned HTTP ${response.status}`);
       }
@@ -210,6 +213,12 @@ async function fetchStackPrinterHtml(url) {
       baseDelay: STACKPRINTER_RETRY_BASE_DELAY_MS,
     }
   );
+}
+
+function fetchHtmlResponse(url) {
+  return fetch(url, {
+    headers: HTML_FETCH_HEADERS,
+  });
 }
 
 function isStackPrinterTransientError(html) {
