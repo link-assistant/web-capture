@@ -43,7 +43,10 @@ function startFixtureServer({
 } = {}) {
   return new Promise((resolve, reject) => {
     const server = http.createServer((req, res) => {
-      res.writeHead(200, { 'Content-Type': contentType });
+      res.writeHead(200, {
+        'Content-Type': contentType,
+        'Content-Length': Buffer.byteLength(body),
+      });
       res.end(body);
     });
 
@@ -350,6 +353,47 @@ describe('CLI', () => {
         blockedByCaptcha: false,
       });
       expect(body.diagnostics.sourceUrl).toContain('en.wikipedia.org');
+    }, 20000);
+
+    test('emits shared-dialog demo_memory from the shared-dialog subcommand', async () => {
+      const fixturePath = resolve(
+        __dirname,
+        '../../../docs/case-studies/issue-141/raw-data/chatgpt-share-6a3825b9.html'
+      );
+      const body = readFileSync(fixturePath, 'utf-8');
+      const { server, url } = await startFixtureServer({ body });
+      const shareUrl = url.replace(
+        '/article',
+        '/share/6a3825b9-8de4-83ee-9c24-52fd1eb38d24'
+      );
+
+      try {
+        const result = await runCli(
+          [
+            'shared-dialog',
+            shareUrl,
+            '--format',
+            'demo-memory',
+            '--output',
+            '-',
+          ],
+          {
+            cwd: resolve(__dirname, '../..'),
+          }
+        );
+
+        expect(result.code).toBe(0);
+        expect(result.stdout.startsWith('demo_memory')).toBe(true);
+        expect(result.stdout).toContain('demo_memory');
+        expect(result.stdout.match(/\n {2}event "/g)).toHaveLength(4);
+        expect(result.stdout).toContain('role "user"');
+        expect(result.stdout).toContain('role "assistant"');
+        expect(result.stdout).toContain(
+          'conversationTitle "Infinite loop script"'
+        );
+      } finally {
+        await stopFixtureServer(server);
+      }
     }, 20000);
   });
 });

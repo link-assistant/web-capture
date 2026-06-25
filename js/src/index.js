@@ -13,6 +13,7 @@ import { animationHandler } from './animation.js';
 import { figuresHandler } from './figures.js';
 import { themedImageHandler } from './themed-image.js';
 import { searchHandler } from './search.js';
+import { sharedDialogHandler } from './shared-dialog.js';
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -31,6 +32,7 @@ app.get('/animation', animationHandler);
 app.get('/figures', figuresHandler);
 app.get('/themed-image', themedImageHandler);
 app.get('/search', searchHandler);
+app.get('/shared-dialog', sharedDialogHandler);
 
 // Start the server if this is the main module
 const isMainModule =
@@ -78,3 +80,13 @@ export {
   formatSearchAsMarkdown,
   SEARCH_PROVIDERS,
 } from './search.js';
+export {
+  captureSharedDialog,
+  formatSharedDialogAsDemoMemory,
+  formatSharedDialogAsMarkdown,
+  formatSharedDialogAsMetaLanguage,
+  formatSharedDialogAsText,
+  formatSharedDialogResult,
+  parseSharedDialog,
+  sharedDialogHandler,
+} from './shared-dialog.js';
