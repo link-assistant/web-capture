@@ -1,5 +1,11 @@
 # @link-assistant/web-capture
 
+## 1.10.10
+
+### Patch Changes
+
+- 65d7dcc: Add shared AI dialog capture for ChatGPT share links with structured transcript output and unsupported-provider diagnostics.
+
 ## 1.10.9
 
 ### Patch Changes
