@@ -1,4 +1,6 @@
+import nock from 'nock';
 import {
+  fetchGithubRepositorySnapshot,
   formatGithubRepositoryMarkdown,
   formatGithubRepositoryText,
   getGithubRepositoryTextFilename,
@@ -42,6 +44,10 @@ const SNAPSHOT = {
   },
 };
 
+afterEach(() => {
+  nock.cleanAll();
+});
+
 describe('GitHub repository URLs', () => {
   it('detects plain GitHub repository pages', () => {
     expect(
@@ -67,6 +73,59 @@ describe('GitHub repository URLs', () => {
     expect(
       getGithubRepositoryTextFilename('https://github.com/octocat/Hello-World')
     ).toBe('octocat-Hello-World.txt');
+  });
+});
+
+describe('GitHub repository snapshot fetching', () => {
+  it('requests identity encoding from GitHub JSON and raw README fetches', async () => {
+    const owner = 'octocat';
+    const repo = 'Hello-World';
+    const readme = '# Hello World\n\nRaw README content.';
+
+    const githubApi = nock('https://api.github.com', {
+      reqheaders: {
+        'accept-encoding': 'identity',
+      },
+    })
+      .get(`/repos/${owner}/${repo}`)
+      .reply(200, {
+        full_name: `${owner}/${repo}`,
+        html_url: `https://github.com/${owner}/${repo}`,
+        default_branch: 'master',
+      })
+      .get(`/repos/${owner}/${repo}/readme`)
+      .query({ ref: 'master' })
+      .reply(200, {
+        name: 'README.md',
+        path: 'README.md',
+        download_url: `https://raw.githubusercontent.com/${owner}/${repo}/master/README.md`,
+      })
+      .get(`/repos/${owner}/${repo}/contents`)
+      .query({ ref: 'master' })
+      .reply(200, [
+        {
+          name: 'README.md',
+          path: 'README.md',
+          type: 'file',
+          size: readme.length,
+        },
+      ]);
+
+    const rawGithub = nock('https://raw.githubusercontent.com', {
+      reqheaders: {
+        'accept-encoding': 'identity',
+      },
+    })
+      .get(`/${owner}/${repo}/master/README.md`)
+      .reply(200, readme);
+
+    const snapshot = await fetchGithubRepositorySnapshot(
+      `https://github.com/${owner}/${repo}`
+    );
+
+    expect(snapshot.readme.content).toBe(readme);
+    expect(githubApi.isDone()).toBe(true);
+    expect(rawGithub.isDone()).toBe(true);
   });
 });
 

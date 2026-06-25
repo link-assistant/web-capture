@@ -244,6 +244,7 @@ async function fetchGithubText(url, options = {}) {
 function githubHeaders(accept) {
   const headers = {
     Accept: accept,
+    'Accept-Encoding': 'identity',
     'User-Agent': GITHUB_USER_AGENT,
     'X-GitHub-Api-Version': '2022-11-28',
   };
