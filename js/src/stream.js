@@ -1,6 +1,7 @@
 import fetch from 'node-fetch';
 import { pipeline } from 'stream';
 import { convertGoogleDriveUrl } from './lib.js';
+import { copyProxyResponseHeaders } from './proxy-headers.js';
 
 export async function streamHandler(req, res) {
   const url = req.query.url;
@@ -11,21 +12,9 @@ export async function streamHandler(req, res) {
     const response = await fetch(convertGoogleDriveUrl(url));
     // Copy status and headers
     res.status(response.status);
-
-    // Set default content type if not present
-    const contentType = response.headers.get('content-type') || 'text/plain';
-    res.setHeader('Content-Type', contentType);
-
-    // Copy other headers
-    for (const [key, value] of response.headers.entries()) {
-      if (
-        key.toLowerCase() !== 'transfer-encoding' &&
-        key.toLowerCase() !== 'content-encoding' &&
-        key.toLowerCase() !== 'content-length'
-      ) {
-        res.setHeader(key, value);
-      }
-    }
+    copyProxyResponseHeaders(response.headers, res, {
+      preserveContentLength: true,
+    });
 
     // Stream the response body
     if (response.body) {

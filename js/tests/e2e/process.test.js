@@ -186,7 +186,14 @@ async function waitForProcessOutput(child, expected) {
 }
 
 async function expectTextResponse(res) {
-  const text = await res.text();
+  let text;
+  try {
+    text = await res.text();
+  } catch (error) {
+    throw new Error(
+      `${error.message}\nServer output:\n${serverOutput || '(empty)'}`
+    );
+  }
   expectResponseStatus(res.status, text);
   return text;
 }
