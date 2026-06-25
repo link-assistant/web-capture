@@ -21,14 +21,28 @@ export async function streamHandler(req, res) {
 
     // Stream the response body
     if (response.body) {
-      response.body.on('error', (err) => {
-        console.error('Upstream stream error in /stream:', err);
+      let upstreamEnded = false;
+      let upstreamFailureHandled = false;
+      const finishAfterUpstreamFailure = (err) => {
+        if (upstreamEnded || upstreamFailureHandled) {
+          return;
+        }
+        upstreamFailureHandled = true;
+        console.error('Upstream stream failed in /stream:', err);
         if (!res.headersSent) {
           res.status(500);
           res.end('Error proxying content');
         } else if (!res.writableEnded) {
           res.end();
         }
+      };
+
+      response.body.once('end', () => {
+        upstreamEnded = true;
+      });
+      response.body.once('error', finishAfterUpstreamFailure);
+      response.body.once('close', () => {
+        finishAfterUpstreamFailure(new Error('Upstream closed before end'));
       });
       response.body.pipe(res);
     } else {
