@@ -7,4 +7,5 @@ mod localize_images;
 mod markdown;
 mod metadata;
 mod postprocess;
+mod shared_dialog;
 mod verify;

@@ -40,9 +40,8 @@ beforeAll(async () => {
   await new Promise((resolve) =>
     mockServer.listen(mockPort, '0.0.0.0', resolve)
   );
-  // Use host.docker.internal or the host IP to make it reachable from Docker
-  // On Linux (CI), Docker containers can reach the host via 172.17.0.1
-  mockUrl = `http://172.17.0.1:${mockPort}`;
+  // docker-compose.yml maps this hostname to the host gateway on Linux CI.
+  mockUrl = `http://host.docker.internal:${mockPort}`;
 
   console.log('Checking if Docker service is already running...');
   const alreadyRunning = await isServiceRunning();

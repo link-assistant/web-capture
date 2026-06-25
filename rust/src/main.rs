@@ -50,11 +50,11 @@ use web_capture::{
 #[allow(clippy::struct_excessive_bools)]
 struct Args {
     /// URL to capture (required in capture mode). Use the literal `search`
-    /// here to enter structured search mode: `web-capture search <query>`.
+    /// or `shared-dialog` to enter those structured capture modes.
     #[arg(index = 1)]
     url: Option<String>,
 
-    /// Search query (used only in `web-capture search <query>` mode)
+    /// Search query or shared dialog URL (used only in structured subcommands)
     #[arg(index = 2)]
     query: Option<String>,
 
@@ -74,7 +74,7 @@ struct Args {
     #[arg(short, long, default_value = "3000", env = "PORT")]
     port: u16,
 
-    /// Output format: markdown/md, html, txt/text, image/png
+    /// Output format: markdown/md, html, txt/text, image/png, json, meta-language, demo-memory
     #[arg(short, long, default_value = "markdown")]
     format: String,
 
@@ -224,6 +224,16 @@ struct SearchQuery {
     limit: Option<usize>,
     #[serde(default)]
     format: Option<String>,
+}
+
+/// Query parameters for the /shared-dialog endpoint
+#[derive(Debug, Deserialize)]
+struct SharedDialogQuery {
+    url: String,
+    #[serde(default)]
+    format: Option<String>,
+    #[serde(default)]
+    capture: Option<String>,
 }
 
 /// Current UTC time as an RFC 3339 timestamp (e.g. `2026-05-30T12:34:56Z`).
@@ -400,6 +410,9 @@ async fn main() -> anyhow::Result<()> {
     } else if args.url.as_deref() == Some("search") {
         // Structured search mode: `web-capture search <query>`
         run_search(&args).await?;
+    } else if args.url.as_deref() == Some("shared-dialog") {
+        // Shared AI dialog mode: `web-capture shared-dialog <url>`
+        run_shared_dialog(&args).await?;
     } else if let Some(ref url) = args.url {
         // Capture mode
         capture_url(url, &effective_format, args.output.as_ref(), &args).await?;
@@ -426,6 +439,7 @@ async fn start_server(port: u16) -> anyhow::Result<()> {
         .route("/figures", get(figures_handler))
         .route("/themed-image", get(themed_image_handler))
         .route("/search", get(search_handler))
+        .route("/shared-dialog", get(shared_dialog_handler))
         .layer(TraceLayer::new_for_http());
 
     let addr = SocketAddr::from(([0, 0, 0, 0], port));
@@ -444,6 +458,7 @@ async fn start_server(port: u16) -> anyhow::Result<()> {
     info!("  GET /figures?url=<URL>    - Extract figure images");
     info!("  GET /themed-image?url=<URL> - Dual-theme screenshots");
     info!("  GET /search?q=<QUERY>     - Structured search-provider capture");
+    info!("  GET /shared-dialog?url=<URL> - Shared AI dialog capture");
     info!("");
     info!("Press Ctrl+C to stop the server");
 
@@ -1079,6 +1094,39 @@ async fn search_handler(Query(params): Query<SearchQuery>) -> Response {
     }
 }
 
+/// Shared AI dialog capture endpoint handler.
+async fn shared_dialog_handler(Query(params): Query<SharedDialogQuery>) -> Response {
+    let url = match normalize_url(&params.url) {
+        Ok(url) => url,
+        Err(e) => return (StatusCode::BAD_REQUEST, e).into_response(),
+    };
+    let format = params.format.unwrap_or_else(|| "json".to_string());
+    let capture = params.capture.unwrap_or_else(|| "browser".to_string());
+
+    let result = match web_capture::shared_dialog::capture_shared_dialog(
+        &url,
+        &capture,
+        Some(now_rfc3339()),
+    )
+    .await
+    {
+        Ok(result) => result,
+        Err(e) => return (StatusCode::BAD_REQUEST, e).into_response(),
+    };
+
+    let body = match web_capture::shared_dialog::format_shared_dialog_result(&result, &format) {
+        Ok(body) => body,
+        Err(e) => return (StatusCode::BAD_REQUEST, e.to_string()).into_response(),
+    };
+
+    (
+        StatusCode::OK,
+        [("Content-Type", shared_dialog_content_type(&format))],
+        body,
+    )
+        .into_response()
+}
+
 /// Run structured search from the CLI (`web-capture search <query>`).
 async fn run_search(args: &Args) -> anyhow::Result<()> {
     let Some(query) = args.query.as_deref() else {
@@ -1107,6 +1155,60 @@ async fn run_search(args: &Args) -> anyhow::Result<()> {
         println!("{}", serde_json::to_string_pretty(&result)?);
     }
     Ok(())
+}
+
+/// Run shared AI dialog capture from the CLI (`web-capture shared-dialog <url>`).
+async fn run_shared_dialog(args: &Args) -> anyhow::Result<()> {
+    let Some(url) = args.query.as_deref() else {
+        eprintln!("Error: Missing shared dialog URL. Usage: web-capture shared-dialog <url>");
+        std::process::exit(1);
+    };
+    let absolute_url = normalize_url(url).map_err(|e| anyhow::anyhow!(e))?;
+
+    // Shared dialog output defaults to JSON unless --format/-f was passed explicitly.
+    let format_explicit = std::env::args().any(|arg| {
+        arg == "-f" || arg == "--format" || arg.starts_with("--format=") || arg.starts_with("-f=")
+    });
+    let format = if format_explicit {
+        args.format.clone()
+    } else {
+        "json".to_string()
+    };
+
+    let result = web_capture::shared_dialog::capture_shared_dialog(
+        &absolute_url,
+        &args.capture,
+        Some(now_rfc3339()),
+    )
+    .await
+    .map_err(|e| anyhow::anyhow!(e))?;
+    let body = web_capture::shared_dialog::format_shared_dialog_result(&result, &format)
+        .map_err(|e| anyhow::anyhow!(e))?;
+
+    if let Some(path) = effective_output_path(
+        &absolute_url,
+        web_capture::shared_dialog::shared_dialog_output_extension(&format),
+        args.output.as_ref(),
+        &args.data_dir,
+    ) {
+        if let Some(parent) = path.parent() {
+            std::fs::create_dir_all(parent).ok();
+        }
+        fs::write(&path, &body).await?;
+        eprintln!("Shared dialog ({format}) saved to: {}", path.display());
+    } else {
+        print!("{body}");
+    }
+    Ok(())
+}
+
+fn shared_dialog_content_type(format: &str) -> &'static str {
+    match format.to_ascii_lowercase().as_str() {
+        "json" => "application/json; charset=utf-8",
+        "markdown" | "md" => "text/markdown; charset=utf-8",
+        "html" => "text/html; charset=utf-8",
+        _ => "text/plain; charset=utf-8",
+    }
 }
 
 /// Capture a URL and save/output the result

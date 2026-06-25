@@ -13,6 +13,7 @@ A CLI and microservice to fetch URLs and render them as:
 - **HTML**: Rendered page content
 - **Plain text**: Raw text downloads for paste-like URLs such as xpaste.pro
 - **PNG screenshot**: Full page capture
+- **Shared AI dialog transcript**: ChatGPT share captures with structured diagnostics for unsupported providers
 
 This is the Rust implementation of web-capture, providing the same API as the JavaScript version.
 
@@ -68,6 +69,10 @@ web-capture https://example.com --embed-images -o page.md
 # Structured search-provider capture (JSON by default)
 web-capture search "formal methods" --provider wikipedia
 
+# Shared AI dialog capture (JSON by default)
+web-capture shared-dialog https://chatgpt.com/share/SHARE_ID
+web-capture shared-dialog https://chatgpt.com/share/SHARE_ID --format demo-memory -o -
+
 # Start as API server
 web-capture --serve
 
@@ -90,6 +95,7 @@ FormalAI integration should use the stable HTTP/CLI contract documented in
 - **PNG screenshot**: `GET /image?url=<URL>`
 - **Archive**: `GET /archive?url=<URL>` (ZIP containing `document.md` and `document.html`)
 - **Search**: `GET /search?q=<QUERY>&provider=<PROVIDER>&format=json|markdown`
+- **Shared dialog**: `GET /shared-dialog?url=<URL>&format=json|meta-language|demo-memory|markdown|txt`
 
 For xpaste.pro paste URLs, `/markdown` captures the visual paste page in visible
 order and appends the raw paste text as `xpaste-pro-<id>.txt` when the final

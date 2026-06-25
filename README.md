@@ -15,6 +15,7 @@ A CLI and microservice to fetch URLs and render them as:
 - **ZIP archive**: Markdown/HTML + locally downloaded images
 - **PDF**: Print-quality document
 - **DOCX**: Word document
+- **Shared AI dialog transcript**: ChatGPT share captures with structured diagnostics for unsupported providers
 
 ## Language Implementations
 
@@ -60,6 +61,7 @@ Both implementations expose the same API:
 | `GET /fetch?url=<URL>`                                    | Proxy fetch content                                                                                            |
 | `GET /stream?url=<URL>`                                   | Stream content                                                                                                 |
 | `GET /search?q=<QUERY>`                                   | Capture structured search-provider results                                                                     |
+| `GET /shared-dialog?url=<URL>`                            | Capture shared AI dialog transcripts as JSON, Markdown, text, or Links Notation                                |
 
 FormalAI integration should use the stable HTTP/CLI contract documented in
 [`docs/formalai-contract.md`](docs/formalai-contract.md).
@@ -88,6 +90,9 @@ web-capture https://example.com --format png -o screenshot.png
 # Create a ZIP archive
 web-capture https://example.com --archive
 
+# Capture a shared AI dialog transcript as structured JSON
+web-capture shared-dialog https://chatgpt.com/share/SHARE_ID
+
 # Start as API server
 web-capture --serve
 
@@ -97,24 +102,24 @@ web-capture --serve --port 8080
 
 ## CLI Options
 
-| Option                   | Short | Description                                                                                           | Default               |
-| ------------------------ | ----- | ----------------------------------------------------------------------------------------------------- | --------------------- |
-| `--serve`                | `-s`  | Start as HTTP API server                                                                              | -                     |
-| `--port`                 | `-p`  | Port to listen on                                                                                     | 3000                  |
-| `--format`               | `-f`  | Output format: `markdown`/`md`, `html`, `txt`/`text`, `image`/`png`, `jpeg`, `pdf`, `docx`, `archive` | `markdown`            |
-| `--output`               | `-o`  | Output file path. Use `-o -` for stdout                                                               | auto-derived from URL |
-| `--data-dir`             |       | Base directory for auto-derived output paths                                                          | `./data/web-capture`  |
-| `--engine`               | `-e`  | Browser engine (JS only): `puppeteer`, `playwright`                                                   | `puppeteer`           |
-| `--embed-images`         |       | Keep images inline as base64 data URIs (self-contained file)                                          | `false`               |
-| `--no-extract-images`    |       | Alias for `--embed-images`                                                                            | `false`               |
-| `--extract-images[=DIR]` |       | Extract images to `DIR/images/` (or next to the output) and download remote images                    | -                     |
-| `--keep-original-links`  |       | Keep remote image URLs as direct links (the default markdown behavior)                                | `false`               |
-| `--images-dir`           |       | Subdirectory name for extracted images                                                                | `images`              |
-| `--archive`              |       | Create archive: `zip` (default), `7z`, `tar.gz`, `tar`                                                | -                     |
-| `--extract-latex`        |       | Extract LaTeX formulas                                                                                | `true`                |
-| `--extract-metadata`     |       | Extract article metadata                                                                              | `true`                |
-| `--post-process`         |       | Apply post-processing                                                                                 | `true`                |
-| `--detect-code-language` |       | Detect code block languages                                                                           | `true`                |
+| Option                   | Short | Description                                                                                                                                   | Default               |
+| ------------------------ | ----- | --------------------------------------------------------------------------------------------------------------------------------------------- | --------------------- |
+| `--serve`                | `-s`  | Start as HTTP API server                                                                                                                      | -                     |
+| `--port`                 | `-p`  | Port to listen on                                                                                                                             | 3000                  |
+| `--format`               | `-f`  | Output format: `markdown`/`md`, `html`, `txt`/`text`, `image`/`png`, `jpeg`, `pdf`, `docx`, `archive`, `json`, `meta-language`, `demo-memory` | `markdown`            |
+| `--output`               | `-o`  | Output file path. Use `-o -` for stdout                                                                                                       | auto-derived from URL |
+| `--data-dir`             |       | Base directory for auto-derived output paths                                                                                                  | `./data/web-capture`  |
+| `--engine`               | `-e`  | Browser engine (JS only): `puppeteer`, `playwright`                                                                                           | `puppeteer`           |
+| `--embed-images`         |       | Keep images inline as base64 data URIs (self-contained file)                                                                                  | `false`               |
+| `--no-extract-images`    |       | Alias for `--embed-images`                                                                                                                    | `false`               |
+| `--extract-images[=DIR]` |       | Extract images to `DIR/images/` (or next to the output) and download remote images                                                            | -                     |
+| `--keep-original-links`  |       | Keep remote image URLs as direct links (the default markdown behavior)                                                                        | `false`               |
+| `--images-dir`           |       | Subdirectory name for extracted images                                                                                                        | `images`              |
+| `--archive`              |       | Create archive: `zip` (default), `7z`, `tar.gz`, `tar`                                                                                        | -                     |
+| `--extract-latex`        |       | Extract LaTeX formulas                                                                                                                        | `true`                |
+| `--extract-metadata`     |       | Extract article metadata                                                                                                                      | `true`                |
+| `--post-process`         |       | Apply post-processing                                                                                                                         | `true`                |
+| `--detect-code-language` |       | Detect code block languages                                                                                                                   | `true`                |
 
 ## Image Handling
 
@@ -168,6 +173,7 @@ Both implementations expose the same API:
 | `GET /docx?url=<URL>`                                     | DOCX with embedded images                                                                        |
 | `GET /fetch?url=<URL>`                                    | Proxy fetch content                                                                              |
 | `GET /stream?url=<URL>`                                   | Stream content                                                                                   |
+| `GET /shared-dialog?url=<URL>`                            | Shared AI dialog transcript capture with structured diagnostics                                  |
 
 ## Docker
 

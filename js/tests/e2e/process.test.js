@@ -1,13 +1,13 @@
 import { spawn } from 'child_process';
-import http from 'http';
 import fetch from 'node-fetch';
 import getPort from 'get-port';
 import path from 'path';
 
 const WAIT_FOR_READY = 5000; // ms
 let serverProcess;
+let serverOutput = '';
 let baseUrl;
-let mockServer;
+let mockProcess;
 let mockUrl;
 
 const MOCK_HTML = `<!DOCTYPE html>
@@ -17,17 +17,13 @@ const MOCK_HTML = `<!DOCTYPE html>
 </html>`;
 
 beforeAll(async () => {
-  // Start a local mock server to avoid depending on external network
   const mockPort = await getPort();
-  mockServer = http.createServer((req, res) => {
-    res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
-    res.end(MOCK_HTML);
-  });
-  await new Promise((resolve) => mockServer.listen(mockPort, resolve));
-  mockUrl = `http://localhost:${mockPort}`;
+  mockProcess = startMockServer(mockPort);
+  await waitForProcessOutput(mockProcess, 'mock fixture server listening');
+  mockUrl = `http://127.0.0.1:${mockPort}`;
 
   const port = await getPort();
-  baseUrl = `http://localhost:${port}`;
+  baseUrl = `http://127.0.0.1:${port}`;
 
   serverProcess = spawn(
     'node',
@@ -37,6 +33,9 @@ beforeAll(async () => {
       stdio: ['ignore', 'pipe', 'pipe'],
     }
   );
+  collectProcessOutput(serverProcess, (chunk) => {
+    serverOutput += chunk;
+  });
 
   // Wait for the server to be ready (simple delay or poll)
   await new Promise((resolve, reject) => {
@@ -79,8 +78,8 @@ afterAll(() => {
   if (serverProcess) {
     serverProcess.kill();
   }
-  if (mockServer) {
-    mockServer.close();
+  if (mockProcess) {
+    mockProcess.kill();
   }
 });
 
@@ -89,8 +88,7 @@ describe('E2E: Web Capture Microservice', () => {
     const res = await fetch(
       `${baseUrl}/html?url=${encodeURIComponent(mockUrl)}`
     );
-    expect(res.status).toBe(200);
-    const text = await res.text();
+    const text = await expectTextResponse(res);
     expect(text).toMatch(/<html/i);
   });
 
@@ -98,8 +96,7 @@ describe('E2E: Web Capture Microservice', () => {
     const res = await fetch(
       `${baseUrl}/markdown?url=${encodeURIComponent(mockUrl)}`
     );
-    expect(res.status).toBe(200);
-    const text = await res.text();
+    const text = await expectTextResponse(res);
     expect(text).toMatch(/example/i);
   });
 
@@ -107,7 +104,7 @@ describe('E2E: Web Capture Microservice', () => {
     const res = await fetch(
       `${baseUrl}/image?url=${encodeURIComponent(mockUrl)}`
     );
-    expect(res.status).toBe(200);
+    await expectStatusOk(res);
     expect(res.headers.get('content-type')).toMatch(/^image\/png/);
     const buf = Buffer.from(await res.arrayBuffer());
     // PNG signature check
@@ -122,9 +119,7 @@ describe('E2E: Web Capture Microservice', () => {
     const res = await fetch(
       `${baseUrl}/stream?url=${encodeURIComponent(mockUrl)}`
     );
-    expect(res.status).toBe(200);
-    // Get the response as text
-    const text = await res.text();
+    const text = await expectTextResponse(res);
     expect(text).toMatch(/<html/i);
     expect(text).toMatch(/Example Domain/i);
   }, 20000);
@@ -133,9 +128,87 @@ describe('E2E: Web Capture Microservice', () => {
     const res = await fetch(
       `${baseUrl}/fetch?url=${encodeURIComponent(mockUrl)}`
     );
-    expect(res.status).toBe(200);
-    const text = await res.text();
+    const text = await expectTextResponse(res);
     expect(text).toMatch(/<html/i);
     expect(text).toMatch(/Example Domain/i);
   }, 20000);
 });
+
+function startMockServer(port) {
+  const script = `
+    const http = require('http');
+    const html = ${JSON.stringify(MOCK_HTML)};
+    const server = http.createServer((req, res) => {
+      res.writeHead(200, {
+        'Content-Type': 'text/html; charset=utf-8',
+        'Content-Length': Buffer.byteLength(html),
+      });
+      res.end(html);
+    });
+    server.listen(${port}, '127.0.0.1', () => {
+      console.log('mock fixture server listening');
+    });
+    process.on('SIGTERM', () => server.close(() => process.exit(0)));
+    process.on('SIGINT', () => server.close(() => process.exit(0)));
+  `;
+  return spawn('node', ['-e', script], {
+    stdio: ['ignore', 'pipe', 'pipe'],
+  });
+}
+
+function collectProcessOutput(child, onChunk) {
+  child.stdout.on('data', (data) => onChunk(data.toString()));
+  child.stderr.on('data', (data) => onChunk(data.toString()));
+}
+
+async function waitForProcessOutput(child, expected) {
+  let output = '';
+  collectProcessOutput(child, (chunk) => {
+    output += chunk;
+  });
+  await new Promise((resolve, reject) => {
+    const timeout = setTimeout(() => {
+      reject(
+        new Error(`Timed out waiting for "${expected}". Output:\n${output}`)
+      );
+    }, WAIT_FOR_READY);
+    child.stdout.on('data', (data) => {
+      if (data.toString().includes(expected)) {
+        clearTimeout(timeout);
+        resolve();
+      }
+    });
+    child.on('exit', (code, signal) => {
+      clearTimeout(timeout);
+      reject(new Error(`Process exited with code ${code}, signal ${signal}`));
+    });
+  });
+}
+
+async function expectTextResponse(res) {
+  let text;
+  try {
+    text = await res.text();
+  } catch (error) {
+    throw new Error(
+      `${error.message}\nServer output:\n${serverOutput || '(empty)'}`
+    );
+  }
+  expectResponseStatus(res.status, text);
+  return text;
+}
+
+async function expectStatusOk(res) {
+  if (res.status === 200) {
+    return;
+  }
+  expectResponseStatus(res.status, await res.text());
+}
+
+function expectResponseStatus(status, body) {
+  if (status !== 200) {
+    throw new Error(
+      `Expected HTTP 200, received ${status}\nBody:\n${body}\nServer output:\n${serverOutput}`
+    );
+  }
+}

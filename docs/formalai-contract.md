@@ -13,6 +13,7 @@ The contract covers the shared endpoints requested in issue 135:
 - `GET /archive`
 - `GET /stream`
 - `GET /search`
+- `GET /shared-dialog`
 
 The JavaScript package is published as `@link-assistant/web-capture`. The Rust
 crate is published as `web-capture`, but the Rust crate currently declares
@@ -33,6 +34,9 @@ The structured response exceptions are:
 - `/search`, which returns normalized JSON by default.
 - `/markdown?converter=kreuzberg&format=json`, which returns the structured
   converter output.
+- `/shared-dialog`, which returns normalized transcript JSON by default and
+  structured unsupported-provider diagnostics when transcript data is blocked
+  or unavailable.
 
 For reproducible FormalAI integration:
 
@@ -47,16 +51,17 @@ For reproducible FormalAI integration:
 
 ## HTTP Endpoints
 
-| Endpoint    | Required query | Stable success shape                                                                                                                                                |
-| ----------- | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/fetch`    | `url`          | Proxies upstream status, content type, selected headers, and response bytes.                                                                                        |
-| `/stream`   | `url`          | Streams or proxies upstream status, content type, selected headers, and response bytes.                                                                             |
-| `/html`     | `url`          | `200`, `Content-Type: text/html; charset=utf-8`, rendered or fetched HTML with relative URLs normalized to absolute URLs where supported.                           |
-| `/txt`      | `url`          | `200`, `Content-Type: text/plain; charset=utf-8`, `Content-Disposition` attachment, plain text body.                                                                |
-| `/markdown` | `url`          | `200`, `Content-Type: text/markdown`, Markdown body.                                                                                                                |
-| `/image`    | `url`          | `200`, `Content-Type: image/png` by default or `image/jpeg` when requested, binary image bytes.                                                                     |
-| `/archive`  | `url`          | `200`, `Content-Type: application/zip`, ZIP bytes. Default archive contains `document.md` and `document.html`; local assets use relative folders such as `images/`. |
-| `/search`   | `q` or `query` | `200`, `Content-Type: application/json` by default, normalized search JSON.                                                                                         |
+| Endpoint         | Required query | Stable success shape                                                                                                                                                |
+| ---------------- | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/fetch`         | `url`          | Proxies upstream status, content type, selected headers, and response bytes.                                                                                        |
+| `/stream`        | `url`          | Streams or proxies upstream status, content type, selected headers, and response bytes.                                                                             |
+| `/html`          | `url`          | `200`, `Content-Type: text/html; charset=utf-8`, rendered or fetched HTML with relative URLs normalized to absolute URLs where supported.                           |
+| `/txt`           | `url`          | `200`, `Content-Type: text/plain; charset=utf-8`, `Content-Disposition` attachment, plain text body.                                                                |
+| `/markdown`      | `url`          | `200`, `Content-Type: text/markdown`, Markdown body.                                                                                                                |
+| `/image`         | `url`          | `200`, `Content-Type: image/png` by default or `image/jpeg` when requested, binary image bytes.                                                                     |
+| `/archive`       | `url`          | `200`, `Content-Type: application/zip`, ZIP bytes. Default archive contains `document.md` and `document.html`; local assets use relative folders such as `images/`. |
+| `/search`        | `q` or `query` | `200`, `Content-Type: application/json` by default, normalized search JSON.                                                                                         |
+| `/shared-dialog` | `url`          | `200`, `Content-Type: application/json` by default, normalized shared-dialog transcript JSON or an unsupported diagnostic.                                          |
 
 Common HTTP parameters:
 
@@ -134,6 +139,73 @@ Provider catalog:
 Provider IDs are a strict allow-list. Unknown providers return `400` over HTTP
 or a non-zero CLI exit.
 
+## Shared Dialog Contract
+
+`GET /shared-dialog?url=<URL>&format=json|meta-language|demo-memory|markdown|txt`
+
+CLI equivalent:
+
+```bash
+web-capture shared-dialog "<URL>"
+web-capture shared-dialog "<URL>" --format demo-memory -o -
+```
+
+JSON response:
+
+```json
+{
+  "provider": "chatgpt",
+  "sourceUrl": "https://chatgpt.com/share/6a3825b9-8de4-83ee-9c24-52fd1eb38d24",
+  "captureMethod": "static_http",
+  "capturedAt": "2026-06-25T00:00:00.000Z",
+  "status": "ok",
+  "conversationId": "6a3825b9-8de4-83ee-9c24-52fd1eb38d24",
+  "title": "Infinite loop script",
+  "turns": [
+    {
+      "id": "0c9f0151-b5a1-402f-afc3-6bd34a0d01d2",
+      "role": "user",
+      "content": "make a loop of that",
+      "visibility": "visible",
+      "sourceEvidence": [
+        {
+          "kind": "chatgpt_linear_conversation",
+          "sourceUrl": "https://chatgpt.com/share/6a3825b9-8de4-83ee-9c24-52fd1eb38d24",
+          "captureMethod": "static_http",
+          "pointer": "linear_conversation[0].message"
+        }
+      ]
+    }
+  ],
+  "diagnostics": {
+    "status": "ok",
+    "httpStatus": 200,
+    "warnings": []
+  }
+}
+```
+
+Unsupported providers keep the same top-level fields and return:
+
+```json
+{
+  "provider": "google_ai_mode",
+  "sourceUrl": "https://share.google/aimode/VG0HhpnAXrBkC0QgP",
+  "captureMethod": "browser",
+  "status": "unsupported",
+  "turns": [],
+  "diagnostics": {
+    "status": "unsupported",
+    "unsupportedReason": "provider_challenge_interstitial",
+    "message": "Google AI Mode capture returned a Google Search JavaScript/interstitial page instead of transcript data."
+  }
+}
+```
+
+Supported output formats are `json`, `meta-language`, `demo-memory`,
+`markdown`/`md`, `txt`/`text`, and `html`. ChatGPT share pages are decoded from
+embedded `linear_conversation` data and hidden turns are omitted from `turns`.
+
 ## web-search Relationship
 
 `web-capture` currently owns the five-provider `/search` catalog above. No
@@ -172,6 +244,7 @@ Stable CLI behavior:
 | `image` / `png`   | `web-capture <URL> --format png --output screenshot.png` | PNG file bytes at the output path.           |
 | `jpeg`            | JavaScript implementation                                | JPEG file bytes at the output path.          |
 | `search`          | `web-capture search "<QUERY>" --provider wikipedia`      | Normalized search JSON on stdout by default. |
+| `shared-dialog`   | `web-capture shared-dialog "<URL>" --format json -o -`   | Normalized shared-dialog JSON on stdout.     |
 
 CLI failures use a non-zero exit code and a human-readable stderr message.
 FormalAI should normalize the CLI diagnostic with:
@@ -190,7 +263,9 @@ The contract is covered by smoke tests in:
 
 - `js/tests/integration/formalai-contract.test.js`
 - `js/tests/unit/cli.test.js`
+- `js/tests/unit/shared-dialog.test.js`
 - `rust/tests/integration/formalai_contract.rs`
+- `rust/tests/unit/shared_dialog.rs`
 
 These tests assert the stable HTTP content types, binary signatures, ZIP
 contents, search JSON diagnostics, provider allow-list, and CLI output shapes

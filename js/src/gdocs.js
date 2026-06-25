@@ -42,6 +42,12 @@ const GDOCS_EXPORT_BASE = 'https://docs.google.com/document/d';
 const GDOCS_API_BASE = 'https://docs.googleapis.com/v1/documents';
 const DEFAULT_USER_AGENT =
   'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
+const PUBLIC_EXPORT_HEADERS = {
+  'User-Agent': DEFAULT_USER_AGENT,
+  'Accept-Charset': 'utf-8',
+  'Accept-Language': 'en-US,en;q=0.9',
+  'Accept-Encoding': 'identity',
+};
 
 /**
  * Supported Google Docs export formats.
@@ -165,11 +171,7 @@ export async function fetchGoogleDoc(url, options = {}) {
     hasApiToken: Boolean(apiToken),
   }));
 
-  const headers = {
-    'User-Agent': DEFAULT_USER_AGENT,
-    'Accept-Charset': 'utf-8',
-    'Accept-Language': 'en-US,en;q=0.9',
-  };
+  const headers = { ...PUBLIC_EXPORT_HEADERS };
 
   if (apiToken) {
     headers.Authorization = `Bearer ${apiToken}`;

@@ -1,6 +1,10 @@
 import fetch from 'node-fetch';
-import { pipeline } from 'stream';
 import { convertGoogleDriveUrl } from './lib.js';
+import { copyProxyResponseHeaders } from './proxy-headers.js';
+
+const STREAM_FETCH_HEADERS = {
+  'accept-encoding': 'identity',
+};
 
 export async function streamHandler(req, res) {
   const url = req.query.url;
@@ -8,36 +12,18 @@ export async function streamHandler(req, res) {
     return res.status(400).send('Missing `url` parameter');
   }
   try {
-    const response = await fetch(convertGoogleDriveUrl(url));
+    const response = await fetch(convertGoogleDriveUrl(url), {
+      headers: STREAM_FETCH_HEADERS,
+    });
     // Copy status and headers
     res.status(response.status);
-
-    // Set default content type if not present
-    const contentType = response.headers.get('content-type') || 'text/plain';
-    res.setHeader('Content-Type', contentType);
-
-    // Copy other headers
-    for (const [key, value] of response.headers.entries()) {
-      if (
-        key.toLowerCase() !== 'transfer-encoding' &&
-        key.toLowerCase() !== 'content-encoding' &&
-        key.toLowerCase() !== 'content-length'
-      ) {
-        res.setHeader(key, value);
-      }
-    }
+    copyProxyResponseHeaders(response.headers, res, {
+      preserveContentLength: true,
+    });
 
     // Stream the response body
     if (response.body) {
-      pipeline(response.body, res, (err) => {
-        if (err) {
-          console.error('Pipeline error in /stream:', err);
-          if (!res.headersSent) {
-            res.status(500);
-            res.end('Error proxying content');
-          }
-        }
-      });
+      await writeStreamResponse(response.body, res);
     } else {
       res.end();
     }
@@ -46,6 +32,27 @@ export async function streamHandler(req, res) {
     if (!res.headersSent) {
       res.status(500);
       res.end('Error proxying content');
+    }
+  }
+}
+
+async function writeStreamResponse(body, res) {
+  try {
+    for await (const chunk of body) {
+      if (!res.write(chunk)) {
+        await new Promise((resolve) => res.once('drain', resolve));
+      }
+    }
+    if (!res.writableEnded) {
+      res.end();
+    }
+  } catch (err) {
+    console.error('Upstream stream failed in /stream:', err);
+    if (!res.headersSent) {
+      res.status(500);
+      res.end('Error proxying content');
+    } else if (!res.writableEnded) {
+      res.end();
     }
   }
 }

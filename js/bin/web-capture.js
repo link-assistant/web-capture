@@ -1,8 +1,4 @@
 #!/usr/bin/env node
-// CLI entry point for web-capture
-// Supports two modes:
-// 1. Server mode: web-capture --serve [--port 3000]
-// 2. Capture mode: web-capture <url> [options]
 
 import fs from 'fs';
 import path from 'path';
@@ -27,7 +23,11 @@ function makeVerboseLog(enabled) {
   });
 }
 
-// Create configuration using lino-arguments pattern
+const originalConsoleLog = console.log;
+console.log = (...args) =>
+  String(args[0]).includes(' variables from ')
+    ? console.error(...args)
+    : originalConsoleLog(...args);
 const config = makeConfig({
   yargs: ({ yargs, getenv }) =>
     yargs
@@ -47,6 +47,15 @@ const config = makeConfig({
           yargs.positional('query', {
             type: 'string',
             description: 'Search query',
+          })
+      )
+      .command(
+        'shared-dialog <sharedDialogUrl>',
+        'Capture replayable shared AI dialog transcripts',
+        (yargs) =>
+          yargs.positional('sharedDialogUrl', {
+            type: 'string',
+            description: 'Shared AI dialog URL',
           })
       )
       .option('provider', {
@@ -78,7 +87,7 @@ const config = makeConfig({
         alias: 'f',
         type: 'string',
         description:
-          'Output format: markdown, md, html, txt, text, image, png, jpeg, pdf, docx, archive',
+          'Output format: markdown, md, html, txt, text, image, png, jpeg, pdf, docx, archive, json, meta-language, demo-memory',
         default: 'markdown',
       })
       .option('theme', {
@@ -289,7 +298,8 @@ const config = makeConfig({
         'Capture private Google Doc with API token'
       )
       .epilogue(
-        'API Endpoints (in server mode):\n  GET /html?url=<URL>&engine=<ENGINE>           Get rendered HTML\n  GET /markdown?url=<URL>                       Get Markdown conversion\n  GET /txt?url=<URL>                            Get text content\n  GET /image?url=<URL>&format=png|jpeg&theme=light|dark  Screenshot\n  GET /archive?url=<URL>&localImages=true&documentFormat=markdown|html  ZIP archive\n  GET /pdf?url=<URL>&theme=light|dark           PDF with embedded images\n  GET /docx?url=<URL>                           DOCX with embedded images\n  GET /fetch?url=<URL>                          Proxy fetch\n  GET /stream?url=<URL>                         Streaming proxy'
+        'API Endpoints (in server mode):\n  GET /html?url=<URL>&engine=<ENGINE>           Get rendered HTML\n  GET /markdown?url=<URL>                       Get Markdown conversion\n  GET /txt?url=<URL>                            Get text content\n  GET /image?url=<URL>&format=png|jpeg&theme=light|dark  Screenshot\n  GET /archive?url=<URL>&localImages=true&documentFormat=markdown|html  ZIP archive\n  GET /pdf?url=<URL>&theme=light|dark           PDF with embedded images\n  GET /docx?url=<URL>                           DOCX with embedded images\n  GET /fetch?url=<URL>                          Proxy fetch\n  GET /stream?url=<URL>                         Streaming proxy' +
+          '\n  GET /shared-dialog?url=<URL>&format=json|meta-language|demo-memory|markdown|txt  Shared AI dialog capture'
       )
       .strict(),
   lenv: {
@@ -297,6 +307,7 @@ const config = makeConfig({
     path: '.lenv',
   },
 });
+console.log = originalConsoleLog;
 
 function getUrlArgument() {
   if (typeof config.url === 'string' && config.url.length > 0) {
@@ -331,6 +342,7 @@ async function startServer(port) {
       console.log(`  GET /docx?url=<URL>       - DOCX with embedded images`);
       console.log(`  GET /fetch?url=<URL>      - Proxy fetch content`);
       console.log(`  GET /stream?url=<URL>     - Stream content`);
+      console.log(`  GET /shared-dialog?url=<URL> - Shared AI dialog capture`);
       console.log('');
       console.log('Press Ctrl+C to stop the server');
       resolve(server);
@@ -1370,14 +1382,8 @@ async function captureUrl(url, options) {
 
 async function runSearch(query) {
   const { search, formatSearchAsMarkdown } = await import('../src/search.js');
-  // `--format` defaults to `markdown` for capture mode, but search results are
-  // primarily structured JSON. Only honor the format flag when the user passed
-  // it explicitly; otherwise default search output to JSON.
-  const formatPassedExplicitly = process.argv.some(
-    (arg) => arg === '-f' || arg === '--format' || arg.startsWith('--format=')
-  );
   const format = (
-    formatPassedExplicitly ? config.format : 'json'
+    formatPassedExplicitly() ? config.format : 'json'
   ).toLowerCase();
   const result = await search({
     query,
@@ -1391,13 +1397,40 @@ async function runSearch(query) {
   }
 }
 
+async function runSharedDialog(sharedDialogUrl) {
+  const { runSharedDialogCli } = await import('../src/shared-dialog-cli.js');
+  await runSharedDialogCli(sharedDialogUrl, {
+    capture: config.capture,
+    engine: config.engine,
+    format: formatPassedExplicitly() ? config.format : 'json',
+    output: config.output,
+  });
+}
+
+function formatPassedExplicitly() {
+  return process.argv.some(
+    (arg) => arg === '-f' || arg === '--format' || arg.startsWith('--format=')
+  );
+}
+
 async function main() {
   const url = getUrlArgument();
-  // The `query` key is only present when the `search <query>` command matched.
   const isSearch = Object.prototype.hasOwnProperty.call(config, 'query');
+  const isSharedDialog = Object.prototype.hasOwnProperty.call(
+    config,
+    'sharedDialogUrl'
+  );
 
-  if (isSearch) {
-    // Search mode
+  if (isSharedDialog) {
+    const sharedDialogUrl =
+      typeof config.sharedDialogUrl === 'string' ? config.sharedDialogUrl : '';
+    if (!sharedDialogUrl.trim()) {
+      console.error('Error: Missing shared-dialog URL');
+      console.error('Usage: web-capture shared-dialog <url> [--format <fmt>]');
+      process.exit(1);
+    }
+    await runSharedDialog(sharedDialogUrl);
+  } else if (isSearch) {
     const query = typeof config.query === 'string' ? config.query : '';
     if (!query.trim()) {
       console.error('Error: Missing search query');
@@ -1406,7 +1439,6 @@ async function main() {
     }
     await runSearch(query);
   } else if (config.serve) {
-    // Server mode
     await startServer(config.port);
   } else if (url) {
     // --no-extract-images is an alias for --embed-images
@@ -1429,7 +1461,6 @@ async function main() {
       config.archiveFormat = archiveFormat === 'gz' ? 'tar.gz' : archiveFormat;
       config.format = 'archive';
     }
-    // Capture mode
     await captureUrl(url, {
       format: config.format,
       output: config.output,
@@ -1457,7 +1488,6 @@ async function main() {
       capture: config.capture,
     });
   } else {
-    // No arguments - show error
     console.error('Error: Missing URL or --serve flag');
     console.error('Run with --help for usage information');
     process.exit(1);

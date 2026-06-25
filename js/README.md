@@ -15,6 +15,7 @@ A CLI and microservice to fetch URLs and render them as:
 - **ZIP archive**: Markdown + locally downloaded images
 - **PDF**: Print-quality document with embedded images
 - **DOCX**: Word document with embedded images
+- **Shared AI dialog transcript**: ChatGPT share captures with structured diagnostics for unsupported providers
 
 ## Installation
 
@@ -98,6 +99,10 @@ web-capture https://example.com --no-extract-latex --no-post-process -o page.md
 
 # Structured search-provider capture (JSON by default)
 web-capture search "formal methods" --provider wikipedia
+
+# Shared AI dialog capture (JSON by default)
+web-capture shared-dialog https://chatgpt.com/share/SHARE_ID
+web-capture shared-dialog https://chatgpt.com/share/SHARE_ID --format demo-memory -o -
 
 # Start as API server
 web-capture --serve
@@ -320,6 +325,17 @@ Example response (`format=json`):
   }
 }
 ```
+
+### Shared Dialog Endpoint
+
+```
+GET /shared-dialog?url=<URL>&format=json|meta-language|demo-memory|markdown|txt
+```
+
+Captures replayable shared AI dialog transcripts. ChatGPT share links are
+decoded from their embedded `linear_conversation` data. Providers that cannot
+currently expose transcript data, such as Google AI Mode interstitial pages,
+return a structured unsupported diagnostic.
 
 ## CLI Reference
 
