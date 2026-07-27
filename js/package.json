@@ -33,7 +33,7 @@
   },
   "dependencies": {
     "@kreuzberg/html-to-markdown-node": "^3.5.5",
-    "archiver": "^7.0.1",
+    "archiver": "^8.0.0",
     "browser-commander": "^0.8.0",
     "cheerio": "^1.0.0",
     "docx": "^9.6.1",

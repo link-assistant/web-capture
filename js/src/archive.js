@@ -15,7 +15,7 @@
  *   documentFormat - 'markdown' (default) or 'html' - format of the main document
  */
 
-import archiver from 'archiver';
+import { ZipArchive } from 'archiver';
 import fetch from 'node-fetch';
 import * as cheerio from 'cheerio';
 import { URL } from 'url';
@@ -88,7 +88,7 @@ export async function archiveHandler(req, res) {
       `attachment; filename="${hostname}-archive.zip"`
     );
 
-    const archive = archiver('zip', { zlib: { level: 9 } });
+    const archive = new ZipArchive({ zlib: { level: 9 } });
     archive.pipe(res);
 
     // Build the image map for local downloads
@@ -251,7 +251,7 @@ function appendMarkdownAndImages(archive, markdown) {
  * @returns {Promise<Buffer>} the finalized ZIP archive bytes
  */
 export async function buildArchiveFromHtml(html, baseUrl) {
-  const archive = archiver('zip', { zlib: { level: 9 } });
+  const archive = new ZipArchive({ zlib: { level: 9 } });
   const chunks = [];
   archive.on('data', (chunk) => chunks.push(chunk));
   const finished = new Promise((resolve, reject) => {

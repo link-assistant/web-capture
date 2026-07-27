@@ -17,7 +17,7 @@ import { convertWithKreuzberg, isKreuzbergAvailable } from './kreuzberg.js';
 import { applyImageMode } from './extract-images.js';
 import { createBrowser, getBrowserEngine } from './browser.js';
 import { retry } from './retry.js';
-import archiver from 'archiver';
+import { ZipArchive } from 'archiver';
 import fetch from 'node-fetch';
 import * as cheerio from 'cheerio';
 
@@ -300,7 +300,7 @@ async function sendTextPasteMarkdownArchive(res, url, markdown, rawText) {
   res.setHeader('Content-Type', 'application/zip');
   res.setHeader('Content-Disposition', `attachment; filename="${pasteId}.zip"`);
 
-  const archive = archiver('zip', { zlib: { level: 9 } });
+  const archive = new ZipArchive({ zlib: { level: 9 } });
   archive.pipe(res);
   archive.append(
     [
