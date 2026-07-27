@@ -208,6 +208,9 @@ struct MarkdownQuery {
     body_selector: Option<String>,
 }
 
+// Serde calls this through generated deserialization code. Rust 1.97's
+// test-harness dead-code analysis does not count that generated reference.
+#[allow(dead_code)]
 const fn default_true() -> bool {
     true
 }
