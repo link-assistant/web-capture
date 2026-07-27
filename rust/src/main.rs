@@ -208,6 +208,9 @@ struct MarkdownQuery {
     body_selector: Option<String>,
 }
 
+// Serde invokes this helper through the generated `MarkdownQuery` deserializer.
+// Rust 1.97's test-target dead-code analysis does not count that attribute use.
+#[cfg_attr(test, allow(dead_code))]
 const fn default_true() -> bool {
     true
 }
