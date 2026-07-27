@@ -12,6 +12,9 @@ web-capture baseline:
 [`4c5443e`](https://github.com/link-assistant/web-capture/commit/4c5443e1ab83a4a250457933079eaf2fbd61ed21)
 (JavaScript 1.10.10, Rust 0.3.32)
 
+The delivery branch was later synchronized with `main` at `b3e4383`; the
+baseline above remains pinned so the audit's observations stay reproducible.
+
 ## Executive decision
 
 MinerU and web-capture overlap at Markdown/JSON output, but they solve different
