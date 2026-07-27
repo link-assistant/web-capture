@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Patch Changes
 
-- Allow Serde query defaults under Rust 1.97 test linting
+- Auto-release unreleased changes
 
 ## 0.3.32
 

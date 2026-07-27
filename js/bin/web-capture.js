@@ -549,15 +549,14 @@ async function writeGoogleDocsArchive({
   archiveFormat,
   prettyHtml,
 }) {
-  const { default: archiver } = await import('archiver');
+  const { ZipArchive } = await import('archiver');
   const { prettyPrintHtml } = await import('../src/lib.js');
   const output =
     explicitOutput === '-'
       ? null
       : explicitOutput ||
         deriveOutputPath(absoluteUrl, archiveExtension(archiveFormat), dataDir);
-  const archiverFn = archiver.default ? archiver.default : archiver;
-  const archive = archiverFn('zip', { zlib: { level: 9 } });
+  const archive = new ZipArchive({ zlib: { level: 9 } });
   archive.append(archiveResult.markdown, { name: 'document.md' });
   archive.append(
     prettyHtml ? prettyPrintHtml(archiveResult.html) : archiveResult.html,
@@ -835,7 +834,7 @@ async function captureUrl(url, options) {
       try {
         if (normalizedFormat === 'archive' || normalizedFormat === 'zip') {
           const { fetchGoogleDocAsArchive } = await import('../src/gdocs.js');
-          const { default: archiver } = await import('archiver');
+          const { ZipArchive } = await import('archiver');
           const archiveFormat = options.archiveFormat || 'zip';
           const ext =
             archiveFormat === 'tar.gz' || archiveFormat === 'gz'
@@ -855,9 +854,7 @@ async function captureUrl(url, options) {
               : explicitOutput || deriveOutputPath(absoluteUrl, ext, dataDir);
           if (output) {
             const outStream = fs.createWriteStream(output);
-            const archive = archiver.default
-              ? archiver.default('zip', { zlib: { level: 9 } })
-              : archiver('zip', { zlib: { level: 9 } });
+            const archive = new ZipArchive({ zlib: { level: 9 } });
             archive.pipe(outStream);
             const { prettyPrintHtml: ppHtml } = await import('../src/lib.js');
             archive.append(archiveResult.markdown, { name: 'document.md' });
@@ -876,10 +873,7 @@ async function captureUrl(url, options) {
           } else {
             const { PassThrough } = await import('stream');
             const passthrough = new PassThrough();
-            const archiverMod = await import('archiver');
-            const archiverFn =
-              archiverMod.default?.default || archiverMod.default;
-            const archive = archiverFn('zip', { zlib: { level: 9 } });
+            const archive = new ZipArchive({ zlib: { level: 9 } });
             archive.pipe(passthrough);
             passthrough.pipe(process.stdout);
             const { prettyPrintHtml: ppHtml2 } = await import('../src/lib.js');
@@ -1111,7 +1105,7 @@ async function captureUrl(url, options) {
       console.error(`DOCX saved to: ${outPath}`);
     } else if (normalizedFormat === 'archive' || normalizedFormat === 'zip') {
       // ZIP archive
-      const { default: archiver } = await import('archiver');
+      const { ZipArchive } = await import('archiver');
       const { fetchHtml, convertHtmlToMarkdown, convertRelativeUrls } =
         await import('../src/lib.js');
       const { retry } = await import('../src/retry.js');
@@ -1131,9 +1125,7 @@ async function captureUrl(url, options) {
         explicitOutput ||
         `${new URL(absoluteUrl).hostname.replace(/\./g, '-')}-archive.zip`;
       const outStream = fs.createWriteStream(outPath);
-      const archive = archiver.default
-        ? archiver.default('zip', { zlib: { level: 9 } })
-        : archiver('zip', { zlib: { level: 9 } });
+      const archive = new ZipArchive({ zlib: { level: 9 } });
       archive.pipe(outStream);
 
       // Collect images

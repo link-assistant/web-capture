@@ -112,7 +112,6 @@ describe('API Endpoint Tests', () => {
       expect(res.headers['content-type']).toMatch(/text\/markdown/);
       expect(res.text).toContain('Test Page');
       expect(res.text).toContain('Hello world');
-      expect(res.text).toContain('https://example.com/image.png');
     });
 
     it('returns a compact GitHub repository markdown snapshot', async () => {

@@ -10,6 +10,25 @@ function readJson(relativePath) {
   return JSON.parse(readFileSync(resolve(jsRoot, relativePath), 'utf8'));
 }
 
+function collectProductionDependencies(packageLock, packageName) {
+  const visited = new Set();
+
+  function visit(name) {
+    if (visited.has(name)) {
+      return;
+    }
+    visited.add(name);
+
+    const entry = packageLock.packages[`node_modules/${name}`];
+    for (const dependency of Object.keys(entry?.dependencies || {})) {
+      visit(dependency);
+    }
+  }
+
+  visit(packageName);
+  return visited;
+}
+
 const runtimeImports = [
   {
     packageName: 'turndown-plugin-gfm',
@@ -18,6 +37,13 @@ const runtimeImports = [
 ];
 
 describe('runtime package dependencies', () => {
+  test('archiver production dependencies do not include deprecated glob', () => {
+    const packageLock = readJson('package-lock.json');
+    const dependencies = collectProductionDependencies(packageLock, 'archiver');
+
+    expect([...dependencies]).not.toContain('glob');
+  });
+
   test.each(runtimeImports)(
     '$packageName is declared as a production dependency',
     ({ packageName, sourceFile }) => {
