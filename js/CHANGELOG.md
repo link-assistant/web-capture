@@ -1,5 +1,11 @@
 # @link-assistant/web-capture
 
+## 1.10.11
+
+### Patch Changes
+
+- 611e6e7: Upgrade Archiver to version 8 so downstream installs no longer include the deprecated glob package.
+
 ## 1.10.10
 
 ### Patch Changes
