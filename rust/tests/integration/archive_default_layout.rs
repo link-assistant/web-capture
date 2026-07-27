@@ -18,6 +18,11 @@ fn archive_default_contains_md_html_and_images_folder() {
     let zip_bytes =
         web_capture::archive::build_zip_from_html(FIXTURE_HTML, "https://example.invalid/")
             .unwrap();
+    assert_eq!(
+        &zip_bytes[..4],
+        b"PK\x03\x04",
+        "archive output must retain the standard ZIP signature"
+    );
     let mut zip = ZipArchive::new(std::io::Cursor::new(zip_bytes)).unwrap();
     let names: Vec<String> = (0..zip.len())
         .map(|i| zip.by_index(i).unwrap().name().to_string())
