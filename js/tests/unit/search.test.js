@@ -76,6 +76,25 @@ describe('search module (#130)', () => {
     });
   });
 
+  it('keeps URL construction and response parsing transport-independent', () => {
+    const sourceUrl = buildSearchUrl('wikipedia', 'formal ai', 1);
+    const { results } = parseSearchResults('wikipedia', WIKI_JSON, {
+      limit: 1,
+    });
+
+    expect(sourceUrl).toBe(
+      'https://en.wikipedia.org/w/rest.php/v1/search/page?q=formal%20ai&limit=1'
+    );
+    expect(results).toEqual([
+      {
+        rank: 1,
+        title: 'Formal methods',
+        url: 'https://en.wikipedia.org/wiki/Formal_methods',
+        snippet: 'the study of formal',
+      },
+    ]);
+  });
+
   describe('parseSearchResults', () => {
     it('normalizes Wikipedia REST JSON and strips markup', () => {
       const { results } = parseSearchResults('wikipedia', WIKI_JSON, {
