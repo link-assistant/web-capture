@@ -32,6 +32,24 @@ cd rust
 cargo build --release
 ```
 
+## Cargo Features
+
+The default `runtime` feature preserves the full CLI, HTTP server, HTTP client,
+and browser capture behavior. Applications that only build provider URLs,
+parse provider responses, or supply their own transport can disable default
+features and select `search`:
+
+```toml
+[dependencies]
+web-capture = { version = "0.3", default-features = false, features = ["search"] }
+```
+
+The `search` feature exposes the pure URL/parser API and the caller-owned
+transport contract, including `build_search_url`, `parse_search_results`, and
+`search_with_transport`. It does not select `browser-commander`, `reqwest`,
+Tokio, Axum, or OpenSSL. The convenience `search` function, which performs an
+HTTP request with reqwest, remains part of `runtime`.
+
 ## Quick Start
 
 ### CLI Usage

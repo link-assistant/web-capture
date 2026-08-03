@@ -10,11 +10,16 @@
 //! - Convert relative URLs to absolute URLs
 //! - Support for headless browser rendering via browser-commander
 //!
+//! The default `runtime` feature provides the complete CLI, server, browser,
+//! and HTTP client. For transport-independent search URL construction and
+//! response parsing only, disable default features and enable `search`.
+//!
 //! ## Example
 //!
 //! ```rust,no_run
-//! use web_capture::{fetch_html, convert_html_to_markdown, capture_screenshot};
-//!
+//! # #[cfg(feature = "runtime")]
+//! # use web_capture::{fetch_html, convert_html_to_markdown, capture_screenshot};
+//! # #[cfg(feature = "runtime")]
 //! #[tokio::main]
 //! async fn main() -> anyhow::Result<()> {
 //!     // Fetch HTML from a URL
@@ -31,37 +36,63 @@
 //!
 //!     Ok(())
 //! }
+//! # #[cfg(not(feature = "runtime"))]
+//! # fn main() {}
 //! ```
 
+#[cfg(feature = "runtime")]
 pub mod animation;
+#[cfg(feature = "runtime")]
 pub mod archive;
+#[cfg(feature = "runtime")]
 pub mod batch;
+#[cfg(feature = "runtime")]
 pub mod browser;
+#[cfg(feature = "runtime")]
 pub mod extract_images;
+#[cfg(feature = "runtime")]
 pub mod figures;
+#[cfg(feature = "runtime")]
 pub mod gdocs;
+#[cfg(feature = "runtime")]
 pub mod github;
+#[cfg(feature = "runtime")]
 pub mod html;
+#[cfg(feature = "runtime")]
 pub mod kreuzberg;
+#[cfg(feature = "runtime")]
 pub mod latex;
+#[cfg(feature = "runtime")]
 pub mod localize_images;
+#[cfg(feature = "runtime")]
 pub mod markdown;
+#[cfg(feature = "runtime")]
 pub mod metadata;
+#[cfg(feature = "runtime")]
 pub mod postprocess;
+#[cfg(feature = "search")]
 pub mod search;
+#[cfg(feature = "runtime")]
 pub mod shared_dialog;
+#[cfg(feature = "runtime")]
 pub mod stackoverflow;
+#[cfg(feature = "runtime")]
 pub mod themed_image;
+#[cfg(feature = "search")]
 pub mod transport;
+#[cfg(feature = "runtime")]
 pub mod verify;
+#[cfg(feature = "runtime")]
 pub mod xpaste;
-
-use thiserror::Error;
 
 /// Version of the web-capture library
 pub const VERSION: &str = env!("CARGO_PKG_VERSION");
 
+#[cfg(feature = "runtime")]
+use thiserror::Error;
+
 /// Error types for web-capture operations
+#[cfg(feature = "runtime")]
 #[derive(Error, Debug)]
 pub enum WebCaptureError {
     #[error("Failed to fetch URL: {0}")]
@@ -90,6 +121,7 @@ pub enum WebCaptureError {
 }
 
 /// Result type for web-capture operations
+#[cfg(feature = "runtime")]
 pub type Result<T> = std::result::Result<T, WebCaptureError>;
 
 /// Fetch HTML content from a URL
@@ -108,11 +140,13 @@ pub type Result<T> = std::result::Result<T, WebCaptureError>;
 /// # Errors
 ///
 /// Returns an error if the fetch fails or the response cannot be decoded
+#[cfg(feature = "runtime")]
 pub async fn fetch_html(url: &str) -> Result<String> {
     html::fetch_html(url).await
 }
 
 /// Fetch an undecoded HTML response receipt through caller-owned transport.
+#[cfg(feature = "runtime")]
 pub async fn fetch_html_receipt_with_transport(
     url: &str,
     transport: &dyn transport::Transport,
@@ -121,6 +155,7 @@ pub async fn fetch_html_receipt_with_transport(
 }
 
 /// Fetch an undecoded HTML response receipt through the default transport.
+#[cfg(feature = "runtime")]
 pub async fn fetch_html_receipt(
     url: &str,
 ) -> std::result::Result<transport::ResponseReceipt, transport::TransportError> {
@@ -143,6 +178,7 @@ pub async fn fetch_html_receipt(
 /// # Errors
 ///
 /// Returns an error if browser operations fail
+#[cfg(feature = "runtime")]
 pub async fn render_html(url: &str) -> Result<String> {
     browser::render_html(url).await
 }
@@ -161,6 +197,7 @@ pub async fn render_html(url: &str) -> Result<String> {
 /// # Errors
 ///
 /// Returns an error if conversion fails
+#[cfg(feature = "runtime")]
 pub fn convert_html_to_markdown(html: &str, base_url: Option<&str>) -> Result<String> {
     markdown::convert_html_to_markdown(html, base_url)
 }
@@ -181,6 +218,7 @@ pub fn convert_html_to_markdown(html: &str, base_url: Option<&str>) -> Result<St
 /// # Errors
 ///
 /// Returns an error if browser operations fail
+#[cfg(feature = "runtime")]
 pub async fn capture_screenshot(url: &str) -> Result<Vec<u8>> {
     browser::capture_screenshot(url).await
 }
@@ -195,6 +233,7 @@ pub async fn capture_screenshot(url: &str) -> Result<Vec<u8>> {
 /// # Returns
 ///
 /// The HTML content with absolute URLs
+#[cfg(feature = "runtime")]
 #[must_use]
 pub fn convert_relative_urls(html: &str, base_url: &str) -> String {
     html::convert_relative_urls(html, base_url)
@@ -211,12 +250,14 @@ pub fn convert_relative_urls(html: &str, base_url: &str) -> String {
 /// # Returns
 ///
 /// The UTF-8 encoded HTML content
+#[cfg(feature = "runtime")]
 #[must_use]
 pub fn convert_to_utf8(html: &str) -> String {
     html::convert_to_utf8(html)
 }
 
 /// Options for enhanced HTML-to-Markdown conversion.
+#[cfg(feature = "runtime")]
 #[allow(clippy::struct_excessive_bools)]
 #[derive(Debug, Clone)]
 pub struct EnhancedOptions {
@@ -234,6 +275,7 @@ pub struct EnhancedOptions {
     pub body_selector: Option<String>,
 }
 
+#[cfg(feature = "runtime")]
 impl Default for EnhancedOptions {
     fn default() -> Self {
         Self {
@@ -248,6 +290,7 @@ impl Default for EnhancedOptions {
 }
 
 /// Result of enhanced HTML-to-Markdown conversion.
+#[cfg(feature = "runtime")]
 #[derive(Debug, Clone)]
 pub struct EnhancedMarkdownResult {
     pub markdown: String,
@@ -272,6 +315,7 @@ pub struct EnhancedMarkdownResult {
 /// # Errors
 ///
 /// Returns an error if base conversion fails
+#[cfg(feature = "runtime")]
 pub fn convert_html_to_markdown_enhanced(
     html: &str,
     base_url: Option<&str>,
@@ -348,6 +392,7 @@ pub fn convert_html_to_markdown_enhanced(
 /// # Errors
 ///
 /// Returns an error if conversion fails
+#[cfg(feature = "runtime")]
 pub fn convert_with_kreuzberg(
     html: &str,
     base_url: Option<&str>,
@@ -363,6 +408,7 @@ pub fn convert_with_kreuzberg(
 /// # Errors
 ///
 /// Returns an error if conversion fails.
+#[cfg(feature = "runtime")]
 pub fn convert_with_kreuzberg_enhanced(
     html: &str,
     base_url: Option<&str>,
@@ -372,6 +418,7 @@ pub fn convert_with_kreuzberg_enhanced(
     kreuzberg::convert_with_kreuzberg(&scoped_html, base_url)
 }
 
+#[cfg(feature = "runtime")]
 fn normalize_extracted_latex_markdown(markdown: &str) -> String {
     let re = regex::Regex::new(r"\$([^$\n]+)\$").expect("valid regex");
     re.replace_all(markdown, |caps: &regex::Captures<'_>| {
@@ -381,6 +428,7 @@ fn normalize_extracted_latex_markdown(markdown: &str) -> String {
     .into_owned()
 }
 
+#[cfg(feature = "runtime")]
 fn scope_html_with_selectors(html: &str, options: &EnhancedOptions) -> String {
     if let Some(body_selector) = options.body_selector.as_deref() {
         let body_html = markdown::select_html(html, body_selector);
@@ -403,6 +451,7 @@ fn scope_html_with_selectors(html: &str, options: &EnhancedOptions) -> String {
         .unwrap_or_else(|| html.to_string())
 }
 
+#[cfg(feature = "runtime")]
 fn replace_latex_formula_elements(html: &str) -> String {
     let mut result = html.to_string();
 
@@ -455,6 +504,7 @@ fn replace_latex_formula_elements(html: &str) -> String {
         .into_owned()
 }
 
+#[cfg(feature = "runtime")]
 fn correct_code_languages(html: &str) -> String {
     let code_re = regex::Regex::new(r"(?is)<code\b(?P<attrs>[^>]*)>(?P<body>.*?)</code>")
         .expect("valid regex");
@@ -479,11 +529,13 @@ fn correct_code_languages(html: &str) -> String {
         .into_owned()
 }
 
+#[cfg(feature = "runtime")]
 fn is_formula_img_tag(tag: &str) -> bool {
     extract_attr(tag, "source").is_some()
         || extract_attr(tag, "class").is_some_and(|classes| classes.contains("formula"))
 }
 
+#[cfg(feature = "runtime")]
 fn is_math_attrs(tag: &str, attrs: &str) -> bool {
     tag == "mjx-container"
         || extract_attr(attrs, "class").is_some_and(|classes| {
@@ -491,6 +543,7 @@ fn is_math_attrs(tag: &str, attrs: &str) -> bool {
         })
 }
 
+#[cfg(feature = "runtime")]
 fn has_matlab_language(attrs: &str) -> bool {
     extract_attr(attrs, "class").is_some_and(|classes| {
         classes
@@ -499,6 +552,7 @@ fn has_matlab_language(attrs: &str) -> bool {
     })
 }
 
+#[cfg(feature = "runtime")]
 fn looks_like_coq(text: &str) -> bool {
     let decoded = crate::html::decode_html_entities(text);
     [
@@ -516,10 +570,12 @@ fn looks_like_coq(text: &str) -> bool {
     .any(|needle| decoded.contains(needle))
 }
 
+#[cfg(feature = "runtime")]
 fn normalize_latex_for_html(latex: &str) -> String {
     latex.trim().replace('\\', "&#92;")
 }
 
+#[cfg(feature = "runtime")]
 fn extract_annotation_tex(html: &str) -> Option<String> {
     let re = regex::Regex::new(
         r#"(?is)<annotation\b[^>]*encoding\s*=\s*["']application/x-tex["'][^>]*>(.*?)</annotation>"#,
@@ -532,6 +588,7 @@ fn extract_annotation_tex(html: &str) -> Option<String> {
     })
 }
 
+#[cfg(feature = "runtime")]
 fn extract_attr(tag: &str, attr: &str) -> Option<String> {
     let re = regex::Regex::new(&format!(
         r#"(?is)\b{}\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s"'=<>`]+))"#,
@@ -550,13 +607,20 @@ fn extract_attr(tag: &str, attr: &str) -> Option<String> {
     })
 }
 
-// Re-export commonly used types
+#[cfg(feature = "runtime")]
 pub use browser::BrowserEngine;
+#[cfg(feature = "runtime")]
+pub use search::search;
+#[cfg(feature = "search")]
 pub use search::{
-    search, search_with_transport, SearchCapture, SearchDiagnostics, SearchResult,
-    SearchResultItem, DEFAULT_LIMIT, DEFAULT_PROVIDER, SEARCH_PROVIDERS,
+    build_search_url, format_search_as_markdown, is_supported_provider, parse_search_results,
+    search_with_transport, SearchCapture, SearchDiagnostics, SearchResult, SearchResultItem,
+    DEFAULT_LIMIT, DEFAULT_PROVIDER, SEARCH_PROVIDERS,
 };
+#[cfg(feature = "runtime")]
+pub use transport::{capture_response, ReqwestTransport};
+#[cfg(feature = "search")]
 pub use transport::{
-    capture_response, capture_response_with_transport, ReqwestTransport, ResponseReceipt,
-    Transport, TransportDiagnostics, TransportError, TransportRequest, RECEIPT_HEADERS,
+    capture_response_with_transport, ResponseReceipt, Transport, TransportDiagnostics,
+    TransportError, TransportRequest, RECEIPT_HEADERS,
 };
