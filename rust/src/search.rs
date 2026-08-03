@@ -393,6 +393,7 @@ pub fn format_search_as_markdown(result: &SearchResult) -> String {
 /// # Errors
 ///
 /// Returns an error string for an empty query or unsupported provider.
+#[cfg(feature = "runtime")]
 pub async fn search(
     query: &str,
     provider: &str,

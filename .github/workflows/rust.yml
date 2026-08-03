@@ -131,6 +131,12 @@ jobs:
       - name: Run Clippy
         run: cargo clippy --all-targets --all-features -- -D warnings
 
+      - name: Check minimal search feature dependency boundary
+        working-directory: .
+        run: |
+          cargo test --manifest-path rust/Cargo.toml --no-default-features --features search --test search_feature
+          node scripts/rust-check-search-feature.mjs
+
   # Test matrix: Rust on multiple OS - only runs when Rust code changes
   test:
     name: Rust - Test (${{ matrix.os }})

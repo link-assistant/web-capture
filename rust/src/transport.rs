@@ -82,11 +82,13 @@ where
 }
 
 /// Default reqwest implementation. Callers may supply an already configured client.
+#[cfg(feature = "runtime")]
 #[derive(Debug, Clone)]
 pub struct ReqwestTransport {
     client: reqwest::Client,
 }
 
+#[cfg(feature = "runtime")]
 impl ReqwestTransport {
     #[must_use]
     pub const fn new(client: reqwest::Client) -> Self {
@@ -94,12 +96,14 @@ impl ReqwestTransport {
     }
 }
 
+#[cfg(feature = "runtime")]
 impl Default for ReqwestTransport {
     fn default() -> Self {
         Self::new(reqwest::Client::new())
     }
 }
 
+#[cfg(feature = "runtime")]
 impl Transport for ReqwestTransport {
     fn execute(&self, request: TransportRequest) -> TransportFuture<'_> {
         Box::pin(async move {
@@ -168,6 +172,7 @@ pub async fn capture_response_with_transport(
 }
 
 /// Capture an HTTP response with the default reqwest transport.
+#[cfg(feature = "runtime")]
 pub async fn capture_response(
     request: TransportRequest,
 ) -> std::result::Result<ResponseReceipt, TransportError> {

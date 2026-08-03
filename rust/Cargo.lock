@@ -3593,7 +3593,7 @@ dependencies = [
 
 [[package]]
 name = "web-capture"
-version = "0.3.34"
+version = "0.3.35"
 dependencies = [
  "anyhow",
  "async-tungstenite",
