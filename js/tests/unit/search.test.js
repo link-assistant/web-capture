@@ -4,6 +4,7 @@
  * Parsers are pure functions tested against fixtures; the orchestrating
  * `search()` is exercised with an injected fetch so no network is required.
  */
+import { jest } from '@jest/globals';
 
 import {
   search,
@@ -203,6 +204,57 @@ describe('search module (#130)', () => {
       });
       expect(result.results).toEqual([]);
       expect(result.diagnostics.error).toBe('network down');
+    });
+
+    it('returns the source receipt and forwards caller cancellation', async () => {
+      const body = Buffer.from(WIKI_JSON);
+      const controller = new globalThis.AbortController();
+      const transport = jest.fn(async ({ url, signal }) => ({
+        body,
+        finalUrl: `${url}&redirected=true`,
+        status: 200,
+        headers: { 'content-type': 'application/json', etag: 'search-v1' },
+        diagnostics: { outcome: 'response' },
+        signal,
+      }));
+
+      const result = await search({
+        query: 'formal-ai',
+        transport,
+        signal: controller.signal,
+        now: fixedNow,
+      });
+
+      expect(Buffer.from(result.receipt.body)).toEqual(body);
+      expect(result.receipt.finalUrl).toContain('redirected=true');
+      expect(result.receipt.headers.etag).toBe('search-v1');
+      expect(transport).toHaveBeenCalledWith(
+        expect.objectContaining({ signal: controller.signal })
+      );
+    });
+
+    it('classifies AbortSignal cancellation in structured diagnostics', async () => {
+      const controller = new globalThis.AbortController();
+      controller.abort();
+      const transport = async ({ signal }) => {
+        expect(signal).toBe(controller.signal);
+        const error = new Error('cancelled by caller');
+        error.name = 'AbortError';
+        throw error;
+      };
+
+      const result = await search({
+        query: 'formal-ai',
+        transport,
+        signal: controller.signal,
+        now: fixedNow,
+      });
+
+      expect(result.diagnostics).toMatchObject({
+        status: 0,
+        errorKind: 'cancelled',
+        error: 'cancelled by caller',
+      });
     });
 
     it('rejects an empty query', async () => {

@@ -52,6 +52,7 @@ pub mod search;
 pub mod shared_dialog;
 pub mod stackoverflow;
 pub mod themed_image;
+pub mod transport;
 pub mod verify;
 pub mod xpaste;
 
@@ -109,6 +110,21 @@ pub type Result<T> = std::result::Result<T, WebCaptureError>;
 /// Returns an error if the fetch fails or the response cannot be decoded
 pub async fn fetch_html(url: &str) -> Result<String> {
     html::fetch_html(url).await
+}
+
+/// Fetch an undecoded HTML response receipt through caller-owned transport.
+pub async fn fetch_html_receipt_with_transport(
+    url: &str,
+    transport: &dyn transport::Transport,
+) -> std::result::Result<transport::ResponseReceipt, transport::TransportError> {
+    html::fetch_html_receipt_with_transport(url, transport).await
+}
+
+/// Fetch an undecoded HTML response receipt through the default transport.
+pub async fn fetch_html_receipt(
+    url: &str,
+) -> std::result::Result<transport::ResponseReceipt, transport::TransportError> {
+    html::fetch_html_receipt(url).await
 }
 
 /// Render HTML content from a URL using a headless browser
@@ -537,6 +553,10 @@ fn extract_attr(tag: &str, attr: &str) -> Option<String> {
 // Re-export commonly used types
 pub use browser::BrowserEngine;
 pub use search::{
-    search, SearchDiagnostics, SearchResult, SearchResultItem, DEFAULT_LIMIT, DEFAULT_PROVIDER,
-    SEARCH_PROVIDERS,
+    search, search_with_transport, SearchCapture, SearchDiagnostics, SearchResult,
+    SearchResultItem, DEFAULT_LIMIT, DEFAULT_PROVIDER, SEARCH_PROVIDERS,
+};
+pub use transport::{
+    capture_response, capture_response_with_transport, ReqwestTransport, ResponseReceipt,
+    Transport, TransportDiagnostics, TransportError, TransportRequest, RECEIPT_HEADERS,
 };
