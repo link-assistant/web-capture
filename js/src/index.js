@@ -81,6 +81,13 @@ export {
   SEARCH_PROVIDERS,
 } from './search.js';
 export {
+  captureResponse,
+  fetchTransport,
+  CaptureTransportError,
+  RECEIPT_HEADERS,
+} from './transport.js';
+export { fetchHtml, fetchHtmlReceipt } from './lib.js';
+export {
   captureSharedDialog,
   formatSharedDialogAsDemoMemory,
   formatSharedDialogAsMarkdown,

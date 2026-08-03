@@ -2,6 +2,8 @@
 //!
 //! This module provides functions for fetching, parsing, and processing HTML content.
 
+use std::collections::BTreeMap;
+
 use crate::{Result, WebCaptureError};
 use regex::Regex;
 use tracing::{debug, info};
@@ -35,7 +37,7 @@ pub async fn fetch_html(url: &str) -> Result<String> {
     let client = reqwest::Client::builder()
         .user_agent(USER_AGENT)
         .build()
-        .map_err(|e| WebCaptureError::FetchError(e.to_string()))?;
+        .map_err(|error| WebCaptureError::FetchError(error.to_string()))?;
 
     let response = client
         .get(url)
@@ -43,15 +45,40 @@ pub async fn fetch_html(url: &str) -> Result<String> {
         .header("Accept-Charset", "utf-8")
         .send()
         .await
-        .map_err(|e| WebCaptureError::FetchError(e.to_string()))?;
+        .map_err(|error| WebCaptureError::FetchError(error.to_string()))?;
 
     let html = response
         .text()
         .await
-        .map_err(|e| WebCaptureError::FetchError(e.to_string()))?;
+        .map_err(|error| WebCaptureError::FetchError(error.to_string()))?;
 
     info!("Successfully fetched HTML ({} bytes)", html.len());
     Ok(html)
+}
+
+/// Fetch an undecoded response through caller-owned transport.
+pub async fn fetch_html_receipt_with_transport(
+    url: &str,
+    transport: &dyn crate::transport::Transport,
+) -> std::result::Result<crate::transport::ResponseReceipt, crate::transport::TransportError> {
+    let request = crate::transport::TransportRequest {
+        url: url.to_string(),
+        method: "GET".to_string(),
+        headers: BTreeMap::from([
+            ("user-agent".to_string(), USER_AGENT.to_string()),
+            ("accept-encoding".to_string(), "identity".to_string()),
+            ("accept-language".to_string(), "en-US,en;q=0.9".to_string()),
+            ("accept-charset".to_string(), "utf-8".to_string()),
+        ]),
+    };
+    crate::transport::capture_response_with_transport(request, transport).await
+}
+
+/// Fetch an undecoded response through the default reqwest transport.
+pub async fn fetch_html_receipt(
+    url: &str,
+) -> std::result::Result<crate::transport::ResponseReceipt, crate::transport::TransportError> {
+    fetch_html_receipt_with_transport(url, &crate::transport::ReqwestTransport::default()).await
 }
 
 /// Convert relative URLs to absolute URLs in HTML content

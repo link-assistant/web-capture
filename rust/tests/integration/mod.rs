@@ -21,5 +21,6 @@ mod search;
 mod stackoverflow_download;
 mod strip_base64_empty_alt;
 mod themed_image;
+mod transport;
 mod wikipedia_download;
 mod xpaste;

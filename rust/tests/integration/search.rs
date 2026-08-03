@@ -4,11 +4,13 @@
 //! without making network calls (parsers are pure; only error paths of the
 //! async orchestrator are checked).
 
+use std::collections::BTreeMap;
 use web_capture::search::{
     build_search_url, format_search_as_markdown, parse_search_results, SearchDiagnostics,
     SearchResult, SearchResultItem,
 };
 use web_capture::{search, SEARCH_PROVIDERS};
+use web_capture::{search_with_transport, ResponseReceipt, TransportDiagnostics};
 
 const WIKI_JSON: &str = r#"{"pages":[
     {"id":1,"key":"Formal_methods","title":"Formal methods","excerpt":"the <b>study</b>","description":"x"}
@@ -98,4 +100,34 @@ async fn rejects_empty_query() {
 async fn rejects_unknown_provider() {
     let err = search("x", "yahoo", 10, "fetch", "t").await;
     assert!(err.unwrap_err().contains("Unknown search provider"));
+}
+
+#[tokio::test]
+async fn injectable_search_transport_returns_exact_receipt() {
+    let expected = WIKI_JSON.as_bytes().to_vec();
+    let transport = move |request: web_capture::TransportRequest| {
+        let body = expected.clone();
+        async move {
+            assert!(request.url.contains("en.wikipedia.org"));
+            Ok(ResponseReceipt {
+                body,
+                final_url: format!("{}&redirected=true", request.url),
+                status: 200,
+                headers: BTreeMap::from([
+                    ("content-type".into(), "application/json".into()),
+                    ("etag".into(), "search-v1".into()),
+                ]),
+                diagnostics: TransportDiagnostics::response(),
+            })
+        }
+    };
+
+    let capture = search_with_transport("formal-ai", "wikipedia", 1, "fetch", "t", &transport)
+        .await
+        .unwrap();
+
+    assert_eq!(capture.receipt.body, WIKI_JSON.as_bytes());
+    assert!(capture.receipt.final_url.ends_with("&redirected=true"));
+    assert_eq!(capture.result.results.len(), 1);
+    assert_eq!(capture.result.diagnostics.status, 200);
 }

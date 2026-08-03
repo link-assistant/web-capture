@@ -11,6 +11,7 @@ import { isFormulaImage, isMathElement, extractFormula } from './latex.js';
 import { extractMetadata } from './metadata.js';
 import { postProcessMarkdown } from './postprocess.js';
 import { retry } from './retry.js';
+import { captureResponse, fetchTransport } from './transport.js';
 
 const STACKPRINTER_RETRIES = 3;
 const STACKPRINTER_RETRY_BASE_DELAY_MS = 1000;
@@ -19,7 +20,7 @@ const HTML_FETCH_HEADERS = {
   'accept-encoding': 'identity',
 };
 
-export async function fetchHtml(url) {
+export async function fetchHtml(url, options = {}) {
   if (!url) {
     throw new Error('Missing URL parameter');
   }
@@ -33,8 +34,16 @@ export async function fetchHtml(url) {
     return await fetchStackPrinterHtml(stackPrinterUrl);
   }
 
-  const response = await fetchHtmlResponse(url);
-  return response.text();
+  const receipt = await fetchHtmlReceipt(url, options);
+  return receipt.body.toString('utf8');
+}
+
+/** Return an undecoded, exact-byte receipt for a document fetch. */
+export function fetchHtmlReceipt(url, options = {}) {
+  return captureResponse(url, {
+    ...options,
+    headers: { ...HTML_FETCH_HEADERS, ...options.headers },
+  });
 }
 
 export function getGoogleDriveFileId(url) {
@@ -216,9 +225,7 @@ async function fetchStackPrinterHtml(url) {
 }
 
 function fetchHtmlResponse(url) {
-  return fetch(url, {
-    headers: HTML_FETCH_HEADERS,
-  });
+  return fetchTransport({ url, headers: HTML_FETCH_HEADERS });
 }
 
 function isStackPrinterTransientError(html) {

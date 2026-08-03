@@ -568,6 +568,33 @@ const buffer = await page.screenshot({ type: 'png', fullPage: true });
 await browser.close();
 ```
 
+### Exact response receipts and cancellation
+
+Library callers can retain response provenance without decoding the source
+through a text API. A receipt contains the exact `Buffer` body, final URL, HTTP
+status, selected cache/content headers, and structured diagnostics:
+
+```javascript
+import { fetchHtmlReceipt, search } from '@link-assistant/web-capture';
+
+const controller = new AbortController();
+const receipt = await fetchHtmlReceipt('https://example.com', {
+  signal: controller.signal,
+  // transport: ({ url, method, headers, signal }) => myTransport(...),
+});
+
+const result = await search({
+  query: 'formal methods',
+  signal: controller.signal,
+});
+console.log(receipt.status, result.receipt.body, result.receipt.finalUrl);
+```
+
+`transport` may return either a Fetch-compatible `Response` or a materialized
+receipt. The search receipt is available to library callers as
+`result.receipt`; it is intentionally non-enumerable so the stable `/search`
+JSON response does not duplicate the full provider body.
+
 ## License
 
 [Unlicense](../LICENSE) — This is free and unencumbered software released into the public domain. You are free to copy, modify, publish, use, compile, sell, or distribute this software for any purpose, commercial or non-commercial, and by any means. See [https://unlicense.org](https://unlicense.org) for details.

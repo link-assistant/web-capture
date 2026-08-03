@@ -21,6 +21,7 @@
 
 use scraper::{Html, Selector};
 use serde::{Deserialize, Serialize};
+use std::collections::BTreeMap;
 use url::form_urlencoded::byte_serialize;
 
 const USER_AGENT: &str = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36";
@@ -65,6 +66,14 @@ pub struct SearchResult {
     pub captured_at: String,
     pub results: Vec<SearchResultItem>,
     pub diagnostics: SearchDiagnostics,
+}
+
+/// Parsed rankings paired with the exact provider response used to derive them.
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct SearchCapture {
+    pub result: SearchResult,
+    pub receipt: crate::transport::ResponseReceipt,
 }
 
 /// Returns true if `provider` is one of the supported providers.
@@ -409,38 +418,19 @@ pub async fn search(
         source_url: source_url.clone(),
         error: None,
     };
-    let mut results = Vec::new();
-
-    let accept = if provider == "wikipedia" {
-        "application/json"
-    } else {
-        "text/html,application/xhtml+xml"
-    };
-
-    match reqwest::Client::builder().user_agent(USER_AGENT).build() {
-        Ok(client) => {
-            match client
-                .get(&source_url)
-                .header("Accept", accept)
-                .header("Accept-Language", "en-US,en;q=0.9")
-                .send()
-                .await
-            {
-                Ok(response) => {
-                    diagnostics.status = response.status().as_u16();
-                    match response.text().await {
-                        Ok(body) => {
-                            let (parsed, blocked) = parse_search_results(provider, &body, limit);
-                            results = parsed;
-                            diagnostics.blocked_by_captcha = blocked;
-                        }
-                        Err(e) => diagnostics.error = Some(e.to_string()),
-                    }
-                }
-                Err(e) => diagnostics.error = Some(e.to_string()),
-            }
-        }
-        Err(e) => diagnostics.error = Some(e.to_string()),
+    let transport = crate::transport::ReqwestTransport::default();
+    match search_with_transport(
+        query,
+        provider,
+        limit,
+        capture_mode,
+        captured_at,
+        &transport,
+    )
+    .await
+    {
+        Ok(capture) => return Ok(capture.result),
+        Err(error) => diagnostics.error = Some(error.to_string()),
     }
 
     Ok(SearchResult {
@@ -448,9 +438,70 @@ pub async fn search(
         provider: provider.to_string(),
         capture_mode: capture_mode.to_string(),
         captured_at: captured_at.to_string(),
-        results,
+        results: Vec::new(),
         diagnostics,
     })
+}
+
+/// Search through caller-owned transport and return the exact source receipt.
+///
+/// Dropping this future cancels the in-flight transport future. This provides
+/// cancellation without coupling the public API to a particular async runtime.
+pub async fn search_with_transport(
+    query: &str,
+    provider: &str,
+    limit: usize,
+    capture_mode: &str,
+    captured_at: &str,
+    transport: &dyn crate::transport::Transport,
+) -> std::result::Result<SearchCapture, crate::transport::TransportError> {
+    if query.trim().is_empty() {
+        return Err(crate::transport::TransportError {
+            kind: "invalid_request".to_string(),
+            message: "Missing `query` parameter".to_string(),
+            source_url: String::new(),
+        });
+    }
+    let source_url = build_search_url(provider, query, limit).map_err(|message| {
+        crate::transport::TransportError {
+            kind: "invalid_request".to_string(),
+            message,
+            source_url: String::new(),
+        }
+    })?;
+    let accept = if provider == "wikipedia" {
+        "application/json"
+    } else {
+        "text/html,application/xhtml+xml"
+    };
+    let request = crate::transport::TransportRequest {
+        url: source_url.clone(),
+        method: "GET".to_string(),
+        headers: BTreeMap::from([
+            ("user-agent".to_string(), USER_AGENT.to_string()),
+            ("accept".to_string(), accept.to_string()),
+            ("accept-language".to_string(), "en-US,en;q=0.9".to_string()),
+            ("accept-encoding".to_string(), "identity".to_string()),
+        ]),
+    };
+    let receipt = crate::transport::capture_response_with_transport(request, transport).await?;
+    let body = String::from_utf8_lossy(&receipt.body);
+    let (results, blocked_by_captcha) = parse_search_results(provider, &body, limit);
+    let result = SearchResult {
+        query: query.to_string(),
+        provider: provider.to_string(),
+        capture_mode: capture_mode.to_string(),
+        captured_at: captured_at.to_string(),
+        results,
+        diagnostics: SearchDiagnostics {
+            status: receipt.status,
+            blocked_by_cors: false,
+            blocked_by_captcha,
+            source_url,
+            error: None,
+        },
+    };
+    Ok(SearchCapture { result, receipt })
 }
 
 #[cfg(test)]

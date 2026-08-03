@@ -19,10 +19,10 @@
  * @module search
  */
 
-import fetch from 'node-fetch';
 import * as cheerio from 'cheerio';
 import he from 'he';
 import { URL } from 'url';
+import { captureResponse, fetchTransport } from './transport.js';
 
 /** Providers understood by the search contract. */
 export const SEARCH_PROVIDERS = [
@@ -310,7 +310,9 @@ export function formatSearchAsMarkdown(result) {
  * @param {string} [options.provider=wikipedia] - Provider id
  * @param {number} [options.limit=10] - Max results to return
  * @param {string} [options.captureMode=fetch] - Reported capture mode
- * @param {Function} [options.fetchImpl=fetch] - Fetch implementation (injectable for tests)
+ * @param {Function} [options.transport] - Receipt transport (injectable)
+ * @param {AbortSignal} [options.signal] - Caller cancellation signal
+ * @param {Function} [options.fetchImpl] - Legacy Fetch-compatible injection
  * @param {Function} [options.now] - Clock returning an ISO timestamp (injectable for tests)
  * @returns {Promise<Object>} Normalized search result object
  */
@@ -319,7 +321,9 @@ export async function search({
   provider = DEFAULT_PROVIDER,
   limit = DEFAULT_LIMIT,
   captureMode = 'fetch',
-  fetchImpl = fetch,
+  transport,
+  signal,
+  fetchImpl,
   now = () => new Date().toISOString(),
 } = {}) {
   if (!query || !String(query).trim()) {
@@ -342,7 +346,14 @@ export async function search({
 
   let results = [];
   try {
-    const response = await fetchImpl(sourceUrl, {
+    const effectiveTransport = transport
+      ? transport
+      : fetchImpl
+        ? ({ url, ...init }) => fetchImpl(url, init)
+        : fetchTransport;
+    const receipt = await captureResponse(sourceUrl, {
+      transport: effectiveTransport,
+      signal,
       headers: {
         'User-Agent': USER_AGENT,
         Accept:
@@ -352,16 +363,33 @@ export async function search({
         'Accept-Language': 'en-US,en;q=0.9',
       },
     });
-    diagnostics.status = response.status;
-    const body = await response.text();
+    diagnostics.status = receipt.status;
+    const body = receipt.body.toString('utf8');
     const parsed = parseSearchResults(provider, body, { limit });
     results = parsed.results;
     diagnostics.blockedByCaptcha = parsed.blockedByCaptcha;
+    const result = {
+      query,
+      provider,
+      captureMode,
+      capturedAt,
+      results,
+      diagnostics,
+    };
+    // Library callers can bind parsed results to the exact receipt without
+    // inflating the stable HTTP /search JSON representation.
+    Object.defineProperty(result, 'receipt', {
+      value: receipt,
+      enumerable: false,
+    });
+    return result;
   } catch (err) {
     // A network/transport failure from a server context is reported as an
     // error status; browser CORS failures surface the same way and are flagged.
     diagnostics.status = diagnostics.status || 0;
     diagnostics.error = err.message;
+    diagnostics.errorKind = err.diagnostics?.errorKind || 'transport';
+    diagnostics.blockedByCors = diagnostics.errorKind === 'cors_or_transport';
   }
 
   return {

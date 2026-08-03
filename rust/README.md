@@ -315,6 +315,34 @@ async fn main() -> anyhow::Result<()> {
 }
 ```
 
+### Exact response receipts, custom transports, and cancellation
+
+`fetch_html_receipt` returns undecoded bytes together with the final URL, HTTP
+status, selected cache/content headers, and structured diagnostics.
+`fetch_html_receipt_with_transport` and `search_with_transport` accept any
+caller-owned implementation of `Transport`; `ReqwestTransport::new` also lets a
+caller supply its configured `reqwest::Client`.
+
+```rust,no_run
+use web_capture::{fetch_html_receipt_with_transport, ReqwestTransport};
+
+# async fn example() -> Result<(), Box<dyn std::error::Error>> {
+let transport = ReqwestTransport::new(reqwest::Client::new());
+let receipt = fetch_html_receipt_with_transport(
+    "https://example.com",
+    &transport,
+).await?;
+assert_eq!(receipt.status, 200);
+println!("{}: {} bytes", receipt.final_url, receipt.body.len());
+# Ok(())
+# }
+```
+
+Rust cancellation follows future lifetime semantics: dropping the future
+returned by a capture or search function cancels its in-flight transport
+future. `search_with_transport` returns `SearchCapture`, pairing deterministic
+parsed rankings with the exact `ResponseReceipt` they came from.
+
 ## Testing
 
 ```bash

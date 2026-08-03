@@ -126,6 +126,23 @@ JSON response:
 recorded. Search transport failures are reported in this JSON object with an
 empty `results` array instead of being silently discarded.
 
+### Library transport and receipt contract
+
+Both packages expose a caller-owned transport boundary for capture and search:
+
+- JavaScript: `captureResponse` / `fetchHtmlReceipt` accept `transport` and
+  `AbortSignal`; `search` accepts the same options and exposes a non-enumerable
+  `result.receipt` to library callers.
+- Rust: `capture_response_with_transport`,
+  `fetch_html_receipt_with_transport`, and `search_with_transport` accept a
+  `Transport`; dropping the returned future cancels the request.
+
+A successful receipt preserves the exact undecoded response bytes, final URL,
+HTTP status, selected content/cache headers, and structured transport
+diagnostics. Search parsing is applied only after the receipt exists, keeping
+`build_search_url` and `parse_search_results` deterministic and allowing a
+downstream content-addressed cache to bind rankings to their source bytes.
+
 Provider catalog:
 
 | Provider     | Default | Source                     | Notes                                                                     |
