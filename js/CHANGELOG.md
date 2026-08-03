@@ -1,5 +1,11 @@
 # @link-assistant/web-capture
 
+## 1.11.0
+
+### Minor Changes
+
+- 66d8144: Add caller-owned transports, AbortSignal cancellation, and exact-byte response receipts to capture and search library APIs.
+
 ## 1.10.12
 
 ### Patch Changes
