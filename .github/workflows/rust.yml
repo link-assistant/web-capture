@@ -137,6 +137,10 @@ jobs:
           cargo test --manifest-path rust/Cargo.toml --no-default-features --features search --test search_feature
           node scripts/rust-check-search-feature.mjs
 
+      - name: Check no dependency of ours pulls OpenSSL (issue #151)
+        working-directory: .
+        run: node scripts/rust-check-openssl-free.mjs
+
   # Test matrix: Rust on multiple OS - only runs when Rust code changes
   test:
     name: Rust - Test (${{ matrix.os }})
@@ -245,6 +249,29 @@ jobs:
         run: |
           cargo check --all-targets --all-features
           cargo test --all-features
+
+  # Bare-container build check (issue #151)
+  # `rust:slim-bookworm` ships no `pkg-config` and no OpenSSL headers. Building here
+  # without any `apt-get install` step proves the crate does not silently require a
+  # system OpenSSL toolchain. The default feature set still reaches OpenSSL through
+  # `browser-commander -> fantoccini` (link-foundation/browser-commander#77), so for
+  # now this job covers the feature sets that are already free of it.
+  bare-container-build:
+    name: Rust - Build Without System OpenSSL
+    runs-on: ubuntu-latest
+    container: rust:slim-bookworm
+    needs: [detect-changes]
+    if: |
+      always() && !cancelled() && (
+        github.event_name == 'push' ||
+        github.event_name == 'workflow_dispatch' ||
+        needs.detect-changes.outputs.any-rust-code-changed == 'true'
+      )
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Build the minimal search feature set with no system packages
+        run: cargo build --no-default-features --features search
 
   # Build check - only runs when Rust code changes
   build:

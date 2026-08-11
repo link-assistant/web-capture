@@ -8,4 +8,5 @@ mod markdown;
 mod metadata;
 mod postprocess;
 mod shared_dialog;
+mod tls_backend;
 mod verify;
