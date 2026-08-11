@@ -1,6 +1,6 @@
 [package]
 name = "web-capture"
-version = "0.3.36"
+version = "0.3.37"
 edition = "2021"
 description = "CLI and microservice to render web pages as HTML, Markdown, or PNG"
 license = "Unlicense"
@@ -43,6 +43,9 @@ runtime = [
     "dep:tracing-subscriber",
     "dep:zip",
 ]
+# Opt-in system TLS stack (OpenSSL/Schannel/Secure Transport) for consumers that
+# genuinely need it. Not enabled by default — see issue #151.
+native-tls = ["dep:reqwest", "reqwest/native-tls"]
 
 [lib]
 path = "src/lib.rs"
@@ -85,7 +88,17 @@ tower = { version = "0.5", optional = true }
 tower-http = { version = "0.6", features = ["cors", "trace"], optional = true }
 
 # HTTP client
-reqwest = { version = "0.12", features = ["cookies", "gzip"], optional = true }
+# `default-features = false` keeps `native-tls` (and therefore `openssl-sys`) out of the
+# dependency tree: consumers without `pkg-config`/`libssl-dev` must still be able to build.
+# `charset` and `http2` are part of reqwest's default set and are relied on here
+# (`Response::text()` needs `charset`); TLS is provided by `rustls-tls` instead.
+reqwest = { version = "0.12", default-features = false, features = [
+    "charset",
+    "cookies",
+    "gzip",
+    "http2",
+    "rustls-tls",
+], optional = true }
 
 # HTML parsing and manipulation
 scraper = { version = "0.21", optional = true }

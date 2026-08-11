@@ -50,6 +50,22 @@ transport contract, including `build_search_url`, `parse_search_results`, and
 Tokio, Axum, or OpenSSL. The convenience `search` function, which performs an
 HTTP request with reqwest, remains part of `runtime`.
 
+### TLS backend
+
+The HTTP client uses `rustls` and takes `reqwest` with `default-features = false`,
+so building this crate needs no `pkg-config` and no OpenSSL development headers.
+Consumers that require the platform's system TLS stack can opt back in:
+
+```toml
+[dependencies]
+web-capture = { version = "0.3", features = ["native-tls"] }
+```
+
+Note that `browser-commander` still reaches OpenSSL through `fantoccini`'s default
+features, tracked upstream in
+[link-foundation/browser-commander#77](https://github.com/link-foundation/browser-commander/issues/77);
+until that lands, the default (`runtime`) feature set is not yet fully OpenSSL-free.
+
 ## Quick Start
 
 ### CLI Usage
