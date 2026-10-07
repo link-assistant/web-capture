@@ -1,5 +1,5 @@
 import getPort from 'get-port';
-import nock from 'nock';
+import nock from '../helpers/nock.js';
 import { app } from '../../src/index.js';
 
 describe('xpaste.pro HTTP e2e', () => {

@@ -1,4 +1,4 @@
-FROM node:22-bullseye
+FROM node:24-bookworm
 
 WORKDIR /app
 
@@ -27,12 +27,14 @@ RUN apt-get update && \
         libxshmfence1 \
         xdg-utils \
         --no-install-recommends && break || \
-      { echo "apt-get install attempt $i failed, retrying..."; sleep 5; }; \
+      { if [ "$i" -eq 3 ]; then exit 1; fi; \
+        echo "apt-get install attempt $i failed, retrying..."; \
+        apt-get update && sleep 5; }; \
     done && \
     rm -rf /var/lib/apt/lists/*
 
 # Set Puppeteer environment variables
-ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
+ENV PUPPETEER_SKIP_DOWNLOAD=true
 ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
 ENV PUPPETEER_ARGS="--no-sandbox --disable-setuid-sandbox --disable-dev-shm-usage"
 
@@ -40,8 +42,8 @@ ENV PUPPETEER_ARGS="--no-sandbox --disable-setuid-sandbox --disable-dev-shm-usag
 ENV PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1
 ENV PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH=/usr/bin/chromium
 
-COPY package.json yarn.lock ./
-RUN yarn install --frozen-lockfile
+COPY package.json package-lock.json ./
+RUN npm ci
 
 COPY . .
 

@@ -9,7 +9,7 @@
  */
 
 import fetch from 'node-fetch';
-import he from 'he';
+import * as he from 'he';
 import { URL } from 'node:url';
 
 import { createBrowser as defaultCreateBrowser } from './browser.js';

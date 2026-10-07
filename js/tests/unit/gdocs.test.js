@@ -28,7 +28,7 @@ import fs from 'fs';
 import os from 'os';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import nock from 'nock';
+import nock from '../helpers/nock.js';
 
 jest.setTimeout(30000);
 

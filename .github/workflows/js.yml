@@ -45,6 +45,26 @@ defaults:
     working-directory: js
 
 jobs:
+  dependency-health:
+    name: JS - Dependency Audit and Freshness
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24.x'
+      - name: Install locked dependencies
+        env:
+          PUPPETEER_SKIP_DOWNLOAD: 'true'
+        run: npm ci
+      - name: Audit every locked dependency
+        run: npm audit --package-lock-only --audit-level=moderate
+      - name: Require current direct dependencies or open blockers
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: node ../scripts/check-dependency-freshness.mjs npm
+
   # === DETECT CHANGES - determines which jobs should run ===
   detect-changes:
     name: JS - Detect Changes
@@ -89,7 +109,7 @@ jobs:
           node-version: '24.x'
 
       - name: Install dependencies
-        run: npm install
+        run: npm ci
 
       - name: Check for changesets
         run: |
@@ -135,6 +155,8 @@ jobs:
       )
     steps:
       - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
 
       - name: Setup Node.js
         uses: actions/setup-node@v6
@@ -142,7 +164,7 @@ jobs:
           node-version: '24.x'
 
       - name: Install dependencies
-        run: npm install
+        run: npm ci
 
       - name: Run ESLint
         run: npm run lint
@@ -182,7 +204,7 @@ jobs:
           node-version: '24.x'
 
       - name: Install dependencies
-        run: npm install
+        run: npm ci
 
       # Install the Chromium bundle Playwright needs.
       #
@@ -262,13 +284,12 @@ jobs:
       - name: Install Puppeteer browsers
         env:
           PUPPETEER_SKIP_DOWNLOAD: 'false'
-          PUPPETEER_SKIP_CHROMIUM_DOWNLOAD: 'false'
         run: |
           CACHE="${HOME}/.cache/puppeteer"
           # executablePath() returns the computed path for the pinned Chrome
           # build (independent of whether it is installed yet), so the version
           # is tracked automatically across Puppeteer bumps.
-          EXPECTED="$(node -e "process.stdout.write(require('puppeteer').executablePath())")"
+          EXPECTED="$(node --input-type=module -e "import puppeteer from 'puppeteer'; process.stdout.write(await puppeteer.executablePath())")"
           echo "Expected Chrome executable: $EXPECTED"
           rm -rf "$CACHE/chrome" "$CACHE/chrome-headless-shell" || true
           for attempt in 1 2 3; do
@@ -306,32 +327,32 @@ jobs:
       - name: Run Habr article live integration tests
         env:
           HABR_INTEGRATION: 'true'
-        run: npm test -- --testPathPattern="habr-article" --testTimeout=120000
+        run: npm test -- --testPathPatterns="habr-article" --testTimeout=120000
         timeout-minutes: 15
 
       - name: Run Google Docs public-document live integration tests (issue #90)
         env:
           GDOCS_INTEGRATION: 'true'
-        run: npm test -- --testPathPattern="gdocs-public-doc" --testTimeout=120000
+        run: npm test -- --testPathPatterns="gdocs-public-doc" --testTimeout=120000
         timeout-minutes: 10
 
       - name: Run Wikipedia page download live integration tests (issue #8)
         env:
           WIKIPEDIA_INTEGRATION: 'true'
-        run: npm test -- --testPathPattern="wikipedia-download" --testTimeout=120000
+        run: npm test -- --testPathPatterns="wikipedia-download" --testTimeout=120000
         timeout-minutes: 10
 
       - name: Run GitHub repository capture live integration tests (issue #5)
         env:
           GITHUB_REPOSITORY_INTEGRATION: 'true'
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: npm test -- --testPathPattern="github-readme" --testTimeout=120000
+        run: npm test -- --testPathPatterns="github-readme" --testTimeout=120000
         timeout-minutes: 10
 
       - name: Run StackOverflow page download live integration tests (issue #11)
         env:
           STACKOVERFLOW_INTEGRATION: 'true'
-        run: npm test -- --testPathPattern="stackoverflow-download" --testTimeout=180000
+        run: npm test -- --testPathPatterns="stackoverflow-download" --testTimeout=180000
         timeout-minutes: 10
 
       - name: Build Docker image for e2e tests
@@ -346,13 +367,14 @@ jobs:
   # Self-healing: detects unreleased commits and auto-bumps patch version
   release:
     name: JS - Release
-    needs: [lint, test]
+    needs: [lint, test, dependency-health]
     if: |
       !cancelled() &&
       github.ref == 'refs/heads/main' &&
       github.event_name == 'push' &&
       needs.lint.result == 'success' &&
-      needs.test.result == 'success'
+      needs.test.result == 'success' &&
+      needs.dependency-health.result == 'success'
     runs-on: ubuntu-latest
     # Permissions required for npm OIDC trusted publishing
     permissions:
@@ -371,7 +393,7 @@ jobs:
           registry-url: 'https://registry.npmjs.org'
 
       - name: Install dependencies
-        run: npm install
+        run: npm ci
 
       - name: Update npm for OIDC trusted publishing
         run: node ../scripts/setup-npm.mjs
@@ -433,7 +455,14 @@ jobs:
   # only allows one workflow file to be registered as a trusted publisher
   instant-release:
     name: JS - Instant Release
-    if: github.event_name == 'workflow_dispatch' && github.event.inputs.release_mode == 'instant'
+    needs: [lint, test, dependency-health]
+    if: |
+      !cancelled() &&
+      github.event_name == 'workflow_dispatch' &&
+      github.event.inputs.release_mode == 'instant' &&
+      needs.lint.result == 'success' &&
+      needs.test.result == 'success' &&
+      needs.dependency-health.result == 'success'
     runs-on: ubuntu-latest
     # Permissions required for npm OIDC trusted publishing
     permissions:
@@ -452,7 +481,7 @@ jobs:
           registry-url: 'https://registry.npmjs.org'
 
       - name: Install dependencies
-        run: npm install
+        run: npm ci
 
       - name: Update npm for OIDC trusted publishing
         run: node ../scripts/setup-npm.mjs
@@ -498,7 +527,7 @@ jobs:
           node-version: '24.x'
 
       - name: Install dependencies
-        run: npm install
+        run: npm ci
 
       - name: Create changeset file
         run: node ../scripts/create-manual-changeset.mjs --bump-type "${{ github.event.inputs.bump_type }}" --description "${{ github.event.inputs.description }}"

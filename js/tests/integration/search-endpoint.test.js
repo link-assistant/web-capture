@@ -5,7 +5,7 @@
  */
 
 import request from 'supertest';
-import nock from 'nock';
+import nock from '../helpers/nock.js';
 import { app } from '../../src/index.js';
 
 const WIKI_JSON = {

@@ -20,7 +20,7 @@
  */
 
 import * as cheerio from 'cheerio';
-import he from 'he';
+import * as he from 'he';
 import { URL } from 'url';
 import { captureResponse, fetchTransport } from './transport.js';
 

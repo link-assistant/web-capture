@@ -6,12 +6,8 @@
 // `openssl-sys` up to the crates that pull it in. This script walks that tree and
 // checks which of `web-capture`'s own dependencies sit on such a path.
 //
-// Anything reached through the crate's direct dependencies (reqwest, ...) is a
-// defect here and fails the check. The one accepted route is
-// `browser-commander -> fantoccini`, whose `default = ["native-tls"]` cannot be
-// turned off downstream (Cargo unifies features as a union); that half is tracked
-// upstream in link-foundation/browser-commander#77. Once it is fixed the allow
-// list below should be emptied and this check becomes "openssl-sys is absent".
+// browser-commander 0.19 fixes the formerly tracked fantoccini/native-tls gap.
+// No default dependency may now reach OpenSSL.
 
 import { execFileSync } from "node:child_process";
 import { readFileSync } from "node:fs";
@@ -24,11 +20,7 @@ const repositoryRoot = path.resolve(
 );
 const manifestPath = path.join(repositoryRoot, "rust", "Cargo.toml");
 
-// Direct dependencies of `web-capture` that are still allowed to reach OpenSSL,
-// with the upstream issue that tracks removing them.
-const knownUpstreamGaps = new Map([
-  ["browser-commander", "link-foundation/browser-commander#77"],
-]);
+const knownUpstreamGaps = new Map();
 
 // --- Manifest assertions -----------------------------------------------------
 // The dependency tree alone would go green again the moment an unrelated crate
@@ -51,8 +43,8 @@ if (reqwestEntry === "") {
         "and `openssl-sys` return to every consumer's tree",
     );
   }
-  if (!reqwestEntry.includes('"rustls-tls"')) {
-    manifestProblems.push("reqwest must select `rustls-tls` as its TLS backend");
+  if (!reqwestEntry.includes('"rustls"')) {
+    manifestProblems.push("reqwest must select `rustls` as its TLS backend");
   }
   // `charset` backs `Response::text()`; `cookies`, `gzip` and `http2` back the
   // transport behavior that was in place before default features were dropped.

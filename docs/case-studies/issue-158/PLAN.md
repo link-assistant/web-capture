@@ -12,7 +12,7 @@
 - [x] Apply feature consistently across JS/Rust exports/docs/examples and parity policy; reproduce cache cases with deterministic fake clocks/transports before implementation.
 - [x] Add required audit/freshness jobs, explicit open-issue blocker handling, deterministic policy tests and finite CI test/job time limits where appropriate.
 - [x] Run appropriate focused checks then complete local CI suites; log large output and inspect failures; keep experiment scripts in experiments and real examples in examples.
-- [ ] Prepare release triggers for npm and crates.io using existing workflows.
+- [x] Prepare release triggers for npm and crates.io using existing workflows.
 - [ ] Commit useful atomic changes after local checks; push only issue-158-fa165d4218b7; merge default-branch updates if necessary.
 - [ ] Review complete PR diff for regressions and scope coverage; replace WIP description with reproduction, tests, breaking changes, findings and all six Fixes references.
 - [ ] List current CI runs with timestamps/SHA; download each failed run to ci-logs; identify errors with log line numbers; fix and recheck until current checks pass.

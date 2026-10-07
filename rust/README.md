@@ -41,7 +41,7 @@ features and select `search`:
 
 ```toml
 [dependencies]
-web-capture = { version = "0.3", default-features = false, features = ["search"] }
+web-capture = { version = "0.4", default-features = false, features = ["search"] }
 ```
 
 The `search` feature exposes the pure URL/parser API and the caller-owned
@@ -58,13 +58,12 @@ Consumers that require the platform's system TLS stack can opt back in:
 
 ```toml
 [dependencies]
-web-capture = { version = "0.3", features = ["native-tls"] }
+web-capture = { version = "0.4", features = ["native-tls"] }
 ```
 
-Note that `browser-commander` still reaches OpenSSL through `fantoccini`'s default
-features, tracked upstream in
-[link-foundation/browser-commander#77](https://github.com/link-foundation/browser-commander/issues/77);
-until that lands, the default (`runtime`) feature set is not yet fully OpenSSL-free.
+`browser-commander` 0.19 also selects rustls for its WebDriver transport, so the
+default `runtime` dependency graph is fully OpenSSL-free. The dependency guard
+rejects any route back to `openssl-sys`.
 
 ## Quick Start
 
@@ -323,7 +322,7 @@ Add to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-web-capture = "0.2"
+web-capture = "0.4"
 ```
 
 ### Example
@@ -408,3 +407,11 @@ GDOCS_INTEGRATION=1 cargo test --test integration gdocs_public_doc::live -- --no
 ## License
 
 [Unlicense](../LICENSE) — This is free and unencumbered software released into the public domain. You are free to copy, modify, publish, use, compile, sell, or distribute this software for any purpose, commercial or non-commercial, and by any means. See [https://unlicense.org](https://unlicense.org) for details.
+
+## Capture cache
+
+Both packages provide `CaptureStore` and `CachedTransport` over caller-owned transports. Captures keep the exact body bytes, final URL, status, response headers and diagnostics. Request keys include the exact URL, method and every request header in sorted order. Identical bodies share a SHA-256 file. The default TTL is 60 days; expiry is measured from fetch completion, in Unix milliseconds.
+
+Online mode reuses fresh captures and refetches expired entries. Offline mode never invokes the transport: it returns cached captures with `cached: true` and a `stale` flag, or an `offline_cache_miss` error. Use `capture` to read these flags; the transport adapter returns the original receipt unchanged. Transport errors are not stored. Corrupt or unsupported records produce cache errors instead of returning unverified bytes.
+
+`list` returns request metadata; `prune(now, ttl)` removes expired request records and unreferenced body files. `export(request)` and `import(json)` exchange version 1 JSON replay fixtures with byte arrays, shared between Rust and JavaScript. See [the cache format and examples](../docs/capture-cache.md).

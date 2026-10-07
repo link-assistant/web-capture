@@ -48,6 +48,8 @@ pub mod archive;
 pub mod batch;
 #[cfg(feature = "runtime")]
 pub mod browser;
+#[cfg(feature = "cache")]
+pub mod cache;
 #[cfg(feature = "runtime")]
 pub mod extract_images;
 #[cfg(feature = "runtime")]
@@ -78,7 +80,7 @@ pub mod shared_dialog;
 pub mod stackoverflow;
 #[cfg(feature = "runtime")]
 pub mod themed_image;
-#[cfg(feature = "search")]
+#[cfg(any(feature = "search", feature = "cache"))]
 pub mod transport;
 #[cfg(feature = "runtime")]
 pub mod verify;
@@ -619,8 +621,13 @@ pub use search::{
 };
 #[cfg(feature = "runtime")]
 pub use transport::{capture_response, ReqwestTransport};
-#[cfg(feature = "search")]
+#[cfg(any(feature = "search", feature = "cache"))]
 pub use transport::{
     capture_response_with_transport, ResponseReceipt, Transport, TransportDiagnostics,
     TransportError, TransportRequest, RECEIPT_HEADERS,
+};
+
+#[cfg(feature = "cache")]
+pub use cache::{
+    CacheMode, CacheOptions, CachedCapture, CachedTransport, CaptureRecord, CaptureStore,
 };

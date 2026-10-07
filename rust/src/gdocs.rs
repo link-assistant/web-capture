@@ -32,7 +32,7 @@ use async_tungstenite::tokio::{connect_async, ConnectStream};
 use async_tungstenite::tungstenite::Message;
 use async_tungstenite::WebSocketStream;
 use base64::Engine;
-use futures::{SinkExt, StreamExt};
+use futures::StreamExt;
 use regex::Regex;
 use scraper::{node::Node, ElementRef, Html, Selector};
 use serde_json::Value;
@@ -2000,7 +2000,7 @@ async fn cdp_send(
         message["sessionId"] = Value::String(session_id.to_string());
     }
 
-    ws.send(Message::Text(message.to_string()))
+    ws.send(Message::Text(message.to_string().into()))
         .await
         .map_err(|error| {
             WebCaptureError::BrowserError(format!(

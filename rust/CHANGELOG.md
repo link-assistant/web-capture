@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 0.4.0
+
+- Add opt-in transport-independent SHA-256 capture caching, TTL, offline stale replay, portable fixtures, and capture listing/pruning.
+- Upgrade every direct dependency to its current stable release, including reqwest 0.13, scraper 0.27, zip 8, and browser-commander 0.19; remove fxhash.
+- Adapt reqwest TLS/query features and WebSocket text payloads; preserve native TLS as an opt-in and minimal search builds.
+- Require dependency freshness and a fully updated lockfile in CI.
+
 ## 0.3.37
 
 ### Patch Changes

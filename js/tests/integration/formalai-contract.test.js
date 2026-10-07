@@ -6,7 +6,7 @@
  */
 
 import request from 'supertest';
-import nock from 'nock';
+import nock from '../helpers/nock.js';
 import unzipper from 'unzipper';
 import { app, SEARCH_PROVIDERS } from '../../src/index.js';
 

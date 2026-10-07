@@ -300,3 +300,11 @@ The kreuzberg converter is powered by [html-to-markdown](https://github.com/kreu
 - [turndown](https://github.com/mixmark-io/turndown) - HTML to Markdown converter used in JS implementation
 - [html2md](https://github.com/nickyc975/html2md-rs) - HTML to Markdown converter used in Rust implementation
 - [html-to-markdown](https://github.com/kreuzberg-dev/html-to-markdown) - High-performance HTML to Markdown converter (kreuzberg), integrated as optional converter
+
+## Capture cache
+
+Both packages provide `CaptureStore` and `CachedTransport` over caller-owned transports. Captures keep the exact body bytes, final URL, status, response headers and diagnostics. Request keys include the exact URL, method and every request header in sorted order. Identical bodies share a SHA-256 file. The default TTL is 60 days; expiry is measured from fetch completion, in Unix milliseconds.
+
+Online mode reuses fresh captures and refetches expired entries. Offline mode never invokes the transport: it returns cached captures with `cached: true` and a `stale` flag, or an `offline_cache_miss` error. Use `capture` to read these flags; the transport adapter returns the original receipt unchanged. Transport errors are not stored. Corrupt or unsupported records produce cache errors instead of returning unverified bytes.
+
+`list` returns request metadata; `prune(now, ttl)` removes expired request records and unreferenced body files. `export(request)` and `import(json)` exchange version 1 JSON replay fixtures with byte arrays, shared between Rust and JavaScript. See [the cache format and examples](docs/capture-cache.md).

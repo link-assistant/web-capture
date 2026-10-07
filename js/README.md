@@ -19,6 +19,16 @@ A CLI and microservice to fetch URLs and render them as:
 
 ## Installation
 
+Node.js 22.22.1 or newer is required. CI and Docker use Node.js 24. Use `npm ci`
+for a locked repository install; Docker and CI share `package-lock.json` and its
+security overrides.
+
+Bundled applications must externalize `playwright` and `playwright-core` and
+ship them as production packages. Playwright does not support bundling its
+internal modules. Packaged Chromium is supported through
+`createBrowser(engine, { executablePath: packagedPath, channel: 'chrome' })`
+for both engines. See [the upstream bundling discussion](https://github.com/microsoft/playwright/issues/33031).
+
 ### From npm
 
 ```bash
@@ -518,14 +528,14 @@ with environment variables:
 
 ```bash
 # Download the Wikipedia page (markdown + image) in every supported engine
-WIKIPEDIA_INTEGRATION=true npm test -- --testPathPattern="wikipedia-download"
+WIKIPEDIA_INTEGRATION=true npm test -- --testPathPatterns="wikipedia-download"
 
 # Download a GitHub repository page as compact txt/markdown, original HTML, and screenshots
-GITHUB_REPOSITORY_INTEGRATION=true npm test -- --testPathPattern="github-readme"
+GITHUB_REPOSITORY_INTEGRATION=true npm test -- --testPathPatterns="github-readme"
 
 # Habr articles and public Google Docs live suites
-HABR_INTEGRATION=true npm test -- --testPathPattern="habr-article"
-GDOCS_INTEGRATION=true npm test -- --testPathPattern="gdocs-public-doc"
+HABR_INTEGRATION=true npm test -- --testPathPatterns="habr-article"
+GDOCS_INTEGRATION=true npm test -- --testPathPatterns="gdocs-public-doc"
 ```
 
 ## Built With
@@ -598,3 +608,11 @@ JSON response does not duplicate the full provider body.
 ## License
 
 [Unlicense](../LICENSE) — This is free and unencumbered software released into the public domain. You are free to copy, modify, publish, use, compile, sell, or distribute this software for any purpose, commercial or non-commercial, and by any means. See [https://unlicense.org](https://unlicense.org) for details.
+
+## Capture cache
+
+Both packages provide `CaptureStore` and `CachedTransport` over caller-owned transports. Captures keep the exact body bytes, final URL, status, response headers and diagnostics. Request keys include the exact URL, method and every request header in sorted order. Identical bodies share a SHA-256 file. The default TTL is 60 days; expiry is measured from fetch completion, in Unix milliseconds.
+
+Online mode reuses fresh captures and refetches expired entries. Offline mode never invokes the transport: it returns cached captures with `cached: true` and a `stale` flag, or an `offline_cache_miss` error. Use `capture` to read these flags; the transport adapter returns the original receipt unchanged. Transport errors are not stored. Corrupt or unsupported records produce cache errors instead of returning unverified bytes.
+
+`list` returns request metadata; `prune(now, ttl)` removes expired request records and unreferenced body files. `export(request)` and `import(json)` exchange version 1 JSON replay fixtures with byte arrays, shared between Rust and JavaScript. See [the cache format and examples](../docs/capture-cache.md).

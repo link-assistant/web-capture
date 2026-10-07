@@ -145,3 +145,5 @@ examples/js/downloaded.png
 
 # project
 .DS_Store
+# Duplication reports
+reports/

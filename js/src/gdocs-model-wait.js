@@ -12,7 +12,6 @@ export async function waitForGoogleDocsModelQuiescence(
   const started = Date.now();
   let lastFingerprint = null;
   let stableSince = null;
-  let lastModelData = null;
   let lastStableForMs = 0;
   let pollCount = 0;
 
@@ -20,7 +19,6 @@ export async function waitForGoogleDocsModelQuiescence(
     const modelData = await readGoogleDocsModelData(page);
     pollCount += 1;
     const fingerprint = googleDocsModelFingerprint(modelData);
-    lastModelData = modelData;
 
     if (
       fingerprint.chunks > 0 &&
@@ -56,8 +54,8 @@ export async function waitForGoogleDocsModelQuiescence(
 
     const elapsedMs = Date.now() - started;
     if (elapsedMs >= maxWaitMs) {
-      const lastChunks = lastModelData?.chunks?.length || 0;
-      const lastCidUrls = Object.keys(lastModelData?.cidUrlMap || {}).length;
+      const lastChunks = modelData?.chunks?.length || 0;
+      const lastCidUrls = Object.keys(modelData?.cidUrlMap || {}).length;
       throw googleDocsBrowserModelUnavailableError(
         `Google Docs DOCS_modelChunk stream did not quiesce within ${maxWaitMs} ms for document ${documentId} (last chunks=${lastChunks}, payload_bytes=${fingerprint.payloadBytes}, cid_urls=${lastCidUrls}, poll_count=${pollCount}, stable_for_ms=${lastStableForMs})`
       );

@@ -16,7 +16,7 @@ pub const RECEIPT_HEADERS: [&str; 7] = [
 ];
 
 /// Owned request passed to an injectable transport.
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct TransportRequest {
     pub url: String,
     pub method: String,

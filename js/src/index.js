@@ -97,3 +97,10 @@ export {
   parseSharedDialog,
   sharedDialogHandler,
 } from './shared-dialog.js';
+
+export {
+  CaptureStore,
+  CachedTransport,
+  CaptureCacheError,
+  captureRequestKey,
+} from './cache.js';

@@ -6,7 +6,7 @@
  */
 
 import request from 'supertest';
-import nock from 'nock';
+import nock from '../helpers/nock.js';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';

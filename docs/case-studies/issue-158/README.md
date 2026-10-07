@@ -135,6 +135,11 @@ sources: [chromiumoxide](https://docs.rs/crate/chromiumoxide/0.9.1/source/Cargo.
   Keep this generation command while that upstream bug remains open. GNU Linux,
   macOS and Windows native artifacts are published; the optional musl artifacts
   remain unavailable upstream.
+- Docker verification found that both package-install retry loops returned
+  success even when all three attempts failed. A finite mock shell test failed
+  for both Dockerfiles before the fix and now requires a nonzero exit after the
+  third failure. Retries refresh package indexes. Rust's runtime image uses
+  Bookworm after Bullseye package downloads returned 404s during verification.
 
 Primary migration/security references: [Puppeteer v25](https://github.com/puppeteer/puppeteer/releases/tag/puppeteer-v25.0.0),
 [async executablePath](https://pptr.dev/api/puppeteer.executablepath),
