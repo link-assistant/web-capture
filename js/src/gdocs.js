@@ -8,7 +8,7 @@
 // Browser-model capture loads /edit and extracts DOCS_modelChunk data.
 
 import fetch from 'node-fetch';
-import he from 'he';
+import * as he from 'he';
 import * as cheerio from 'cheerio';
 import { convertHtmlToMarkdown } from './lib.js';
 import { createBrowser as defaultCreateBrowser } from './browser.js';

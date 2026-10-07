@@ -80,7 +80,7 @@ fn test_validate_config_valid() {
     let config = sample_config();
     let result = validate_config(&config);
     assert!(result.valid);
-    assert!(result.errors.is_empty());
+    assert_eq!(result.errors, Vec::<String>::new());
 }
 
 #[test]
@@ -99,7 +99,7 @@ fn test_validate_config_missing_url() {
     };
     let result = validate_config(&config);
     assert!(!result.valid);
-    assert!(!result.errors.is_empty());
+    assert_ne!(result.errors, Vec::<String>::new());
 }
 
 #[test]

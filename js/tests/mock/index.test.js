@@ -1,5 +1,5 @@
 import request from 'supertest';
-import nock from 'nock';
+import nock from '../helpers/nock.js';
 import { jest } from '@jest/globals';
 
 let app;

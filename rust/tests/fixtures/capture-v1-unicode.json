@@ -1,0 +1,25 @@
+{
+  "version": 1,
+  "requestKey": "37fb78db73496f8e54bce77825582fc180eb5333a02d708531ab8ae854def676",
+  "request": {
+    "url": "https://example.test/source",
+    "method": "GET",
+    "headers": {
+      "😀": "astral",
+      "": "bmp"
+    }
+  },
+  "fetchedAt": 1000,
+  "sha256": "a90a10503fbfc95789ff38a1bb5039cb71869ab9c0eb1cb51c4a9099f2933c6b",
+  "receipt": {
+    "body": [0, 255, 65],
+    "finalUrl": "https://example.test/final",
+    "status": 206,
+    "headers": {
+      "etag": "v1"
+    },
+    "diagnostics": {
+      "outcome": "response"
+    }
+  }
+}

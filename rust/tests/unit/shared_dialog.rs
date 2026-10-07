@@ -92,7 +92,10 @@ fn google_ai_mode_interstitial_returns_structured_diagnostic() {
 
     assert_eq!(capture.provider, "google_ai_mode");
     assert_eq!(capture.status, "unsupported");
-    assert!(capture.turns.is_empty());
+    assert_eq!(
+        capture.turns,
+        Vec::<web_capture::shared_dialog::SharedDialogTurn>::new()
+    );
     assert_eq!(
         capture.diagnostics.unsupported_reason.as_deref(),
         Some("provider_challenge_interstitial")

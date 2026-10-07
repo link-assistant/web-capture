@@ -63,12 +63,12 @@ export function fetchTransport({ url, method = 'GET', headers, signal }) {
  */
 export async function captureResponse(
   url,
-  { transport = fetchTransport, signal, headers = {} } = {}
+  { transport = fetchTransport, signal, headers = {}, method = 'GET' } = {}
 ) {
   if (!url) {
     throw new Error('Missing URL parameter');
   }
-  const request = { url, method: 'GET', headers, signal };
+  const request = { url, method, headers, signal };
   try {
     const response = await transport(request);
     if (

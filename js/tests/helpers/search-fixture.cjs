@@ -1,4 +1,4 @@
-const nock = require('nock');
+const { default: nock } = require('nock');
 
 nock('https://en.wikipedia.org')
   .persist()

@@ -48,7 +48,7 @@ fn test_format_metadata_block_author() {
         ..Default::default()
     };
     let lines = format_metadata_block(&meta);
-    assert!(!lines.is_empty());
+    assert_ne!(lines, Vec::<String>::new());
     assert!(lines[0].contains("[user123](/users/user123)"));
 }
 
@@ -68,5 +68,5 @@ fn test_format_footer_block_tags() {
 fn test_extract_metadata_empty_html() {
     let meta = extract_metadata("<html><body></body></html>");
     assert!(meta.author.is_none());
-    assert!(meta.tags.is_empty());
+    assert_eq!(meta.tags, Vec::<String>::new());
 }

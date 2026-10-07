@@ -3,25 +3,31 @@ FROM rust:1.96-bullseye AS builder
 
 WORKDIR /app
 
+# Limit parallel compilation of generated browser protocol code.
+ARG CARGO_BUILD_JOBS=2
+ENV CARGO_BUILD_JOBS=${CARGO_BUILD_JOBS}
+
 # Copy Cargo files first for better caching
 COPY Cargo.toml Cargo.lock* ./
 
 # Create a dummy main.rs to build dependencies
-RUN mkdir src && \
+RUN mkdir src examples && \
     echo "fn main() {}" > src/main.rs && \
-    echo "pub fn dummy() {}" > src/lib.rs
+    echo "pub fn dummy() {}" > src/lib.rs && \
+    echo "fn main() {}" > examples/capture_cache.rs
 
 # Build dependencies only
-RUN cargo build --release && rm -rf src
+RUN cargo build --release --locked && rm -rf src examples
 
 # Copy the actual source code
 COPY src ./src
+COPY examples ./examples
 
 # Build the actual application
-RUN touch src/main.rs src/lib.rs && cargo build --release
+RUN touch src/main.rs src/lib.rs && cargo build --release --locked
 
 # Runtime stage
-FROM debian:bullseye-slim
+FROM debian:bookworm-slim
 
 WORKDIR /app
 
@@ -50,7 +56,9 @@ RUN apt-get update && \
         xdg-utils \
         ca-certificates \
         --no-install-recommends && break || \
-      { echo "apt-get install attempt $i failed, retrying..."; sleep 5; }; \
+      { if [ "$i" -eq 3 ]; then exit 1; fi; \
+        echo "apt-get install attempt $i failed, retrying..."; \
+        apt-get update && sleep 5; }; \
     done && \
     rm -rf /var/lib/apt/lists/*
 

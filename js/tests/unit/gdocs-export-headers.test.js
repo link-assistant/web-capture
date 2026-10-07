@@ -1,4 +1,4 @@
-import nock from 'nock';
+import nock from '../helpers/nock.js';
 import { fetchGoogleDocAsMarkdown } from '../../src/gdocs.js';
 
 afterEach(() => {

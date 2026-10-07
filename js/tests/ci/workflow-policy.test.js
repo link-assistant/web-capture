@@ -61,3 +61,19 @@ describe('workflow policy', () => {
     );
   });
 });
+
+test('release workflows require dependency health gates', () => {
+  const js = readWorkflow('.github/workflows/js.yml');
+  expect(js).toContain('npm audit --package-lock-only --audit-level=moderate');
+  expect(js).toContain('check-dependency-freshness.mjs npm');
+  expect(js).toContain('needs: [lint, test, dependency-health]');
+  const rust = readWorkflow('.github/workflows/rust.yml');
+  expect(rust).toContain('check-dependency-freshness.mjs cargo');
+  expect(rust).toContain('cargo update --dry-run');
+  expect(rust).toContain('needs: [lint, test, build, dependency-health]');
+  for (const workflow of [js, rust]) {
+    expect(
+      workflow.match(/needs\.dependency-health\.result == 'success'/g)
+    ).toHaveLength(2);
+  }
+});

@@ -131,5 +131,5 @@ fn test_pretty_print_html_void_elements() {
 #[test]
 fn test_pretty_print_html_empty() {
     let result = pretty_print_html("");
-    assert!(result.is_empty());
+    assert_eq!(result, "");
 }

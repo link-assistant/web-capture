@@ -6,7 +6,7 @@ import TurndownService from 'turndown';
 import iconv from 'iconv-lite';
 import { URL, URLSearchParams } from 'url';
 import turndownPluginGfm from 'turndown-plugin-gfm';
-import he from 'he';
+import * as he from 'he';
 import { isFormulaImage, isMathElement, extractFormula } from './latex.js';
 import { extractMetadata } from './metadata.js';
 import { postProcessMarkdown } from './postprocess.js';

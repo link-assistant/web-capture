@@ -1,5 +1,5 @@
 import { jest } from '@jest/globals';
-import nock from 'nock';
+import nock from '../helpers/nock.js';
 import request from 'supertest';
 import { URL, fileURLToPath } from 'url';
 

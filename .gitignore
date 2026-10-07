@@ -145,3 +145,6 @@ examples/js/downloaded.png
 
 # project
 .DS_Store
+
+# Local investigation artifacts; reusable probes and summaries are committed.
+ci-logs/

@@ -191,7 +191,8 @@ async function expectTextResponse(res) {
     text = await res.text();
   } catch (error) {
     throw new Error(
-      `${error.message}\nServer output:\n${serverOutput || '(empty)'}`
+      `${error.message}\nServer output:\n${serverOutput || '(empty)'}`,
+      { cause: error }
     );
   }
   expectResponseStatus(res.status, text);

@@ -40,6 +40,10 @@ concurrency:
 env:
   CARGO_TERM_COLOR: always
   RUSTFLAGS: -Dwarnings
+  # Generated browser protocol crates have high peak compiler memory usage.
+  CARGO_BUILD_JOBS: 2
+  CARGO_PROFILE_DEV_DEBUG: 0
+  CARGO_PROFILE_TEST_DEBUG: 0
   # Support both CARGO_REGISTRY_TOKEN (cargo's native env var) and CARGO_TOKEN (for backwards compatibility)
   CARGO_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN || secrets.CARGO_TOKEN }}
 
@@ -48,6 +52,29 @@ defaults:
     working-directory: rust
 
 jobs:
+  dependency-health:
+    name: Rust - Dependency Freshness
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24.x'
+      - name: Require current direct dependencies or open blockers
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: node ../scripts/check-dependency-freshness.mjs cargo
+      - name: Require a fully updated lockfile
+        shell: bash
+        run: |
+          cargo update --dry-run 2>&1 | tee "$RUNNER_TEMP/cargo-update.log"
+          if grep -q 'Updating .* ->' "$RUNNER_TEMP/cargo-update.log"; then
+            echo 'Cargo.lock has semver-compatible updates pending'
+            exit 1
+          fi
+
   # === DETECT CHANGES - determines which jobs should run ===
   detect-changes:
     name: Rust - Detect Changes
@@ -131,6 +158,9 @@ jobs:
       - name: Run Clippy
         run: cargo clippy --all-targets --all-features -- -D warnings
 
+      - name: Test runtime-independent capture cache
+        run: cargo test --locked --no-default-features --features cache --test cache_feature
+
       - name: Check minimal search feature dependency boundary
         working-directory: .
         run: |
@@ -144,6 +174,7 @@ jobs:
   # Test matrix: Rust on multiple OS - only runs when Rust code changes
   test:
     name: Rust - Test (${{ matrix.os }})
+    timeout-minutes: 30
     runs-on: ${{ matrix.os }}
     needs: [detect-changes]
     if: |
@@ -253,9 +284,8 @@ jobs:
   # Bare-container build check (issue #151)
   # `rust:slim-bookworm` ships no `pkg-config` and no OpenSSL headers. Building here
   # without any `apt-get install` step proves the crate does not silently require a
-  # system OpenSSL toolchain. The default feature set still reaches OpenSSL through
-  # `browser-commander -> fantoccini` (link-foundation/browser-commander#77), so for
-  # now this job covers the feature sets that are already free of it.
+  # system OpenSSL toolchain. The dependency graph guard additionally checks the
+  # default runtime; current browser-commander uses rustls for fantoccini.
   bare-container-build:
     name: Rust - Build Without System OpenSSL
     runs-on: ubuntu-latest
@@ -313,11 +343,14 @@ jobs:
   # Self-healing: detects unreleased commits and auto-bumps patch version
   release:
     name: Rust - Release
-    needs: [lint, test, build]
+    needs: [lint, test, build, dependency-health]
     if: |
       !cancelled() &&
       github.ref == 'refs/heads/main' &&
       github.event_name == 'push' &&
+      needs.lint.result == 'success' &&
+      needs.test.result == 'success' &&
+      needs.dependency-health.result == 'success' &&
       needs.build.result == 'success'
     runs-on: ubuntu-latest
     permissions:
@@ -398,7 +431,15 @@ jobs:
   # Manual Instant Release
   instant-release:
     name: Rust - Instant Release
-    if: github.event_name == 'workflow_dispatch' && github.event.inputs.release_mode == 'instant'
+    needs: [lint, test, build, dependency-health]
+    if: |
+      !cancelled() &&
+      github.event_name == 'workflow_dispatch' &&
+      github.event.inputs.release_mode == 'instant' &&
+      needs.lint.result == 'success' &&
+      needs.test.result == 'success' &&
+      needs.dependency-health.result == 'success' &&
+      needs.build.result == 'success'
     runs-on: ubuntu-latest
     permissions:
       contents: write
