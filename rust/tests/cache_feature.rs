@@ -28,6 +28,22 @@ const fn now() -> u64 {
     1000
 }
 
+#[test]
+fn unicode_header_ordering_matches_shared_replay_format() {
+    let directory = tempfile::tempdir().unwrap();
+    let store = CaptureStore::new(directory.path());
+    let fixture = include_str!("fixtures/capture-v1-unicode.json");
+    let replay: web_capture::CaptureRecord = serde_json::from_str(fixture).unwrap();
+    store.import(fixture).unwrap();
+    assert_eq!(
+        store.load(&replay.request).unwrap().unwrap().receipt,
+        receipt()
+    );
+    let exported: web_capture::CaptureRecord =
+        serde_json::from_str(&store.export(&replay.request).unwrap()).unwrap();
+    assert_eq!(exported, replay);
+}
+
 #[tokio::test]
 async fn exact_receipts_offline_stale_refresh_and_prune() {
     let directory = tempfile::tempdir().unwrap();

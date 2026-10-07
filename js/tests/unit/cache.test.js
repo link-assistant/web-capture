@@ -119,6 +119,20 @@ test('corrupt bodies are rejected and failed transports are never cached', async
   expect(await store.list()).toHaveLength(1);
 });
 
+test('Unicode header ordering matches the shared Rust replay format', async () => {
+  const fixture = await readFile(
+    new globalThis.URL(
+      '../../../rust/tests/fixtures/capture-v1-unicode.json',
+      import.meta.url
+    ),
+    'utf8'
+  );
+  const replay = JSON.parse(fixture);
+  await store.import(fixture);
+  expect((await store.load(replay.request)).receipt).toEqual(receipt);
+  expect(JSON.parse(await store.export(replay.request))).toEqual(replay);
+});
+
 test('failed online refresh retains the expired capture for offline replay', async () => {
   await store.store(request, receipt, 800);
   const cache = new CachedTransport(

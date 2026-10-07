@@ -39,7 +39,9 @@ export function captureRequestKey({ url, method = 'GET', headers = {} }) {
       VERSION,
       url,
       method,
-      Object.entries(headers).sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0)),
+      Object.entries(headers).sort(([a], [b]) =>
+        Buffer.compare(Buffer.from(a), Buffer.from(b))
+      ),
     ])
   );
 }

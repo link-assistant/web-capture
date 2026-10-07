@@ -147,6 +147,10 @@ sources: [chromiumoxide](https://docs.rs/crate/chromiumoxide/0.9.1/source/Cargo.
   unexpected contents. The all-target check reproduced the same lint in unit,
   integration and cache tests; every reported assertion is migrated and checked
   again with the CI toolchain.
+- A shared fixture with BMP and astral Unicode header names imports correctly in
+  Rust but reproduced a JavaScript request-hash mismatch. JavaScript's UTF-16
+  string ordering differed from Rust's UTF-8 ordering. Sort JS header names by
+  UTF-8 bytes; both implementations now import and export the same fixture.
 
 Primary migration/security references: [Puppeteer v25](https://github.com/puppeteer/puppeteer/releases/tag/puppeteer-v25.0.0),
 [async executablePath](https://pptr.dev/api/puppeteer.executablepath),
@@ -156,6 +160,8 @@ Primary migration/security references: [Puppeteer v25](https://github.com/puppet
 [Jest 30 upgrade guide](https://github.com/jestjs/jest/blob/main/docs/UpgradingToJest30.md),
 [Nock Jest cleanup](https://github.com/nock/nock#memory-issues-with-jest),
 [Clippy empty assertions](https://rust-lang.github.io/rust-clippy/rust-1.99.0/index.html#assert_is_empty),
+[ECMAScript string ordering](https://tc39.es/ecma262/multipage/abstract-operations.html#sec-islessthan),
+[Node byte comparison](https://nodejs.org/api/buffer.html#static-method-buffercomparebuf1-buf2),
 [jscpd 5 migration](https://github.com/kucherenko/jscpd/blob/master/docs/rust.md).
 
 ## Verification protocol
