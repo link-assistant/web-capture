@@ -1,0 +1,132 @@
+[
+  {
+    "name": "browser-commander",
+    "declared": "0.9",
+    "latest": "0.19.0"
+  },
+  {
+    "name": "async-tungstenite",
+    "declared": "0.27",
+    "latest": "0.35.0"
+  },
+  {
+    "name": "futures",
+    "declared": "0.3",
+    "latest": "0.3.34"
+  },
+  {
+    "name": "lino-arguments",
+    "declared": "0.3",
+    "latest": "0.4.0"
+  },
+  {
+    "name": "tokio",
+    "declared": "1.0",
+    "latest": "1.53.2"
+  },
+  {
+    "name": "axum",
+    "declared": "0.8",
+    "latest": "0.8.9"
+  },
+  {
+    "name": "tower",
+    "declared": "0.5",
+    "latest": "0.5.3"
+  },
+  {
+    "name": "tower-http",
+    "declared": "0.6",
+    "latest": "0.7.1"
+  },
+  {
+    "name": "reqwest",
+    "declared": "0.12",
+    "latest": "0.13.5"
+  },
+  {
+    "name": "scraper",
+    "declared": "0.21",
+    "latest": "0.27.0"
+  },
+  {
+    "name": "html2md",
+    "declared": "0.2",
+    "latest": "0.2.17"
+  },
+  {
+    "name": "html-to-markdown-rs",
+    "declared": "3.6",
+    "latest": "3.17.2"
+  },
+  {
+    "name": "clap",
+    "declared": "4.5",
+    "latest": "4.6.7"
+  },
+  {
+    "name": "serde",
+    "declared": "1.0",
+    "latest": "1.0.229"
+  },
+  {
+    "name": "serde_json",
+    "declared": "1.0",
+    "latest": "1.0.151"
+  },
+  {
+    "name": "thiserror",
+    "declared": "2.0",
+    "latest": "2.0.21"
+  },
+  {
+    "name": "anyhow",
+    "declared": "1.0",
+    "latest": "1.0.104"
+  },
+  {
+    "name": "tracing",
+    "declared": "0.1",
+    "latest": "0.1.44"
+  },
+  {
+    "name": "tracing-subscriber",
+    "declared": "0.3",
+    "latest": "0.3.23"
+  },
+  {
+    "name": "url",
+    "declared": "2.5",
+    "latest": "2.5.8"
+  },
+  {
+    "name": "encoding_rs",
+    "declared": "0.8",
+    "latest": "0.8.42"
+  },
+  {
+    "name": "base64",
+    "declared": "0.22",
+    "latest": "0.23.1"
+  },
+  {
+    "name": "regex",
+    "declared": "1.11",
+    "latest": "1.13.1"
+  },
+  {
+    "name": "html-escape",
+    "declared": "0.2",
+    "latest": "0.2.15"
+  },
+  {
+    "name": "zip",
+    "declared": "4.0",
+    "latest": "8.6.0"
+  },
+  {
+    "name": "tokio-test",
+    "declared": "0.4",
+    "latest": "0.4.6"
+  }
+]
