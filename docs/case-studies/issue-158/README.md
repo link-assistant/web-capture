@@ -140,6 +140,13 @@ sources: [chromiumoxide](https://docs.rs/crate/chromiumoxide/0.9.1/source/Cargo.
   for both Dockerfiles before the fix and now requires a nonzero exit after the
   third failure. Retries refresh package indexes. Rust's runtime image uses
   Bookworm after Bullseye package downloads returned 404s during verification.
+- CI's stable Rust toolchain was 1.99, while the initial local checks used 1.98.
+  The downloaded lint job log identified `assert_is_empty` at `src/search.rs:595`.
+  Installing the matching toolchain reproduced that failure locally; the test
+  now compares the complete result with an empty collection so failures expose
+  unexpected contents. The all-target check reproduced the same lint in unit,
+  integration and cache tests; every reported assertion is migrated and checked
+  again with the CI toolchain.
 
 Primary migration/security references: [Puppeteer v25](https://github.com/puppeteer/puppeteer/releases/tag/puppeteer-v25.0.0),
 [async executablePath](https://pptr.dev/api/puppeteer.executablepath),
@@ -148,6 +155,7 @@ Primary migration/security references: [Puppeteer v25](https://github.com/puppet
 [fxhash advisory](https://rustsec.org/advisories/RUSTSEC-2025-0057.html),
 [Jest 30 upgrade guide](https://github.com/jestjs/jest/blob/main/docs/UpgradingToJest30.md),
 [Nock Jest cleanup](https://github.com/nock/nock#memory-issues-with-jest),
+[Clippy empty assertions](https://rust-lang.github.io/rust-clippy/rust-1.99.0/index.html#assert_is_empty),
 [jscpd 5 migration](https://github.com/kucherenko/jscpd/blob/master/docs/rust.md).
 
 ## Verification protocol
@@ -161,6 +169,10 @@ Primary migration/security references: [Puppeteer v25](https://github.com/puppet
 4. Run JS lint/format/duplication and complete tests/Docker integration. Run Rust
    fmt/clippy/all-feature tests, minimal search/cache, TLS guard and fresh consumer
    resolution. Local Rust compilation uses one worker/debug=0 for the 3 GiB host.
+   The local optimized Rust Docker build was stopped when generated browser
+   protocol compilation exhausted that memory budget and caused sustained
+   memory reclaim. Retain its log and validate the production Docker build in
+   the existing CI build job on a larger runner.
 5. Review PR diff and updated description; fetch default branch before push.
 6. Inspect current CI run timestamps and SHA. Preserve failed run logs in
    ci-logs/<workflow>-<run>.log, report precise failures, fix them, and wait for the

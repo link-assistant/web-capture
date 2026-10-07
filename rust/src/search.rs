@@ -592,7 +592,7 @@ mod tests {
     #[test]
     fn empty_json_yields_no_results() {
         let (results, _) = parse_search_results("wikipedia", "not json", 10);
-        assert!(results.is_empty());
+        assert_eq!(results, Vec::<SearchResultItem>::new());
     }
 
     #[test]

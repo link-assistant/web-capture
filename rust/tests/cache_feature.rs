@@ -74,7 +74,10 @@ async fn exact_receipts_offline_stale_refresh_and_prune() {
         receipt()
     );
     assert_eq!(store.prune(1100, options.ttl).unwrap(), 1);
-    assert!(store.list().unwrap().is_empty());
+    assert_eq!(
+        store.list().unwrap(),
+        Vec::<web_capture::CaptureRecord>::new()
+    );
     let error = offline.capture(request()).await.unwrap_err();
     assert_eq!(error.kind, "offline_cache_miss");
 }

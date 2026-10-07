@@ -75,7 +75,7 @@ fn test_verify_headings() {
         &VerifyOptions::default(),
     );
     assert_eq!(result.passed_checks, 2);
-    assert!(result.missing.headings.is_empty());
+    assert_eq!(result.missing.headings, Vec::<String>::new());
 }
 
 #[test]

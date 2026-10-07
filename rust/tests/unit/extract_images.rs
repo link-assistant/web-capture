@@ -46,7 +46,7 @@ fn test_extract_single_png() {
         .is_some_and(|ext| ext.eq_ignore_ascii_case("png")));
 
     let buf = fs::read(&img_path).unwrap();
-    assert!(!buf.is_empty());
+    assert_ne!(buf, Vec::<u8>::new());
     // PNG magic bytes
     assert_eq!(buf[0], 0x89);
     assert_eq!(buf[1], b'P');
@@ -178,7 +178,7 @@ fn test_extract_base64_to_buffers() {
     assert!(std::path::Path::new(&result.images[0].filename)
         .extension()
         .is_some_and(|ext| ext.eq_ignore_ascii_case("png")));
-    assert!(!result.images[0].data.is_empty());
+    assert_ne!(result.images[0].data, Vec::<u8>::new());
     assert!(result
         .markdown
         .contains(&format!("images/{}", result.images[0].filename)));
