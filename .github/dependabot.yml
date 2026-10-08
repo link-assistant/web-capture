@@ -7,6 +7,12 @@ updates:
     groups:
       npm-dependencies:
         patterns: ['*']
+    # Every js/package.json `dependencyBlockers` entry must be ignored here,
+    # otherwise Dependabot reopens the blocked upgrade (PR #176 merged
+    # browser-commander 0.22.0 past open blocker #160). Enforced by
+    # scripts/check-dependency-freshness.mjs.
+    ignore:
+      - dependency-name: 'browser-commander'
   - package-ecosystem: cargo
     directories: ['/rust', '/experiments/issue-158/fresh-consumer']
     schedule:
@@ -14,7 +20,9 @@ updates:
     groups:
       cargo-dependencies:
         patterns: ['*']
-  - package-ecosystem: pip
+  # uv.lock is the source of truth; requirements.txt is its `uv export`.
+  # The `uv` ecosystem keeps uv.lock in sync, which `pip` cannot.
+  - package-ecosystem: uv
     directory: '/'
     schedule:
       interval: weekly

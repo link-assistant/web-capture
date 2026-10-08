@@ -25,6 +25,7 @@ jobs:
           node-version-file: '.node-version'
           package-manager-cache: false
       - run: node scripts/setup-npm.mjs
+      - run: node scripts/repair-npm-lock.mjs --check package-lock.json js/package-lock.json
       - run: npm ci
       - run: npm test
       - run: npm audit --package-lock-only
@@ -47,6 +48,13 @@ jobs:
         with:
           version: '0.12.23'
       - run: uv sync --locked
+      - name: Require requirements.txt to match uv.lock
+        run: |
+          uv export --locked --no-dev --format requirements-txt --output-file requirements.txt
+          git diff --exit-code requirements.txt || {
+            echo '::error file=requirements.txt::requirements.txt is stale; run: uv export --locked --no-dev --format requirements-txt --output-file requirements.txt'
+            exit 1
+          }
       - run: uv run --locked python -m unittest discover -s tests/python -v
       - run: uv run --locked pip-audit --strict
 

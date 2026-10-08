@@ -56,6 +56,10 @@ jobs:
           node-version-file: '.node-version'
       - name: Setup current npm
         run: node ../scripts/setup-npm.mjs
+      # npm 12 drops placeholders that `npm ci` requires (issue #177); report
+      # the exact fix instead of a bare EUSAGE from the next step.
+      - name: Check lock placeholders for unpublished optional dependencies
+        run: node ../scripts/repair-npm-lock.mjs --check package-lock.json ../package-lock.json
 
       - name: Install locked dependencies
         env:
