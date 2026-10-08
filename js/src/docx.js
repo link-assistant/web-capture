@@ -9,7 +9,6 @@
  *   engine - 'puppeteer' or 'playwright' (only used for browser rendering fallback)
  */
 
-import fetch from 'node-fetch';
 import * as cheerio from 'cheerio';
 import { URL } from 'url';
 import {

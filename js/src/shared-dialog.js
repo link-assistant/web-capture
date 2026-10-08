@@ -8,7 +8,6 @@
  * unsupported diagnostic instead of guessed content.
  */
 
-import fetch from 'node-fetch';
 import * as he from 'he';
 import { URL } from 'node:url';
 

@@ -1,4 +1,3 @@
-import fetch from 'node-fetch';
 import { retry } from './retry.js';
 
 // Shared image-download policy; keep HTTP errors distinct from network retries.

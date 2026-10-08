@@ -1,4 +1,3 @@
-import fetch from 'node-fetch';
 import { convertGoogleDriveUrl } from './lib.js';
 import { copyProxyResponseHeaders } from './proxy-headers.js';
 

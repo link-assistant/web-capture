@@ -1110,7 +1110,6 @@ async function captureUrl(url, options) {
         await import('../src/lib.js');
       const { retry } = await import('../src/retry.js');
       const cheerio = await import('cheerio');
-      const nodeFetch = await import('node-fetch');
 
       const html = await retry(() => fetchHtml(absoluteUrl), {
         retries: 3,
@@ -1207,8 +1206,7 @@ async function captureUrl(url, options) {
       if (imageMap.size > 0) {
         for (const [imgUrl, localPath] of imageMap) {
           try {
-            const fetchFn = nodeFetch.default || nodeFetch;
-            const resp = await retry(() => fetchFn(imgUrl), {
+            const resp = await retry(() => fetch(imgUrl), {
               retries: 2,
               baseDelay: 500,
             });

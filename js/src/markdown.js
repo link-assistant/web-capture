@@ -18,7 +18,6 @@ import { applyImageMode } from './extract-images.js';
 import { createBrowser, getBrowserEngine } from './browser.js';
 import { retry } from './retry.js';
 import { ZipArchive } from 'archiver';
-import fetch from 'node-fetch';
 import * as cheerio from 'cheerio';
 
 const INLINE_MARKDOWN_LINE_LIMIT = 1500;

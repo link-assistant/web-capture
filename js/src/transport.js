@@ -1,5 +1,3 @@
-import fetch from 'node-fetch';
-
 export const RECEIPT_HEADERS = [
   'cache-control',
   'content-encoding',
@@ -22,22 +20,42 @@ function selectedHeaders(headers) {
   return selected;
 }
 
+const TIMEOUT_CAUSE_CODES = new Set([
+  'ETIMEDOUT',
+  'UND_ERR_CONNECT_TIMEOUT',
+  'UND_ERR_HEADERS_TIMEOUT',
+  'UND_ERR_BODY_TIMEOUT',
+]);
+
 function classifyTransportError(error, signal) {
   if (signal?.aborted || error?.name === 'AbortError') {
     return 'cancelled';
   }
-  if (error?.name === 'TimeoutError' || error?.type === 'request-timeout') {
+  if (
+    error?.name === 'TimeoutError' ||
+    TIMEOUT_CAUSE_CODES.has(error?.cause?.code)
+  ) {
     return 'timeout';
   }
-  if (error instanceof TypeError) {
+  // Node's built-in fetch rejects every network failure with
+  // TypeError('fetch failed') and the real reason in `cause`. Browsers give a
+  // cause-less TypeError for CORS and network errors alike.
+  if (error?.name === 'TypeError' && !error.cause) {
     return 'cors_or_transport';
   }
   return 'transport';
 }
 
+/** Message of `error` including its `cause`, e.g. "fetch failed: getaddrinfo ENOTFOUND host". */
+export function describeTransportError(error) {
+  const message = error?.message || String(error);
+  const cause = error?.cause?.message;
+  return cause && !message.includes(cause) ? `${message}: ${cause}` : message;
+}
+
 export class CaptureTransportError extends Error {
   constructor(error, url, signal) {
-    super(error?.message || String(error));
+    super(describeTransportError(error));
     this.name = 'CaptureTransportError';
     this.cause = error;
     this.diagnostics = {

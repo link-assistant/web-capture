@@ -1,4 +1,3 @@
-import fetch from 'node-fetch';
 import { URL } from 'node:url';
 
 const GITHUB_API_BASE = 'https://api.github.com';
