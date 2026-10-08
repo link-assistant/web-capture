@@ -128,7 +128,7 @@ impl Transport for ReqwestTransport {
                     "transport"
                 }
                 .to_string(),
-                message: error.to_string(),
+                message: describe_error(&error),
                 source_url: request.url.clone(),
             })?;
             let status = response.status().as_u16();
@@ -148,7 +148,7 @@ impl Transport for ReqwestTransport {
                 .await
                 .map_err(|error| TransportError {
                     kind: "body".to_string(),
-                    message: error.to_string(),
+                    message: describe_error(&error),
                     source_url: request.url,
                 })?
                 .to_vec();
@@ -161,6 +161,24 @@ impl Transport for ReqwestTransport {
             })
         })
     }
+}
+
+/// Message of `error` followed by its source chain, e.g. "error sending request
+/// for url (...): client error (Connect): tcp connect error: Connection refused".
+/// Matches the JS transport's `describeTransportError`.
+#[cfg(feature = "runtime")]
+fn describe_error(error: &dyn std::error::Error) -> String {
+    let mut message = error.to_string();
+    let mut source = error.source();
+    while let Some(cause) = source {
+        let cause_message = cause.to_string();
+        if !message.contains(&cause_message) {
+            message.push_str(": ");
+            message.push_str(&cause_message);
+        }
+        source = cause.source();
+    }
+    message
 }
 
 /// Capture an HTTP response through caller-supplied transport without decoding it.
