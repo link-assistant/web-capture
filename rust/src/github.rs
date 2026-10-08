@@ -447,10 +447,10 @@ fn github_headers(accept: &str) -> HeaderMap {
         "X-GitHub-Api-Version",
         HeaderValue::from_static("2022-11-28"),
     );
-    if let Ok(token) = std::env::var("GITHUB_TOKEN").or_else(|_| std::env::var("GH_TOKEN")) {
-        if let Ok(value) = HeaderValue::from_str(&format!("Bearer {token}")) {
-            headers.insert(AUTHORIZATION, value);
-        }
+    if let Ok(token) = std::env::var("GITHUB_TOKEN").or_else(|_| std::env::var("GH_TOKEN"))
+        && let Ok(value) = HeaderValue::from_str(&format!("Bearer {token}"))
+    {
+        headers.insert(AUTHORIZATION, value);
     }
     headers
 }

@@ -773,20 +773,20 @@ fn split_paragraphs_at_bold_boundaries(html: &str) -> String {
         let mut current = String::new();
         let mut idx = 0usize;
         while idx < inner.len() {
-            if let Some(br) = br_re.find_at(inner, idx) {
-                if br.start() == idx {
-                    flush_paragraph_segment(&mut segments, &mut current);
-                    idx = br.end();
-                    continue;
-                }
+            if let Some(br) = br_re.find_at(inner, idx)
+                && br.start() == idx
+            {
+                flush_paragraph_segment(&mut segments, &mut current);
+                idx = br.end();
+                continue;
             }
-            if let Some(img) = img_re.find_at(inner, idx) {
-                if img.start() == idx {
-                    flush_paragraph_segment(&mut segments, &mut current);
-                    segments.push(img.as_str().to_string());
-                    idx = img.end();
-                    continue;
-                }
+            if let Some(img) = img_re.find_at(inner, idx)
+                && img.start() == idx
+            {
+                flush_paragraph_segment(&mut segments, &mut current);
+                segments.push(img.as_str().to_string());
+                idx = img.end();
+                continue;
             }
             // Find the next boundary.
             let next_br = br_re.find_at(inner, idx).map(|m| m.start());
@@ -916,13 +916,13 @@ fn nest_google_docs_lists(html: &str, class_styles: &HashMap<String, String>) ->
     let mut groups: Vec<Vec<ExportListBlock>> = Vec::new();
     let mut current: Vec<ExportListBlock> = Vec::new();
     for block in blocks {
-        if let Some(previous) = current.last() {
-            if !html[previous.end..block.start].trim().is_empty() {
-                if current.len() > 1 {
-                    groups.push(std::mem::take(&mut current));
-                } else {
-                    current.clear();
-                }
+        if let Some(previous) = current.last()
+            && !html[previous.end..block.start].trim().is_empty()
+        {
+            if current.len() > 1 {
+                groups.push(std::mem::take(&mut current));
+            } else {
+                current.clear();
             }
         }
         current.push(block);
@@ -1084,10 +1084,11 @@ fn open_rendered_list(
     ensure_list_stack(open_tags, item_open, level);
     html.push('<');
     html.push_str(tag);
-    if let Some(start) = start_attr {
-        if tag == "ol" && !start.is_empty() {
-            write!(html, r#" start="{start}""#).expect("write to String");
-        }
+    if let Some(start) = start_attr
+        && tag == "ol"
+        && !start.is_empty()
+    {
+        write!(html, r#" start="{start}""#).expect("write to String");
     }
     html.push('>');
     open_tags[level] = Some(tag.to_string());
@@ -1304,12 +1305,12 @@ fn percent_decode_utf8_lossy(input: &str) -> String {
         if bytes[i] == b'%' && i + 2 < bytes.len() {
             let hi = (bytes[i + 1] as char).to_digit(16);
             let lo = (bytes[i + 2] as char).to_digit(16);
-            if let (Some(hi), Some(lo)) = (hi, lo) {
-                if let Ok(byte) = u8::try_from((hi << 4) | lo) {
-                    decoded.push(byte);
-                    i += 3;
-                    continue;
-                }
+            if let (Some(hi), Some(lo)) = (hi, lo)
+                && let Ok(byte) = u8::try_from((hi << 4) | lo)
+            {
+                decoded.push(byte);
+                i += 3;
+                continue;
             }
         }
         decoded.push(bytes[i]);
@@ -2245,10 +2246,9 @@ fn paragraph_to_content(paragraph: &Value, inline_objects: &Value) -> Vec<Conten
         } else if let Some(inline_id) = element
             .pointer("/inlineObjectElement/inlineObjectId")
             .and_then(Value::as_str)
+            && let Some(image) = inline_object_to_image(inline_id, inline_objects)
         {
-            if let Some(image) = inline_object_to_image(inline_id, inline_objects) {
-                content.push(image);
-            }
+            content.push(image);
         }
     }
     content
@@ -2465,18 +2465,17 @@ pub fn parse_model_chunks_with_export_html<S: BuildHasher>(
 
     let mut positions = HashMap::new();
     for item in &items {
-        if matches!(item.get("ty").and_then(Value::as_str), Some("te" | "ste")) {
-            if let (Some(id), Some(pos)) = (
+        if matches!(item.get("ty").and_then(Value::as_str), Some("te" | "ste"))
+            && let (Some(id), Some(pos)) = (
                 item.get("id").and_then(Value::as_str),
                 item.get("spi").and_then(Value::as_u64),
-            ) {
-                if let Ok(pos) = usize::try_from(pos) {
-                    positions.insert(
-                        id.to_string(),
-                        utf16_position_to_char_position(&utf16_position_map, pos).saturating_sub(1),
-                    );
-                }
-            }
+            )
+            && let Ok(pos) = usize::try_from(pos)
+        {
+            positions.insert(
+                id.to_string(),
+                utf16_position_to_char_position(&utf16_position_map, pos).saturating_sub(1),
+            );
         }
     }
 

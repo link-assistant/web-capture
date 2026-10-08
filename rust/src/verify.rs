@@ -346,20 +346,20 @@ pub fn verify_markdown_content(
     }
 
     // Check for figure images
-    if options.has_local_images {
-        if let Some(expected) = options.expected_figures {
-            total_checks += 1;
-            let figure_re = Regex::new(
+    if options.has_local_images
+        && let Some(expected) = options.expected_figures
+    {
+        total_checks += 1;
+        let figure_re = Regex::new(
                 r"(?i)!\[(?:\*\*)?(?:Figure|Рис\.?|Рисунок)\s*\d+[\s\S]*?\]\(images/figure-\d+\.(png|jpg)\)",
             )
             .unwrap();
-            #[allow(clippy::cast_possible_truncation)]
-            let figure_count = figure_re.find_iter(markdown_text).count() as u32;
-            if figure_count >= expected {
-                passed_checks += 1;
-            } else {
-                missing.images = expected - figure_count;
-            }
+        #[allow(clippy::cast_possible_truncation)]
+        let figure_count = figure_re.find_iter(markdown_text).count() as u32;
+        if figure_count >= expected {
+            passed_checks += 1;
+        } else {
+            missing.images = expected - figure_count;
         }
     }
 
