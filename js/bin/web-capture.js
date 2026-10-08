@@ -1111,9 +1111,8 @@ async function captureUrl(url, options) {
       const { retry } = await import('../src/retry.js');
       const cheerio = await import('cheerio');
 
+      // retry() defaults: 3 retries from a 1000ms base delay.
       const html = await retry(() => fetchHtml(absoluteUrl), {
-        retries: 3,
-        baseDelay: 1000,
         onRetry: (err, attempt) => {
           console.error(`Retry ${attempt} fetching page: ${err.message}`);
         },
