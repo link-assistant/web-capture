@@ -320,13 +320,12 @@ async fn process_output_markdown(
             result.stripped
         );
     }
-    if let Some(dir) = extract_dir {
-        if !result.pending_remote.is_empty() {
-            let images_path = dir.join(&args.images_dir);
-            md =
-                download_pending_remote(md, &result.pending_remote, &images_path, &args.images_dir)
-                    .await;
-        }
+    if let Some(dir) = extract_dir
+        && !result.pending_remote.is_empty()
+    {
+        let images_path = dir.join(&args.images_dir);
+        md = download_pending_remote(md, &result.pending_remote, &images_path, &args.images_dir)
+            .await;
     }
     Ok(md)
 }
