@@ -2,8 +2,8 @@ use std::fs;
 use std::path::Path;
 
 use web_capture::shared_dialog::{
-    format_shared_dialog_as_demo_memory, format_shared_dialog_as_markdown,
-    format_shared_dialog_as_meta_language, parse_shared_dialog, SharedDialogParseOptions,
+    SharedDialogParseOptions, format_shared_dialog_as_demo_memory,
+    format_shared_dialog_as_markdown, format_shared_dialog_as_meta_language, parse_shared_dialog,
 };
 
 const CHATGPT_SHARE_URL: &str = "https://chatgpt.com/share/6a3825b9-8de4-83ee-9c24-52fd1eb38d24";
@@ -40,12 +40,16 @@ fn chatgpt_share_html_extracts_visible_dialog_turns() {
         CHATGPT_SHARE_URL
     );
     assert!(capture.turns[0].content.contains("make a loop of that"));
-    assert!(capture.turns[1]
-        .content
-        .contains("while true; do sleep 30m && hive-cleanup -f; done"));
-    assert!(capture.turns[3]
-        .content
-        .contains("screen -dmS auto-cleanup bash -c"));
+    assert!(
+        capture.turns[1]
+            .content
+            .contains("while true; do sleep 30m && hive-cleanup -f; done")
+    );
+    assert!(
+        capture.turns[3]
+            .content
+            .contains("screen -dmS auto-cleanup bash -c")
+    );
 }
 
 #[test]
@@ -64,8 +68,11 @@ fn chatgpt_share_formats_demo_memory_meta_language_and_markdown() {
     assert!(memory.contains("demo_memory"));
     assert_eq!(memory.matches("\n  event \"").count(), 4);
     assert!(memory.contains("conversationTitle \"Infinite loop script\""));
-    assert!(memory
-        .contains("evidence \"https://chatgpt.com/share/6a3825b9-8de4-83ee-9c24-52fd1eb38d24\""));
+    assert!(
+        memory.contains(
+            "evidence \"https://chatgpt.com/share/6a3825b9-8de4-83ee-9c24-52fd1eb38d24\""
+        )
+    );
 
     let meta_language = format_shared_dialog_as_meta_language(&capture);
     assert!(meta_language.contains("shared_dialog_capture"));

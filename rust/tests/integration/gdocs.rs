@@ -3,13 +3,13 @@ use std::fs;
 use std::path::PathBuf;
 
 use web_capture::gdocs::{
-    build_docs_api_url, build_edit_url, build_export_url, create_archive_zip,
-    extract_base64_images, extract_bearer_token, extract_document_id, is_google_docs_url,
-    localize_rendered_remote_images_for_archive, normalize_google_docs_export_markdown,
-    parse_model_chunks, parse_model_chunks_with_export_html, preprocess_google_docs_export_html,
-    render_captured_document, render_docs_api_document, select_capture_method, CapturedBlock,
-    CapturedDocument, ContentNode, ExtractedImage, GDocsArchiveResult, GDocsCaptureMethod,
-    GDocsRenderedResult, RemoteImage,
+    CapturedBlock, CapturedDocument, ContentNode, ExtractedImage, GDocsArchiveResult,
+    GDocsCaptureMethod, GDocsRenderedResult, RemoteImage, build_docs_api_url, build_edit_url,
+    build_export_url, create_archive_zip, extract_base64_images, extract_bearer_token,
+    extract_document_id, is_google_docs_url, localize_rendered_remote_images_for_archive,
+    normalize_google_docs_export_markdown, parse_model_chunks, parse_model_chunks_with_export_html,
+    preprocess_google_docs_export_html, render_captured_document, render_docs_api_document,
+    select_capture_method,
 };
 
 fn issue_104_fixture_path(filename: &str) -> PathBuf {
@@ -276,12 +276,16 @@ fn test_parse_model_chunks_renders_style_records() {
     let markdown = render_captured_document(&capture, "markdown");
 
     assert!(markdown.contains("# Title"));
-    assert!(markdown
-        .contains("This is **bold**, *italic*, ~~strike~~, and [link](https://example.com)"));
+    assert!(
+        markdown
+            .contains("This is **bold**, *italic*, ~~strike~~, and [link](https://example.com)")
+    );
     assert!(markdown.contains("---"));
     assert!(markdown.contains("- Item"));
     assert!(markdown.contains("> Quote"));
-    assert!(markdown.contains("![Blue rectangle](https://docs.google.com/docs-images-rt/image-id)"));
+    assert!(
+        markdown.contains("![Blue rectangle](https://docs.google.com/docs-images-rt/image-id)")
+    );
 }
 
 #[test]
@@ -427,8 +431,11 @@ fn test_parse_model_chunks_translates_utf16_positions() {
     let capture = parse_model_chunks(&chunks, &cid_urls);
     let markdown = render_captured_document(&capture, "markdown");
 
-    assert!(markdown
-        .contains("😀 **bold**![Blue rectangle](https://docs.google.com/docs-images-rt/image-id)"));
+    assert!(
+        markdown.contains(
+            "😀 **bold**![Blue rectangle](https://docs.google.com/docs-images-rt/image-id)"
+        )
+    );
 }
 
 #[test]
@@ -501,9 +508,11 @@ fn test_render_docs_api_document_paragraphs_tables_and_images() {
     assert!(rendered.markdown.contains("Intro paragraph"));
     assert!(rendered.markdown.contains("| Name | ![Diagram]"));
     assert!(rendered.html.contains("<table>"));
-    assert!(rendered
-        .html
-        .contains("src=\"https://example.com/diagram.png\""));
+    assert!(
+        rendered
+            .html
+            .contains("src=\"https://example.com/diagram.png\"")
+    );
 }
 
 #[test]
@@ -843,8 +852,7 @@ fn test_render_ordered_list_sequential_numbering_r3() {
     })];
     let cid_urls = std::collections::HashMap::<String, String>::new();
 
-    let export_html =
-        "<html><body><ol><li>First item</li><li>Second item</li><li>Third item</li></ol></body></html>";
+    let export_html = "<html><body><ol><li>First item</li><li>Second item</li><li>Third item</li></ol></body></html>";
     let capture = parse_model_chunks_with_export_html(&chunks, &cid_urls, Some(export_html));
     let markdown = render_captured_document(&capture, "markdown");
 
@@ -1340,9 +1348,10 @@ fn test_preprocess_exports_noop_for_regular_html_r6() {
     let out = preprocess_google_docs_export_html(html);
     assert_eq!(out.hoisted, 0);
     assert_eq!(out.unwrapped_links, 0);
-    assert!(out
-        .html
-        .contains("<p>Plain text with <strong>bold</strong>.</p>"));
+    assert!(
+        out.html
+            .contains("<p>Plain text with <strong>bold</strong>.</p>")
+    );
 }
 
 #[test]

@@ -1,4 +1,4 @@
-use web_capture::{convert_with_kreuzberg, convert_with_kreuzberg_enhanced, EnhancedOptions};
+use web_capture::{EnhancedOptions, convert_with_kreuzberg, convert_with_kreuzberg_enhanced};
 
 #[test]
 fn converts_basic_html() {

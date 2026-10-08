@@ -1,5 +1,5 @@
 use web_capture::verify::{
-    normalize_code, normalize_text, verify_markdown_content, Heading, VerifyOptions, WebContent,
+    Heading, VerifyOptions, WebContent, normalize_code, normalize_text, verify_markdown_content,
 };
 
 #[test]

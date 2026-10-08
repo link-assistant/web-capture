@@ -41,9 +41,11 @@ fn test_extract_single_png() {
     let img_path = entries[0].as_ref().unwrap().path();
     let filename = img_path.file_name().unwrap().to_str().unwrap();
     assert!(filename.starts_with("image-"));
-    assert!(std::path::Path::new(filename)
-        .extension()
-        .is_some_and(|ext| ext.eq_ignore_ascii_case("png")));
+    assert!(
+        std::path::Path::new(filename)
+            .extension()
+            .is_some_and(|ext| ext.eq_ignore_ascii_case("png"))
+    );
 
     let buf = fs::read(&img_path).unwrap();
     assert_ne!(buf, Vec::<u8>::new());
@@ -125,9 +127,11 @@ fn test_preserves_alt_text() {
 
     let result = extract_and_save_images(&md, &dir, "images").unwrap();
 
-    assert!(result
-        .markdown
-        .starts_with("![A descriptive alt text](images/image-"));
+    assert!(
+        result
+            .markdown
+            .starts_with("![A descriptive alt text](images/image-")
+    );
     assert!(result.markdown.ends_with(".png)"));
 
     cleanup(&dir);
@@ -175,13 +179,17 @@ fn test_extract_base64_to_buffers() {
 
     assert_eq!(result.images.len(), 1);
     assert!(result.images[0].filename.starts_with("image-"));
-    assert!(std::path::Path::new(&result.images[0].filename)
-        .extension()
-        .is_some_and(|ext| ext.eq_ignore_ascii_case("png")));
+    assert!(
+        std::path::Path::new(&result.images[0].filename)
+            .extension()
+            .is_some_and(|ext| ext.eq_ignore_ascii_case("png"))
+    );
     assert_ne!(result.images[0].data, Vec::<u8>::new());
-    assert!(result
-        .markdown
-        .contains(&format!("images/{}", result.images[0].filename)));
+    assert!(
+        result
+            .markdown
+            .contains(&format!("images/{}", result.images[0].filename))
+    );
     assert!(!result.markdown.contains("data:image"));
 }
 

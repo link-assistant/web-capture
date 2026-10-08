@@ -17,11 +17,11 @@
 //! ```
 
 use axum::{
+    Router,
     extract::Query,
-    http::{header, HeaderValue, StatusCode},
+    http::{HeaderValue, StatusCode, header},
     response::{IntoResponse, Response},
     routing::get,
-    Router,
 };
 use clap::Parser;
 use serde::Deserialize;
@@ -33,11 +33,11 @@ use tracing::{debug, error, info};
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 use url::Url;
 
-use web_capture::extract_images::{apply_image_mode, ImageMode, PendingRemoteImage};
-use web_capture::search::{format_search_as_markdown, DEFAULT_PROVIDER};
+use web_capture::extract_images::{ImageMode, PendingRemoteImage, apply_image_mode};
+use web_capture::search::{DEFAULT_PROVIDER, format_search_as_markdown};
 use web_capture::{
-    capture_screenshot, convert_html_to_markdown_enhanced, convert_relative_urls, convert_to_utf8,
-    convert_with_kreuzberg_enhanced, fetch_html, html, render_html, EnhancedOptions,
+    EnhancedOptions, capture_screenshot, convert_html_to_markdown_enhanced, convert_relative_urls,
+    convert_to_utf8, convert_with_kreuzberg_enhanced, fetch_html, html, render_html,
 };
 
 /// CLI arguments
@@ -398,7 +398,9 @@ async fn main() -> anyhow::Result<()> {
         match fmt {
             "zip" | "7z" | "tar.gz" | "gz" | "tar" => {}
             other => {
-                eprintln!("Error: Unsupported archive format \"{other}\". Supported: zip, 7z, tar.gz, gz, tar");
+                eprintln!(
+                    "Error: Unsupported archive format \"{other}\". Supported: zip, 7z, tar.gz, gz, tar"
+                );
                 std::process::exit(1);
             }
         }
@@ -451,7 +453,9 @@ async fn start_server(port: u16) -> anyhow::Result<()> {
     info!("Available endpoints:");
     info!("  GET /html?url=<URL>       - Render page as HTML");
     info!("  GET /markdown?url=<URL>   - Convert page to Markdown");
-    info!("  GET /markdown?url=<URL>&converter=kreuzberg&format=json - Structured Markdown conversion");
+    info!(
+        "  GET /markdown?url=<URL>&converter=kreuzberg&format=json - Structured Markdown conversion"
+    );
     info!("  GET /txt?url=<URL>        - Fetch text content");
     info!("  GET /image?url=<URL>      - Screenshot page as PNG");
     info!("  GET /archive?url=<URL>    - Capture page as ZIP archive");

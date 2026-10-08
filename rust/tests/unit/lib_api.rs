@@ -1,6 +1,6 @@
 use web_capture::{
-    convert_html_to_markdown_enhanced, convert_relative_urls, convert_to_utf8, EnhancedOptions,
-    VERSION,
+    EnhancedOptions, VERSION, convert_html_to_markdown_enhanced, convert_relative_urls,
+    convert_to_utf8,
 };
 
 #[test]

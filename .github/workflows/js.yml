@@ -50,10 +50,13 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-node@v6
+      - uses: actions/checkout@v7.0.1
+      - uses: actions/setup-node@v7.1.0
         with:
-          node-version: '24.x'
+          node-version-file: '.node-version'
+      - name: Setup current npm
+        run: node ../scripts/setup-npm.mjs
+
       - name: Install locked dependencies
         env:
           PUPPETEER_SKIP_DOWNLOAD: 'true'
@@ -79,7 +82,7 @@ jobs:
       any-code-changed: ${{ steps.changes.outputs.any-code-changed }}
       docs-changed: ${{ steps.changes.outputs.docs-changed }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7.0.1
         with:
           fetch-depth: 0
 
@@ -99,14 +102,21 @@ jobs:
     needs: [detect-changes]
     if: github.event_name == 'pull_request' && needs.detect-changes.outputs.js-code-changed == 'true'
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7.0.1
         with:
           fetch-depth: 0
 
       - name: Setup Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v7.1.0
         with:
-          node-version: '24.x'
+          node-version-file: '.node-version'
+
+      - name: Setup current npm
+        run: node ../scripts/setup-npm.mjs
+
+      - name: Install release tooling
+        working-directory: .
+        run: npm ci
 
       - name: Install dependencies
         run: npm ci
@@ -131,7 +141,7 @@ jobs:
     needs: [detect-changes]
     if: github.event_name == 'pull_request' && needs.detect-changes.outputs.any-js-code-changed == 'true'
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7.0.1
         with:
           fetch-depth: 0
 
@@ -154,14 +164,21 @@ jobs:
         needs.detect-changes.outputs.docs-changed == 'true'
       )
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7.0.1
         with:
           fetch-depth: 0
 
       - name: Setup Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v7.1.0
         with:
-          node-version: '24.x'
+          node-version-file: '.node-version'
+
+      - name: Setup current npm
+        run: node ../scripts/setup-npm.mjs
+
+      - name: Install release tooling
+        working-directory: .
+        run: npm ci
 
       - name: Install dependencies
         run: npm ci
@@ -196,12 +213,19 @@ jobs:
       matrix:
         os: [ubuntu-latest]
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7.0.1
 
       - name: Setup Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v7.1.0
         with:
-          node-version: '24.x'
+          node-version-file: '.node-version'
+
+      - name: Setup current npm
+        run: node ../scripts/setup-npm.mjs
+
+      - name: Install release tooling
+        working-directory: .
+        run: npm ci
 
       - name: Install dependencies
         run: npm ci
@@ -382,15 +406,22 @@ jobs:
       pull-requests: write
       id-token: write
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7.0.1
         with:
           fetch-depth: 0
 
       - name: Setup Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v7.1.0
         with:
-          node-version: '24.x'
+          node-version-file: '.node-version'
           registry-url: 'https://registry.npmjs.org'
+
+      - name: Setup current npm
+        run: node ../scripts/setup-npm.mjs
+
+      - name: Install release tooling
+        working-directory: .
+        run: npm ci
 
       - name: Install dependencies
         run: npm ci
@@ -470,15 +501,22 @@ jobs:
       pull-requests: write
       id-token: write
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7.0.1
         with:
           fetch-depth: 0
 
       - name: Setup Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v7.1.0
         with:
-          node-version: '24.x'
+          node-version-file: '.node-version'
           registry-url: 'https://registry.npmjs.org'
+
+      - name: Setup current npm
+        run: node ../scripts/setup-npm.mjs
+
+      - name: Install release tooling
+        working-directory: .
+        run: npm ci
 
       - name: Install dependencies
         run: npm ci
@@ -517,14 +555,21 @@ jobs:
       contents: write
       pull-requests: write
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7.0.1
         with:
           fetch-depth: 0
 
       - name: Setup Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v7.1.0
         with:
-          node-version: '24.x'
+          node-version-file: '.node-version'
+
+      - name: Setup current npm
+        run: node ../scripts/setup-npm.mjs
+
+      - name: Install release tooling
+        working-directory: .
+        run: npm ci
 
       - name: Install dependencies
         run: npm ci
@@ -540,7 +585,7 @@ jobs:
           echo "Formatted changeset files"
 
       - name: Create Pull Request
-        uses: peter-evans/create-pull-request@v8
+        uses: peter-evans/create-pull-request@v8.1.1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           commit-message: 'chore(js): add changeset for manual ${{ github.event.inputs.bump_type }} release'

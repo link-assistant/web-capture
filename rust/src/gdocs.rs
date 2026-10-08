@@ -28,13 +28,13 @@
 //! }
 //! ```
 
-use async_tungstenite::tokio::{connect_async, ConnectStream};
-use async_tungstenite::tungstenite::Message;
 use async_tungstenite::WebSocketStream;
+use async_tungstenite::tokio::{ConnectStream, connect_async};
+use async_tungstenite::tungstenite::Message;
 use base64::Engine;
 use futures::StreamExt;
 use regex::Regex;
-use scraper::{node::Node, ElementRef, Html, Selector};
+use scraper::{ElementRef, Html, Selector, node::Node};
 use serde_json::Value;
 use std::collections::HashMap;
 use std::fmt::Write as _;
@@ -51,8 +51,7 @@ use crate::WebCaptureError;
 
 const GDOCS_EXPORT_BASE: &str = "https://docs.google.com/document/d";
 const GDOCS_API_BASE: &str = "https://docs.googleapis.com/v1/documents";
-const GDOCS_USER_AGENT: &str =
-    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36";
+const GDOCS_USER_AGENT: &str = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36";
 const GDOCS_EDITOR_MODEL_MAX_WAIT_DEFAULT: Duration = Duration::from_secs(30);
 const GDOCS_EDITOR_MODEL_STABILITY_DEFAULT: Duration = Duration::from_millis(1500);
 const GDOCS_EDITOR_MODEL_POLL_INTERVAL: Duration = Duration::from_millis(250);

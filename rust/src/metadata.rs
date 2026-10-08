@@ -78,11 +78,7 @@ fn select_text(document: &Html, selector_str: &str) -> Option<String> {
     let sel = Selector::parse(selector_str).ok()?;
     let el = document.select(&sel).next()?;
     let text: String = el.text().collect::<String>().trim().to_string();
-    if text.is_empty() {
-        None
-    } else {
-        Some(text)
-    }
+    if text.is_empty() { None } else { Some(text) }
 }
 
 /// Helper to select first element and get an attribute value.

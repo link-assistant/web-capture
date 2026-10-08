@@ -2,8 +2,8 @@
 //!
 //! This module provides functions for converting HTML to Markdown format.
 
-use crate::html::convert_relative_urls;
 use crate::Result;
+use crate::html::convert_relative_urls;
 use regex::Regex;
 use scraper::{Html, Selector};
 use tracing::{debug, info};

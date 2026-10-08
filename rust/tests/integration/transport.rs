@@ -1,13 +1,13 @@
 use std::{
     collections::BTreeMap,
     sync::{
-        atomic::{AtomicBool, Ordering},
         Arc,
+        atomic::{AtomicBool, Ordering},
     },
 };
 
 use web_capture::{
-    fetch_html_receipt_with_transport, ResponseReceipt, TransportDiagnostics, TransportRequest,
+    ResponseReceipt, TransportDiagnostics, TransportRequest, fetch_html_receipt_with_transport,
 };
 
 #[tokio::test]

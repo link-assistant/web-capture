@@ -1,7 +1,7 @@
 use web_capture::github::{
+    GithubReadme, GithubRepositoryMetadata, GithubRepositorySnapshot, GithubTreeEntry,
     format_github_repository_markdown, format_github_repository_text,
     github_repository_text_filename, is_github_repository_url, parse_github_repository_url,
-    GithubReadme, GithubRepositoryMetadata, GithubRepositorySnapshot, GithubTreeEntry,
 };
 
 #[test]

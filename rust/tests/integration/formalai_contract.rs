@@ -15,9 +15,9 @@ use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use tokio::process::{Child, Command};
 use tokio::sync::oneshot;
 use tokio::task::JoinHandle;
-use tokio::time::{sleep, Duration, Instant};
+use tokio::time::{Duration, Instant, sleep};
 use web_capture::search::{
-    parse_search_results, SearchDiagnostics, SearchResult, SEARCH_PROVIDERS,
+    SEARCH_PROVIDERS, SearchDiagnostics, SearchResult, parse_search_results,
 };
 
 const HTML: &str = "<!doctype html><html><head><title>FormalAI fixture</title></head><body><h1>FormalAI Fixture</h1><p>Stable Rust shape.</p></body></html>";
@@ -287,10 +287,12 @@ fn formalai_search_json_contract_shape() {
     assert_eq!(value["diagnostics"]["status"], 200);
     assert_eq!(value["diagnostics"]["blockedByCors"], false);
     assert_eq!(value["diagnostics"]["blockedByCaptcha"], false);
-    assert!(value["diagnostics"]["sourceUrl"]
-        .as_str()
-        .expect("sourceUrl")
-        .contains("en.wikipedia.org"));
+    assert!(
+        value["diagnostics"]["sourceUrl"]
+            .as_str()
+            .expect("sourceUrl")
+            .contains("en.wikipedia.org")
+    );
 }
 
 #[test]

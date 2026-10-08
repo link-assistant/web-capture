@@ -122,7 +122,9 @@ async fn live_capture_repository_as_png() {
         return;
     }
     if !chrome_available() {
-        eprintln!("Skipping live GitHub repository screenshot test because Chrome/Chromium is not installed");
+        eprintln!(
+            "Skipping live GitHub repository screenshot test because Chrome/Chromium is not installed"
+        );
         return;
     }
 

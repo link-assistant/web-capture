@@ -6,11 +6,11 @@
 
 use std::collections::BTreeMap;
 use web_capture::search::{
-    build_search_url, format_search_as_markdown, parse_search_results, SearchDiagnostics,
-    SearchResult, SearchResultItem,
+    SearchDiagnostics, SearchResult, SearchResultItem, build_search_url, format_search_as_markdown,
+    parse_search_results,
 };
-use web_capture::{search, SEARCH_PROVIDERS};
-use web_capture::{search_with_transport, ResponseReceipt, TransportDiagnostics};
+use web_capture::{ResponseReceipt, TransportDiagnostics, search_with_transport};
+use web_capture::{SEARCH_PROVIDERS, search};
 
 const WIKI_JSON: &str = r#"{"pages":[
     {"id":1,"key":"Formal_methods","title":"Formal methods","excerpt":"the <b>study</b>","description":"x"}
@@ -26,12 +26,16 @@ fn exposes_documented_provider_list() {
 
 #[test]
 fn builds_provider_urls() {
-    assert!(build_search_url("wikipedia", "x", 10)
-        .unwrap()
-        .contains("en.wikipedia.org"));
-    assert!(build_search_url("duckduckgo", "x", 10)
-        .unwrap()
-        .contains("duckduckgo.com"));
+    assert!(
+        build_search_url("wikipedia", "x", 10)
+            .unwrap()
+            .contains("en.wikipedia.org")
+    );
+    assert!(
+        build_search_url("duckduckgo", "x", 10)
+            .unwrap()
+            .contains("duckduckgo.com")
+    );
     assert!(build_search_url("nope", "x", 10).is_err());
 }
 

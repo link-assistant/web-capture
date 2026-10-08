@@ -13,14 +13,14 @@ jobs:
     name: JS/Rust Source and Test Parity
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7.0.1
         with:
           fetch-depth: 0
 
       - name: Setup Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v7.1.0
         with:
-          node-version: '24.x'
+          node-version-file: '.node-version'
 
       - name: Check JS/Rust parity
         env:

@@ -314,10 +314,10 @@ fn parse_brave(doc: &Html, limit: usize) -> Vec<SearchResultItem> {
             .unwrap_or_default()
             .to_string();
         let mut title = first_text(&el, &title_sel);
-        if title.is_empty() {
-            if let Some(a) = anchor {
-                title = clean_text(&a.text().collect::<String>());
-            }
+        if title.is_empty()
+            && let Some(a) = anchor
+        {
+            title = clean_text(&a.text().collect::<String>());
         }
         let snippet = first_text(&el, &snippet_sel);
         if !title.is_empty() && !url.is_empty() {

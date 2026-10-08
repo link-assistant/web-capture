@@ -11,9 +11,9 @@
 //! - <https://github.com/kreuzberg-dev/html-to-markdown>
 //! - <https://crates.io/crates/html-to-markdown-rs>
 
-use crate::html::convert_relative_urls;
 use crate::Result;
-use base64::{engine::general_purpose::STANDARD, Engine as _};
+use crate::html::convert_relative_urls;
+use base64::{Engine as _, engine::general_purpose::STANDARD};
 use serde::{Deserialize, Serialize};
 use tracing::{debug, info};
 
