@@ -1,7 +1,6 @@
 use web_capture::{
-    convert_html_to_markdown_enhanced,
+    EnhancedOptions, convert_html_to_markdown_enhanced,
     markdown::{clean_markdown, convert_html_to_markdown},
-    EnhancedOptions,
 };
 
 #[test]

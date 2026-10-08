@@ -3,8 +3,8 @@
 use std::collections::BTreeMap;
 
 use web_capture::{
-    build_search_url, parse_search_results, search_with_transport, ResponseReceipt,
-    TransportDiagnostics, TransportRequest,
+    ResponseReceipt, TransportDiagnostics, TransportRequest, build_search_url,
+    parse_search_results, search_with_transport,
 };
 
 #[test]

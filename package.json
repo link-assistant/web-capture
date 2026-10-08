@@ -1,0 +1,16 @@
+{
+  "name": "web-capture-development-tools",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=26.10.0"
+  },
+  "packageManager": "npm@12.2.0",
+  "scripts": {
+    "test": "node --test tests/tools/*.test.mjs"
+  },
+  "dependencies": {
+    "lino-arguments": "^0.3.0",
+    "execa": "^10.1.0"
+  }
+}

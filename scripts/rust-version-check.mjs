@@ -8,20 +8,14 @@
  *   should_release: true if tag doesn't exist
  *   version: Current version from Cargo.toml
  *
- * Uses link-foundation libraries:
- * - use-m: Dynamic package loading without package.json dependencies
- * - command-stream: Modern shell command execution with streaming support
+ * Uses locked libraries:
+ * - execa: Process execution with safe tagged argument interpolation
  */
 
 import { readFileSync, appendFileSync } from 'fs';
 
-// Load use-m dynamically
-const { use } = eval(
-  await (await fetch('https://unpkg.com/use-m/use.js')).text()
-);
-
-// Import command-stream for shell command execution
-const { $ } = await use('command-stream');
+// Import execa for shell command execution
+import { $ } from 'execa';
 
 /**
  * Append to GitHub Actions output file
@@ -56,7 +50,7 @@ try {
   // Check if tag exists using `git tag -l` which is more reliable than `git rev-parse`
   // (git rev-parse without --verify can give false positives for ambiguous arguments)
   const tagName = `rust-v${currentVersion}`;
-  const tagResult = await $`git tag -l "${tagName}"`.run({ capture: true });
+  const tagResult = await $({ reject: false })`git tag -l ${tagName}`;
   const tagExists = tagResult.stdout.trim().length > 0;
 
   if (tagExists) {

@@ -234,11 +234,27 @@ web-capture/
 
 ## Development
 
+Use Node.js 26.11.1 (`.node-version`), npm 12.2.0, Rust 1.99.0
+(`rust-toolchain.toml`), and Python 3.14.8 (`.python-version`). The Docker
+service supports Node.js 26.10.0, the latest published official image.
+Install the shared, locked release tools from the repository root before
+running scripts in `scripts/`:
+
+```bash
+node scripts/setup-npm.mjs
+npm ci
+npm test
+```
+
+Release commands detect the published package in `js/`; the root npm package
+contains private tooling. Weekly Dependabot updates cover both npm and Cargo
+projects, Python, Docker, Compose, and GitHub Actions.
+
 ### JavaScript
 
 ```bash
 cd js
-npm install
+npm ci
 npm run dev          # Start dev server
 npm test             # Run tests
 npm run lint         # Run linter
@@ -253,6 +269,21 @@ cargo test           # Run tests
 cargo clippy         # Run linter
 cargo fmt            # Format code
 ```
+
+### Python examples
+
+Install uv 0.12.23, then run these commands from the repository root:
+
+```bash
+uv sync --locked
+uv run --locked python -m unittest discover -s tests/python -v
+uv run --locked pip-audit --strict
+uv run --locked python js/examples/python/html_download.py https://example.com
+```
+
+Set `WEB_CAPTURE_URL` to use a service other than `http://localhost:3000`.
+`requirements.txt` exports the hashed runtime dependencies for pip consumers;
+`uv.lock` also locks the example test and audit tools.
 
 ## Features
 

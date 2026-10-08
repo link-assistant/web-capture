@@ -2,8 +2,8 @@
 //!
 //! This module provides functions for converting HTML to Markdown format.
 
-use crate::html::convert_relative_urls;
 use crate::Result;
+use crate::html::convert_relative_urls;
 use regex::Regex;
 use scraper::{Html, Selector};
 use tracing::{debug, info};
@@ -349,17 +349,15 @@ fn renumber_top_level_ordered_list_lines(markdown: &str, numbers: &[u32]) -> Str
                 .get(i + 1)
                 .map_or("", |l| l.strip_suffix('\n').unwrap_or(l));
             let is_setext_heading = setext_re.is_match(next_body);
-            if !is_setext_heading {
-                if let Some(&n) = numbers.get(idx) {
-                    let after = &body[caps.get(0).expect("match 0").end()..];
-                    let sep = caps.get(2).expect("group 2").as_str();
-                    write!(out, "{n}.{sep}{after}").expect("write to String");
-                    if line.ends_with('\n') {
-                        out.push('\n');
-                    }
-                    idx += 1;
-                    continue;
+            if !is_setext_heading && let Some(&n) = numbers.get(idx) {
+                let after = &body[caps.get(0).expect("match 0").end()..];
+                let sep = caps.get(2).expect("group 2").as_str();
+                write!(out, "{n}.{sep}{after}").expect("write to String");
+                if line.ends_with('\n') {
+                    out.push('\n');
                 }
+                idx += 1;
+                continue;
             }
         }
         out.push_str(line);

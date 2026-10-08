@@ -31,20 +31,16 @@ export function getJsRoot(options = {}) {
     return explicitRoot;
   }
   if (cachedJsRoot !== null) return cachedJsRoot;
-  if (existsSync('./package.json')) {
-    if (verbose)
-      console.log(
-        'Detected single-language repository (package.json in root)'
-      );
-    cachedJsRoot = '.';
+  // Repository tooling can have its own root manifest; release js/ first.
+  if (existsSync('./js/package.json')) {
+    if (verbose) console.log('Detected JavaScript package in js/');
+    cachedJsRoot = 'js';
     return cachedJsRoot;
   }
-  if (existsSync('./js/package.json')) {
+  if (existsSync('./package.json')) {
     if (verbose)
-      console.log(
-        'Detected multi-language repository (package.json in js/)'
-      );
-    cachedJsRoot = 'js';
+      console.log('Detected JavaScript package in current directory');
+    cachedJsRoot = '.';
     return cachedJsRoot;
   }
   throw new Error(

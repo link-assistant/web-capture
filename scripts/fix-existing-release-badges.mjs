@@ -24,13 +24,8 @@
  *     --repository link-assistant/web-capture [--dry-run]
  */
 
-// Load use-m dynamically
-const { use } = eval(
-  await (await fetch('https://unpkg.com/use-m/use.js')).text()
-);
-
-const { $ } = await use('command-stream');
-const { makeConfig } = await use('lino-arguments');
+import { $ } from 'execa';
+import { makeConfig } from 'lino-arguments';
 
 const config = makeConfig({
   yargs: ({ yargs, getenv }) =>
@@ -100,11 +95,9 @@ function rewriteName(name, tag) {
   return name;
 }
 
-const listResult =
-  await $`gh api "repos/${repository}/releases?per_page=100"`.run({
-    capture: true,
-    mirror: false,
-  });
+const listResult = await $({
+  reject: false,
+})`gh api repos/${repository}/releases?per_page=100`;
 const releases = JSON.parse(listResult.stdout);
 
 let touched = 0;
@@ -127,9 +120,9 @@ for (const release of releases) {
   }
 
   const payload = JSON.stringify({ name: newName, body: newBody });
-  await $`gh api repos/${repository}/releases/${id} -X PATCH --input -`.run({
-    stdin: payload,
-  });
+  await $({
+    input: payload,
+  })`gh api repos/${repository}/releases/${id} -X PATCH --input -`;
 }
 
 console.log(

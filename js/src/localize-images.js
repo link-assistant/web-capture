@@ -13,9 +13,8 @@
  * @module localize-images
  */
 
-import fetch from 'node-fetch';
 import { URL } from 'url';
-import { retry } from './retry.js';
+import { downloadBinary } from './binary-download.js';
 
 /**
  * Extract image references from markdown text.
@@ -165,16 +164,7 @@ export async function localizeImages(markdownText, options = {}) {
     }
 
     try {
-      const resp = await retry(() => fetch(image.url), {
-        retries: 3,
-        baseDelay: 1000,
-      });
-
-      if (!resp.ok) {
-        throw new Error(`HTTP ${resp.status}`);
-      }
-
-      const buffer = await resp.buffer();
+      const buffer = await downloadBinary(image.url);
       downloadedCount++;
 
       replacements.push({

@@ -1,6 +1,6 @@
 use web_capture::localize_images::{
-    extract_image_references, generate_local_filename, get_extension_from_url, localize_images,
-    LocalizeOptions,
+    LocalizeOptions, extract_image_references, generate_local_filename, get_extension_from_url,
+    localize_images,
 };
 
 #[test]

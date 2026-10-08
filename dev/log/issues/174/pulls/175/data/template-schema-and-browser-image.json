@@ -1,0 +1,27 @@
+[
+  {
+    "url": "https://unpkg.com/@changesets/config@4.0.1/schema.json",
+    "checkedAt": "2026-10-08T07:29:08.596090+00:00",
+    "status": 200,
+    "contentType": "application/json",
+    "digest": null,
+    "bytes": 6415,
+    "keys": [
+      "$schema",
+      "type",
+      "properties",
+      "required"
+    ]
+  },
+  {
+    "url": "https://mcr.microsoft.com/v2/playwright/manifests/v1.64.0-noble",
+    "checkedAt": "2026-10-08T07:29:08.836207+00:00",
+    "status": 404,
+    "error": "{\"errors\":[{\"code\":\"MANIFEST_UNKNOWN\",\"message\":\"manifest tagged by \\\"v1.64.0-noble\\\" is not found\",\"detail\":{\"Tag\":\"v1.64.0-noble\"}}]}\n"
+  },
+  {
+    "schema": "local locked @changesets/config@4.0.1",
+    "sha256": "7f969c1c374a68018be50c1ce0d01979d16bafe91d107af9727dcd44c37440c2",
+    "validJson": true
+  }
+]

@@ -15,9 +15,8 @@
  * 3. Look up PRs that contain the commit via GitHub API
  * 4. If no PR found, simply don't display any PR link (no guessing)
  *
- * Uses link-foundation libraries:
- * - use-m: Dynamic package loading without package.json dependencies
- * - command-stream: Modern shell command execution with streaming support
+ * Uses locked libraries:
+ * - execa: Process execution with safe tagged argument interpolation
  * - lino-arguments: Unified configuration from CLI args, env vars, and .lenv files
  *
  * Note: Uses --release-version instead of --version to avoid conflict with yargs' built-in --version flag.
@@ -25,14 +24,9 @@
 
 const PACKAGE_NAME = '@link-assistant/web-capture';
 
-// Load use-m dynamically
-const { use } = eval(
-  await (await fetch('https://unpkg.com/use-m/use.js')).text()
-);
-
-// Import link-foundation libraries
-const { $ } = await use('command-stream');
-const { makeConfig } = await use('lino-arguments');
+// Import locked release tooling
+import { $ } from 'execa';
+import { makeConfig } from 'lino-arguments';
 
 // Parse CLI arguments using lino-arguments
 // Note: Using --release-version instead of --version to avoid conflict with yargs' built-in --version flag
@@ -75,9 +69,9 @@ if (!releaseId || !version || !repository) {
 
 try {
   // Get current release body
-  const result = await $`gh api repos/${repository}/releases/${releaseId}`.run({
-    capture: true,
-  });
+  const result = await $({
+    reject: false,
+  })`gh api repos/${repository}/releases/${releaseId}`;
   const releaseData = JSON.parse(result.stdout);
 
   const currentBody = releaseData.body || '';
@@ -122,7 +116,7 @@ try {
 
   // Clean up the description:
   // 1. Convert literal \n sequences (escaped newlines from GitHub API) to actual newlines
-  // 2. Remove leading/trailing quotes (including escaped quotes from command-stream shell escaping)
+  // 2. Remove leading/trailing quotes (including escaped quotes from execa shell escaping)
   // 3. Remove any trailing npm package links or markdown that might be there
   // 4. Normalize whitespace while preserving line breaks
   const cleanDescription = rawDescription
@@ -152,10 +146,9 @@ try {
     );
 
     try {
-      const prResult =
-        await $`gh api "repos/${repository}/commits/${commitShaToLookup}/pulls"`.run(
-          { capture: true }
-        );
+      const prResult = await $({
+        reject: false,
+      })`gh api repos/${repository}/commits/${commitShaToLookup}/pulls`;
       const prsData = JSON.parse(prResult.stdout);
 
       // Find the PR that's not the version bump PR (not "chore: version packages")
@@ -208,9 +201,9 @@ try {
 
   // Update the release using JSON input to properly handle special characters
   const updatePayload = JSON.stringify({ body: formattedBody });
-  await $`gh api repos/${repository}/releases/${releaseId} -X PATCH --input -`.run(
-    { stdin: updatePayload }
-  );
+  await $({
+    input: updatePayload,
+  })`gh api repos/${repository}/releases/${releaseId} -X PATCH --input -`;
 
   console.log(`✅ Formatted release notes for v${versionWithoutV}`);
   if (prNumber) {

@@ -39,7 +39,10 @@ function commitAll(repoPath, message) {
   git(repoPath, ['commit', '-m', message]);
 }
 
-function createMergedFeatureRepo() {
+function createMergedFeatureRepo({
+  featureCode = true,
+  baseCode = false,
+} = {}) {
   const repoPath = mkdtempSync(join(tmpdir(), 'web-capture-detect-'));
 
   initializeRepo(repoPath);
@@ -48,13 +51,19 @@ function createMergedFeatureRepo() {
   commitAll(repoPath, 'initial commit');
 
   git(repoPath, ['checkout', '-b', 'feature']);
-  writeTrackedFile(repoPath, 'rust/src/lib.rs', 'pub fn capture() {}\n');
-  commitAll(repoPath, 'add rust code');
+  if (featureCode) {
+    writeTrackedFile(repoPath, 'rust/src/lib.rs', 'pub fn capture() {}\n');
+    commitAll(repoPath, 'add rust code');
+  }
 
   writeTrackedFile(repoPath, 'docs/notes.md', '# docs only tail commit\n');
   commitAll(repoPath, 'document rust change');
 
   git(repoPath, ['checkout', 'main']);
+  if (baseCode) {
+    writeTrackedFile(repoPath, 'rust/src/lib.rs', 'pub fn base_capture() {}\n');
+    commitAll(repoPath, 'base branch code change');
+  }
   git(repoPath, ['merge', '--no-ff', 'feature', '-m', 'merge feature']);
 
   return repoPath;
@@ -123,28 +132,32 @@ describe('detect-code-changes', () => {
     }
   });
 
-  test('detects code introduced by a real merge commit pushed to main', () => {
-    repoPath = createMergedFeatureRepo();
+  test.each(['push', 'pull_request'])(
+    'detects code before a docs-only final commit for %s',
+    (eventName) => {
+      repoPath = createMergedFeatureRepo();
 
-    const outputs = runDetector(repoPath, 'push');
+      expect(runDetector(repoPath, eventName)).toMatchObject({
+        'rust-code-changed': 'true',
+        'rust-changed': 'true',
+        'any-rust-code-changed': 'true',
+        'any-code-changed': 'true',
+        'docs-changed': 'true',
+      });
+    }
+  );
 
-    expect(outputs['rust-code-changed']).toBe('true');
-    expect(outputs['rust-changed']).toBe('true');
-    expect(outputs['any-rust-code-changed']).toBe('true');
-    expect(outputs['any-code-changed']).toBe('true');
-    expect(outputs['docs-changed']).toBe('true');
-  });
+  test.each([
+    ['docs-only', { featureCode: false }],
+    ['base branch code only', { featureCode: false, baseCode: true }],
+  ])('keeps code checks disabled for %s PRs', (_name, options) => {
+    repoPath = createMergedFeatureRepo(options);
 
-  test('keeps pull request merge commits scoped to the PR head commit', () => {
-    repoPath = createMergedFeatureRepo();
-
-    const outputs = runDetector(repoPath, 'pull_request');
-
-    expect(outputs['rust-code-changed']).toBe('false');
-    expect(outputs['rust-changed']).toBe('false');
-    expect(outputs['any-rust-code-changed']).toBe('false');
-    expect(outputs['any-code-changed']).toBe('false');
-    expect(outputs['docs-changed']).toBe('true');
+    expect(runDetector(repoPath, 'pull_request')).toMatchObject({
+      'rust-code-changed': 'false',
+      'any-code-changed': 'false',
+      'docs-changed': 'true',
+    });
   });
 
   test('detects files when a push only has one commit', () => {

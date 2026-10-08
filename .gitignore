@@ -148,3 +148,9 @@ examples/js/downloaded.png
 
 # Local investigation artifacts; reusable probes and summaries are committed.
 ci-logs/
+
+# Python environments and bytecode
+.venv/
+.tools/
+__pycache__/
+*.pyc

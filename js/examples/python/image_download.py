@@ -1,11 +1,7 @@
-import sys
-import requests
+from capture_client import capture
 import os
 
-url = sys.argv[1] if len(sys.argv) > 1 else 'https://example.com'
-endpoint = f'http://localhost:3000/image?url={url}'
-
-response = requests.get(endpoint)
+response = capture('image')
 print('Status:', response.status_code)
 print('Content-Type:', response.headers.get('content-type'))
 
@@ -17,4 +13,4 @@ if response.content[:8] == png_signature:
         f.write(response.content)
     print(f'Image saved to {output_path} (valid PNG)')
 else:
-    print('Response is not a valid PNG! First bytes:', response.content[:16]) 
+    print('Response is not a valid PNG! First bytes:', response.content[:16])

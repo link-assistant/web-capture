@@ -1,5 +1,5 @@
 use web_capture::metadata::{
-    extract_metadata, format_footer_block, format_metadata_block, ArticleMetadata,
+    ArticleMetadata, extract_metadata, format_footer_block, format_metadata_block,
 };
 
 #[test]
@@ -59,9 +59,11 @@ fn test_format_footer_block_tags() {
         ..Default::default()
     };
     let lines = format_footer_block(&meta);
-    assert!(lines
-        .iter()
-        .any(|l| l.contains("rust") && l.contains("web")));
+    assert!(
+        lines
+            .iter()
+            .any(|l| l.contains("rust") && l.contains("web"))
+    );
 }
 
 #[test]

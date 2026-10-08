@@ -10,7 +10,7 @@
 //!   * every mode has an observable effect (no flag is a silent no-op).
 
 use std::path::PathBuf;
-use web_capture::extract_images::{apply_image_mode, ImageMode};
+use web_capture::extract_images::{ImageMode, apply_image_mode};
 
 /// Create a unique temporary directory without pulling in the `tempfile` crate,
 /// mirroring the helper used by the other extract-images integration tests.

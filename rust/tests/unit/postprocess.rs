@@ -1,6 +1,6 @@
 use web_capture::postprocess::{
-    apply_bold_formatting_fixes, apply_latex_spacing_fixes, apply_percent_sign_fix,
-    apply_unicode_normalization, post_process_markdown, PostProcessOptions,
+    PostProcessOptions, apply_bold_formatting_fixes, apply_latex_spacing_fixes,
+    apply_percent_sign_fix, apply_unicode_normalization, post_process_markdown,
 };
 
 #[test]

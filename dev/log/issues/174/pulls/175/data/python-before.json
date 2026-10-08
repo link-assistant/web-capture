@@ -1,0 +1,18 @@
+{
+  "requests": {
+    "latest": "2.34.2",
+    "requires_python": ">=3.10"
+  },
+  "pip": {
+    "latest": "26.2.1",
+    "requires_python": ">=3.10"
+  },
+  "pip-audit": {
+    "latest": "2.10.1",
+    "requires_python": ">=3.10"
+  },
+  "uv": {
+    "latest": "0.12.23",
+    "requires_python": ">=3.8"
+  }
+}

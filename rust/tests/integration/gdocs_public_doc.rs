@@ -16,9 +16,8 @@ use std::fs;
 use std::path::PathBuf;
 
 use web_capture::gdocs::{
-    build_docs_api_url, build_edit_url, build_export_url, extract_document_id,
-    fetch_google_doc_from_model, is_google_docs_url, select_capture_method, GDocsCaptureMethod,
-    GDocsRenderedResult,
+    GDocsCaptureMethod, GDocsRenderedResult, build_docs_api_url, build_edit_url, build_export_url,
+    extract_document_id, fetch_google_doc_from_model, is_google_docs_url, select_capture_method,
 };
 
 const PUBLIC_DOCUMENT_ID: &str = "1f5zI2xOFpKa90v0GjamO_t7lqSdzMlaM";
@@ -279,9 +278,11 @@ async fn live_capture_of_public_document_preserves_every_section() {
     assert!(result.content.contains("**This text is bold**"));
     assert!(result.content.contains("*This text is italic*"));
     assert!(result.content.contains("~~This text has strikethrough~~"));
-    assert!(result
-        .content
-        .contains("> This is a single-level blockquote"));
+    assert!(
+        result
+            .content
+            .contains("> This is a single-level blockquote")
+    );
     assert!(result.content.contains("| Feature | Supported | Notes |"));
     assert!(!result.content.contains("| Feature |  | Supported |"));
     assert!(result.content.contains("|  | x |  |"));
@@ -317,12 +318,16 @@ async fn live_browser_model_capture_of_public_document_preserves_markdown_featur
     assert!(result.markdown.contains("**This text is bold**"));
     assert!(result.markdown.contains("*This text is italic*"));
     assert!(result.markdown.contains("~~This text has strikethrough~~"));
-    assert!(result
-        .markdown
-        .contains("> This is a single-level blockquote"));
-    assert!(result
-        .markdown
-        .contains("[Regular link](https://example.com)"));
+    assert!(
+        result
+            .markdown
+            .contains("> This is a single-level blockquote")
+    );
+    assert!(
+        result
+            .markdown
+            .contains("[Regular link](https://example.com)")
+    );
     assert!(result.markdown.contains("| Feature | Supported | Notes |"));
     assert!(!result.markdown.contains("| Feature |  | Supported |"));
     assert!(result.markdown.contains("|  | x |  |"));

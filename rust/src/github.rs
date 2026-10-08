@@ -4,12 +4,12 @@
 //! output, the compact content users expect is available more reliably through
 //! the GitHub REST API: repository details, the root file listing, and README.
 
-use anyhow::{anyhow, Context};
-use base64::{engine::general_purpose::STANDARD, Engine as _};
-use reqwest::header::{HeaderMap, HeaderValue, ACCEPT, AUTHORIZATION, USER_AGENT};
+use anyhow::{Context, anyhow};
+use base64::{Engine as _, engine::general_purpose::STANDARD};
 use reqwest::StatusCode;
-use serde::de::DeserializeOwned;
+use reqwest::header::{ACCEPT, AUTHORIZATION, HeaderMap, HeaderValue, USER_AGENT};
 use serde::Deserialize;
+use serde::de::DeserializeOwned;
 use url::Url;
 
 const GITHUB_API_BASE: &str = "https://api.github.com";
@@ -447,10 +447,10 @@ fn github_headers(accept: &str) -> HeaderMap {
         "X-GitHub-Api-Version",
         HeaderValue::from_static("2022-11-28"),
     );
-    if let Ok(token) = std::env::var("GITHUB_TOKEN").or_else(|_| std::env::var("GH_TOKEN")) {
-        if let Ok(value) = HeaderValue::from_str(&format!("Bearer {token}")) {
-            headers.insert(AUTHORIZATION, value);
-        }
+    if let Ok(token) = std::env::var("GITHUB_TOKEN").or_else(|_| std::env::var("GH_TOKEN"))
+        && let Ok(value) = HeaderValue::from_str(&format!("Bearer {token}"))
+    {
+        headers.insert(AUTHORIZATION, value);
     }
     headers
 }

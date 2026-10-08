@@ -19,6 +19,8 @@ This is the Rust implementation of web-capture, providing the same API as the Ja
 
 ## Installation
 
+Rust 1.99.0 or newer is required. The crate uses edition 2024.
+
 ### From crates.io
 
 ```bash

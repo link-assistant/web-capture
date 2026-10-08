@@ -63,13 +63,13 @@ pub fn extract_habr_formula(element: &ElementRef) -> Option<String> {
 #[must_use]
 pub fn extract_katex_formula(element: &ElementRef) -> Option<String> {
     // Look for annotation element
-    if let Ok(sel) = Selector::parse(r#"annotation[encoding="application/x-tex"]"#) {
-        if let Some(annotation) = element.select(&sel).next() {
-            let text: String = annotation.text().collect();
-            let trimmed = text.trim();
-            if !trimmed.is_empty() {
-                return Some(trimmed.to_string());
-            }
+    if let Ok(sel) = Selector::parse(r#"annotation[encoding="application/x-tex"]"#)
+        && let Some(annotation) = element.select(&sel).next()
+    {
+        let text: String = annotation.text().collect();
+        let trimmed = text.trim();
+        if !trimmed.is_empty() {
+            return Some(trimmed.to_string());
         }
     }
     // Fallback to data-tex or data-latex attributes
@@ -97,13 +97,13 @@ pub fn extract_mathjax_formula(element: &ElementRef) -> Option<String> {
         }
     }
     // Fallback to annotation element
-    if let Ok(sel) = Selector::parse(r#"annotation[encoding="application/x-tex"]"#) {
-        if let Some(annotation) = element.select(&sel).next() {
-            let text: String = annotation.text().collect();
-            let trimmed = text.trim();
-            if !trimmed.is_empty() {
-                return Some(trimmed.to_string());
-            }
+    if let Ok(sel) = Selector::parse(r#"annotation[encoding="application/x-tex"]"#)
+        && let Some(annotation) = element.select(&sel).next()
+    {
+        let text: String = annotation.text().collect();
+        let trimmed = text.trim();
+        if !trimmed.is_empty() {
+            return Some(trimmed.to_string());
         }
     }
     None

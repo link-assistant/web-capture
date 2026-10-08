@@ -1,0 +1,7 @@
+{
+  "version": "0.10.0",
+  "dependencies": {
+    "log-lazy": "^1.0.4",
+    "test-anywhere": "^0.9.1"
+  }
+}

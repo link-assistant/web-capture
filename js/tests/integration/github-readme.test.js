@@ -12,6 +12,7 @@ import { jest } from '@jest/globals';
 import { createBrowser } from '../../src/browser.js';
 import { fetchHtml } from '../../src/lib.js';
 import { retry } from '../../src/retry.js';
+import { expectPngScreenshot } from '../helpers/screenshot.js';
 import {
   fetchGithubRepositorySnapshot,
   formatGithubRepositoryMarkdown,
@@ -22,9 +23,6 @@ import {
 const GITHUB_REPOSITORY_URL =
   process.env.GITHUB_REPOSITORY_URL ||
   'https://github.com/link-assistant/web-capture';
-const PNG_SIGNATURE = Buffer.from([
-  0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a,
-]);
 
 const SKIP_LIVE =
   !process.env.GITHUB_REPOSITORY_INTEGRATION ||
@@ -128,9 +126,7 @@ describe.each(['puppeteer', 'playwright'])(
 
         const screenshot = await page.screenshot({ type: 'png' });
 
-        expect(screenshot).toBeInstanceOf(Buffer);
-        expect(screenshot.length).toBeGreaterThan(1000);
-        expect(screenshot.slice(0, 8)).toEqual(PNG_SIGNATURE);
+        expectPngScreenshot(screenshot);
       });
     });
   }

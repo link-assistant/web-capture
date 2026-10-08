@@ -21,19 +21,13 @@
  *   version: current version from Cargo.toml
  *   max_published_version: highest non-yanked version on crates.io
  *
- * Uses link-foundation libraries:
- * - use-m: Dynamic package loading without package.json dependencies
- * - command-stream: Modern shell command execution with streaming support
+ * Uses locked libraries:
+ * - execa: Process execution with safe tagged argument interpolation
  */
 
 import { readFileSync, appendFileSync } from 'fs';
 
-// Load use-m dynamically
-const { use } = eval(
-  await (await fetch('https://unpkg.com/use-m/use.js')).text()
-);
-
-const { $ } = await use('command-stream');
+import { $ } from 'execa';
 
 const RUST_PUBLISHABLE_PATHS = [
   'rust/src/',
@@ -105,7 +99,9 @@ async function getMaxPublishedVersion(crateName) {
       if (
         parts[0] > maxParts[0] ||
         (parts[0] === maxParts[0] && parts[1] > maxParts[1]) ||
-        (parts[0] === maxParts[0] && parts[1] === maxParts[1] && parts[2] > maxParts[2])
+        (parts[0] === maxParts[0] &&
+          parts[1] === maxParts[1] &&
+          parts[2] > maxParts[2])
       ) {
         maxParts = parts;
         maxVersion = v.num;
@@ -119,7 +115,9 @@ async function getMaxPublishedVersion(crateName) {
 
 async function getLatestReleaseTag() {
   try {
-    const result = await $`git tag -l "rust-v*" --sort=-version:refname`.run({ capture: true });
+    const result = await $({
+      reject: false,
+    })`git tag -l rust-v* --sort=-version:refname`;
     const tags = result.stdout.trim().split('\n').filter(Boolean);
     return tags.length > 0 ? tags[0] : null;
   } catch {
@@ -129,7 +127,9 @@ async function getLatestReleaseTag() {
 
 async function hasPublishableChangesSinceTag(tag) {
   try {
-    const result = await $`git diff --name-only ${tag}..HEAD`.run({ capture: true });
+    const result = await $({
+      reject: false,
+    })`git diff --name-only ${tag}..HEAD`;
     const changedFiles = result.stdout.trim().split('\n').filter(Boolean);
 
     const publishableChanges = changedFiles.filter((file) =>
@@ -167,11 +167,15 @@ try {
 
   // Check if current version is already published
   const isPublished = await checkCratesIo(crateName, currentVersion);
-  console.log(`Version ${currentVersion} published on crates.io: ${isPublished}`);
+  console.log(
+    `Version ${currentVersion} published on crates.io: ${isPublished}`
+  );
 
   if (!isPublished) {
     // Current version not on crates.io — release it (no bump needed)
-    console.log(`Version ${currentVersion} is NOT on crates.io — should release`);
+    console.log(
+      `Version ${currentVersion} is NOT on crates.io — should release`
+    );
     setOutput('should_release', 'true');
     setOutput('needs_auto_bump', 'false');
     process.exit(0);
@@ -197,7 +201,9 @@ try {
     setOutput('should_release', 'true');
     setOutput('needs_auto_bump', 'true');
   } else {
-    console.log(`No publishable changes since ${latestTag} — no release needed`);
+    console.log(
+      `No publishable changes since ${latestTag} — no release needed`
+    );
     setOutput('should_release', 'false');
     setOutput('needs_auto_bump', 'false');
   }

@@ -78,11 +78,7 @@ fn select_text(document: &Html, selector_str: &str) -> Option<String> {
     let sel = Selector::parse(selector_str).ok()?;
     let el = document.select(&sel).next()?;
     let text: String = el.text().collect::<String>().trim().to_string();
-    if text.is_empty() {
-        None
-    } else {
-        Some(text)
-    }
+    if text.is_empty() { None } else { Some(text) }
 }
 
 /// Helper to select first element and get an attribute value.
@@ -124,15 +120,15 @@ pub fn extract_metadata(html: &str) -> ArticleMetadata {
     meta.difficulty = select_text(&document, ".tm-article-complexity__label");
 
     // Views
-    if let Ok(sel) = Selector::parse(".tm-icon-counter__value") {
-        if let Some(el) = document.select(&sel).next() {
-            if let Some(title) = el.value().attr("title") {
-                meta.views = Some(title.to_string());
-            } else {
-                let text: String = el.text().collect::<String>().trim().to_string();
-                if !text.is_empty() {
-                    meta.views = Some(text);
-                }
+    if let Ok(sel) = Selector::parse(".tm-icon-counter__value")
+        && let Some(el) = document.select(&sel).next()
+    {
+        if let Some(title) = el.value().attr("title") {
+            meta.views = Some(title.to_string());
+        } else {
+            let text: String = el.text().collect::<String>().trim().to_string();
+            if !text.is_empty() {
+                meta.views = Some(text);
             }
         }
     }
@@ -203,39 +199,39 @@ pub fn extract_metadata(html: &str) -> ArticleMetadata {
     }
 
     // Original article link
-    if let Ok(sel) = Selector::parse(".tm-article-presenter__origin-link") {
-        if let Some(el) = document.select(&sel).next() {
-            meta.original_article_url = el.value().attr("href").map(String::from);
-            if let Ok(span_sel) = Selector::parse("span") {
-                if let Some(span) = el.select(&span_sel).next() {
-                    let text = span.text().collect::<String>().trim().to_string();
-                    if !text.is_empty() {
-                        meta.original_authors = Some(text);
-                    }
-                }
+    if let Ok(sel) = Selector::parse(".tm-article-presenter__origin-link")
+        && let Some(el) = document.select(&sel).next()
+    {
+        meta.original_article_url = el.value().attr("href").map(String::from);
+        if let Ok(span_sel) = Selector::parse("span")
+            && let Some(span) = el.select(&span_sel).next()
+        {
+            let text = span.text().collect::<String>().trim().to_string();
+            if !text.is_empty() {
+                meta.original_authors = Some(text);
             }
-            let full_text = el.text().collect::<String>().trim().to_string();
-            if !full_text.is_empty() {
-                meta.original_author_text = Some(full_text);
-            }
+        }
+        let full_text = el.text().collect::<String>().trim().to_string();
+        if !full_text.is_empty() {
+            meta.original_author_text = Some(full_text);
         }
     }
 
     // LD+JSON structured data
-    if let Ok(sel) = Selector::parse(r#"script[type="application/ld+json"]"#) {
-        if let Some(el) = document.select(&sel).next() {
-            let json_text: String = el.text().collect();
-            if let Ok(value) = serde_json::from_str::<serde_json::Value>(&json_text) {
-                if let Some(modified) = value.get("dateModified").and_then(|v| v.as_str()) {
-                    meta.date_modified = Some(modified.to_string());
-                }
-                if let Some(author_name) = value
-                    .get("author")
-                    .and_then(|a| a.get("name"))
-                    .and_then(|n| n.as_str())
-                {
-                    meta.author_full_name = Some(author_name.to_string());
-                }
+    if let Ok(sel) = Selector::parse(r#"script[type="application/ld+json"]"#)
+        && let Some(el) = document.select(&sel).next()
+    {
+        let json_text: String = el.text().collect();
+        if let Ok(value) = serde_json::from_str::<serde_json::Value>(&json_text) {
+            if let Some(modified) = value.get("dateModified").and_then(|v| v.as_str()) {
+                meta.date_modified = Some(modified.to_string());
+            }
+            if let Some(author_name) = value
+                .get("author")
+                .and_then(|a| a.get("name"))
+                .and_then(|n| n.as_str())
+            {
+                meta.author_full_name = Some(author_name.to_string());
             }
         }
     }
@@ -296,12 +292,12 @@ pub fn format_metadata_block(metadata: &ArticleMetadata) -> Vec<String> {
     // Publication date
     if let Some(ref date) = metadata.publish_date {
         let mut date_line = format!("**Published:** {date}");
-        if let Some(ref modified) = metadata.date_modified {
-            if modified != date {
-                date_line.push_str(" (updated ");
-                date_line.push_str(modified);
-                date_line.push(')');
-            }
+        if let Some(ref modified) = metadata.date_modified
+            && modified != date
+        {
+            date_line.push_str(" (updated ");
+            date_line.push_str(modified);
+            date_line.push(')');
         }
         lines.push(date_line);
     }

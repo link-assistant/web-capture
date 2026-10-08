@@ -151,7 +151,7 @@ export async function fetchGoogleDriveImage(url) {
   }
 
   return {
-    buffer: await response.buffer(),
+    buffer: Buffer.from(await response.arrayBuffer()),
     contentType,
     downloadUrl,
     filename: `google-drive-${fileId}.${imageExtensionForContentType(contentType)}`,

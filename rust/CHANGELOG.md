@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 0.5.0
+
+- Require Rust 1.99 and adopt edition 2024, including its formatting style.
+- Use current Rust and Chromium images on Debian Trixie; preserve all runtime, search, cache and native TLS feature sets.
+- Add weekly dependency updates and locked-tree security checks. All direct crates remain at their latest stable registry releases.
+
 ## 0.4.0
 
 - Add opt-in transport-independent SHA-256 capture caching, TTL, offline stale replay, portable fixtures, and capture listing/pruning.

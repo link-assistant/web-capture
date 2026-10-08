@@ -615,17 +615,17 @@ pub use browser::BrowserEngine;
 pub use search::search;
 #[cfg(feature = "search")]
 pub use search::{
-    build_search_url, format_search_as_markdown, is_supported_provider, parse_search_results,
-    search_with_transport, SearchCapture, SearchDiagnostics, SearchResult, SearchResultItem,
-    DEFAULT_LIMIT, DEFAULT_PROVIDER, SEARCH_PROVIDERS,
+    DEFAULT_LIMIT, DEFAULT_PROVIDER, SEARCH_PROVIDERS, SearchCapture, SearchDiagnostics,
+    SearchResult, SearchResultItem, build_search_url, format_search_as_markdown,
+    is_supported_provider, parse_search_results, search_with_transport,
 };
-#[cfg(feature = "runtime")]
-pub use transport::{capture_response, ReqwestTransport};
 #[cfg(any(feature = "search", feature = "cache"))]
 pub use transport::{
-    capture_response_with_transport, ResponseReceipt, Transport, TransportDiagnostics,
-    TransportError, TransportRequest, RECEIPT_HEADERS,
+    RECEIPT_HEADERS, ResponseReceipt, Transport, TransportDiagnostics, TransportError,
+    TransportRequest, capture_response_with_transport,
 };
+#[cfg(feature = "runtime")]
+pub use transport::{ReqwestTransport, capture_response};
 
 #[cfg(feature = "cache")]
 pub use cache::{

@@ -1,0 +1,27 @@
+[
+  {
+    "name": "actions/cache",
+    "before": "v5",
+    "latest": "v6.1.0"
+  },
+  {
+    "name": "actions/checkout",
+    "before": "v6",
+    "latest": "v7.0.1"
+  },
+  {
+    "name": "actions/setup-node",
+    "before": "v6",
+    "latest": "v7.1.0"
+  },
+  {
+    "name": "dtolnay/rust-toolchain",
+    "before": "stable",
+    "latest": "89b12181fb390509a0842a86cc55eeb8eb928c1d"
+  },
+  {
+    "name": "peter-evans/create-pull-request",
+    "before": "v8",
+    "latest": "v8.1.1"
+  }
+]

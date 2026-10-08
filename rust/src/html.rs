@@ -194,12 +194,12 @@ pub fn convert_to_utf8(html: &str) -> String {
     // If already UTF-8, ensure the meta tag is present
     if current_charset == "utf-8" || current_charset == "utf8" {
         // Add meta charset if not present
-        if !html.to_lowercase().contains("charset") {
-            if let Ok(head_regex) = Regex::new(r"<head[^>]*>") {
-                return head_regex
-                    .replace(html, r#"$0<meta charset="utf-8">"#)
-                    .to_string();
-            }
+        if !html.to_lowercase().contains("charset")
+            && let Ok(head_regex) = Regex::new(r"<head[^>]*>")
+        {
+            return head_regex
+                .replace(html, r#"$0<meta charset="utf-8">"#)
+                .to_string();
         }
         return html.to_string();
     }

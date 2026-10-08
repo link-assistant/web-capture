@@ -1,23 +1,20 @@
 import { jest } from '@jest/globals';
 
-const originalFetch = global.fetch;
+jest.unstable_mockModule('execa', () => ({
+  $: () => async () => ({ exitCode: 0, stdout: '', stderr: '' }),
+}));
+jest.unstable_mockModule('lino-arguments', () => ({
+  makeConfig: () => ({ shouldPull: false, jsRoot: 'js' }),
+}));
 
 beforeAll(() => {
-  global.fetch = jest.fn().mockResolvedValue({
-    text: async () => `
-      ({
-        use: async (name) => {
-          if (name === 'command-stream') return { $: () => ({ run: async () => ({ code: 0, stdout: '', stderr: '' }) }) };
-          if (name === 'lino-arguments') return { makeConfig: () => ({ shouldPull: false, jsRoot: 'js' }) };
-          throw new Error('Unexpected dynamic import: ' + name);
-        }
-      })
-    `,
-  });
+  jest
+    .spyOn(global, 'fetch')
+    .mockRejectedValue(new Error('unexpected remote code download'));
 });
 
 afterAll(() => {
-  global.fetch = originalFetch;
+  global.fetch.mockRestore();
 });
 
 describe('publish verification', () => {
@@ -28,17 +25,17 @@ describe('publish verification', () => {
     const runVerify = jest
       .fn()
       .mockResolvedValueOnce({
-        code: 1,
+        exitCode: 1,
         stdout: '',
         stderr: 'npm error code E404',
       })
       .mockResolvedValueOnce({
-        code: 1,
+        exitCode: 1,
         stdout: '',
         stderr: 'npm error code E404',
       })
       .mockResolvedValueOnce({
-        code: 0,
+        exitCode: 0,
         stdout: '1.7.1\n',
         stderr: '',
       });

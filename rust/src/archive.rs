@@ -5,7 +5,7 @@
 //! `images/` folder, identical across every capture path.
 
 use crate::extract_images::extract_base64_to_buffers;
-use crate::gdocs::{create_archive_zip, ExtractedImage, GDocsArchiveResult};
+use crate::gdocs::{ExtractedImage, GDocsArchiveResult, create_archive_zip};
 use crate::markdown::convert_html_to_markdown;
 
 /// Build a default `--format archive` ZIP (`Vec<u8>`) from raw HTML.

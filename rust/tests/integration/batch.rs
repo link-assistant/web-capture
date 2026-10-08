@@ -1,7 +1,7 @@
 use std::collections::BTreeMap;
 use web_capture::batch::{
-    create_config_from_urls, get_all_articles, get_all_versions, get_article, validate_config,
-    ArticleConfig, BatchConfig,
+    ArticleConfig, BatchConfig, create_config_from_urls, get_all_articles, get_all_versions,
+    get_article, validate_config,
 };
 
 fn sample_config() -> BatchConfig {
