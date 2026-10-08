@@ -1,0 +1,9 @@
+{
+  "repository": {
+    "url": "git+https://github.com/sindresorhus/execa.git",
+    "type": "git"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}

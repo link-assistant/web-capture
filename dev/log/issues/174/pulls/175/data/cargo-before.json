@@ -1,0 +1,3840 @@
+[
+  {
+    "name": "adler2",
+    "declared": null,
+    "before": [
+      "2.0.1"
+    ],
+    "latest": "2.0.1",
+    "repository": "https://github.com/oyvindln/adler2"
+  },
+  {
+    "name": "aead",
+    "declared": null,
+    "before": [
+      "0.6.1"
+    ],
+    "latest": "0.6.1",
+    "repository": "https://github.com/RustCrypto/traits"
+  },
+  {
+    "name": "aes",
+    "declared": null,
+    "before": [
+      "0.9.3"
+    ],
+    "latest": "0.9.3",
+    "repository": "https://github.com/RustCrypto/block-ciphers"
+  },
+  {
+    "name": "aes-gcm",
+    "declared": null,
+    "before": [
+      "0.11.1"
+    ],
+    "latest": "0.11.1",
+    "repository": "https://github.com/RustCrypto/AEADs"
+  },
+  {
+    "name": "ahash",
+    "declared": null,
+    "before": [
+      "0.8.12"
+    ],
+    "latest": "0.8.12",
+    "repository": "https://github.com/tkaitchuck/ahash"
+  },
+  {
+    "name": "aho-corasick",
+    "declared": null,
+    "before": [
+      "1.1.5"
+    ],
+    "latest": "1.1.5",
+    "repository": "https://github.com/BurntSushi/aho-corasick"
+  },
+  {
+    "name": "android_system_properties",
+    "declared": null,
+    "before": [
+      "0.1.6"
+    ],
+    "latest": "0.1.6",
+    "repository": "https://github.com/nical/android_system_properties"
+  },
+  {
+    "name": "anstream",
+    "declared": null,
+    "before": [
+      "1.0.0"
+    ],
+    "latest": "1.0.0",
+    "repository": "https://github.com/rust-cli/anstyle.git"
+  },
+  {
+    "name": "anstyle",
+    "declared": null,
+    "before": [
+      "1.0.14"
+    ],
+    "latest": "1.0.14",
+    "repository": "https://github.com/rust-cli/anstyle.git"
+  },
+  {
+    "name": "anstyle-parse",
+    "declared": null,
+    "before": [
+      "1.0.0"
+    ],
+    "latest": "1.0.0",
+    "repository": "https://github.com/rust-cli/anstyle.git"
+  },
+  {
+    "name": "anstyle-query",
+    "declared": null,
+    "before": [
+      "1.1.5"
+    ],
+    "latest": "1.1.5",
+    "repository": "https://github.com/rust-cli/anstyle.git"
+  },
+  {
+    "name": "anstyle-wincon",
+    "declared": null,
+    "before": [
+      "3.0.11"
+    ],
+    "latest": "3.0.11",
+    "repository": "https://github.com/rust-cli/anstyle.git"
+  },
+  {
+    "name": "anyhow",
+    "declared": {
+      "version": "1.0.104",
+      "optional": true
+    },
+    "before": [
+      "1.0.104"
+    ],
+    "latest": "1.0.104",
+    "repository": "https://github.com/dtolnay/anyhow"
+  },
+  {
+    "name": "arrayvec",
+    "declared": null,
+    "before": [
+      "0.7.8"
+    ],
+    "latest": "0.7.8",
+    "repository": "https://github.com/bluss/arrayvec"
+  },
+  {
+    "name": "astral-tl",
+    "declared": null,
+    "before": [
+      "0.8.0"
+    ],
+    "latest": "0.8.0",
+    "repository": "https://github.com/astral-sh/astral-tl"
+  },
+  {
+    "name": "async-compression",
+    "declared": null,
+    "before": [
+      "0.4.50"
+    ],
+    "latest": "0.4.50",
+    "repository": "https://github.com/Nullus157/async-compression"
+  },
+  {
+    "name": "async-trait",
+    "declared": null,
+    "before": [
+      "0.1.92"
+    ],
+    "latest": "0.1.92",
+    "repository": "https://github.com/dtolnay/async-trait"
+  },
+  {
+    "name": "async-tungstenite",
+    "declared": {
+      "version": "0.35.0",
+      "features": [
+        "tokio-runtime"
+      ],
+      "optional": true
+    },
+    "before": [
+      "0.32.1",
+      "0.35.0"
+    ],
+    "latest": "0.35.0",
+    "repository": "https://github.com/sdroege/async-tungstenite"
+  },
+  {
+    "name": "atomic-waker",
+    "declared": null,
+    "before": [
+      "1.1.2"
+    ],
+    "latest": "1.1.2",
+    "repository": "https://github.com/smol-rs/atomic-waker"
+  },
+  {
+    "name": "autocfg",
+    "declared": null,
+    "before": [
+      "1.5.1"
+    ],
+    "latest": "1.5.1",
+    "repository": "https://github.com/cuviper/autocfg"
+  },
+  {
+    "name": "aws-lc-rs",
+    "declared": null,
+    "before": [
+      "1.18.1"
+    ],
+    "latest": "1.18.1",
+    "repository": "https://github.com/aws/aws-lc-rs"
+  },
+  {
+    "name": "aws-lc-sys",
+    "declared": null,
+    "before": [
+      "0.45.0"
+    ],
+    "latest": "0.45.0",
+    "repository": "https://github.com/aws/aws-lc-rs"
+  },
+  {
+    "name": "axum",
+    "declared": {
+      "version": "0.8.9",
+      "optional": true
+    },
+    "before": [
+      "0.8.9"
+    ],
+    "latest": "0.8.9",
+    "repository": "https://github.com/tokio-rs/axum"
+  },
+  {
+    "name": "axum-core",
+    "declared": null,
+    "before": [
+      "0.5.6"
+    ],
+    "latest": "0.5.6",
+    "repository": "https://github.com/tokio-rs/axum"
+  },
+  {
+    "name": "base64",
+    "declared": {
+      "version": "0.23.1",
+      "optional": true
+    },
+    "before": [
+      "0.22.1",
+      "0.23.1"
+    ],
+    "latest": "0.23.1",
+    "repository": "https://github.com/marshallpierce/rust-base64"
+  },
+  {
+    "name": "bitflags",
+    "declared": null,
+    "before": [
+      "1.3.2",
+      "2.13.2"
+    ],
+    "latest": "2.13.2",
+    "repository": "https://github.com/bitflags/bitflags"
+  },
+  {
+    "name": "block-buffer",
+    "declared": null,
+    "before": [
+      "0.10.4",
+      "0.12.1"
+    ],
+    "latest": "0.12.1",
+    "repository": "https://github.com/RustCrypto/utils"
+  },
+  {
+    "name": "block-padding",
+    "declared": null,
+    "before": [
+      "0.4.2"
+    ],
+    "latest": "0.4.2",
+    "repository": "https://github.com/RustCrypto/utils"
+  },
+  {
+    "name": "browser-commander",
+    "declared": {
+      "version": "0.19.0",
+      "optional": true
+    },
+    "before": [
+      "0.19.0"
+    ],
+    "latest": "0.19.0",
+    "repository": "https://github.com/link-foundation/browser-commander"
+  },
+  {
+    "name": "bumpalo",
+    "declared": null,
+    "before": [
+      "3.20.3"
+    ],
+    "latest": "3.20.3",
+    "repository": "https://github.com/fitzgen/bumpalo"
+  },
+  {
+    "name": "bytemuck",
+    "declared": null,
+    "before": [
+      "1.25.2"
+    ],
+    "latest": "1.25.2",
+    "repository": "https://github.com/Lokathor/bytemuck"
+  },
+  {
+    "name": "byteorder-lite",
+    "declared": null,
+    "before": [
+      "0.1.0"
+    ],
+    "latest": "0.1.0",
+    "repository": "https://github.com/image-rs/byteorder-lite"
+  },
+  {
+    "name": "bytes",
+    "declared": null,
+    "before": [
+      "1.12.1"
+    ],
+    "latest": "1.12.1",
+    "repository": "https://github.com/tokio-rs/bytes"
+  },
+  {
+    "name": "cargo-audit",
+    "declared": null,
+    "before": [],
+    "latest": "0.22.2",
+    "repository": "https://github.com/rustsec/rustsec"
+  },
+  {
+    "name": "cargo-edit",
+    "declared": null,
+    "before": [],
+    "latest": "0.13.13",
+    "repository": "https://github.com/killercup/cargo-edit"
+  },
+  {
+    "name": "cbc",
+    "declared": null,
+    "before": [
+      "0.2.1"
+    ],
+    "latest": "0.2.1",
+    "repository": "https://github.com/RustCrypto/block-modes"
+  },
+  {
+    "name": "cc",
+    "declared": null,
+    "before": [
+      "1.6.0"
+    ],
+    "latest": "1.6.0",
+    "repository": "https://github.com/rust-lang/cc-rs"
+  },
+  {
+    "name": "cfg-if",
+    "declared": null,
+    "before": [
+      "1.0.5"
+    ],
+    "latest": "1.0.5",
+    "repository": "https://github.com/rust-lang/cfg-if"
+  },
+  {
+    "name": "cfg_aliases",
+    "declared": null,
+    "before": [
+      "0.1.1",
+      "0.2.2"
+    ],
+    "latest": "0.2.2",
+    "repository": "https://github.com/katharostech/cfg_aliases"
+  },
+  {
+    "name": "chacha20",
+    "declared": null,
+    "before": [
+      "0.10.2"
+    ],
+    "latest": "0.10.2",
+    "repository": "https://github.com/RustCrypto/stream-ciphers"
+  },
+  {
+    "name": "chromiumoxide",
+    "declared": null,
+    "before": [
+      "0.9.1"
+    ],
+    "latest": "0.9.1",
+    "repository": "https://github.com/mattsse/chromiumoxide"
+  },
+  {
+    "name": "chromiumoxide_cdp",
+    "declared": null,
+    "before": [
+      "0.9.1"
+    ],
+    "latest": "0.9.1",
+    "repository": "https://github.com/mattsse/chromiumoxide"
+  },
+  {
+    "name": "chromiumoxide_pdl",
+    "declared": null,
+    "before": [
+      "0.9.1"
+    ],
+    "latest": "0.9.1",
+    "repository": "https://github.com/mattsse/chromiumoxide"
+  },
+  {
+    "name": "chromiumoxide_types",
+    "declared": null,
+    "before": [
+      "0.9.1"
+    ],
+    "latest": "0.9.1",
+    "repository": "https://github.com/mattsse/chromiumoxide"
+  },
+  {
+    "name": "chrono",
+    "declared": null,
+    "before": [
+      "0.4.45"
+    ],
+    "latest": "0.4.45",
+    "repository": "https://github.com/chronotope/chrono"
+  },
+  {
+    "name": "cipher",
+    "declared": null,
+    "before": [
+      "0.5.2"
+    ],
+    "latest": "0.5.2",
+    "repository": "https://github.com/RustCrypto/traits"
+  },
+  {
+    "name": "clap",
+    "declared": {
+      "version": "4.6.7",
+      "features": [
+        "derive",
+        "env"
+      ],
+      "optional": true
+    },
+    "before": [
+      "4.6.7"
+    ],
+    "latest": "4.6.7",
+    "repository": "https://github.com/clap-rs/clap"
+  },
+  {
+    "name": "clap_builder",
+    "declared": null,
+    "before": [
+      "4.6.7"
+    ],
+    "latest": "4.6.7",
+    "repository": "https://github.com/clap-rs/clap"
+  },
+  {
+    "name": "clap_derive",
+    "declared": null,
+    "before": [
+      "4.6.7"
+    ],
+    "latest": "4.6.7",
+    "repository": "https://github.com/clap-rs/clap"
+  },
+  {
+    "name": "clap_lex",
+    "declared": null,
+    "before": [
+      "1.1.1"
+    ],
+    "latest": "1.1.1",
+    "repository": "https://github.com/clap-rs/clap"
+  },
+  {
+    "name": "cmake",
+    "declared": null,
+    "before": [
+      "0.1.58"
+    ],
+    "latest": "0.1.58",
+    "repository": "https://github.com/rust-lang/cmake-rs"
+  },
+  {
+    "name": "cmov",
+    "declared": null,
+    "before": [
+      "0.5.4"
+    ],
+    "latest": "0.5.4",
+    "repository": "https://github.com/RustCrypto/utils"
+  },
+  {
+    "name": "color_quant",
+    "declared": null,
+    "before": [
+      "1.1.0"
+    ],
+    "latest": "2.0.0",
+    "repository": "https://github.com/image-rs/color_quant.git"
+  },
+  {
+    "name": "colorchoice",
+    "declared": null,
+    "before": [
+      "1.0.5"
+    ],
+    "latest": "1.0.5",
+    "repository": "https://github.com/rust-cli/anstyle.git"
+  },
+  {
+    "name": "combine",
+    "declared": null,
+    "before": [
+      "4.6.8"
+    ],
+    "latest": "4.6.8",
+    "repository": "https://github.com/Marwes/combine"
+  },
+  {
+    "name": "command-stream",
+    "declared": null,
+    "before": [
+      "1.5.3"
+    ],
+    "latest": "1.5.3",
+    "repository": "https://github.com/link-foundation/command-stream"
+  },
+  {
+    "name": "compression-codecs",
+    "declared": null,
+    "before": [
+      "0.4.45"
+    ],
+    "latest": "0.4.45",
+    "repository": "https://github.com/Nullus157/async-compression"
+  },
+  {
+    "name": "compression-core",
+    "declared": null,
+    "before": [
+      "0.4.33"
+    ],
+    "latest": "0.4.33",
+    "repository": "https://github.com/Nullus157/async-compression"
+  },
+  {
+    "name": "const-oid",
+    "declared": null,
+    "before": [
+      "0.10.2"
+    ],
+    "latest": "0.10.2",
+    "repository": "https://github.com/RustCrypto/formats"
+  },
+  {
+    "name": "const-random",
+    "declared": null,
+    "before": [
+      "0.1.18"
+    ],
+    "latest": "0.1.18",
+    "repository": "https://github.com/tkaitchuck/constrandom"
+  },
+  {
+    "name": "const-random-macro",
+    "declared": null,
+    "before": [
+      "0.1.16"
+    ],
+    "latest": "0.1.16",
+    "repository": "https://github.com/tkaitchuck/constrandom"
+  },
+  {
+    "name": "cookie",
+    "declared": null,
+    "before": [
+      "0.16.2",
+      "0.18.2"
+    ],
+    "latest": "0.18.2",
+    "repository": "https://github.com/SergioBenitez/cookie-rs"
+  },
+  {
+    "name": "cookie_store",
+    "declared": null,
+    "before": [
+      "0.22.1"
+    ],
+    "latest": "0.22.1",
+    "repository": "https://github.com/pfernie/cookie_store"
+  },
+  {
+    "name": "core-foundation",
+    "declared": null,
+    "before": [
+      "0.10.1"
+    ],
+    "latest": "0.10.1",
+    "repository": "https://github.com/servo/core-foundation-rs"
+  },
+  {
+    "name": "core-foundation-sys",
+    "declared": null,
+    "before": [
+      "0.8.7"
+    ],
+    "latest": "0.8.7",
+    "repository": "https://github.com/servo/core-foundation-rs"
+  },
+  {
+    "name": "core_detect",
+    "declared": null,
+    "before": [
+      "1.0.0"
+    ],
+    "latest": "1.0.0",
+    "repository": "https://github.com/thomcc/core_detect"
+  },
+  {
+    "name": "core_maths",
+    "declared": null,
+    "before": [
+      "0.1.1"
+    ],
+    "latest": "0.1.1",
+    "repository": "https://github.com/robertbastian/core_maths"
+  },
+  {
+    "name": "cpubits",
+    "declared": null,
+    "before": [
+      "0.1.1"
+    ],
+    "latest": "0.1.1",
+    "repository": "https://github.com/RustCrypto/utils"
+  },
+  {
+    "name": "cpufeatures",
+    "declared": null,
+    "before": [
+      "0.2.17",
+      "0.3.1"
+    ],
+    "latest": "0.3.1",
+    "repository": "https://github.com/RustCrypto/utils"
+  },
+  {
+    "name": "crc32fast",
+    "declared": null,
+    "before": [
+      "1.5.2"
+    ],
+    "latest": "1.5.2",
+    "repository": "https://github.com/srijs/rust-crc32fast"
+  },
+  {
+    "name": "crunchy",
+    "declared": null,
+    "before": [
+      "0.2.4"
+    ],
+    "latest": "0.2.4",
+    "repository": "https://github.com/eira-fransham/crunchy"
+  },
+  {
+    "name": "crypto-common",
+    "declared": null,
+    "before": [
+      "0.1.7",
+      "0.2.2"
+    ],
+    "latest": "0.2.2",
+    "repository": "https://github.com/RustCrypto/traits"
+  },
+  {
+    "name": "cssparser",
+    "declared": null,
+    "before": [
+      "0.37.0"
+    ],
+    "latest": "0.38.0",
+    "repository": "https://github.com/servo/rust-cssparser"
+  },
+  {
+    "name": "cssparser-macros",
+    "declared": null,
+    "before": [
+      "0.7.1"
+    ],
+    "latest": "0.7.1",
+    "repository": "https://github.com/servo/rust-cssparser"
+  },
+  {
+    "name": "csv",
+    "declared": null,
+    "before": [
+      "1.4.0"
+    ],
+    "latest": "1.4.0",
+    "repository": "https://github.com/BurntSushi/rust-csv"
+  },
+  {
+    "name": "csv-core",
+    "declared": null,
+    "before": [
+      "0.1.13"
+    ],
+    "latest": "0.1.13",
+    "repository": "https://github.com/BurntSushi/rust-csv"
+  },
+  {
+    "name": "ctor",
+    "declared": null,
+    "before": [
+      "1.0.13"
+    ],
+    "latest": "1.0.13",
+    "repository": "https://github.com/mmastrac/linktime"
+  },
+  {
+    "name": "ctr",
+    "declared": null,
+    "before": [
+      "0.10.1"
+    ],
+    "latest": "0.10.1",
+    "repository": "https://github.com/RustCrypto/block-modes"
+  },
+  {
+    "name": "ctutils",
+    "declared": null,
+    "before": [
+      "0.4.3"
+    ],
+    "latest": "0.4.3",
+    "repository": "https://github.com/RustCrypto/utils"
+  },
+  {
+    "name": "data-encoding",
+    "declared": null,
+    "before": [
+      "2.11.1"
+    ],
+    "latest": "2.11.1",
+    "repository": "https://github.com/ia0/data-encoding"
+  },
+  {
+    "name": "deranged",
+    "declared": null,
+    "before": [
+      "0.5.8"
+    ],
+    "latest": "0.5.8",
+    "repository": "https://github.com/jhpratt/deranged"
+  },
+  {
+    "name": "derive_more",
+    "declared": null,
+    "before": [
+      "2.1.1"
+    ],
+    "latest": "2.1.1",
+    "repository": "https://github.com/JelteF/derive_more"
+  },
+  {
+    "name": "derive_more-impl",
+    "declared": null,
+    "before": [
+      "2.1.1"
+    ],
+    "latest": "2.1.1",
+    "repository": "https://github.com/JelteF/derive_more"
+  },
+  {
+    "name": "des",
+    "declared": null,
+    "before": [
+      "0.9.0"
+    ],
+    "latest": "0.9.0",
+    "repository": "https://github.com/RustCrypto/block-ciphers"
+  },
+  {
+    "name": "digest",
+    "declared": null,
+    "before": [
+      "0.10.7",
+      "0.11.3"
+    ],
+    "latest": "0.11.3",
+    "repository": "https://github.com/RustCrypto/traits"
+  },
+  {
+    "name": "dirs",
+    "declared": null,
+    "before": [
+      "7.0.0"
+    ],
+    "latest": "7.0.0",
+    "repository": "https://codeberg.org/dirs/dirs-rs"
+  },
+  {
+    "name": "dirs-sys",
+    "declared": null,
+    "before": [
+      "0.5.0"
+    ],
+    "latest": "0.5.0",
+    "repository": "https://github.com/dirs-dev/dirs-sys-rs"
+  },
+  {
+    "name": "displaydoc",
+    "declared": null,
+    "before": [
+      "0.2.7"
+    ],
+    "latest": "0.2.7",
+    "repository": "https://github.com/yaahc/displaydoc"
+  },
+  {
+    "name": "document-features",
+    "declared": null,
+    "before": [
+      "0.2.12"
+    ],
+    "latest": "0.2.12",
+    "repository": "https://github.com/slint-ui/document-features"
+  },
+  {
+    "name": "dotenvy",
+    "declared": null,
+    "before": [
+      "0.15.7"
+    ],
+    "latest": "0.15.7",
+    "repository": "https://github.com/allan2/dotenvy"
+  },
+  {
+    "name": "downcast-rs",
+    "declared": null,
+    "before": [
+      "1.2.1"
+    ],
+    "latest": "2.0.2",
+    "repository": "https://github.com/marcianx/downcast-rs"
+  },
+  {
+    "name": "dtoa",
+    "declared": null,
+    "before": [
+      "1.0.11"
+    ],
+    "latest": "1.0.11",
+    "repository": "https://github.com/dtolnay/dtoa"
+  },
+  {
+    "name": "dtoa-short",
+    "declared": null,
+    "before": [
+      "0.3.5"
+    ],
+    "latest": "0.3.5",
+    "repository": "https://github.com/upsuper/dtoa-short"
+  },
+  {
+    "name": "dunce",
+    "declared": null,
+    "before": [
+      "1.0.5"
+    ],
+    "latest": "1.0.5",
+    "repository": "https://gitlab.com/kornelski/dunce"
+  },
+  {
+    "name": "ego-tree",
+    "declared": null,
+    "before": [
+      "0.11.0"
+    ],
+    "latest": "0.11.0",
+    "repository": "https://github.com/rust-scraper/ego-tree"
+  },
+  {
+    "name": "either",
+    "declared": null,
+    "before": [
+      "1.19.0"
+    ],
+    "latest": "1.19.0",
+    "repository": "https://github.com/rayon-rs/either"
+  },
+  {
+    "name": "encoding_rs",
+    "declared": {
+      "version": "0.8.42",
+      "optional": true
+    },
+    "before": [
+      "0.8.42"
+    ],
+    "latest": "0.8.42",
+    "repository": "https://github.com/hsivonen/encoding_rs"
+  },
+  {
+    "name": "equivalent",
+    "declared": null,
+    "before": [
+      "1.0.2"
+    ],
+    "latest": "1.0.2",
+    "repository": "https://github.com/indexmap-rs/equivalent"
+  },
+  {
+    "name": "errno",
+    "declared": null,
+    "before": [
+      "0.3.14"
+    ],
+    "latest": "0.3.14",
+    "repository": "https://github.com/lambda-fairy/rust-errno"
+  },
+  {
+    "name": "fallible-iterator",
+    "declared": null,
+    "before": [
+      "0.3.0"
+    ],
+    "latest": "0.3.0",
+    "repository": "https://github.com/sfackler/rust-fallible-iterator"
+  },
+  {
+    "name": "fallible-streaming-iterator",
+    "declared": null,
+    "before": [
+      "0.1.9"
+    ],
+    "latest": "0.1.9",
+    "repository": "https://github.com/sfackler/fallible-streaming-iterator"
+  },
+  {
+    "name": "fantoccini",
+    "declared": null,
+    "before": [
+      "0.22.1"
+    ],
+    "latest": "0.22.1",
+    "repository": "https://github.com/jonhoo/fantoccini.git"
+  },
+  {
+    "name": "fastrand",
+    "declared": null,
+    "before": [
+      "2.5.0"
+    ],
+    "latest": "2.5.0",
+    "repository": "https://github.com/smol-rs/fastrand"
+  },
+  {
+    "name": "fdeflate",
+    "declared": null,
+    "before": [
+      "0.3.7"
+    ],
+    "latest": "0.3.7",
+    "repository": "https://github.com/image-rs/fdeflate"
+  },
+  {
+    "name": "filedescriptor",
+    "declared": null,
+    "before": [
+      "0.8.3"
+    ],
+    "latest": "0.8.3",
+    "repository": "https://github.com/wezterm/wezterm"
+  },
+  {
+    "name": "filetime",
+    "declared": null,
+    "before": [
+      "0.2.29"
+    ],
+    "latest": "0.2.29",
+    "repository": "https://github.com/alexcrichton/filetime"
+  },
+  {
+    "name": "find-msvc-tools",
+    "declared": null,
+    "before": [
+      "0.1.14"
+    ],
+    "latest": "0.1.14",
+    "repository": "https://github.com/rust-lang/cc-rs"
+  },
+  {
+    "name": "flate2",
+    "declared": null,
+    "before": [
+      "1.1.10"
+    ],
+    "latest": "1.1.10",
+    "repository": "https://github.com/rust-lang/flate2-rs"
+  },
+  {
+    "name": "fnv",
+    "declared": null,
+    "before": [
+      "1.0.7"
+    ],
+    "latest": "1.0.7",
+    "repository": "https://github.com/servo/rust-fnv"
+  },
+  {
+    "name": "foldhash",
+    "declared": null,
+    "before": [
+      "0.2.0"
+    ],
+    "latest": "0.2.0",
+    "repository": "https://github.com/orlp/foldhash"
+  },
+  {
+    "name": "foreign-types",
+    "declared": null,
+    "before": [
+      "0.3.2"
+    ],
+    "latest": "0.5.0",
+    "repository": "https://github.com/sfackler/foreign-types"
+  },
+  {
+    "name": "foreign-types-shared",
+    "declared": null,
+    "before": [
+      "0.1.1"
+    ],
+    "latest": "0.3.1",
+    "repository": "https://github.com/sfackler/foreign-types"
+  },
+  {
+    "name": "form_urlencoded",
+    "declared": null,
+    "before": [
+      "1.2.2"
+    ],
+    "latest": "1.2.2",
+    "repository": "https://github.com/servo/rust-url"
+  },
+  {
+    "name": "fs_extra",
+    "declared": null,
+    "before": [
+      "1.3.0"
+    ],
+    "latest": "1.3.0",
+    "repository": "https://github.com/webdesus/fs_extra"
+  },
+  {
+    "name": "futures",
+    "declared": {
+      "version": "0.3.34",
+      "optional": true
+    },
+    "before": [
+      "0.3.34"
+    ],
+    "latest": "0.3.34",
+    "repository": "https://github.com/rust-lang/futures-rs"
+  },
+  {
+    "name": "futures-channel",
+    "declared": null,
+    "before": [
+      "0.3.34"
+    ],
+    "latest": "0.3.34",
+    "repository": "https://github.com/rust-lang/futures-rs"
+  },
+  {
+    "name": "futures-core",
+    "declared": null,
+    "before": [
+      "0.3.34"
+    ],
+    "latest": "0.3.34",
+    "repository": "https://github.com/rust-lang/futures-rs"
+  },
+  {
+    "name": "futures-executor",
+    "declared": null,
+    "before": [
+      "0.3.34"
+    ],
+    "latest": "0.3.34",
+    "repository": "https://github.com/rust-lang/futures-rs"
+  },
+  {
+    "name": "futures-io",
+    "declared": null,
+    "before": [
+      "0.3.34"
+    ],
+    "latest": "0.3.34",
+    "repository": "https://github.com/rust-lang/futures-rs"
+  },
+  {
+    "name": "futures-macro",
+    "declared": null,
+    "before": [
+      "0.3.34"
+    ],
+    "latest": "0.3.34",
+    "repository": "https://github.com/rust-lang/futures-rs"
+  },
+  {
+    "name": "futures-sink",
+    "declared": null,
+    "before": [
+      "0.3.34"
+    ],
+    "latest": "0.3.34",
+    "repository": "https://github.com/rust-lang/futures-rs"
+  },
+  {
+    "name": "futures-task",
+    "declared": null,
+    "before": [
+      "0.3.34"
+    ],
+    "latest": "0.3.34",
+    "repository": "https://github.com/rust-lang/futures-rs"
+  },
+  {
+    "name": "futures-timer",
+    "declared": null,
+    "before": [
+      "3.0.4"
+    ],
+    "latest": "3.0.4",
+    "repository": "https://github.com/async-rs/futures-timer"
+  },
+  {
+    "name": "futures-util",
+    "declared": null,
+    "before": [
+      "0.3.34"
+    ],
+    "latest": "0.3.34",
+    "repository": "https://github.com/rust-lang/futures-rs"
+  },
+  {
+    "name": "generic-array",
+    "declared": null,
+    "before": [
+      "0.14.7"
+    ],
+    "latest": "1.4.5",
+    "repository": "https://github.com/fizyk20/generic-array.git"
+  },
+  {
+    "name": "getopts",
+    "declared": null,
+    "before": [
+      "0.2.24"
+    ],
+    "latest": "0.2.24",
+    "repository": "https://github.com/rust-lang/getopts"
+  },
+  {
+    "name": "getrandom",
+    "declared": null,
+    "before": [
+      "0.2.17",
+      "0.3.4",
+      "0.4.3"
+    ],
+    "latest": "0.4.3",
+    "repository": "https://github.com/rust-random/getrandom"
+  },
+  {
+    "name": "ghash",
+    "declared": null,
+    "before": [
+      "0.6.0"
+    ],
+    "latest": "0.6.0",
+    "repository": "https://github.com/RustCrypto/universal-hashes"
+  },
+  {
+    "name": "gif",
+    "declared": null,
+    "before": [
+      "0.14.2"
+    ],
+    "latest": "0.14.2",
+    "repository": "https://github.com/image-rs/image-gif"
+  },
+  {
+    "name": "glob",
+    "declared": null,
+    "before": [
+      "0.3.4"
+    ],
+    "latest": "0.3.4",
+    "repository": "https://github.com/rust-lang/glob"
+  },
+  {
+    "name": "h2",
+    "declared": null,
+    "before": [
+      "0.4.20"
+    ],
+    "latest": "0.4.20",
+    "repository": "https://github.com/hyperium/h2"
+  },
+  {
+    "name": "hashbrown",
+    "declared": null,
+    "before": [
+      "0.16.1",
+      "0.17.1"
+    ],
+    "latest": "0.17.1",
+    "repository": "https://github.com/rust-lang/hashbrown"
+  },
+  {
+    "name": "hashlink",
+    "declared": null,
+    "before": [
+      "0.12.2"
+    ],
+    "latest": "0.12.2",
+    "repository": "https://github.com/djc/hashlink"
+  },
+  {
+    "name": "heck",
+    "declared": null,
+    "before": [
+      "0.5.0"
+    ],
+    "latest": "0.5.0",
+    "repository": "https://github.com/withoutboats/heck"
+  },
+  {
+    "name": "hmac",
+    "declared": null,
+    "before": [
+      "0.13.0"
+    ],
+    "latest": "0.13.0",
+    "repository": "https://github.com/RustCrypto/MACs"
+  },
+  {
+    "name": "html-escape",
+    "declared": {
+      "version": "0.2.15",
+      "optional": true
+    },
+    "before": [
+      "0.2.15"
+    ],
+    "latest": "0.2.15",
+    "repository": "https://github.com/magiclen/html-escape"
+  },
+  {
+    "name": "html-to-markdown-rs",
+    "declared": {
+      "version": "3.17.2",
+      "features": [
+        "inline-images",
+        "metadata",
+        "serde"
+      ],
+      "optional": true
+    },
+    "before": [
+      "3.17.2"
+    ],
+    "latest": "3.17.2",
+    "repository": "https://github.com/xberg-io/html-to-markdown"
+  },
+  {
+    "name": "html2md",
+    "declared": {
+      "version": "0.2.17",
+      "optional": true
+    },
+    "before": [
+      "0.2.17"
+    ],
+    "latest": "0.2.17",
+    "repository": "https://gitlab.com/Kanedias/html2md"
+  },
+  {
+    "name": "html5ever",
+    "declared": null,
+    "before": [
+      "0.39.0",
+      "0.40.1"
+    ],
+    "latest": "0.40.1",
+    "repository": "https://github.com/servo/html5ever"
+  },
+  {
+    "name": "http",
+    "declared": null,
+    "before": [
+      "0.2.12",
+      "1.5.0"
+    ],
+    "latest": "1.5.0",
+    "repository": "https://github.com/hyperium/http"
+  },
+  {
+    "name": "http-body",
+    "declared": null,
+    "before": [
+      "1.1.0"
+    ],
+    "latest": "1.1.0",
+    "repository": "https://github.com/hyperium/http-body"
+  },
+  {
+    "name": "http-body-util",
+    "declared": null,
+    "before": [
+      "0.1.5"
+    ],
+    "latest": "0.1.5",
+    "repository": "https://github.com/hyperium/http-body"
+  },
+  {
+    "name": "httparse",
+    "declared": null,
+    "before": [
+      "1.10.1"
+    ],
+    "latest": "1.10.1",
+    "repository": "https://github.com/seanmonstar/httparse"
+  },
+  {
+    "name": "httpdate",
+    "declared": null,
+    "before": [
+      "1.0.3"
+    ],
+    "latest": "1.0.3",
+    "repository": "https://github.com/pyfisch/httpdate"
+  },
+  {
+    "name": "hybrid-array",
+    "declared": null,
+    "before": [
+      "0.4.15"
+    ],
+    "latest": "0.4.15",
+    "repository": "https://github.com/RustCrypto/hybrid-array"
+  },
+  {
+    "name": "hyper",
+    "declared": null,
+    "before": [
+      "1.12.0"
+    ],
+    "latest": "1.12.0",
+    "repository": "https://github.com/hyperium/hyper"
+  },
+  {
+    "name": "hyper-rustls",
+    "declared": null,
+    "before": [
+      "0.27.10"
+    ],
+    "latest": "0.27.10",
+    "repository": "https://github.com/rustls/hyper-rustls"
+  },
+  {
+    "name": "hyper-tls",
+    "declared": null,
+    "before": [
+      "0.6.0"
+    ],
+    "latest": "0.6.0",
+    "repository": "https://github.com/hyperium/hyper-tls"
+  },
+  {
+    "name": "hyper-util",
+    "declared": null,
+    "before": [
+      "0.1.21"
+    ],
+    "latest": "0.1.21",
+    "repository": "https://github.com/hyperium/hyper-util"
+  },
+  {
+    "name": "iana-time-zone",
+    "declared": null,
+    "before": [
+      "0.1.65"
+    ],
+    "latest": "0.1.65",
+    "repository": "https://github.com/strawlab/iana-time-zone"
+  },
+  {
+    "name": "iana-time-zone-haiku",
+    "declared": null,
+    "before": [
+      "0.1.2"
+    ],
+    "latest": "0.1.2",
+    "repository": "https://github.com/strawlab/iana-time-zone"
+  },
+  {
+    "name": "icu_collections",
+    "declared": null,
+    "before": [
+      "1.5.0",
+      "2.3.0"
+    ],
+    "latest": "2.3.0",
+    "repository": "https://github.com/unicode-org/icu4x"
+  },
+  {
+    "name": "icu_locale_core",
+    "declared": null,
+    "before": [
+      "2.3.0"
+    ],
+    "latest": "2.3.0",
+    "repository": "https://github.com/unicode-org/icu4x"
+  },
+  {
+    "name": "icu_locid",
+    "declared": null,
+    "before": [
+      "1.5.0"
+    ],
+    "latest": "2.0.0",
+    "repository": "https://github.com/unicode-org/icu4x"
+  },
+  {
+    "name": "icu_normalizer",
+    "declared": null,
+    "before": [
+      "2.3.0"
+    ],
+    "latest": "2.3.0",
+    "repository": "https://github.com/unicode-org/icu4x"
+  },
+  {
+    "name": "icu_normalizer_data",
+    "declared": null,
+    "before": [
+      "2.3.0"
+    ],
+    "latest": "2.3.0",
+    "repository": "https://github.com/unicode-org/icu4x"
+  },
+  {
+    "name": "icu_properties",
+    "declared": null,
+    "before": [
+      "2.3.0"
+    ],
+    "latest": "2.3.0",
+    "repository": "https://github.com/unicode-org/icu4x"
+  },
+  {
+    "name": "icu_properties_data",
+    "declared": null,
+    "before": [
+      "2.3.0"
+    ],
+    "latest": "2.3.0",
+    "repository": "https://github.com/unicode-org/icu4x"
+  },
+  {
+    "name": "icu_provider",
+    "declared": null,
+    "before": [
+      "1.5.0",
+      "2.3.1"
+    ],
+    "latest": "2.3.1",
+    "repository": "https://github.com/unicode-org/icu4x"
+  },
+  {
+    "name": "icu_provider_macros",
+    "declared": null,
+    "before": [
+      "1.5.0"
+    ],
+    "latest": "1.5.0",
+    "repository": "https://github.com/unicode-org/icu4x"
+  },
+  {
+    "name": "icu_segmenter",
+    "declared": null,
+    "before": [
+      "1.5.0"
+    ],
+    "latest": "2.3.0",
+    "repository": "https://github.com/unicode-org/icu4x"
+  },
+  {
+    "name": "icu_segmenter_data",
+    "declared": null,
+    "before": [
+      "1.5.1"
+    ],
+    "latest": "2.3.0",
+    "repository": "https://github.com/unicode-org/icu4x"
+  },
+  {
+    "name": "idna",
+    "declared": null,
+    "before": [
+      "1.1.0"
+    ],
+    "latest": "1.1.0",
+    "repository": "https://github.com/servo/rust-url/"
+  },
+  {
+    "name": "idna_adapter",
+    "declared": null,
+    "before": [
+      "1.2.2"
+    ],
+    "latest": "1.2.2",
+    "repository": "https://github.com/hsivonen/idna_adapter"
+  },
+  {
+    "name": "image",
+    "declared": null,
+    "before": [
+      "0.25.10"
+    ],
+    "latest": "0.25.10",
+    "repository": "https://github.com/image-rs/image"
+  },
+  {
+    "name": "image-webp",
+    "declared": null,
+    "before": [
+      "0.2.4"
+    ],
+    "latest": "0.2.4",
+    "repository": "https://github.com/image-rs/image-webp"
+  },
+  {
+    "name": "indexmap",
+    "declared": null,
+    "before": [
+      "2.14.2"
+    ],
+    "latest": "2.14.2",
+    "repository": "https://github.com/indexmap-rs/indexmap"
+  },
+  {
+    "name": "inout",
+    "declared": null,
+    "before": [
+      "0.2.2"
+    ],
+    "latest": "0.2.2",
+    "repository": "https://github.com/RustCrypto/utils"
+  },
+  {
+    "name": "ipnet",
+    "declared": null,
+    "before": [
+      "2.12.2"
+    ],
+    "latest": "2.12.2",
+    "repository": "https://github.com/krisprice/ipnet"
+  },
+  {
+    "name": "is_terminal_polyfill",
+    "declared": null,
+    "before": [
+      "1.70.2"
+    ],
+    "latest": "1.70.2",
+    "repository": "https://github.com/polyfill-rs/is_terminal_polyfill"
+  },
+  {
+    "name": "itoa",
+    "declared": null,
+    "before": [
+      "1.0.18"
+    ],
+    "latest": "1.0.18",
+    "repository": "https://github.com/dtolnay/itoa"
+  },
+  {
+    "name": "jni",
+    "declared": null,
+    "before": [
+      "0.22.4"
+    ],
+    "latest": "0.22.4",
+    "repository": "https://github.com/jni-rs/jni-rs"
+  },
+  {
+    "name": "jni-macros",
+    "declared": null,
+    "before": [
+      "0.22.4"
+    ],
+    "latest": "0.22.4",
+    "repository": "https://github.com/jni-rs/jni-rs"
+  },
+  {
+    "name": "jni-sys",
+    "declared": null,
+    "before": [
+      "0.4.1"
+    ],
+    "latest": "0.4.1",
+    "repository": "https://github.com/jni-rs/jni-sys"
+  },
+  {
+    "name": "jni-sys-macros",
+    "declared": null,
+    "before": [
+      "0.4.1"
+    ],
+    "latest": "0.4.1",
+    "repository": "https://github.com/jni-rs/jni-sys"
+  },
+  {
+    "name": "jobserver",
+    "declared": null,
+    "before": [
+      "0.1.35"
+    ],
+    "latest": "0.1.35",
+    "repository": "https://github.com/rust-lang/jobserver-rs"
+  },
+  {
+    "name": "js-sys",
+    "declared": null,
+    "before": [
+      "0.3.106"
+    ],
+    "latest": "0.3.106",
+    "repository": "https://github.com/wasm-bindgen/wasm-bindgen/tree/master/crates/js-sys"
+  },
+  {
+    "name": "lazy_static",
+    "declared": null,
+    "before": [
+      "1.5.1"
+    ],
+    "latest": "1.5.1",
+    "repository": "https://github.com/rust-lang-nursery/lazy-static.rs"
+  },
+  {
+    "name": "libc",
+    "declared": null,
+    "before": [
+      "0.2.190"
+    ],
+    "latest": "0.2.190",
+    "repository": "https://github.com/rust-lang/libc"
+  },
+  {
+    "name": "libm",
+    "declared": null,
+    "before": [
+      "0.2.16"
+    ],
+    "latest": "0.2.16",
+    "repository": "https://github.com/rust-lang/compiler-builtins"
+  },
+  {
+    "name": "libredox",
+    "declared": null,
+    "before": [
+      "0.1.25"
+    ],
+    "latest": "0.1.25",
+    "repository": "https://gitlab.redox-os.org/redox-os/libredox.git"
+  },
+  {
+    "name": "libsqlite3-sys",
+    "declared": null,
+    "before": [
+      "0.38.2"
+    ],
+    "latest": "0.38.2",
+    "repository": "https://github.com/rusqlite/rusqlite"
+  },
+  {
+    "name": "link-section",
+    "declared": null,
+    "before": [
+      "0.19.3"
+    ],
+    "latest": "0.19.3",
+    "repository": "https://github.com/mmastrac/linktime"
+  },
+  {
+    "name": "linktime-proc-macro",
+    "declared": null,
+    "before": [
+      "0.2.3"
+    ],
+    "latest": "0.2.3",
+    "repository": "https://github.com/mmastrac/linktime"
+  },
+  {
+    "name": "lino-arguments",
+    "declared": {
+      "version": "0.4.0",
+      "optional": true
+    },
+    "before": [
+      "0.4.0"
+    ],
+    "latest": "0.4.0",
+    "repository": "https://github.com/link-foundation/lino-arguments"
+  },
+  {
+    "name": "lino-env",
+    "declared": null,
+    "before": [
+      "0.1.0"
+    ],
+    "latest": "0.1.0",
+    "repository": "https://github.com/link-foundation/lino-env"
+  },
+  {
+    "name": "linux-raw-sys",
+    "declared": null,
+    "before": [
+      "0.12.1"
+    ],
+    "latest": "0.12.1",
+    "repository": "https://github.com/sunfishcode/linux-raw-sys"
+  },
+  {
+    "name": "litemap",
+    "declared": null,
+    "before": [
+      "0.7.5",
+      "0.8.3"
+    ],
+    "latest": "0.8.3",
+    "repository": "https://github.com/unicode-org/icu4x"
+  },
+  {
+    "name": "litrs",
+    "declared": null,
+    "before": [
+      "1.0.0"
+    ],
+    "latest": "1.0.0",
+    "repository": "https://github.com/LukasKalbertodt/litrs"
+  },
+  {
+    "name": "lock_api",
+    "declared": null,
+    "before": [
+      "0.4.14"
+    ],
+    "latest": "0.4.14",
+    "repository": "https://github.com/Amanieu/parking_lot"
+  },
+  {
+    "name": "log",
+    "declared": null,
+    "before": [
+      "0.4.34"
+    ],
+    "latest": "0.4.34",
+    "repository": "https://github.com/rust-lang/log"
+  },
+  {
+    "name": "lru-slab",
+    "declared": null,
+    "before": [
+      "0.1.3"
+    ],
+    "latest": "0.1.3",
+    "repository": "https://github.com/Ralith/lru-slab"
+  },
+  {
+    "name": "markup5ever",
+    "declared": null,
+    "before": [
+      "0.39.0",
+      "0.40.0"
+    ],
+    "latest": "0.40.0",
+    "repository": "https://github.com/servo/html5ever"
+  },
+  {
+    "name": "markup5ever_rcdom",
+    "declared": null,
+    "before": [
+      "0.39.0+unofficial"
+    ],
+    "latest": "0.39.0+unofficial",
+    "repository": "https://github.com/servo/html5ever"
+  },
+  {
+    "name": "matchers",
+    "declared": null,
+    "before": [
+      "0.2.0"
+    ],
+    "latest": "0.2.0",
+    "repository": "https://github.com/hawkw/matchers"
+  },
+  {
+    "name": "matchit",
+    "declared": null,
+    "before": [
+      "0.8.4"
+    ],
+    "latest": "0.9.2",
+    "repository": "https://github.com/ibraheemdev/matchit"
+  },
+  {
+    "name": "memchr",
+    "declared": null,
+    "before": [
+      "2.8.3"
+    ],
+    "latest": "2.8.3",
+    "repository": "https://github.com/BurntSushi/memchr"
+  },
+  {
+    "name": "mime",
+    "declared": null,
+    "before": [
+      "0.3.17"
+    ],
+    "latest": "0.3.17",
+    "repository": "https://github.com/hyperium/mime"
+  },
+  {
+    "name": "miniz_oxide",
+    "declared": null,
+    "before": [
+      "0.8.9",
+      "0.9.1"
+    ],
+    "latest": "0.9.1",
+    "repository": "https://github.com/Frommi/miniz_oxide/tree/master/miniz_oxide"
+  },
+  {
+    "name": "mio",
+    "declared": null,
+    "before": [
+      "1.2.4"
+    ],
+    "latest": "1.2.4",
+    "repository": "https://github.com/tokio-rs/mio"
+  },
+  {
+    "name": "moxcms",
+    "declared": null,
+    "before": [
+      "0.8.1"
+    ],
+    "latest": "0.9.1",
+    "repository": "https://github.com/awxkee/moxcms.git"
+  },
+  {
+    "name": "multiversion_no_op",
+    "declared": null,
+    "before": [
+      "1.0.0"
+    ],
+    "latest": "1.0.0",
+    "repository": "https://github.com/hsivonen/multiversion_no_op"
+  },
+  {
+    "name": "native-tls",
+    "declared": null,
+    "before": [
+      "0.2.18"
+    ],
+    "latest": "0.2.18",
+    "repository": "https://github.com/rust-native-tls/rust-native-tls"
+  },
+  {
+    "name": "new_debug_unreachable",
+    "declared": null,
+    "before": [
+      "1.0.6"
+    ],
+    "latest": "1.0.6",
+    "repository": "https://github.com/mbrubeck/rust-debug-unreachable"
+  },
+  {
+    "name": "nix",
+    "declared": null,
+    "before": [
+      "0.28.0",
+      "0.31.3"
+    ],
+    "latest": "0.31.3",
+    "repository": "https://github.com/nix-rust/nix"
+  },
+  {
+    "name": "nu-ansi-term",
+    "declared": null,
+    "before": [
+      "0.50.3"
+    ],
+    "latest": "0.50.3",
+    "repository": "https://github.com/nushell/nu-ansi-term"
+  },
+  {
+    "name": "num-conv",
+    "declared": null,
+    "before": [
+      "0.2.2"
+    ],
+    "latest": "0.2.2",
+    "repository": "https://github.com/jhpratt/num-conv"
+  },
+  {
+    "name": "num-traits",
+    "declared": null,
+    "before": [
+      "0.2.19"
+    ],
+    "latest": "0.2.19",
+    "repository": "https://github.com/rust-num/num-traits"
+  },
+  {
+    "name": "once_cell",
+    "declared": null,
+    "before": [
+      "1.21.4"
+    ],
+    "latest": "1.21.4",
+    "repository": "https://github.com/matklad/once_cell"
+  },
+  {
+    "name": "once_cell_polyfill",
+    "declared": null,
+    "before": [
+      "1.70.2"
+    ],
+    "latest": "1.70.2",
+    "repository": "https://github.com/polyfill-rs/once_cell_polyfill"
+  },
+  {
+    "name": "openssl",
+    "declared": null,
+    "before": [
+      "0.10.81"
+    ],
+    "latest": "0.10.81",
+    "repository": "https://github.com/rust-openssl/rust-openssl"
+  },
+  {
+    "name": "openssl-macros",
+    "declared": null,
+    "before": [
+      "0.1.1"
+    ],
+    "latest": "0.1.1",
+    "repository": null
+  },
+  {
+    "name": "openssl-probe",
+    "declared": null,
+    "before": [
+      "0.2.1"
+    ],
+    "latest": "0.2.1",
+    "repository": "https://github.com/rustls/openssl-probe"
+  },
+  {
+    "name": "openssl-sys",
+    "declared": null,
+    "before": [
+      "0.9.117"
+    ],
+    "latest": "0.9.117",
+    "repository": "https://github.com/rust-openssl/rust-openssl"
+  },
+  {
+    "name": "option-ext",
+    "declared": null,
+    "before": [
+      "0.2.0"
+    ],
+    "latest": "0.2.0",
+    "repository": "https://github.com/soc/option-ext.git"
+  },
+  {
+    "name": "parking_lot",
+    "declared": null,
+    "before": [
+      "0.12.5"
+    ],
+    "latest": "0.12.5",
+    "repository": "https://github.com/Amanieu/parking_lot"
+  },
+  {
+    "name": "parking_lot_core",
+    "declared": null,
+    "before": [
+      "0.9.12"
+    ],
+    "latest": "0.9.12",
+    "repository": "https://github.com/Amanieu/parking_lot"
+  },
+  {
+    "name": "pbkdf2",
+    "declared": null,
+    "before": [
+      "0.13.0"
+    ],
+    "latest": "0.13.0",
+    "repository": "https://github.com/RustCrypto/password-hashes"
+  },
+  {
+    "name": "percent-encoding",
+    "declared": null,
+    "before": [
+      "2.3.2"
+    ],
+    "latest": "2.3.2",
+    "repository": "https://github.com/servo/rust-url/"
+  },
+  {
+    "name": "phf",
+    "declared": null,
+    "before": [
+      "0.13.1",
+      "0.14.0"
+    ],
+    "latest": "0.14.0",
+    "repository": "https://github.com/rust-phf/rust-phf"
+  },
+  {
+    "name": "phf_codegen",
+    "declared": null,
+    "before": [
+      "0.13.1",
+      "0.14.0"
+    ],
+    "latest": "0.14.0",
+    "repository": "https://github.com/rust-phf/rust-phf"
+  },
+  {
+    "name": "phf_generator",
+    "declared": null,
+    "before": [
+      "0.13.1",
+      "0.14.0"
+    ],
+    "latest": "0.14.0",
+    "repository": "https://github.com/rust-phf/rust-phf"
+  },
+  {
+    "name": "phf_macros",
+    "declared": null,
+    "before": [
+      "0.13.1",
+      "0.14.0"
+    ],
+    "latest": "0.14.0",
+    "repository": "https://github.com/rust-phf/rust-phf"
+  },
+  {
+    "name": "phf_shared",
+    "declared": null,
+    "before": [
+      "0.13.1",
+      "0.14.0"
+    ],
+    "latest": "0.14.0",
+    "repository": "https://github.com/rust-phf/rust-phf"
+  },
+  {
+    "name": "pin-project-lite",
+    "declared": null,
+    "before": [
+      "0.2.17"
+    ],
+    "latest": "0.2.17",
+    "repository": "https://github.com/taiki-e/pin-project-lite"
+  },
+  {
+    "name": "pkg-config",
+    "declared": null,
+    "before": [
+      "0.3.34"
+    ],
+    "latest": "0.3.34",
+    "repository": "https://github.com/rust-lang/pkg-config-rs"
+  },
+  {
+    "name": "plist",
+    "declared": null,
+    "before": [
+      "1.10.1"
+    ],
+    "latest": "1.10.1",
+    "repository": "https://github.com/ebarnard/rust-plist/"
+  },
+  {
+    "name": "png",
+    "declared": null,
+    "before": [
+      "0.18.1"
+    ],
+    "latest": "0.18.1",
+    "repository": "https://github.com/image-rs/image-png"
+  },
+  {
+    "name": "polyval",
+    "declared": null,
+    "before": [
+      "0.7.3"
+    ],
+    "latest": "0.7.3",
+    "repository": "https://github.com/RustCrypto/universal-hashes"
+  },
+  {
+    "name": "portable-pty",
+    "declared": null,
+    "before": [
+      "0.9.0"
+    ],
+    "latest": "0.9.0",
+    "repository": "https://github.com/wezterm/wezterm"
+  },
+  {
+    "name": "potential_utf",
+    "declared": null,
+    "before": [
+      "0.1.6"
+    ],
+    "latest": "0.1.6",
+    "repository": "https://github.com/unicode-org/icu4x"
+  },
+  {
+    "name": "powerfmt",
+    "declared": null,
+    "before": [
+      "0.2.1"
+    ],
+    "latest": "0.2.1",
+    "repository": "https://github.com/jhpratt/powerfmt"
+  },
+  {
+    "name": "ppv-lite86",
+    "declared": null,
+    "before": [
+      "0.2.21"
+    ],
+    "latest": "0.2.21",
+    "repository": "https://github.com/cryptocorrosion/cryptocorrosion"
+  },
+  {
+    "name": "precomputed-hash",
+    "declared": null,
+    "before": [
+      "0.1.1"
+    ],
+    "latest": "0.1.1",
+    "repository": "https://github.com/emilio/precomputed-hash"
+  },
+  {
+    "name": "proc-macro2",
+    "declared": null,
+    "before": [
+      "1.0.107"
+    ],
+    "latest": "1.0.107",
+    "repository": "https://github.com/dtolnay/proc-macro2"
+  },
+  {
+    "name": "psl-types",
+    "declared": null,
+    "before": [
+      "2.0.11"
+    ],
+    "latest": "2.0.11",
+    "repository": "https://github.com/addr-rs/psl-types"
+  },
+  {
+    "name": "publicsuffix",
+    "declared": null,
+    "before": [
+      "2.3.0"
+    ],
+    "latest": "2.3.0",
+    "repository": "https://github.com/rushmorem/publicsuffix"
+  },
+  {
+    "name": "pxfm",
+    "declared": null,
+    "before": [
+      "0.1.30"
+    ],
+    "latest": "0.1.30",
+    "repository": "https://github.com/awxkee/pxfm"
+  },
+  {
+    "name": "quick-error",
+    "declared": null,
+    "before": [
+      "2.0.1"
+    ],
+    "latest": "2.0.1",
+    "repository": "http://github.com/tailhook/quick-error"
+  },
+  {
+    "name": "quick-xml",
+    "declared": null,
+    "before": [
+      "0.42.0"
+    ],
+    "latest": "0.42.0",
+    "repository": "https://github.com/tafia/quick-xml"
+  },
+  {
+    "name": "quinn",
+    "declared": null,
+    "before": [
+      "0.11.12"
+    ],
+    "latest": "0.11.12",
+    "repository": "https://github.com/quinn-rs/quinn"
+  },
+  {
+    "name": "quinn-proto",
+    "declared": null,
+    "before": [
+      "0.11.19"
+    ],
+    "latest": "0.11.19",
+    "repository": "https://github.com/quinn-rs/quinn"
+  },
+  {
+    "name": "quinn-udp",
+    "declared": null,
+    "before": [
+      "0.5.16"
+    ],
+    "latest": "0.6.3",
+    "repository": "https://github.com/quinn-rs/quinn"
+  },
+  {
+    "name": "quote",
+    "declared": null,
+    "before": [
+      "1.0.47"
+    ],
+    "latest": "1.0.47",
+    "repository": "https://github.com/dtolnay/quote"
+  },
+  {
+    "name": "r-efi",
+    "declared": null,
+    "before": [
+      "5.3.0",
+      "6.0.0"
+    ],
+    "latest": "7.1.0",
+    "repository": "https://github.com/r-efi/r-efi"
+  },
+  {
+    "name": "rand",
+    "declared": null,
+    "before": [
+      "0.10.3",
+      "0.9.5"
+    ],
+    "latest": "0.10.3",
+    "repository": "https://github.com/rust-random/rand"
+  },
+  {
+    "name": "rand_chacha",
+    "declared": null,
+    "before": [
+      "0.9.0"
+    ],
+    "latest": "0.10.0",
+    "repository": "https://github.com/rust-random/rand"
+  },
+  {
+    "name": "rand_core",
+    "declared": null,
+    "before": [
+      "0.10.1",
+      "0.9.5"
+    ],
+    "latest": "0.10.1",
+    "repository": "https://github.com/rust-lang-nursery/rand"
+  },
+  {
+    "name": "rand_pcg",
+    "declared": null,
+    "before": [
+      "0.10.2"
+    ],
+    "latest": "0.10.2",
+    "repository": "https://github.com/rust-random/rngs"
+  },
+  {
+    "name": "redox_syscall",
+    "declared": null,
+    "before": [
+      "0.5.18"
+    ],
+    "latest": "0.9.4",
+    "repository": "https://gitlab.redox-os.org/redox-os/kernel"
+  },
+  {
+    "name": "redox_users",
+    "declared": null,
+    "before": [
+      "0.5.3"
+    ],
+    "latest": "0.5.3",
+    "repository": "https://gitlab.redox-os.org/redox-os/users"
+  },
+  {
+    "name": "regex",
+    "declared": {
+      "version": "1.13.1",
+      "optional": true
+    },
+    "before": [
+      "1.13.1"
+    ],
+    "latest": "1.13.1",
+    "repository": "https://github.com/rust-lang/regex"
+  },
+  {
+    "name": "regex-automata",
+    "declared": null,
+    "before": [
+      "0.4.18"
+    ],
+    "latest": "0.4.18",
+    "repository": "https://github.com/rust-lang/regex"
+  },
+  {
+    "name": "regex-syntax",
+    "declared": null,
+    "before": [
+      "0.8.11"
+    ],
+    "latest": "0.8.11",
+    "repository": "https://github.com/rust-lang/regex"
+  },
+  {
+    "name": "reqwest",
+    "declared": {
+      "version": "0.13.5",
+      "default-features": false,
+      "features": [
+        "charset",
+        "cookies",
+        "gzip",
+        "http2",
+        "query",
+        "rustls"
+      ],
+      "optional": true
+    },
+    "before": [
+      "0.13.5"
+    ],
+    "latest": "0.13.5",
+    "repository": "https://github.com/seanmonstar/reqwest"
+  },
+  {
+    "name": "ring",
+    "declared": null,
+    "before": [
+      "0.17.14"
+    ],
+    "latest": "0.17.14",
+    "repository": "https://github.com/briansmith/ring"
+  },
+  {
+    "name": "rsqlite-vfs",
+    "declared": null,
+    "before": [
+      "0.1.1"
+    ],
+    "latest": "0.2.0",
+    "repository": "https://github.com/Spxg/sqlite-wasm-rs"
+  },
+  {
+    "name": "rusqlite",
+    "declared": null,
+    "before": [
+      "0.40.2"
+    ],
+    "latest": "0.40.2",
+    "repository": "https://github.com/rusqlite/rusqlite"
+  },
+  {
+    "name": "rustc-hash",
+    "declared": null,
+    "before": [
+      "2.1.3"
+    ],
+    "latest": "2.1.3",
+    "repository": "https://github.com/rust-lang/rustc-hash"
+  },
+  {
+    "name": "rustc_version",
+    "declared": null,
+    "before": [
+      "0.4.1"
+    ],
+    "latest": "0.4.1",
+    "repository": "https://github.com/djc/rustc-version-rs"
+  },
+  {
+    "name": "rustix",
+    "declared": null,
+    "before": [
+      "1.1.5"
+    ],
+    "latest": "1.1.5",
+    "repository": "https://github.com/bytecodealliance/rustix"
+  },
+  {
+    "name": "rustls",
+    "declared": null,
+    "before": [
+      "0.23.45"
+    ],
+    "latest": "0.23.45",
+    "repository": "https://github.com/rustls/rustls"
+  },
+  {
+    "name": "rustls-native-certs",
+    "declared": null,
+    "before": [
+      "0.8.4"
+    ],
+    "latest": "0.8.4",
+    "repository": "https://github.com/rustls/rustls-native-certs"
+  },
+  {
+    "name": "rustls-pki-types",
+    "declared": null,
+    "before": [
+      "1.15.1"
+    ],
+    "latest": "1.15.1",
+    "repository": "https://github.com/rustls/pki-types"
+  },
+  {
+    "name": "rustls-platform-verifier",
+    "declared": null,
+    "before": [
+      "0.7.1"
+    ],
+    "latest": "0.7.1",
+    "repository": "https://github.com/rustls/rustls-platform-verifier"
+  },
+  {
+    "name": "rustls-platform-verifier-android",
+    "declared": null,
+    "before": [
+      "0.2.0"
+    ],
+    "latest": "0.2.0",
+    "repository": "https://github.com/rustls/rustls-platform-verifier"
+  },
+  {
+    "name": "rustls-webpki",
+    "declared": null,
+    "before": [
+      "0.103.15"
+    ],
+    "latest": "0.103.15",
+    "repository": "https://github.com/rustls/webpki"
+  },
+  {
+    "name": "rustversion",
+    "declared": null,
+    "before": [
+      "1.0.23"
+    ],
+    "latest": "1.0.23",
+    "repository": "https://github.com/dtolnay/rustversion"
+  },
+  {
+    "name": "ryu",
+    "declared": null,
+    "before": [
+      "1.0.23"
+    ],
+    "latest": "1.0.23",
+    "repository": "https://github.com/dtolnay/ryu"
+  },
+  {
+    "name": "same-file",
+    "declared": null,
+    "before": [
+      "1.0.6"
+    ],
+    "latest": "1.0.6",
+    "repository": "https://github.com/BurntSushi/same-file"
+  },
+  {
+    "name": "schannel",
+    "declared": null,
+    "before": [
+      "0.1.29"
+    ],
+    "latest": "0.1.29",
+    "repository": "https://github.com/steffengy/schannel-rs"
+  },
+  {
+    "name": "scopeguard",
+    "declared": null,
+    "before": [
+      "1.2.0"
+    ],
+    "latest": "1.2.0",
+    "repository": "https://github.com/bluss/scopeguard"
+  },
+  {
+    "name": "scraper",
+    "declared": {
+      "version": "0.27.0",
+      "optional": true
+    },
+    "before": [
+      "0.27.0"
+    ],
+    "latest": "0.27.0",
+    "repository": "https://github.com/rust-scraper/scraper"
+  },
+  {
+    "name": "security-framework",
+    "declared": null,
+    "before": [
+      "3.7.0"
+    ],
+    "latest": "3.7.0",
+    "repository": "https://github.com/kornelski/rust-security-framework"
+  },
+  {
+    "name": "security-framework-sys",
+    "declared": null,
+    "before": [
+      "2.17.0"
+    ],
+    "latest": "2.17.0",
+    "repository": "https://github.com/kornelski/rust-security-framework"
+  },
+  {
+    "name": "selectors",
+    "declared": null,
+    "before": [
+      "0.38.0"
+    ],
+    "latest": "0.41.0",
+    "repository": "https://github.com/servo/stylo"
+  },
+  {
+    "name": "semver",
+    "declared": null,
+    "before": [
+      "1.0.28"
+    ],
+    "latest": "1.0.28",
+    "repository": "https://github.com/dtolnay/semver"
+  },
+  {
+    "name": "serde",
+    "declared": {
+      "version": "1.0.229",
+      "features": [
+        "derive"
+      ],
+      "optional": true
+    },
+    "before": [
+      "1.0.229"
+    ],
+    "latest": "1.0.229",
+    "repository": "https://github.com/serde-rs/serde"
+  },
+  {
+    "name": "serde_core",
+    "declared": null,
+    "before": [
+      "1.0.229"
+    ],
+    "latest": "1.0.229",
+    "repository": "https://github.com/serde-rs/serde"
+  },
+  {
+    "name": "serde_derive",
+    "declared": null,
+    "before": [
+      "1.0.229"
+    ],
+    "latest": "1.0.229",
+    "repository": "https://github.com/serde-rs/serde"
+  },
+  {
+    "name": "serde_json",
+    "declared": {
+      "version": "1.0.151",
+      "optional": true
+    },
+    "before": [
+      "1.0.151"
+    ],
+    "latest": "1.0.151",
+    "repository": "https://github.com/serde-rs/json"
+  },
+  {
+    "name": "serde_path_to_error",
+    "declared": null,
+    "before": [
+      "0.1.20"
+    ],
+    "latest": "0.1.20",
+    "repository": "https://github.com/dtolnay/path-to-error"
+  },
+  {
+    "name": "serde_urlencoded",
+    "declared": null,
+    "before": [
+      "0.7.1"
+    ],
+    "latest": "0.7.1",
+    "repository": "https://github.com/nox/serde_urlencoded"
+  },
+  {
+    "name": "serial2",
+    "declared": null,
+    "before": [
+      "0.2.38"
+    ],
+    "latest": "0.2.38",
+    "repository": "https://github.com/de-vri-es/serial2-rs"
+  },
+  {
+    "name": "servo_arc",
+    "declared": null,
+    "before": [
+      "0.4.3"
+    ],
+    "latest": "0.5.0",
+    "repository": "https://github.com/servo/stylo"
+  },
+  {
+    "name": "sha1",
+    "declared": null,
+    "before": [
+      "0.10.7",
+      "0.11.0"
+    ],
+    "latest": "0.11.0",
+    "repository": "https://github.com/RustCrypto/hashes"
+  },
+  {
+    "name": "sha2",
+    "declared": {
+      "version": "0.11.0",
+      "optional": true
+    },
+    "before": [
+      "0.11.0"
+    ],
+    "latest": "0.11.0",
+    "repository": "https://github.com/RustCrypto/hashes"
+  },
+  {
+    "name": "sharded-slab",
+    "declared": null,
+    "before": [
+      "0.1.7"
+    ],
+    "latest": "0.1.7",
+    "repository": "https://github.com/hawkw/sharded-slab"
+  },
+  {
+    "name": "shared_library",
+    "declared": null,
+    "before": [
+      "0.1.9"
+    ],
+    "latest": "0.1.9",
+    "repository": "https://github.com/tomaka/shared_library/"
+  },
+  {
+    "name": "shell-words",
+    "declared": null,
+    "before": [
+      "1.1.1"
+    ],
+    "latest": "1.1.1",
+    "repository": "https://github.com/tmiasko/shell-words"
+  },
+  {
+    "name": "shlex",
+    "declared": null,
+    "before": [
+      "2.0.1"
+    ],
+    "latest": "2.0.1",
+    "repository": "https://github.com/comex/rust-shlex"
+  },
+  {
+    "name": "signal-hook-registry",
+    "declared": null,
+    "before": [
+      "1.4.8"
+    ],
+    "latest": "1.4.8",
+    "repository": "https://github.com/vorner/signal-hook"
+  },
+  {
+    "name": "simd-adler32",
+    "declared": null,
+    "before": [
+      "0.3.10"
+    ],
+    "latest": "0.3.10",
+    "repository": "https://github.com/mcountryman/simd-adler32"
+  },
+  {
+    "name": "simd_cesu8",
+    "declared": null,
+    "before": [
+      "1.2.0"
+    ],
+    "latest": "1.2.0",
+    "repository": "https://github.com/seancroach/simd_cesu8"
+  },
+  {
+    "name": "simdutf8",
+    "declared": null,
+    "before": [
+      "0.1.5"
+    ],
+    "latest": "0.1.5",
+    "repository": "https://github.com/rusticstuff/simdutf8"
+  },
+  {
+    "name": "siphasher",
+    "declared": null,
+    "before": [
+      "1.0.4"
+    ],
+    "latest": "1.0.4",
+    "repository": "https://github.com/jedisct1/rust-siphash"
+  },
+  {
+    "name": "slab",
+    "declared": null,
+    "before": [
+      "0.4.12"
+    ],
+    "latest": "0.4.12",
+    "repository": "https://github.com/tokio-rs/slab"
+  },
+  {
+    "name": "smallvec",
+    "declared": null,
+    "before": [
+      "1.16.2"
+    ],
+    "latest": "1.16.2",
+    "repository": "https://github.com/servo/rust-smallvec"
+  },
+  {
+    "name": "socket2",
+    "declared": null,
+    "before": [
+      "0.6.5"
+    ],
+    "latest": "0.6.5",
+    "repository": "https://github.com/rust-lang/socket2"
+  },
+  {
+    "name": "sqlite-wasm-rs",
+    "declared": null,
+    "before": [
+      "0.5.5"
+    ],
+    "latest": "0.6.1",
+    "repository": "https://github.com/Spxg/sqlite-wasm-rs"
+  },
+  {
+    "name": "stable_deref_trait",
+    "declared": null,
+    "before": [
+      "1.2.1"
+    ],
+    "latest": "1.2.1",
+    "repository": "https://github.com/storyyeller/stable_deref_trait"
+  },
+  {
+    "name": "string_cache",
+    "declared": null,
+    "before": [
+      "0.11.0",
+      "0.9.0"
+    ],
+    "latest": "0.11.0",
+    "repository": "https://github.com/servo/string-cache"
+  },
+  {
+    "name": "string_cache_codegen",
+    "declared": null,
+    "before": [
+      "0.11.2",
+      "0.6.1"
+    ],
+    "latest": "0.11.2",
+    "repository": "https://github.com/servo/string-cache"
+  },
+  {
+    "name": "strsim",
+    "declared": null,
+    "before": [
+      "0.11.1"
+    ],
+    "latest": "0.11.1",
+    "repository": "https://github.com/rapidfuzz/strsim-rs"
+  },
+  {
+    "name": "subtle",
+    "declared": null,
+    "before": [
+      "2.6.1"
+    ],
+    "latest": "2.6.1",
+    "repository": "https://github.com/dalek-cryptography/subtle"
+  },
+  {
+    "name": "syn",
+    "declared": null,
+    "before": [
+      "2.0.119",
+      "3.0.6"
+    ],
+    "latest": "3.0.6",
+    "repository": "https://github.com/dtolnay/syn"
+  },
+  {
+    "name": "sync_wrapper",
+    "declared": null,
+    "before": [
+      "1.0.2"
+    ],
+    "latest": "1.0.2",
+    "repository": "https://github.com/Actyx/sync_wrapper"
+  },
+  {
+    "name": "synstructure",
+    "declared": null,
+    "before": [
+      "0.13.2",
+      "0.14.0"
+    ],
+    "latest": "0.14.0",
+    "repository": "https://github.com/mystor/synstructure"
+  },
+  {
+    "name": "tempfile",
+    "declared": "3.27.0",
+    "before": [
+      "3.27.0"
+    ],
+    "latest": "3.27.0",
+    "repository": "https://github.com/Stebalien/tempfile"
+  },
+  {
+    "name": "tendril",
+    "declared": null,
+    "before": [
+      "0.5.1"
+    ],
+    "latest": "0.5.1",
+    "repository": "https://github.com/servo/html5ever"
+  },
+  {
+    "name": "thiserror",
+    "declared": {
+      "version": "2.0.21",
+      "optional": true
+    },
+    "before": [
+      "1.0.69",
+      "2.0.21"
+    ],
+    "latest": "2.0.21",
+    "repository": "https://github.com/dtolnay/thiserror"
+  },
+  {
+    "name": "thiserror-impl",
+    "declared": null,
+    "before": [
+      "1.0.69",
+      "2.0.21"
+    ],
+    "latest": "2.0.21",
+    "repository": "https://github.com/dtolnay/thiserror"
+  },
+  {
+    "name": "thread_local",
+    "declared": null,
+    "before": [
+      "1.1.10"
+    ],
+    "latest": "1.1.10",
+    "repository": "https://github.com/Amanieu/thread_local-rs"
+  },
+  {
+    "name": "time",
+    "declared": null,
+    "before": [
+      "0.3.55"
+    ],
+    "latest": "0.3.55",
+    "repository": "https://github.com/time-rs/time"
+  },
+  {
+    "name": "time-core",
+    "declared": null,
+    "before": [
+      "0.1.9"
+    ],
+    "latest": "0.1.9",
+    "repository": "https://github.com/time-rs/time"
+  },
+  {
+    "name": "time-macros",
+    "declared": null,
+    "before": [
+      "0.2.32"
+    ],
+    "latest": "0.2.32",
+    "repository": "https://github.com/time-rs/time"
+  },
+  {
+    "name": "tiny-keccak",
+    "declared": null,
+    "before": [
+      "2.0.2"
+    ],
+    "latest": "2.0.2",
+    "repository": null
+  },
+  {
+    "name": "tinystr",
+    "declared": null,
+    "before": [
+      "0.7.6",
+      "0.8.4"
+    ],
+    "latest": "0.8.4",
+    "repository": "https://github.com/unicode-org/icu4x"
+  },
+  {
+    "name": "tinyvec",
+    "declared": null,
+    "before": [
+      "1.13.3"
+    ],
+    "latest": "1.13.3",
+    "repository": "https://github.com/Lokathor/tinyvec"
+  },
+  {
+    "name": "tokio",
+    "declared": {
+      "version": "1.53.2",
+      "features": [
+        "macros",
+        "rt"
+      ]
+    },
+    "before": [
+      "1.53.2"
+    ],
+    "latest": "1.53.2",
+    "repository": "https://github.com/tokio-rs/tokio"
+  },
+  {
+    "name": "tokio-macros",
+    "declared": null,
+    "before": [
+      "2.7.2"
+    ],
+    "latest": "2.7.2",
+    "repository": "https://github.com/tokio-rs/tokio"
+  },
+  {
+    "name": "tokio-native-tls",
+    "declared": null,
+    "before": [
+      "0.3.1"
+    ],
+    "latest": "0.3.1",
+    "repository": "https://github.com/tokio-rs/tls"
+  },
+  {
+    "name": "tokio-rustls",
+    "declared": null,
+    "before": [
+      "0.26.6"
+    ],
+    "latest": "0.26.6",
+    "repository": "https://github.com/rustls/tokio-rustls"
+  },
+  {
+    "name": "tokio-stream",
+    "declared": null,
+    "before": [
+      "0.1.19"
+    ],
+    "latest": "0.1.19",
+    "repository": "https://github.com/tokio-rs/tokio"
+  },
+  {
+    "name": "tokio-test",
+    "declared": "0.4.6",
+    "before": [
+      "0.4.6"
+    ],
+    "latest": "0.4.6",
+    "repository": "https://github.com/tokio-rs/tokio"
+  },
+  {
+    "name": "tokio-util",
+    "declared": null,
+    "before": [
+      "0.7.19"
+    ],
+    "latest": "0.7.19",
+    "repository": "https://github.com/tokio-rs/tokio"
+  },
+  {
+    "name": "tower",
+    "declared": {
+      "version": "0.5.3",
+      "optional": true
+    },
+    "before": [
+      "0.5.3"
+    ],
+    "latest": "0.5.3",
+    "repository": "https://github.com/tower-rs/tower"
+  },
+  {
+    "name": "tower-http",
+    "declared": {
+      "version": "0.7.1",
+      "features": [
+        "cors",
+        "trace"
+      ],
+      "optional": true
+    },
+    "before": [
+      "0.6.11",
+      "0.7.1"
+    ],
+    "latest": "0.7.1",
+    "repository": "https://github.com/tower-rs/tower-http"
+  },
+  {
+    "name": "tower-layer",
+    "declared": null,
+    "before": [
+      "0.3.3"
+    ],
+    "latest": "0.3.3",
+    "repository": "https://github.com/tower-rs/tower"
+  },
+  {
+    "name": "tower-service",
+    "declared": null,
+    "before": [
+      "0.3.3"
+    ],
+    "latest": "0.3.3",
+    "repository": "https://github.com/tower-rs/tower"
+  },
+  {
+    "name": "tracing",
+    "declared": {
+      "version": "0.1.44",
+      "optional": true
+    },
+    "before": [
+      "0.1.44"
+    ],
+    "latest": "0.1.44",
+    "repository": "https://github.com/tokio-rs/tracing"
+  },
+  {
+    "name": "tracing-attributes",
+    "declared": null,
+    "before": [
+      "0.1.31"
+    ],
+    "latest": "0.1.31",
+    "repository": "https://github.com/tokio-rs/tracing"
+  },
+  {
+    "name": "tracing-core",
+    "declared": null,
+    "before": [
+      "0.1.36"
+    ],
+    "latest": "0.1.36",
+    "repository": "https://github.com/tokio-rs/tracing"
+  },
+  {
+    "name": "tracing-log",
+    "declared": null,
+    "before": [
+      "0.2.0"
+    ],
+    "latest": "0.2.0",
+    "repository": "https://github.com/tokio-rs/tracing"
+  },
+  {
+    "name": "tracing-subscriber",
+    "declared": {
+      "version": "0.3.23",
+      "features": [
+        "env-filter"
+      ],
+      "optional": true
+    },
+    "before": [
+      "0.3.23"
+    ],
+    "latest": "0.3.23",
+    "repository": "https://github.com/tokio-rs/tracing"
+  },
+  {
+    "name": "try-lock",
+    "declared": null,
+    "before": [
+      "0.2.5"
+    ],
+    "latest": "0.2.5",
+    "repository": "https://github.com/seanmonstar/try-lock"
+  },
+  {
+    "name": "tungstenite",
+    "declared": null,
+    "before": [
+      "0.28.0",
+      "0.30.0"
+    ],
+    "latest": "0.30.0",
+    "repository": "https://github.com/snapview/tungstenite-rs"
+  },
+  {
+    "name": "typed-path",
+    "declared": null,
+    "before": [
+      "0.12.3"
+    ],
+    "latest": "0.12.3",
+    "repository": "https://github.com/chipsenkbeil/typed-path"
+  },
+  {
+    "name": "typenum",
+    "declared": null,
+    "before": [
+      "1.20.1"
+    ],
+    "latest": "1.20.1",
+    "repository": "https://github.com/paholg/typenum"
+  },
+  {
+    "name": "unicode-ident",
+    "declared": null,
+    "before": [
+      "1.0.26"
+    ],
+    "latest": "1.0.26",
+    "repository": "https://github.com/dtolnay/unicode-ident"
+  },
+  {
+    "name": "unicode-width",
+    "declared": null,
+    "before": [
+      "0.2.2"
+    ],
+    "latest": "0.2.2",
+    "repository": "https://github.com/unicode-rs/unicode-width"
+  },
+  {
+    "name": "universal-hash",
+    "declared": null,
+    "before": [
+      "0.6.1"
+    ],
+    "latest": "0.6.1",
+    "repository": "https://github.com/RustCrypto/traits"
+  },
+  {
+    "name": "untrusted",
+    "declared": null,
+    "before": [
+      "0.9.0"
+    ],
+    "latest": "0.9.0",
+    "repository": "https://github.com/briansmith/untrusted"
+  },
+  {
+    "name": "url",
+    "declared": {
+      "version": "2.5.8",
+      "optional": true
+    },
+    "before": [
+      "2.5.8"
+    ],
+    "latest": "2.5.8",
+    "repository": "https://github.com/servo/rust-url"
+  },
+  {
+    "name": "utf-8",
+    "declared": null,
+    "before": [
+      "0.7.6"
+    ],
+    "latest": "0.7.6",
+    "repository": "https://github.com/SimonSapin/rust-utf8"
+  },
+  {
+    "name": "utf8_iter",
+    "declared": null,
+    "before": [
+      "1.0.4"
+    ],
+    "latest": "1.0.4",
+    "repository": "https://github.com/hsivonen/utf8_iter"
+  },
+  {
+    "name": "utf8parse",
+    "declared": null,
+    "before": [
+      "0.2.2"
+    ],
+    "latest": "0.2.2",
+    "repository": "https://github.com/alacritty/vte"
+  },
+  {
+    "name": "valuable",
+    "declared": null,
+    "before": [
+      "0.1.1"
+    ],
+    "latest": "0.1.1",
+    "repository": "https://github.com/tokio-rs/valuable"
+  },
+  {
+    "name": "vcpkg",
+    "declared": null,
+    "before": [
+      "0.2.15"
+    ],
+    "latest": "0.2.15",
+    "repository": "https://github.com/mcgoo/vcpkg-rs"
+  },
+  {
+    "name": "version_check",
+    "declared": null,
+    "before": [
+      "0.9.5"
+    ],
+    "latest": "0.9.5",
+    "repository": "https://github.com/SergioBenitez/version_check"
+  },
+  {
+    "name": "vt100",
+    "declared": null,
+    "before": [
+      "0.16.2"
+    ],
+    "latest": "0.16.2",
+    "repository": "https://github.com/doy/vt100-rust"
+  },
+  {
+    "name": "vte",
+    "declared": null,
+    "before": [
+      "0.15.0"
+    ],
+    "latest": "0.15.0",
+    "repository": "https://github.com/alacritty/vte"
+  },
+  {
+    "name": "walkdir",
+    "declared": null,
+    "before": [
+      "2.5.0"
+    ],
+    "latest": "2.5.0",
+    "repository": "https://github.com/BurntSushi/walkdir"
+  },
+  {
+    "name": "want",
+    "declared": null,
+    "before": [
+      "0.3.2"
+    ],
+    "latest": "0.3.2",
+    "repository": "https://github.com/seanmonstar/want"
+  },
+  {
+    "name": "wasi",
+    "declared": null,
+    "before": [
+      "0.11.1+wasi-snapshot-preview1"
+    ],
+    "latest": "0.14.7+wasi-0.2.4",
+    "repository": "https://github.com/bytecodealliance/wasi-rs"
+  },
+  {
+    "name": "wasip2",
+    "declared": null,
+    "before": [
+      "1.0.4+wasi-0.2.12"
+    ],
+    "latest": "2.0.1+wasi-0.2.12",
+    "repository": "https://github.com/bytecodealliance/wasi-rs"
+  },
+  {
+    "name": "wasm-bindgen",
+    "declared": null,
+    "before": [
+      "0.2.129"
+    ],
+    "latest": "0.2.129",
+    "repository": "https://github.com/wasm-bindgen/wasm-bindgen"
+  },
+  {
+    "name": "wasm-bindgen-futures",
+    "declared": null,
+    "before": [
+      "0.4.79"
+    ],
+    "latest": "0.4.79",
+    "repository": "https://github.com/wasm-bindgen/wasm-bindgen/tree/master/crates/futures"
+  },
+  {
+    "name": "wasm-bindgen-macro",
+    "declared": null,
+    "before": [
+      "0.2.129"
+    ],
+    "latest": "0.2.129",
+    "repository": "https://github.com/wasm-bindgen/wasm-bindgen/tree/master/crates/macro"
+  },
+  {
+    "name": "wasm-bindgen-macro-support",
+    "declared": null,
+    "before": [
+      "0.2.129"
+    ],
+    "latest": "0.2.129",
+    "repository": "https://github.com/wasm-bindgen/wasm-bindgen/tree/main/crates/macro-support"
+  },
+  {
+    "name": "wasm-bindgen-shared",
+    "declared": null,
+    "before": [
+      "0.2.129"
+    ],
+    "latest": "0.2.129",
+    "repository": "https://github.com/wasm-bindgen/wasm-bindgen/tree/master/crates/shared"
+  },
+  {
+    "name": "web-sys",
+    "declared": null,
+    "before": [
+      "0.3.106"
+    ],
+    "latest": "0.3.106",
+    "repository": "https://github.com/wasm-bindgen/wasm-bindgen/tree/master/crates/web-sys"
+  },
+  {
+    "name": "web-time",
+    "declared": null,
+    "before": [
+      "1.1.0"
+    ],
+    "latest": "1.1.0",
+    "repository": "https://github.com/daxpedda/web-time"
+  },
+  {
+    "name": "web_atoms",
+    "declared": null,
+    "before": [
+      "0.2.6",
+      "0.3.0"
+    ],
+    "latest": "0.3.0",
+    "repository": "https://github.com/servo/html5ever"
+  },
+  {
+    "name": "webdriver",
+    "declared": null,
+    "before": [
+      "0.53.0"
+    ],
+    "latest": "0.54.0",
+    "repository": "https://hg.mozilla.org/mozilla-central/file/tip/testing/webdriver"
+  },
+  {
+    "name": "webpki-root-certs",
+    "declared": null,
+    "before": [
+      "1.0.9"
+    ],
+    "latest": "1.0.9",
+    "repository": "https://github.com/rustls/webpki-roots"
+  },
+  {
+    "name": "weezl",
+    "declared": null,
+    "before": [
+      "0.1.12"
+    ],
+    "latest": "0.2.1",
+    "repository": "https://github.com/image-rs/weezl"
+  },
+  {
+    "name": "which",
+    "declared": null,
+    "before": [
+      "8.0.6"
+    ],
+    "latest": "8.0.6",
+    "repository": "https://github.com/harryfei/which-rs.git"
+  },
+  {
+    "name": "winapi",
+    "declared": null,
+    "before": [
+      "0.3.9"
+    ],
+    "latest": "0.3.9",
+    "repository": "https://github.com/retep998/winapi-rs"
+  },
+  {
+    "name": "winapi-i686-pc-windows-gnu",
+    "declared": null,
+    "before": [
+      "0.4.0"
+    ],
+    "latest": "0.4.0",
+    "repository": "https://github.com/retep998/winapi-rs"
+  },
+  {
+    "name": "winapi-util",
+    "declared": null,
+    "before": [
+      "0.1.11"
+    ],
+    "latest": "0.1.11",
+    "repository": "https://github.com/BurntSushi/winapi-util"
+  },
+  {
+    "name": "winapi-x86_64-pc-windows-gnu",
+    "declared": null,
+    "before": [
+      "0.4.0"
+    ],
+    "latest": "0.4.0",
+    "repository": "https://github.com/retep998/winapi-rs"
+  },
+  {
+    "name": "windows-core",
+    "declared": null,
+    "before": [
+      "0.62.2"
+    ],
+    "latest": "0.100.0",
+    "repository": "https://github.com/microsoft/windows-rs"
+  },
+  {
+    "name": "windows-implement",
+    "declared": null,
+    "before": [
+      "0.60.2"
+    ],
+    "latest": "0.100.0",
+    "repository": "https://github.com/microsoft/windows-rs"
+  },
+  {
+    "name": "windows-interface",
+    "declared": null,
+    "before": [
+      "0.59.3"
+    ],
+    "latest": "0.100.0",
+    "repository": "https://github.com/microsoft/windows-rs"
+  },
+  {
+    "name": "windows-link",
+    "declared": null,
+    "before": [
+      "0.2.1"
+    ],
+    "latest": "0.100.0",
+    "repository": "https://github.com/microsoft/windows-rs"
+  },
+  {
+    "name": "windows-registry",
+    "declared": null,
+    "before": [
+      "0.6.1"
+    ],
+    "latest": "0.100.0",
+    "repository": "https://github.com/microsoft/windows-rs"
+  },
+  {
+    "name": "windows-result",
+    "declared": null,
+    "before": [
+      "0.4.1"
+    ],
+    "latest": "0.100.0",
+    "repository": "https://github.com/microsoft/windows-rs"
+  },
+  {
+    "name": "windows-strings",
+    "declared": null,
+    "before": [
+      "0.5.1"
+    ],
+    "latest": "0.100.0",
+    "repository": "https://github.com/microsoft/windows-rs"
+  },
+  {
+    "name": "windows-sys",
+    "declared": null,
+    "before": [
+      "0.52.0",
+      "0.61.2"
+    ],
+    "latest": "0.61.2",
+    "repository": "https://github.com/microsoft/windows-rs"
+  },
+  {
+    "name": "windows-targets",
+    "declared": null,
+    "before": [
+      "0.52.6"
+    ],
+    "latest": "0.53.5",
+    "repository": "https://github.com/microsoft/windows-rs"
+  },
+  {
+    "name": "windows_aarch64_gnullvm",
+    "declared": null,
+    "before": [
+      "0.52.6"
+    ],
+    "latest": "0.53.1",
+    "repository": "https://github.com/microsoft/windows-rs"
+  },
+  {
+    "name": "windows_aarch64_msvc",
+    "declared": null,
+    "before": [
+      "0.52.6"
+    ],
+    "latest": "0.53.1",
+    "repository": "https://github.com/microsoft/windows-rs"
+  },
+  {
+    "name": "windows_i686_gnu",
+    "declared": null,
+    "before": [
+      "0.52.6"
+    ],
+    "latest": "0.53.1",
+    "repository": "https://github.com/microsoft/windows-rs"
+  },
+  {
+    "name": "windows_i686_gnullvm",
+    "declared": null,
+    "before": [
+      "0.52.6"
+    ],
+    "latest": "0.53.1",
+    "repository": "https://github.com/microsoft/windows-rs"
+  },
+  {
+    "name": "windows_i686_msvc",
+    "declared": null,
+    "before": [
+      "0.52.6"
+    ],
+    "latest": "0.53.1",
+    "repository": "https://github.com/microsoft/windows-rs"
+  },
+  {
+    "name": "windows_x86_64_gnu",
+    "declared": null,
+    "before": [
+      "0.52.6"
+    ],
+    "latest": "0.53.1",
+    "repository": "https://github.com/microsoft/windows-rs"
+  },
+  {
+    "name": "windows_x86_64_gnullvm",
+    "declared": null,
+    "before": [
+      "0.52.6"
+    ],
+    "latest": "0.53.1",
+    "repository": "https://github.com/microsoft/windows-rs"
+  },
+  {
+    "name": "windows_x86_64_msvc",
+    "declared": null,
+    "before": [
+      "0.52.6"
+    ],
+    "latest": "0.53.1",
+    "repository": "https://github.com/microsoft/windows-rs"
+  },
+  {
+    "name": "winreg",
+    "declared": null,
+    "before": [
+      "0.10.1"
+    ],
+    "latest": "0.56.0",
+    "repository": "https://github.com/gentoo90/winreg-rs"
+  },
+  {
+    "name": "wit-bindgen",
+    "declared": null,
+    "before": [
+      "0.57.1"
+    ],
+    "latest": "0.62.0",
+    "repository": "https://github.com/bytecodealliance/wit-bindgen"
+  },
+  {
+    "name": "writeable",
+    "declared": null,
+    "before": [
+      "0.5.5",
+      "0.6.4"
+    ],
+    "latest": "0.6.4",
+    "repository": "https://github.com/unicode-org/icu4x"
+  },
+  {
+    "name": "xml5ever",
+    "declared": null,
+    "before": [
+      "0.39.0"
+    ],
+    "latest": "0.40.0",
+    "repository": "https://github.com/servo/html5ever"
+  },
+  {
+    "name": "yoke",
+    "declared": null,
+    "before": [
+      "0.7.5",
+      "0.8.3"
+    ],
+    "latest": "0.8.3",
+    "repository": "https://github.com/unicode-org/icu4x"
+  },
+  {
+    "name": "yoke-derive",
+    "declared": null,
+    "before": [
+      "0.7.5",
+      "0.8.4"
+    ],
+    "latest": "0.8.4",
+    "repository": "https://github.com/unicode-org/icu4x"
+  },
+  {
+    "name": "zerocopy",
+    "declared": null,
+    "before": [
+      "0.8.61"
+    ],
+    "latest": "0.8.61",
+    "repository": "https://github.com/google/zerocopy"
+  },
+  {
+    "name": "zerocopy-derive",
+    "declared": null,
+    "before": [
+      "0.8.61"
+    ],
+    "latest": "0.8.61",
+    "repository": "https://github.com/google/zerocopy"
+  },
+  {
+    "name": "zerofrom",
+    "declared": null,
+    "before": [
+      "0.1.8"
+    ],
+    "latest": "0.1.8",
+    "repository": "https://github.com/unicode-org/icu4x"
+  },
+  {
+    "name": "zerofrom-derive",
+    "declared": null,
+    "before": [
+      "0.1.8"
+    ],
+    "latest": "0.1.8",
+    "repository": "https://github.com/unicode-org/icu4x"
+  },
+  {
+    "name": "zeroize",
+    "declared": null,
+    "before": [
+      "1.9.1"
+    ],
+    "latest": "1.9.1",
+    "repository": "https://github.com/RustCrypto/utils"
+  },
+  {
+    "name": "zerotrie",
+    "declared": null,
+    "before": [
+      "0.2.5"
+    ],
+    "latest": "0.2.5",
+    "repository": "https://github.com/unicode-org/icu4x"
+  },
+  {
+    "name": "zerovec",
+    "declared": null,
+    "before": [
+      "0.10.4",
+      "0.11.8"
+    ],
+    "latest": "0.11.8",
+    "repository": "https://github.com/unicode-org/icu4x"
+  },
+  {
+    "name": "zerovec-derive",
+    "declared": null,
+    "before": [
+      "0.10.4",
+      "0.11.6"
+    ],
+    "latest": "0.11.6",
+    "repository": "https://github.com/unicode-org/icu4x"
+  },
+  {
+    "name": "zip",
+    "declared": {
+      "version": "8.6.0",
+      "default-features": false,
+      "features": [
+        "deflate"
+      ],
+      "optional": true
+    },
+    "before": [
+      "8.6.0"
+    ],
+    "latest": "8.6.0",
+    "repository": "https://github.com/zip-rs/zip2"
+  },
+  {
+    "name": "zlib-rs",
+    "declared": null,
+    "before": [
+      "0.6.8"
+    ],
+    "latest": "0.6.8",
+    "repository": "https://github.com/trifectatechfoundation/zlib-rs"
+  },
+  {
+    "name": "zmij",
+    "declared": null,
+    "before": [
+      "1.0.23"
+    ],
+    "latest": "1.0.23",
+    "repository": "https://github.com/dtolnay/zmij"
+  },
+  {
+    "name": "zopfli",
+    "declared": null,
+    "before": [
+      "0.8.3"
+    ],
+    "latest": "0.8.3",
+    "repository": "https://github.com/zopfli-rs/zopfli"
+  },
+  {
+    "name": "zune-core",
+    "declared": null,
+    "before": [
+      "0.5.3"
+    ],
+    "latest": "0.5.3",
+    "repository": "https://github.com/etemesi254/zune-image"
+  },
+  {
+    "name": "zune-jpeg",
+    "declared": null,
+    "before": [
+      "0.5.15"
+    ],
+    "latest": "0.5.15",
+    "repository": "https://github.com/etemesi254/zune-image/tree/dev/crates/zune-jpeg"
+  }
+]
