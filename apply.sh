@@ -8,8 +8,11 @@ TARGET_DIR=${1:-web-capture}
 PACKAGE_VERSION=$(node -p "JSON.parse(require('fs').readFileSync(process.argv[1], 'utf8')).version" "$SCRIPT_DIR/js/package.json")
 mkdir -p "$TARGET_DIR"
 cd "$TARGET_DIR"
-git init
+git init --initial-branch=main
 
+# The override drops the deprecated whatwg-encoding that cheerio@1.2.0 pulls in
+# through encoding-sniffer@0.2.1; remove it once cheerio releases
+# cheeriojs/cheerio#5157 (same override as js/package.json).
 cat > package.json <<EOF_PACKAGE
 {
   "name": "web-capture-service",
@@ -20,7 +23,8 @@ cat > package.json <<EOF_PACKAGE
   "packageManager": "npm@12.2.0",
   "allowScripts": { "puppeteer": true },
   "scripts": { "start": "node index.js", "dev": "node --watch index.js" },
-  "dependencies": { "@link-assistant/web-capture": "^$PACKAGE_VERSION" }
+  "dependencies": { "@link-assistant/web-capture": "^$PACKAGE_VERSION" },
+  "overrides": { "cheerio": { "encoding-sniffer": "^1.0.2" } }
 }
 EOF_PACKAGE
 
@@ -50,9 +54,10 @@ Build with `docker build -t web-capture .` and run with
 EOF_README
 
 if [ "${2:-}" != '--skip-install' ]; then
-  # npm 12 drops placeholders for unpublished requested Kreuzberg musl versions.
-  # Generate the compatible lock once, then use current npm for installation.
-  npx --yes npm@11.13.0 install --package-lock-only
+  # npm 12 drops the lock placeholders for the unpublished Kreuzberg musl
+  # binaries that `npm ci` requires; restore them like js/package-lock.json.
+  npx --yes npm@12.2.0 install --package-lock-only
+  node "$SCRIPT_DIR/scripts/repair-npm-lock.mjs" package-lock.json
   npx --yes npm@12.2.0 ci
 fi
 printf 'Service scaffolded in %s\n' "$(pwd)"
