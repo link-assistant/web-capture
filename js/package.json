@@ -25,7 +25,7 @@
     "examples:python": "uv run --project .. --locked python examples/python/html_download.py && uv run --project .. --locked python examples/python/markdown_download.py && uv run --project .. --locked python examples/python/image_download.py",
     "examples:javascript": "node examples/js/html_download.js && node examples/js/markdown_download.js && node examples/js/image_download.js",
     "examples": "npm run build && npm run examples:javascript && npm run examples:python",
-    "lint": "eslint .",
+    "lint": "node ../scripts/lint.mjs",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
@@ -90,7 +90,7 @@
   },
   "lint-staged": {
     "*.{js,mjs,cjs}": [
-      "eslint --fix --max-warnings 0",
+      "eslint --fix --no-warn-ignored",
       "prettier --write",
       "prettier --check"
     ],
