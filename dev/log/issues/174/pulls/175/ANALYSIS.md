@@ -79,8 +79,10 @@ active dependency pins; rewriting them would destroy their before/after context.
   `reject: false`/`exitCode` without the vulnerable shelljs/braces dependency
   path. Regression tests preserve literal quotes, shell characters and JSON.
 - npm 12.2.0 is pinned across both manifests, release bootstrap, every npm CI job,
-  Docker and generated scaffold. Its lock generator drops unpublished optional
-  Kreuzberg musl placeholders, while its installer requires them. A failing
+  Docker and generated scaffold. Its lock generator drops placeholders for
+  unpublished requested Kreuzberg musl versions, while its installer requires them.
+  The musl packages' latest available version is 3.5.5, but the current parent
+  requires 3.7.2, which returns HTTP 404 from both exact-version registry endpoints. A failing
   experiment reproduces the mismatch. Generate the compatible lock with
   npm 11.13.0 once; install and release with npm 12.2.0. Use upstream
   [npm version](https://docs.npmjs.com/cli/v11/commands/npm-version) to synchronize

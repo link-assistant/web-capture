@@ -12591,6 +12591,32 @@
     "dependencies": {}
   },
   {
+    "name": "@kreuzberg/html-to-markdown-node-linux-arm64-musl",
+    "before": [],
+    "latest": "3.5.5",
+    "engines": {
+      "node": ">= 18"
+    },
+    "repository": {
+      "url": "git+https://github.com/kreuzberg-dev/html-to-markdown.git",
+      "type": "git"
+    },
+    "dependencies": {}
+  },
+  {
+    "name": "@kreuzberg/html-to-markdown-node-linux-x64-musl",
+    "before": [],
+    "latest": "3.5.5",
+    "engines": {
+      "node": ">= 18"
+    },
+    "repository": {
+      "url": "git+https://github.com/kreuzberg-dev/html-to-markdown.git",
+      "type": "git"
+    },
+    "dependencies": {}
+  },
+  {
     "name": "@sec-ant/readable-stream",
     "before": [],
     "latest": "0.7.0",

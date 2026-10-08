@@ -3,6 +3,7 @@ import concurrent.futures
 import json
 from pathlib import Path
 import tomllib
+import urllib.error
 from inventory import ROOT, OUT, npm, cargo, get
 
 
@@ -12,12 +13,24 @@ def npm_tree():
         lock = json.loads(lockfile.read_text())
         for location, data in lock['packages'].items():
             name = data.get('name') or location.rsplit('node_modules/', 1)[-1] or lock['name']
-            if location and 'version' in data:
-                versions.setdefault(name, set()).add(data['version'])
+            if location:
+                versions.setdefault(name, set()).add(data.get('version', 'unversioned optional placeholder'))
             for child, constraint in {**data.get('dependencies', {}), **data.get('optionalDependencies', {}),
                                       **data.get('peerDependencies', {})}.items():
                 parents.setdefault(child, set()).add(f"{name}@{data.get('version', '?')}: {constraint}")
     return versions, parents
+
+
+def resolve_npm(name):
+    try:
+        return npm(name)
+    except urllib.error.HTTPError as error:
+        if error.code != 404:
+            raise
+        return name, {'latest': 'unpublished (registry HTTP 404)',
+                      'registry_url': error.url,
+                      'registry_status': error.code,
+                      'registry_response': error.read().decode()}
 
 
 def table(rows):
@@ -32,13 +45,15 @@ def main():
     versions, parents = npm_tree()
     known = {x['name']: x for x in before}
     with concurrent.futures.ThreadPoolExecutor(max_workers=8) as pool:
-        for name, data in pool.map(npm, sorted(set(versions) - known.keys())):
+        for name, data in pool.map(resolve_npm, sorted(set(versions) - known.keys())):
             known[name] = {'name': name, 'before': [], **data}
     (OUT / 'npm-final-registry.json').write_text(json.dumps(list(known.values()), indent=2) + '\n')
     rows = []
     for name, data in sorted(known.items()):
         installed = sorted(versions.get(name, []))
-        if name == 'npm':
+        if installed == ['unversioned optional placeholder']:
+            reason = 'Upstream requires an unpublished version: ' + '; '.join(sorted(parents.get(name, []))) + '; registry-current release cannot satisfy that exact requirement; npm 12 clean installation needs this optional placeholder (see VALIDATION.md)'
+        elif name == 'npm':
             installed = ['12.2.0 (packageManager)']
             reason = 'Toolchain, not a library; exact version installed by release bootstrap'
         elif name == 'npm-check-updates':
@@ -127,8 +142,9 @@ def main():
 | Compose | local Dockerfile build | no external image | local Dockerfile build | No separate external dependency |
 | Changesets JSON schema | config@3.1.1 URL | config@4.0.1 | Local schema from locked config@4.0.1 | Match the installed current package without a second CDN version pin |
 
-Unpublished optional Kreuzberg musl packages have no registry version. npm 12's
-lock generator drops their placeholders, although npm 12's clean installer
+Optional Kreuzberg musl packages publish 3.5.5, but their current parent requests
+the unpublished 3.7.2 (both exact-version registry requests return HTTP 404).
+npm 12's lock generator drops their placeholders, although its clean installer
 requires them. The compatible lock is generated once with npm 11.13.0 and verified
 with npm 12.2.0; no old npm runtime/dependency is shipped. See VALIDATION.md.
 

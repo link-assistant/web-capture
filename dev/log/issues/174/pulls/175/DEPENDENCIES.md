@@ -177,7 +177,9 @@ Resolved on 2026-10-08 UTC. Before is the prepared branch, after is the committe
 | @kreuzberg/html-to-markdown-node-darwin-arm64 | 3.7.2 | 3.7.2 | 3.7.2 | Current |
 | @kreuzberg/html-to-markdown-node-darwin-x64 | 3.7.2 | 3.7.2 | 3.7.2 | Current |
 | @kreuzberg/html-to-markdown-node-linux-arm64-gnu | 3.7.2 | 3.7.2 | 3.7.2 | Current |
+| @kreuzberg/html-to-markdown-node-linux-arm64-musl | unlocked/not declared | 3.5.5 | unversioned optional placeholder | Upstream requires an unpublished version: @kreuzberg/html-to-markdown-node@3.7.2: 3.7.2; registry-current release cannot satisfy that exact requirement; npm 12 clean installation needs this optional placeholder (see VALIDATION.md) |
 | @kreuzberg/html-to-markdown-node-linux-x64-gnu | 3.7.2 | 3.7.2 | 3.7.2 | Current |
+| @kreuzberg/html-to-markdown-node-linux-x64-musl | unlocked/not declared | 3.5.5 | unversioned optional placeholder | Upstream requires an unpublished version: @kreuzberg/html-to-markdown-node@3.7.2: 3.7.2; registry-current release cannot satisfy that exact requirement; npm 12 clean installation needs this optional placeholder (see VALIDATION.md) |
 | @kreuzberg/html-to-markdown-node-win32-arm64-msvc | 3.7.2 | 3.7.2 | 3.7.2 | Current |
 | @kreuzberg/html-to-markdown-node-win32-x64-msvc | 3.7.2 | 3.7.2 | 3.7.2 | Current |
 | @manypkg/find-root | 3.1.0 | 3.1.0 | 3.1.0 | Current |
@@ -1189,8 +1191,9 @@ Resolved on 2026-10-08 UTC. Before is the prepared branch, after is the committe
 | Compose | local Dockerfile build | no external image | local Dockerfile build | No separate external dependency |
 | Changesets JSON schema | config@3.1.1 URL | config@4.0.1 | Local schema from locked config@4.0.1 | Match the installed current package without a second CDN version pin |
 
-Unpublished optional Kreuzberg musl packages have no registry version. npm 12's
-lock generator drops their placeholders, although npm 12's clean installer
+Optional Kreuzberg musl packages publish 3.5.5, but their current parent requests
+the unpublished 3.7.2 (both exact-version registry requests return HTTP 404).
+npm 12's lock generator drops their placeholders, although its clean installer
 requires them. The compatible lock is generated once with npm 11.13.0 and verified
 with npm 12.2.0; no old npm runtime/dependency is shipped. See VALIDATION.md.
 

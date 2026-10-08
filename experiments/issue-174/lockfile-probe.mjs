@@ -1,4 +1,4 @@
-// Reproduce npm's handling of unpublished optional packages in an isolated copy.
+// Reproduce npm's handling of unpublished optional versions in an isolated copy.
 import { mkdtemp, copyFile, rm, readFile, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';

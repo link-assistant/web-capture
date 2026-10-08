@@ -15,24 +15,27 @@ Branch: `issue-174-191f66a951d0`. Research started 2026-10-08 UTC.
 - [x] Update JavaScript direct dependencies and complete lockfile; migrate API differences and remove superseded helpers.
 - [x] Update both Rust manifests, edition/MSRV, complete lockfile, and consumer fixture; migrate API differences.
 - [x] Identify Python example dependencies, add reproducible manifests/lockfile, and update Python tooling.
-- [x] Update every Docker base image and package names for the current distribution; build/test the JS image locally and run the Rust image build in full CI.
+- [x] Update every Docker base image and package names for the current distribution; build/test JS locally and build both final images in passing CI.
 - [x] Update all GitHub Actions and runtime versions consistently; add weekly Dependabot for actual manifests.
 - [x] Audit complete npm, Cargo, and Python trees; document every unavoidable upstream constraint with evidence.
 - [x] Run full local lint/format/build/tests where the container supports them, feature/TLS/parity checks, examples, and meaningful regressions; save large logs and document the full Rust compiler's measured memory limit.
 - [x] Prepare release triggers, review diff for feature preservation, and commit atomic verified steps.
 - [x] Fetch current main and verify it is already an ancestor, push only the prepared branch, update PR title/body with requirement coverage and tests.
 - [x] List recent CI runs with timestamps/SHA, preserve each failed run's logs, diagnose precise errors, fix and repeat.
-- [ ] Wait for current-head CI, review full PR diff/comments, confirm a clean tree, and mark PR 175 ready.
+- [x] Complete full CI for the implementation, including all live integrations, cross-platform Rust, release and both Docker builds; retain the validated SHA and run receipts.
+
+Final gate: every later evidence commit must pass the same complete checks before
+PR 175 is marked ready. The PR's current-head checks and review state record that
+final gate without a self-referential CI-results commit.
 
 Experiments belong in `experiments/issue-174/`; collected research and summarized
 validation belong here. Large transient build/test/CI logs belong in `ci-logs/`.
 No existing feature or test may be removed to make dependency updates pass.
 
-Progress: implementation and reproducing regression commits are pushed. All
-local JavaScript/Python checks and minimal Rust checks pass. Full Rust compilation
-exceeded the 3 GB local cgroup; CI passed the full test and live integration
-matrices on Linux, macOS and Windows, fresh resolution and the bare-container
-build. Follow-up CI diagnostics require the final CLI let chain and current
-byte-array screenshot assertions in all live suites. See VALIDATION.md for
-timestamped evidence. Final readiness is recorded by the current-head checks and
-review state of PR 175 after all pending build and test gates complete.
+Progress: all four workflows passed for implementation head 59c9a0e, including
+full test and live integration matrices, all-feature Rust Clippy, fresh resolution,
+the bare-container build, release/package checks and both final Docker images.
+Follow-up diagnostics were fixed with the CLI let chain and current byte-array
+screenshot assertions in every live suite. All local JavaScript/Python and
+minimal Rust checks pass; full Rust compilation exceeded the measured 3 GB local
+cgroup and passed on CI runners. See VALIDATION.md and the saved run receipts.

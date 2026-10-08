@@ -17,7 +17,7 @@ Large transient logs are saved in the ignored repository `ci-logs/` directory.
 | Existing npm bootstrap accepts obsolete npm versions | `issue-174-npm-version-before.log`, test fails against the original bootstrap | `tests/tools/npm-version.test.mjs` checks exact latest patch/major, successful no-op and installation/version failures |
 | Private root tooling manifest redirects JS release paths | `issue-174-paths-before.log`, expected `js`, actual `.` | `tests/tools/js-paths.test.mjs` covers all package/lock/changeset paths and explicit overrides |
 | Manual release from root versions the private package and cannot locate the JS changelog | `issue-174-root-release-before.log`, unchanged JS version and ENOENT CHANGELOG.md | The same test executes the real manual release in a temporary checkout, verifies only JS gets 1.0.1, and checks the changelog |
-| npm 12 lock regeneration drops unpublished optional native package placeholders | `node experiments/issue-174/lockfile-probe.mjs --regenerate` fails with two Missing Kreuzberg musl errors, `issue-174-lockfile-probe.log:12-13` | Positive probe uses upstream npm version to synchronize release metadata and then verifies npm 12 clean installation; a compatible lock is generated once with npm 11.13.0 |
+| npm 12 lock regeneration drops placeholders for unpublished requested optional native versions | `node experiments/issue-174/lockfile-probe.mjs --regenerate` fails with two Missing Kreuzberg musl errors, `issue-174-lockfile-probe.log:12-13` | Positive probe uses upstream npm version to synchronize release metadata and then verifies npm 12 clean installation; a compatible lock is generated once with npm 11.13.0 |
 | Generated scaffold's default install drops the same placeholders | `issue-174-scaffold-lock-before.log:12-13`, missing both musl lock entries | `node experiments/issue-174/scaffold-install-probe.mjs` executes the actual default install, verifies npm 12 clean installation and checks browser installation remains permitted |
 | Docs-only tail commits hide earlier PR code changes from CI | `issue-174-pr-diff-before.log:10-23`, expected Rust changes true, actual false; latest full test matrices were skipped | `js/tests/ci/detect-code-changes.test.js` tests full PR detection, real merge pushes, genuinely docs-only PRs and exclusion of base-branch-only code changes |
 | Python examples hard-code a service address and cannot safely encode URL queries | `issue-174-python-before.log`, five errors against the local fixture | `uv run --locked python -m unittest discover -s tests/python -v` exercises every example with encoded URLs, Unicode HTML/Markdown, exact PNG bytes, Playwright parameters and connection failures |
@@ -46,7 +46,8 @@ Large transient logs are saved in the ignored repository `ci-logs/` directory.
 | Rust minimal dependency boundary / default TLS guard | Passed; no browser/server/runtime in search, no default OpenSSL |
 | Rust direct dependency upgrades and full lock update | All direct crates already current; exact upstream constraints retain generic-array 0.14.7 and matchit 0.8.4 |
 | JavaScript Trixie Docker build and Compose smoke tests | Final Node 26.10/Trixie/npm 12 image built; all five Compose endpoint smoke tests passed |
-| Rust all-feature Clippy/build/test | Local all-feature compiler was killed by the 3 GB cgroup memory limit in generated chromiumoxide_cdp; verified minimal features locally and complete coverage remains enabled in CI |
+| Rust all-feature Clippy/build/test | Local all-feature compiler was killed by the 3 GB cgroup memory limit in generated chromiumoxide_cdp; minimal features verified locally, full coverage passed on CI |
+| Rust final Trixie Docker image and release package | CI release compilation, package listing and complete Docker build passed |
 
 Rust's resource failure is explicit: `issue-174-rust-clippy.log:312-315`
 reports SIGKILL while compiling chromiumoxide_cdp 0.9.1, and
@@ -107,6 +108,25 @@ and leaving HTTP Buffer assertions intact. Security and parity workflows passed
 for this SHA. These are actual current-code diagnostics, rather than stale
 failures from the prepared branch; run timestamps and SHA are retained in data.
 
+## Complete implementation CI receipt
+
+All four workflows created at 2026-10-08T07:48:01Z passed for implementation SHA
+`59c9a0e1b666310cbae6f43aeb0b58d222fe5f1a`:
+
+| Workflow | Full validation actually executed |
+| --- | --- |
+| [JavaScript 37745680526](https://github.com/link-assistant/web-capture/actions/runs/37745680526) | 518 standard tests; Habr 16, Google Docs 27, Wikipedia 5, GitHub 4 and StackOverflow 7 enabled live tests; final-image Docker build and 5 endpoint tests; lint, format, duplication, changeset and freshness checks |
+| [Rust 37745680454](https://github.com/link-assistant/web-capture/actions/runs/37745680454) | All-feature/all-target Clippy with warnings denied; full tests, doctests and all four live integration groups on Linux, macOS and Windows; fresh consumer resolution; bare image without OpenSSL; release compilation, package listing and final Docker image build |
+| [Security/tooling 37745680448](https://github.com/link-assistant/web-capture/actions/runs/37745680448) | Eight release-tool tests; scaffold/default-install/binary/release-lock probes; every Python example; complete npm, Cargo and Python audits with zero findings |
+| [Parity 37745680617](https://github.com/link-assistant/web-capture/actions/runs/37745680617) | Required JavaScript/Rust source and test parity |
+
+Only release publishing and manual release-PR jobs were skipped, as intended
+for a pull request. Full test/build jobs executed; they were not bypassed by the
+evidence-only tail commit. Run receipts and test summary lines are retained in
+`data/ci-validated-source-head.json`. Subsequent research refinements preserve the
+same locks and runtime behavior; the [PR's current-head checks](https://github.com/link-assistant/web-capture/pull/175/checks)
+are the final gate before marking it ready.
+
 ## Evidence-backed exceptions
 
 - JS browser-commander remains 0.10.0 under existing [issue 160](https://github.com/link-assistant/web-capture/issues/160).
@@ -128,7 +148,10 @@ failures from the prepared branch; run timestamps and SHA are retained in data.
   purpose of finding breaks in new consumers; the actual shipped Rust lock,
   both npm locks, uv.lock and hashed requirements export are committed.
 - npm 11.13.0 is a one-time compatible lock generator for the upstream optional
-  package defect. Runtime, CI, Docker and releases use npm 12.2.0.
+  version defect: both Kreuzberg musl packages have latest 3.5.5, but their parent
+  requires unavailable 3.7.2. Exact-version registry 404 responses and unversioned
+  lock placeholders are explicitly recorded in the complete inventory.
+  Runtime, CI, Docker and releases use npm 12.2.0.
 
 No production endpoint, output format, cache behavior, opt-in feature or
 existing assertion was removed. There are no visual UI changes.

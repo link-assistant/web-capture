@@ -1,0 +1,23 @@
+{
+  "collectedAt": "2026-10-08T07:56:23.347327+00:00",
+  "packages": [
+    {
+      "name": "@kreuzberg/html-to-markdown-node-linux-arm64-musl",
+      "latestPublished": "3.5.5",
+      "requestedByParent": "3.7.2",
+      "requestUrl": "https://registry.npmjs.org/%40kreuzberg%2Fhtml-to-markdown-node-linux-arm64-musl/3.7.2",
+      "status": 404,
+      "response": "version not found: 3.7.2",
+      "headers": "HTTP/2 404 \ndate: Thu, 08 Oct 2026 07:55:12 GMT\ncontent-type: application/json\ncontent-length: 26\nset-cookie: __cf_bm=nNIkkTi_p_yShctpafk5nO9pa1Z8Rswh1O0GeEdRvXk-1791446112.1409667-1.0.1.1-e0Ly4R9q85H0qPmIlbcylPrRzhsivnwSHA48u1gVqnE.vHVUTrtjTllVBP6VCN3NAGtDnNeGfumWlrn__1Ly.EccKYU8BePuYfmTCOq6E.4ZYoIPZPG1lkbGv5fc6qQW; HttpOnly; SameSite=None; Secure; Path=/; Domain=npmjs.org; Expires=Thu, 08 Oct 2026 08:25:12 GMT\nset-cookie: _cfuvid=CroAAocq.WPXXcUGg6ZIP9Bnq9LE5ECv9JfhSmUWO98-1791446112.1409667-1.0.1.1-pvojq6cSTlATdyVDpgEiuLDSwFgGiV3Z1.R_aNesjlM; HttpOnly; SameSite=None; Secure; Path=/; Domain=npmjs.org\ncf-ray: a47394f8da5fd295-FRA\naccess-control-allow-origin: *\nserver: cloudflare\n\n"
+    },
+    {
+      "name": "@kreuzberg/html-to-markdown-node-linux-x64-musl",
+      "latestPublished": "3.5.5",
+      "requestedByParent": "3.7.2",
+      "requestUrl": "https://registry.npmjs.org/%40kreuzberg%2Fhtml-to-markdown-node-linux-x64-musl/3.7.2",
+      "status": 404,
+      "response": "version not found: 3.7.2",
+      "headers": "HTTP/2 404 \ndate: Thu, 08 Oct 2026 07:55:12 GMT\ncontent-type: application/json\ncontent-length: 26\nset-cookie: __cf_bm=o21y4rKJsnLQUPEkBY2A6TsRluVDyaXlPcGq5tzW8J8-1791446112.138094-1.0.1.1-3gXOsbZ4dDEdpCFtJ8om1hB.DeCqfknEgpje46zrJjRLHzWxKk9D7ugOGr2szjKvXjoqwVOGqWc0cL_BhA3X_UyIg_j2ajC3T.BPejyQyf3yOIHzTLWbpCx38XkZ_c2S; HttpOnly; SameSite=None; Secure; Path=/; Domain=npmjs.org; Expires=Thu, 08 Oct 2026 08:25:12 GMT\nset-cookie: _cfuvid=EabN8aZj_Ge11wxuvhlfrao3zC5zOjNPCL8AWFVohEo-1791446112.138094-1.0.1.1-R6HLKhd1G7aN9UuyRqpz_x30UgArdwdhZI7MVSpp9Is; HttpOnly; SameSite=None; Secure; Path=/; Domain=npmjs.org\ncf-ray: a47394f8dc35e7ae-FRA\naccess-control-allow-origin: *\nserver: cloudflare\n\n"
+    }
+  ]
+}

@@ -50,7 +50,7 @@ Build with `docker build -t web-capture .` and run with
 EOF_README
 
 if [ "${2:-}" != '--skip-install' ]; then
-  # npm 12 drops unpublished optional Kreuzberg musl lock placeholders.
+  # npm 12 drops placeholders for unpublished requested Kreuzberg musl versions.
   # Generate the compatible lock once, then use current npm for installation.
   npx --yes npm@11.13.0 install --package-lock-only
   npx --yes npm@12.2.0 ci
