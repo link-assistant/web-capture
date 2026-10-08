@@ -18,6 +18,7 @@ cat > package.json <<EOF_PACKAGE
   "type": "module",
   "engines": { "node": ">=26.10.0" },
   "packageManager": "npm@12.2.0",
+  "allowScripts": { "puppeteer": true },
   "scripts": { "start": "node index.js", "dev": "node --watch index.js" },
   "dependencies": { "@link-assistant/web-capture": "^$PACKAGE_VERSION" }
 }
@@ -49,6 +50,9 @@ Build with `docker build -t web-capture .` and run with
 EOF_README
 
 if [ "${2:-}" != '--skip-install' ]; then
-  npm install
+  # npm 12 drops unpublished optional Kreuzberg musl lock placeholders.
+  # Generate the compatible lock once, then use current npm for installation.
+  npx --yes npm@11.13.0 install --package-lock-only
+  npx --yes npm@12.2.0 ci
 fi
 printf 'Service scaffolded in %s\n' "$(pwd)"

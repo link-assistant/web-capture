@@ -9,6 +9,10 @@ on:
     - cron: '17 6 * * 1'
   workflow_dispatch:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
 jobs:
   tools:
     name: Locked release tools and npm security
@@ -29,6 +33,7 @@ jobs:
           PUPPETEER_SKIP_DOWNLOAD: 'true'
       - run: npm audit --prefix js --package-lock-only
       - run: node experiments/issue-174/scaffold-probe.mjs
+      - run: node experiments/issue-174/scaffold-install-probe.mjs
       - run: node experiments/issue-174/fetch-buffer-probe.mjs
       - run: node experiments/issue-174/lockfile-probe.mjs
 
@@ -49,6 +54,8 @@ jobs:
     name: Rust locked dependency security
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    env:
+      CARGO_BUILD_JOBS: 2
     steps:
       - uses: actions/checkout@v7.0.1
       - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d

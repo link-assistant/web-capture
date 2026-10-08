@@ -16,7 +16,7 @@
     "test:e2e": "npm run test:e2e:process && npm run test:e2e:docker",
     "test:all": "npm run build && npm test && npm run test:e2e",
     "build": "docker compose down && docker compose build && npm start",
-    "examples:python": "python3 examples/python/html_download.py && python3 examples/python/markdown_download.py && python3 examples/python/image_download.py",
+    "examples:python": "uv run --project .. --locked python examples/python/html_download.py && uv run --project .. --locked python examples/python/markdown_download.py && uv run --project .. --locked python examples/python/image_download.py",
     "examples:javascript": "node examples/js/html_download.js && node examples/js/markdown_download.js && node examples/js/image_download.js",
     "examples": "npm run build && npm run examples:javascript && npm run examples:python",
     "lint": "eslint .",

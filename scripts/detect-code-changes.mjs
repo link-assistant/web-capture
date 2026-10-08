@@ -2,15 +2,15 @@
 
 // Detect code changes for CI/CD pipeline
 //
-// Detects what types of files changed in the latest commit and outputs
+// Detects what types of files changed and outputs
 // results for use in GitHub Actions workflow conditions.
 //
 // For PRs: GitHub Actions checks out a synthetic merge commit, so we
-// compare HEAD^2^ to HEAD^2 (the PR head's per-commit diff).
+// compare HEAD^...HEAD^2 (the complete PR diff from its merge base).
 // For pushes: compares HEAD^ to HEAD. A real merge commit pushed to main
 // uses HEAD^1 to HEAD so the whole merged branch is detected.
-// This ensures a commit touching only non-code files skips tests in PRs,
-// while main merge pushes still see all files introduced by the merge.
+// This keeps code checks enabled after a docs-only tail commit, while a
+// genuinely docs-only PR still skips them.
 //
 // Excluded from code changes (don't require changesets):
 // - Markdown files in any folder
@@ -59,8 +59,8 @@ function isMergeCommit() {
 function getChangedFiles() {
   // GitHub Actions checks out a synthetic merge commit for pull_request
   // events: HEAD is the merge commit, HEAD^ is the base branch, HEAD^2
-  // is the actual PR head. To get the per-commit diff (what the latest
-  // push actually changed), we compare HEAD^2^ to HEAD^2.
+  // is the actual PR head. Compare from the merge base so the full PR is
+  // checked without including changes made only on the base branch.
   // For push events, HEAD is the real commit. A merge commit pushed to
   // main must compare the first parent to HEAD so earlier commits from the
   // merged branch are not hidden by a docs-only final commit.
@@ -68,19 +68,11 @@ function getChangedFiles() {
 
   if (eventName === 'pull_request' && isMergeCommit()) {
     console.log('Merge commit detected (pull_request event)');
-    console.log('Comparing HEAD^2^ to HEAD^2 (per-commit diff of PR head)');
-    try {
-      const output = exec('git diff --name-only HEAD^2^ HEAD^2', {
-        throwOnError: true,
-      });
-      return output ? output.split('\n').filter(Boolean) : [];
-    } catch {
-      console.log(
-        'HEAD^2^ not available (first commit in PR), listing files in HEAD^2'
-      );
-      const output = exec('git diff --name-only HEAD^ HEAD^2');
-      return output ? output.split('\n').filter(Boolean) : [];
-    }
+    console.log('Comparing HEAD^...HEAD^2 (complete PR diff)');
+    const output = exec('git diff --name-only HEAD^...HEAD^2', {
+      throwOnError: true,
+    });
+    return output ? output.split('\n').filter(Boolean) : [];
   }
 
   if (isMergeCommit()) {
