@@ -1,4 +1,5 @@
 import { createBrowser } from '../../src/browser.js';
+import { expectPngScreenshot } from '../helpers/screenshot.js';
 
 describe('Browser Engine Integration Tests', () => {
   describe.each(['puppeteer', 'playwright'])('%s Engine', (engine) => {
@@ -32,11 +33,7 @@ describe('Browser Engine Integration Tests', () => {
         timeout: 30000,
       });
       const screenshot = await page.screenshot({ type: 'png' });
-      expect(screenshot).toBeInstanceOf(Uint8Array);
-      expect(Buffer.from(screenshot).subarray(0, 8)).toEqual(
-        Buffer.from([137, 80, 78, 71, 13, 10, 26, 10])
-      );
-      expect(screenshot.length).toBeGreaterThan(100);
+      expectPngScreenshot(screenshot, 100);
     }, 60000);
 
     it('can set custom headers and user agent', async () => {

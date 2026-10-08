@@ -19,13 +19,9 @@ import { jest } from '@jest/globals';
 import { createBrowser } from '../../src/browser.js';
 import { convertHtmlToMarkdown } from '../../src/lib.js';
 import { retry } from '../../src/retry.js';
+import { expectPngScreenshot } from '../helpers/screenshot.js';
 
 const WIKIPEDIA_URL = 'https://en.wikipedia.org/wiki/Wikipedia';
-
-// PNG magic number (89 50 4E 47 0D 0A 1A 0A).
-const PNG_SIGNATURE = Buffer.from([
-  0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a,
-]);
 
 const SKIP_LIVE =
   !process.env.WIKIPEDIA_INTEGRATION ||
@@ -99,10 +95,7 @@ describe.each(['puppeteer', 'playwright'])(
       it('downloads the Wikipedia page as an image (PNG screenshot)', async () => {
         const screenshot = await page.screenshot({ type: 'png' });
 
-        expect(screenshot).toBeInstanceOf(Buffer);
-        expect(screenshot.length).toBeGreaterThan(1000);
-        // Verify the PNG signature so we know it is a real image.
-        expect(screenshot.slice(0, 8)).toEqual(PNG_SIGNATURE);
+        expectPngScreenshot(screenshot);
       });
     });
   }
@@ -135,8 +128,7 @@ describeIfLive('Wikipedia Page Download (engine parity)', () => {
       expect(markdown).toContain('Wikipedia');
       expect(markdown.length).toBeGreaterThan(500);
       // Image captured from both engines.
-      expect(screenshot.slice(0, 8)).toEqual(PNG_SIGNATURE);
-      expect(screenshot.length).toBeGreaterThan(1000);
+      expectPngScreenshot(screenshot);
     }
   }, 180000);
 });
