@@ -1,9 +1,13 @@
 version: 2
+# A 7-day cooldown lets the registries yank compromised or broken releases
+# before Dependabot proposes them (zizmor dependabot-cooldown).
 updates:
   - package-ecosystem: npm
     directories: ['/', '/js']
     schedule:
       interval: weekly
+    cooldown:
+      default-days: 7
     groups:
       npm-dependencies:
         patterns: ['*']
@@ -17,6 +21,8 @@ updates:
     directories: ['/rust', '/experiments/issue-158/fresh-consumer']
     schedule:
       interval: weekly
+    cooldown:
+      default-days: 7
     groups:
       cargo-dependencies:
         patterns: ['*']
@@ -26,6 +32,8 @@ updates:
     directory: '/'
     schedule:
       interval: weekly
+    cooldown:
+      default-days: 7
     groups:
       python-dependencies:
         patterns: ['*']
@@ -33,6 +41,8 @@ updates:
     directories: ['/js', '/rust']
     schedule:
       interval: weekly
+    cooldown:
+      default-days: 7
     groups:
       docker-images:
         patterns: ['*']
@@ -40,10 +50,14 @@ updates:
     directory: '/js'
     schedule:
       interval: weekly
+    cooldown:
+      default-days: 7
   - package-ecosystem: github-actions
     directory: '/'
     schedule:
       interval: weekly
+    cooldown:
+      default-days: 7
     groups:
       actions:
         patterns: ['*']
