@@ -88,9 +88,20 @@ active dependency pins; rewriting them would destroy their before/after context.
 - The fresh-consumer fixture deliberately ignores its disposable Cargo.lock
   to detect new upstream breakage. Regenerate it for this inventory, while
   preserving its fresh-resolution purpose; the shipped Rust lock is committed.
-- Source code is checked for Rust 2024 changes; existing logic required only
-  rustfmt's new edition ordering. Rust 0.5.0 and a JavaScript major changeset
+- Source code is checked for Rust 2024 changes; current Clippy requires
+  let chains in 25 nested conditions, including runtime-only modules and the CLI. These
+  suggestions preserve the original short-circuit behavior without suppressing
+  warnings. Rust 0.5.0 and a JavaScript major changeset
   prepare releases for the raised toolchain/runtime floors.
+- CI initially inspected only a PR's final commit: a research-only commit
+  canceled earlier runs and skipped the full test matrices. Compare the complete
+  PR from its merge base instead. Real Git fixtures reproduce the missing code
+  checks and verify genuinely docs-only PRs and base-branch-only changes still
+  skip those checks.
+- The generated scaffold's actual default install reproduces the npm 12 optional
+  package defect too. Apply the compatible lock-generation policy there and
+  explicitly allow Puppeteer's browser-install script; test the default install
+  as well as the scaffold's three original routes.
 - All node-fetch binary response paths now use upstream arrayBuffer instead
   of deprecated buffer(). Shared downloads preserve the existing retry/status
   behavior. Puppeteer byte-array assertions accept its current Uint8Array API.

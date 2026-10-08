@@ -18,20 +18,24 @@ Large transient logs are saved in the ignored repository `ci-logs/` directory.
 | Private root tooling manifest redirects JS release paths | `issue-174-paths-before.log`, expected `js`, actual `.` | `tests/tools/js-paths.test.mjs` covers all package/lock/changeset paths and explicit overrides |
 | Manual release from root versions the private package and cannot locate the JS changelog | `issue-174-root-release-before.log`, unchanged JS version and ENOENT CHANGELOG.md | The same test executes the real manual release in a temporary checkout, verifies only JS gets 1.0.1, and checks the changelog |
 | npm 12 lock regeneration drops unpublished optional native package placeholders | `node experiments/issue-174/lockfile-probe.mjs --regenerate` fails with two Missing Kreuzberg musl errors, `issue-174-lockfile-probe.log:12-13` | Positive probe uses upstream npm version to synchronize release metadata and then verifies npm 12 clean installation; a compatible lock is generated once with npm 11.13.0 |
+| Generated scaffold's default install drops the same placeholders | `issue-174-scaffold-lock-before.log:12-13`, missing both musl lock entries | `node experiments/issue-174/scaffold-install-probe.mjs` executes the actual default install, verifies npm 12 clean installation and checks browser installation remains permitted |
+| Docs-only tail commits hide earlier PR code changes from CI | `issue-174-pr-diff-before.log:10-23`, expected Rust changes true, actual false; latest full test matrices were skipped | `js/tests/ci/detect-code-changes.test.js` tests full PR detection, real merge pushes, genuinely docs-only PRs and exclusion of base-branch-only code changes |
 | Python examples hard-code a service address and cannot safely encode URL queries | `issue-174-python-before.log`, five errors against the local fixture | `uv run --locked python -m unittest discover -s tests/python -v` exercises every example with encoded URLs, Unicode HTML/Markdown, exact PNG bytes, Playwright parameters and connection failures |
 | Shell-wrapper migration risks argument and failure semantics | Wrapper supplied shell commands and legacy `.code`; locked Execa uses argument arrays and `.exitCode` | `tests/tools/process.test.mjs` checks literal shell characters/newlines/quotes, array arguments, JSON stdin, captured E404 and rejecting mutation failures; existing publish verification tests cover propagation retries |
 | Node 26 fixture closes its socket before body bytes are flushed | Existing stream test returned 500 instead of its expected 200 | Close only after the write callback; retain both partial-body and no-body assertions |
-| Current Puppeteer returns Uint8Array screenshots | Existing browser integration Buffer-only assertion failed | Both real browser engines retain PNG signature, content-length and parity assertions using the current byte-array API |
+| Current Puppeteer returns Uint8Array screenshots | Existing browser integration Buffer-only assertion failed; enabled Wikipedia live suite exposed the same assumption in another file | Browser-engine, Wikipedia and GitHub suites all accept the current byte-array API and retain PNG signature, size and engine parity assertions; HTTP binary parser assertions still require their actual Buffer contract |
 
 ## Local results
 
 | Check | Result |
 | --- | --- |
-| JavaScript full existing suite, Node 26.11.1 / native ESM | 61 suites passed, 521 tests passed; 4 suites / 42 tests are pre-existing opt-in network skips |
-| JavaScript ESLint / Prettier / jscpd | Passed; 226 clones, zero new clones; pre-existing complexity warnings remain |
+| JavaScript full existing suite, Node 26.11.1 / native ESM | 61 suites passed, 523 tests passed; 4 suites / 42 tests are pre-existing opt-in network skips |
+| JavaScript ESLint / Prettier / jscpd | Passed; shared PNG assertions reduce clones from 226 to 224, zero new clones; pre-existing complexity warnings remain |
+| Real browser-engine, Wikipedia and GitHub screenshot suites | 16 passed with live integration gates enabled and open-handle tracing; exact PNG signature, original size thresholds, Markdown content and both engines verified |
 | Locked root release-tool tests | 8 passed |
 | Scaffold, binary response and npm 12 release-lock regressions | Passed |
 | Python example tests, Python 3.14.8 / requests 2.34.2 | 2 passed, covering every script |
+| npm Python-example entrypoint | `python-entrypoint-probe.py` exercises the actual npm command against the local fixture; it uses the locked uv project |
 | npm 12 clean install for both manifests | Passed |
 | npm audit, both complete locks | Zero vulnerabilities, JSON retained in data |
 | cargo audit 0.22.2, complete shipped Rust lock | Zero vulnerabilities and zero warnings, JSON retained in data |
@@ -73,6 +77,36 @@ log `javascript-37735882034.log:813-818` reports EUSAGE at
 lockfile experiment reproduces the same actual errors. Latest-head runs,
 precise follow-up failures and final results will be recorded after pushing.
 
+[Rust run 37741228883](https://github.com/link-assistant/web-capture/actions/runs/37741228883)
+was created at 07:04:35Z for `9582e21`. Its downloaded and color-stripped log
+`rust-37741228883-clean.log:1898-2389` identifies 23 `collapsible_if` errors
+in runtime modules, now eligible for Rust 2024 let chains. Apply the exact
+short-circuit-preserving suggestions; keep all warnings denied. The other three
+workflows passed for that SHA, including all four security audits. However,
+per-commit change detection skipped full test matrices after the research
+commit, so those green workflows did not yet prove full validation. A failing
+Git-fixture regression reproduces that gap; complete PR change detection fixes
+it before the next full run. Canceled superseded runs had no completed job logs;
+their CLI responses and timestamp/SHA snapshots are retained.
+
+The complete matrices ran for `16f63a3`, created at 07:30:22Z.
+[Rust run 37743839902](https://github.com/link-assistant/web-capture/actions/runs/37743839902)
+passed all tests and doctests on Linux, macOS and Windows, all four enabled
+live integration groups on each platform, fresh consumer resolution and the
+bare-container build without system OpenSSL. Its remaining CLI-only Clippy
+error is recorded in `rust-lint-37743839902.log:456-494`: the image extraction
+guard at main.rs:323 requires one more Rust 2024 let chain. Apply the suggestion
+and keep the release/Docker build gate intact.
+
+[JavaScript run 37743839957](https://github.com/link-assistant/web-capture/actions/runs/37743839957)
+passed the standard suite, Habr live tests and all 27 Google Docs tests, but
+`javascript-37743839957.log:4577-4593` reports expected Buffer, received Uint8Array
+in Wikipedia's screenshot test. The same stale assertion exists in GitHub's
+live screenshot suite. Update both suites, preserving signature and size checks
+and leaving HTTP Buffer assertions intact. Security and parity workflows passed
+for this SHA. These are actual current-code diagnostics, rather than stale
+failures from the prepared branch; run timestamps and SHA are retained in data.
+
 ## Evidence-backed exceptions
 
 - JS browser-commander remains 0.10.0 under existing [issue 160](https://github.com/link-assistant/web-capture/issues/160).
@@ -82,6 +116,10 @@ precise follow-up failures and final results will be recorded after pushing.
 - Node source/CI is 26.11.1. The latest published official Docker tag is
   26.10.0-trixie; the 26.11.1-trixie registry request returns 404. The supported
   engine floor covers that current image, and publication evidence is retained.
+- Playwright 1.64's matching prebuilt Noble browser image is not yet published
+  (MCR returns 404; its tag list ends at 1.63.0-noble). CI retains the existing
+  matching-version CDN fallback; it does not install an incompatible older
+  prebuilt browser. Raw tag and manifest responses are retained in data.
 - Latest upstream parents retain older transitive API generations. Every
   installed slot and its actual parent requirements are listed in the inventory;
   incompatible overrides would not constitute a tested upstream migration.

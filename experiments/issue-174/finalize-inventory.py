@@ -41,12 +41,13 @@ def main():
         if name == 'npm':
             installed = ['12.2.0 (packageManager)']
             reason = 'Toolchain, not a library; exact version installed by release bootstrap'
+        elif name == 'npm-check-updates':
+            installed = [data['latest'] + ' (update tool)']
+            reason = 'Registry-current migration tool; not shipped as a runtime dependency'
         elif name == 'browser-commander':
             reason = '[Issue 160](https://github.com/link-assistant/web-capture/issues/160): packaged consumers cannot load mandatory native SQLite; see VALIDATION.md'
         elif not installed:
             reason = 'Removed/unneeded; native ESM/watch or locked Execa replaces the former path'
-        elif name == 'babel-plugin-istanbul' and installed == ['8.0.2'] and data['latest'] == '8.0.0':
-            reason = '8.0.2 is newer than the registry latest dist-tag (8.0.0); current Jest compatible resolution retained'
         elif any(v != data['latest'] for v in installed):
             reason = 'Current upstream parents retain these version slots: ' + '; '.join(sorted(parents.get(name, [])))
         else:
@@ -120,10 +121,11 @@ def main():
 | Rust builder image | rust:1.96-bullseye | rust:1.99.0-trixie | rust:1.99.0-trixie | Current |
 | Rust bare CI image | rust:1.96-slim-bullseye | rust:1.99.0-slim-trixie | rust:1.99.0-slim-trixie | Current |
 | Rust runtime image | debian:bookworm-slim | debian:trixie-20261005-slim | debian:trixie-20261005-slim | Current stable distro dated image |
-| Scaffold Express/Capture Website/Turndown | ^4.18.2 / ^4.1.0 / ^7.1.1 | 5.2.1 / 5.2.0 / 7.2.4 | Maintained web-capture package | Delete duplicate implementation and its untracked dependencies; all routes preserved |
+| Scaffold Express/Capture Website/Turndown | ^4.18.2 / ^4.1.0 / ^7.1.1 | 5.2.1 / 5.1.0 / 7.2.4 | Maintained web-capture package | Delete duplicate implementation and its untracked dependencies; all routes preserved |
 | Scaffold image | node:20-slim | node:26.10.0-trixie | Same maintained JS Dockerfile | No independent stale image or apt list |
+| Playwright prebuilt browser image | dynamically resolved v1.63.0-noble | v1.63.0-noble (published) | v1.64.0-noble attempted; matching CDN fallback | Registry returns 404 for current library's unpublished image; retain existing CDN fallback instead of using an incompatible older browser bundle |
 | Compose | local Dockerfile build | no external image | local Dockerfile build | No separate external dependency |
-| Changesets JSON schema | config@3.1.1 URL | schema metadata | local schema unchanged | Descriptive metadata, not executable/install dependency |
+| Changesets JSON schema | config@3.1.1 URL | config@4.0.1 | Local schema from locked config@4.0.1 | Match the installed current package without a second CDN version pin |
 
 Unpublished optional Kreuzberg musl packages have no registry version. npm 12's
 lock generator drops their placeholders, although npm 12's clean installer

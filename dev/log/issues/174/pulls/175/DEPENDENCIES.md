@@ -558,7 +558,7 @@ Resolved on 2026-10-08 UTC. Before is the prepared branch, after is the committe
 | nodemon | unlocked/not declared | 3.1.14 | removed | Removed/unneeded; native ESM/watch or locked Execa replaces the former path |
 | normalize-path | 3.0.0 | 3.0.0 | 3.0.0 | Current |
 | npm | unlocked/not declared | 12.2.0 | 12.2.0 (packageManager) | Toolchain, not a library; exact version installed by release bootstrap |
-| npm-check-updates | unlocked/not declared | 23.1.0 | removed | Removed/unneeded; native ESM/watch or locked Execa replaces the former path |
+| npm-check-updates | unlocked/not declared | 23.1.0 | 23.1.0 (update tool) | Registry-current migration tool; not shipped as a runtime dependency |
 | npm-run-path | 4.0.1 | 6.0.0 | 4.0.1, 6.0.0 | Current upstream parents retain these version slots: execa@10.1.0: ^6.0.0; execa@5.1.1: ^4.0.1 |
 | nth-check | 2.1.1 | 3.0.1 | 2.1.1 | Current upstream parents retain these version slots: css-select@5.2.2: ^2.0.1 |
 | object-inspect | 1.13.4 | 1.13.4 | 1.13.4 | Current |
@@ -732,14 +732,14 @@ Resolved on 2026-10-08 UTC. Before is the prepared branch, after is the committe
 | astral-tl | 0.8.0 | 0.8.0 | 0.8.0 | Current |
 | async-compression | 0.4.50 | 0.4.50 | 0.4.50 | Current |
 | async-trait | 0.1.92 | 0.1.92 | 0.1.92 | Current |
-| async-tungstenite | 0.32.1, 0.35.0 | 0.35.0 | 0.32.1, 0.35.0 | Current upstream parents retain these version slots: browser-commander@0.19.0: ^0.35.0; chromiumoxide@0.9.1: ^0.32; web-capture@0.4.0: ^0.35.0 |
+| async-tungstenite | 0.32.1, 0.35.0 | 0.35.0 | 0.32.1, 0.35.0 | Current upstream parents retain these version slots: browser-commander@0.19.0: ^0.35.0; chromiumoxide@0.9.1: ^0.32; web-capture@0.5.0: ^0.35.0 |
 | atomic-waker | 1.1.2 | 1.1.2 | 1.1.2 | Current |
 | autocfg | 1.5.1 | 1.5.1 | 1.5.1 | Current |
 | aws-lc-rs | 1.18.1 | 1.18.1 | 1.18.1 | Current |
 | aws-lc-sys | 0.45.0 | 0.45.0 | 0.45.0 | Current |
 | axum | 0.8.9 | 0.8.9 | 0.8.9 | Current |
 | axum-core | 0.5.6 | 0.5.6 | 0.5.6 | Current |
-| base64 | 0.22.1, 0.23.1 | 0.23.1 | 0.22.1, 0.23.1 | Current upstream parents retain these version slots: axum@0.8.9: ^0.22.1; browser-commander@0.19.0: ^0.23.1; chromiumoxide@0.9.1: ^0.22; cookie@0.16.2: ^0.20; cookie@0.18.2: ^0.22; fantoccini@0.22.1: ^0.22; html-to-markdown-rs@3.17.2: ^0.23; hyper-util@0.1.21: ^0.23; plist@1.10.1: ^0.23.1; reqwest@0.13.5: ^0.23; rustls-platform-verifier@0.7.1: ^0.22; rustls-webpki@0.103.15: ^0.23; rustls@0.23.45: ^0.22; tower-http@0.6.11: ^0.22; tower-http@0.7.1: ^0.22; web-capture@0.4.0: ^0.23.1; webdriver@0.53.0: ^0.22 |
+| base64 | 0.22.1, 0.23.1 | 0.23.1 | 0.22.1, 0.23.1 | Current upstream parents retain these version slots: axum@0.8.9: ^0.22.1; browser-commander@0.19.0: ^0.23.1; chromiumoxide@0.9.1: ^0.22; cookie@0.16.2: ^0.20; cookie@0.18.2: ^0.22; fantoccini@0.22.1: ^0.22; html-to-markdown-rs@3.17.2: ^0.23; hyper-util@0.1.21: ^0.23; plist@1.10.1: ^0.23.1; reqwest@0.13.5: ^0.23; rustls-platform-verifier@0.7.1: ^0.22; rustls-webpki@0.103.15: ^0.23; rustls@0.23.45: ^0.22; tower-http@0.6.11: ^0.22; tower-http@0.7.1: ^0.22; web-capture@0.5.0: ^0.23.1; webdriver@0.53.0: ^0.22 |
 | bitflags | 1.3.2, 2.13.2 | 2.13.2 | 1.3.2, 2.13.2 | Current upstream parents retain these version slots: html-to-markdown-rs@3.17.2: ^2; libredox@0.1.25: ^2; nix@0.28.0: ^2.3.1; nix@0.31.3: ^2.3.3; openssl@0.10.81: ^2.2.1; png@0.18.1: ^2.0; portable-pty@0.9.0: ^1.3; redox_syscall@0.5.18: ^2.4; rusqlite@0.40.2: ^2.6.0; rustix@1.1.5: ^2.4.0; security-framework@3.7.0: ^2.11; selectors@0.38.0: ^2; tower-http@0.6.11: ^2.0.2; tower-http@0.7.1: ^2.0.2; vte@0.15.0: ^2.3.3; wit-bindgen@0.57.1: ^2.11.1 |
 | block-buffer | 0.10.4, 0.12.1 | 0.12.1 | 0.10.4, 0.12.1 | Current upstream parents retain these version slots: cipher@0.5.2: ^0.12; digest@0.10.7: ^0.10; digest@0.11.3: ^0.12 |
 | block-padding | 0.4.2 | 0.4.2 | 0.4.2 | Current |
@@ -1025,7 +1025,7 @@ Resolved on 2026-10-08 UTC. Before is the prepared branch, after is the committe
 | synstructure | 0.13.2, 0.14.0 | 0.14.0 | 0.13.2, 0.14.0 | Current upstream parents retain these version slots: yoke-derive@0.7.5: ^0.13.0; yoke-derive@0.8.4: ^0.14.0; zerofrom-derive@0.1.8: ^0.14.0 |
 | tempfile | 3.27.0 | 3.27.0 | 3.27.0 | Current |
 | tendril | 0.5.1 | 0.5.1 | 0.5.1 | Current |
-| thiserror | 1.0.69, 2.0.21 | 2.0.21 | 1.0.69, 2.0.21 | Current upstream parents retain these version slots: anyhow@1.0.104: ^2; browser-commander@0.19.0: ^2.0.21; chromiumoxide@0.9.1: ^2; command-stream@1.5.3: ^2.0.21; displaydoc@0.2.7: ^1.0.24; filedescriptor@0.8.3: ^1.0; html-to-markdown-rs@3.17.2: ^2.0; jni-macros@0.22.4: ^2; jni@0.22.4: ^2; lino-arguments@0.4.0: ^2.0.21; quinn-proto@0.11.19: ^2.0.3; quinn@0.11.12: ^2.0.3; redox_users@0.5.3: ^2.0; rsqlite-vfs@0.1.1: ^2.0.12; tungstenite@0.28.0: ^2.0.7; tungstenite@0.30.0: ^2.0.7; web-capture@0.4.0: ^2.0.21; webdriver@0.53.0: ^1 |
+| thiserror | 1.0.69, 2.0.21 | 2.0.21 | 1.0.69, 2.0.21 | Current upstream parents retain these version slots: anyhow@1.0.104: ^2; browser-commander@0.19.0: ^2.0.21; chromiumoxide@0.9.1: ^2; command-stream@1.5.3: ^2.0.21; displaydoc@0.2.7: ^1.0.24; filedescriptor@0.8.3: ^1.0; html-to-markdown-rs@3.17.2: ^2.0; jni-macros@0.22.4: ^2; jni@0.22.4: ^2; lino-arguments@0.4.0: ^2.0.21; quinn-proto@0.11.19: ^2.0.3; quinn@0.11.12: ^2.0.3; redox_users@0.5.3: ^2.0; rsqlite-vfs@0.1.1: ^2.0.12; tungstenite@0.28.0: ^2.0.7; tungstenite@0.30.0: ^2.0.7; web-capture@0.5.0: ^2.0.21; webdriver@0.53.0: ^1 |
 | thiserror-impl | 1.0.69, 2.0.21 | 2.0.21 | 1.0.69, 2.0.21 | Current upstream parents retain these version slots: thiserror@1.0.69: =1.0.69; thiserror@2.0.21: =2.0.21 |
 | thread_local | 1.1.10 | 1.1.10 | 1.1.10 | Current |
 | time | 0.3.55 | 0.3.55 | 0.3.55 | Current |
@@ -1042,7 +1042,7 @@ Resolved on 2026-10-08 UTC. Before is the prepared branch, after is the committe
 | tokio-test | 0.4.6 | 0.4.6 | 0.4.6 | Current |
 | tokio-util | 0.7.19 | 0.7.19 | 0.7.19 | Current |
 | tower | 0.5.3 | 0.5.3 | 0.5.3 | Current |
-| tower-http | 0.6.11, 0.7.1 | 0.7.1 | 0.6.11, 0.7.1 | Current upstream parents retain these version slots: axum-core@0.5.6: ^0.6.0; axum@0.8.9: ^0.6.8; html-to-markdown-rs@3.17.2: ^0.7; reqwest@0.13.5: ^0.6.8; web-capture@0.4.0: ^0.7.1 |
+| tower-http | 0.6.11, 0.7.1 | 0.7.1 | 0.6.11, 0.7.1 | Current upstream parents retain these version slots: axum-core@0.5.6: ^0.6.0; axum@0.8.9: ^0.6.8; html-to-markdown-rs@3.17.2: ^0.7; reqwest@0.13.5: ^0.6.8; web-capture@0.5.0: ^0.7.1 |
 | tower-layer | 0.3.3 | 0.3.3 | 0.3.3 | Current |
 | tower-service | 0.3.3 | 0.3.3 | 0.3.3 | Current |
 | tracing | 0.1.44 | 0.1.44 | 0.1.44 | Current |
@@ -1183,10 +1183,11 @@ Resolved on 2026-10-08 UTC. Before is the prepared branch, after is the committe
 | Rust builder image | rust:1.96-bullseye | rust:1.99.0-trixie | rust:1.99.0-trixie | Current |
 | Rust bare CI image | rust:1.96-slim-bullseye | rust:1.99.0-slim-trixie | rust:1.99.0-slim-trixie | Current |
 | Rust runtime image | debian:bookworm-slim | debian:trixie-20261005-slim | debian:trixie-20261005-slim | Current stable distro dated image |
-| Scaffold Express/Capture Website/Turndown | ^4.18.2 / ^4.1.0 / ^7.1.1 | 5.2.1 / 5.2.0 / 7.2.4 | Maintained web-capture package | Delete duplicate implementation and its untracked dependencies; all routes preserved |
+| Scaffold Express/Capture Website/Turndown | ^4.18.2 / ^4.1.0 / ^7.1.1 | 5.2.1 / 5.1.0 / 7.2.4 | Maintained web-capture package | Delete duplicate implementation and its untracked dependencies; all routes preserved |
 | Scaffold image | node:20-slim | node:26.10.0-trixie | Same maintained JS Dockerfile | No independent stale image or apt list |
+| Playwright prebuilt browser image | dynamically resolved v1.63.0-noble | v1.63.0-noble (published) | v1.64.0-noble attempted; matching CDN fallback | Registry returns 404 for current library's unpublished image; retain existing CDN fallback instead of using an incompatible older browser bundle |
 | Compose | local Dockerfile build | no external image | local Dockerfile build | No separate external dependency |
-| Changesets JSON schema | config@3.1.1 URL | schema metadata | local schema unchanged | Descriptive metadata, not executable/install dependency |
+| Changesets JSON schema | config@3.1.1 URL | config@4.0.1 | Local schema from locked config@4.0.1 | Match the installed current package without a second CDN version pin |
 
 Unpublished optional Kreuzberg musl packages have no registry version. npm 12's
 lock generator drops their placeholders, although npm 12's clean installer
