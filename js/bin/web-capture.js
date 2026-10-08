@@ -1213,8 +1213,9 @@ async function captureUrl(url, options) {
               baseDelay: 500,
             });
             if (resp.ok) {
-              const buffer = await resp.buffer();
-              archive.append(buffer, { name: localPath });
+              archive.append(Buffer.from(await resp.arrayBuffer()), {
+                name: localPath,
+              });
             }
           } catch {
             /* skip failed image downloads */

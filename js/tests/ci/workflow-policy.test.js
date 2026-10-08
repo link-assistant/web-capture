@@ -40,7 +40,7 @@ describe('workflow policy', () => {
     (workflowFile) => {
       const workflow = readWorkflow(workflowFile);
 
-      expect(workflow).toContain('uses: actions/checkout@v6');
+      expect(workflow).toContain('uses: actions/checkout@v7.0.1');
       expect(workflow).not.toContain('uses: actions/checkout@v4');
     }
   );
@@ -48,7 +48,7 @@ describe('workflow policy', () => {
   test('Rust workflow uses the current cache action', () => {
     const workflow = readWorkflow('.github/workflows/rust.yml');
 
-    expect(workflow).toContain('uses: actions/cache@v5');
+    expect(workflow).toContain('uses: actions/cache@v6.1.0');
     expect(workflow).not.toContain('uses: actions/cache@v4');
   });
 

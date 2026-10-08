@@ -200,7 +200,7 @@ export async function archiveHandler(req, res) {
             baseDelay: 500,
           });
           if (imgResp.ok) {
-            const buffer = await imgResp.buffer();
+            const buffer = Buffer.from(await imgResp.arrayBuffer());
             archive.append(buffer, { name: localPath });
           }
         } catch {

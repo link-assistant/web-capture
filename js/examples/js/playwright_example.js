@@ -16,7 +16,7 @@ console.log('Fetching screenshot using Playwright engine...');
 const imageResponse = await fetch(
   `${baseUrl}/image?url=${encodeURIComponent(targetUrl)}&engine=playwright`
 );
-const imageBuffer = await imageResponse.buffer();
+const imageBuffer = Buffer.from(await imageResponse.arrayBuffer());
 fs.writeFileSync('output/playwright_screenshot.png', imageBuffer);
 console.log('Screenshot saved to output/playwright_screenshot.png');
 

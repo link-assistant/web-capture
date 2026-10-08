@@ -6,22 +6,16 @@
  *   release-version: Version number (e.g., 1.0.0)
  *   repository: GitHub repository (e.g., owner/repo)
  *
- * Uses link-foundation libraries:
- * - use-m: Dynamic package loading without package.json dependencies
- * - command-stream: Modern shell command execution with streaming support
+ * Uses locked libraries:
+ * - execa: Process execution with safe tagged argument interpolation
  * - lino-arguments: Unified configuration from CLI args, env vars, and .lenv files
  */
 
 import { readFileSync } from 'fs';
 
-// Load use-m dynamically
-const { use } = eval(
-  await (await fetch('https://unpkg.com/use-m/use.js')).text()
-);
-
-// Import link-foundation libraries
-const { $ } = await use('command-stream');
-const { makeConfig } = await use('lino-arguments');
+// Import locked release tooling
+import { $ } from 'execa';
+import { makeConfig } from 'lino-arguments';
 
 // Parse CLI arguments using lino-arguments
 // Note: Using --release-version instead of --version to avoid conflict with yargs' built-in --version flag
@@ -82,9 +76,9 @@ try {
     body: releaseNotes,
   });
 
-  await $`gh api repos/${repository}/releases -X POST --input -`.run({
-    stdin: payload,
-  });
+  await $({
+    input: payload,
+  })`gh api repos/${repository}/releases -X POST --input -`;
 
   console.log(`\u2705 Created GitHub release: ${tag}`);
 } catch (error) {

@@ -13,20 +13,14 @@
  *   published_version: The published version
  *   publish_result: success, already_exists, or failed
  *
- * Uses link-foundation libraries:
- * - use-m: Dynamic package loading without package.json dependencies
- * - command-stream: Modern shell command execution with streaming support
+ * Uses locked libraries:
+ * - execa: Process execution with safe tagged argument interpolation
  */
 
 import { readFileSync, appendFileSync } from 'fs';
 
-// Load use-m dynamically
-const { use } = eval(
-  await (await fetch('https://unpkg.com/use-m/use.js')).text()
-);
-
-// Import command-stream for shell command execution
-const { $ } = await use('command-stream');
+// Import execa for shell command execution
+import { $ } from 'execa';
 
 const MAX_RETRIES = 3;
 const RETRY_DELAY = 10000; // 10 seconds
@@ -93,7 +87,7 @@ try {
       'Publishing requires a crates.io API token. Configure one of these secrets:'
     );
     console.error(
-      '  - CARGO_REGISTRY_TOKEN (preferred, cargo\'s native env var)'
+      "  - CARGO_REGISTRY_TOKEN (preferred, cargo's native env var)"
     );
     console.error('  - CARGO_TOKEN (backwards compatibility)');
     setOutput('published', 'false');
@@ -109,9 +103,7 @@ try {
   console.log(`Checking crates.io for ${crateName}@${currentVersion}...`);
   const cratesCheck = await checkCratesIo(crateName, currentVersion);
   if (cratesCheck.exists) {
-    console.log(
-      `Version ${currentVersion} is already published on crates.io`
-    );
+    console.log(`Version ${currentVersion} is already published on crates.io`);
     setOutput('published', 'true');
     setOutput('published_version', currentVersion);
     setOutput('publish_result', 'already_exists');
@@ -147,15 +139,9 @@ try {
         msg.includes('authentication')
       ) {
         console.error('::error::AUTHENTICATION FAILURE');
-        console.error(
-          'The provided token was rejected by crates.io. Verify:'
-        );
-        console.error(
-          '  1. The token is valid and not expired'
-        );
-        console.error(
-          '  2. The token has publish scope for this crate'
-        );
+        console.error('The provided token was rejected by crates.io. Verify:');
+        console.error('  1. The token is valid and not expired');
+        console.error('  2. The token has publish scope for this crate');
         console.error(
           '  3. The correct secret (CARGO_REGISTRY_TOKEN or CARGO_TOKEN) is configured'
         );

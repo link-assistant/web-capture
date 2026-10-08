@@ -1,15 +1,3 @@
-import sys
-import requests
-import os
+from capture_client import download_text
 
-url = sys.argv[1] if len(sys.argv) > 1 else 'https://example.com'
-endpoint = f'http://localhost:3000/markdown?url={url}'
-
-response = requests.get(endpoint)
-response.raise_for_status()
-
-output_path = os.path.join(os.path.dirname(__file__), 'downloaded.md')
-with open(output_path, 'w', encoding='utf-8') as f:
-    f.write(response.text)
-
-print(f'Markdown saved to {output_path}') 
+download_text('markdown', 'downloaded.md')

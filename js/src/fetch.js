@@ -14,7 +14,7 @@ export async function fetchHandler(req, res) {
     copyProxyResponseHeaders(response.headers, res);
 
     // Get the response body as buffer and send it
-    const buffer = await response.buffer();
+    const buffer = Buffer.from(await response.arrayBuffer());
     res.send(buffer);
   } catch (err) {
     console.error('Fetch error:', err);

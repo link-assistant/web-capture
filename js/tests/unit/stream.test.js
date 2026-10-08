@@ -17,10 +17,7 @@ describe('streamHandler', () => {
     });
 
     try {
-      const res = await request(testApp())
-        .get('/stream')
-        .query({ url })
-        .expect(200);
+      const res = await streamFrom(url);
 
       expect(upstreamHeaders['accept-encoding']).toBe('identity');
       expect(res.headers['content-type']).toBe('text/html; charset=utf-8');
@@ -39,15 +36,12 @@ describe('streamHandler', () => {
       res.writeHead(200, {
         'Content-Type': 'text/html; charset=utf-8',
       });
-      res.write(body);
-      res.socket.end();
+      // Wait until the body reaches the socket before deliberately truncating it.
+      res.write(body, () => res.socket.end());
     });
 
     try {
-      const res = await request(testApp())
-        .get('/stream')
-        .query({ url })
-        .expect(200);
+      const res = await streamFrom(url);
 
       expect(res.text).toContain('Example Domain');
     } finally {
@@ -82,4 +76,8 @@ async function closeServer(server) {
       }
     });
   });
+}
+
+function streamFrom(url) {
+  return request(testApp()).get('/stream').query({ url }).expect(200);
 }

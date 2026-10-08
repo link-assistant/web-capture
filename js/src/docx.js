@@ -75,7 +75,7 @@ export async function docxHandler(req, res) {
             const imgUrl = new URL(src, absoluteUrl).href;
             const imgResp = await fetch(imgUrl);
             if (imgResp.ok) {
-              const buffer = await imgResp.buffer();
+              const buffer = Buffer.from(await imgResp.arrayBuffer());
               const contentType = imgResp.headers.get('content-type') || '';
               children.push(
                 new Paragraph({

@@ -1,8 +1,5 @@
 export default {
-  transform: {
-    '^.+\\.js$': ['babel-jest', { configFile: './babel.config.cjs' }],
-  },
-  transformIgnorePatterns: ['node_modules/(?!(turndown)/)'],
+  transform: {},
   moduleNameMapper: {
     '^(\\.{1,2}/.*)\\.js$': '$1',
   },

@@ -24,9 +24,8 @@
  *   needs_auto_bump: 'true' if version needs auto-bumping
  *   version: current version from package.json
  *
- * Uses link-foundation libraries:
- * - use-m: Dynamic package loading without package.json dependencies
- * - command-stream: Modern shell command execution with streaming support
+ * Uses locked libraries:
+ * - execa: Process execution with safe tagged argument interpolation
  */
 
 import { readFileSync, readdirSync, existsSync, appendFileSync } from 'fs';
@@ -37,12 +36,7 @@ import {
   parseJsRootConfig,
 } from './js-paths.mjs';
 
-// Load use-m dynamically
-const { use } = eval(
-  await (await fetch('https://unpkg.com/use-m/use.js')).text()
-);
-
-const { $ } = await use('command-stream');
+import { $ } from 'execa';
 
 const jsRootConfig = parseJsRootConfig();
 const jsRoot = getJsRoot({ jsRoot: jsRootConfig, verbose: true });
@@ -84,7 +78,9 @@ function countChangesets() {
 
 async function checkNpmRegistry(packageName, version) {
   try {
-    const result = await $`npm view "${packageName}@${version}" version`.run({ capture: true });
+    const result = await $({
+      reject: false,
+    })`npm view ${packageName}@${version} version`;
     return result.stdout.trim() === version;
   } catch {
     return false;
@@ -93,7 +89,9 @@ async function checkNpmRegistry(packageName, version) {
 
 async function getLatestReleaseTag() {
   try {
-    const result = await $`git tag -l "v*" --sort=-version:refname`.run({ capture: true });
+    const result = await $({
+      reject: false,
+    })`git tag -l v* --sort=-version:refname`;
     const tags = result.stdout.trim().split('\n').filter(Boolean);
     return tags.length > 0 ? tags[0] : null;
   } catch {
@@ -103,7 +101,9 @@ async function getLatestReleaseTag() {
 
 async function hasPublishableChangesSinceTag(tag) {
   try {
-    const result = await $`git diff --name-only ${tag}..HEAD`.run({ capture: true });
+    const result = await $({
+      reject: false,
+    })`git diff --name-only ${tag}..HEAD`;
     const changedFiles = result.stdout.trim().split('\n').filter(Boolean);
 
     const publishableChanges = changedFiles.filter((file) =>
@@ -174,7 +174,9 @@ try {
     setOutput('should_release', 'true');
     setOutput('needs_auto_bump', 'true');
   } else {
-    console.log(`No publishable changes since ${latestTag} — no release needed`);
+    console.log(
+      `No publishable changes since ${latestTag} — no release needed`
+    );
     setOutput('should_release', 'false');
     setOutput('needs_auto_bump', 'false');
   }

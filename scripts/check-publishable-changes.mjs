@@ -29,11 +29,7 @@ const RUST_PUBLISHABLE_PATHS = [
   'rust/build.rs',
 ];
 
-const JS_PUBLISHABLE_PATHS = [
-  'js/src/',
-  'js/bin/',
-  'js/package.json',
-];
+const JS_PUBLISHABLE_PATHS = ['js/src/', 'js/bin/', 'js/package.json'];
 
 function exec(command) {
   try {
@@ -95,8 +91,8 @@ try {
     if (!versionChanged) {
       issues.push(
         'Rust: publishable code changed but no version bump in Cargo.toml. ' +
-        'The auto-release on main will patch-bump automatically, but consider ' +
-        'adding an explicit version bump for better release notes.'
+          'The auto-release on main will patch-bump automatically, but consider ' +
+          'adding an explicit version bump for better release notes.'
       );
     }
   }
@@ -109,8 +105,8 @@ try {
     if (changesetCount === 0) {
       issues.push(
         'JS: publishable code changed but no changeset file found in js/.changeset/. ' +
-        'The auto-release on main will patch-bump automatically, but consider ' +
-        'adding a changeset for better release notes.'
+          'The auto-release on main will patch-bump automatically, but consider ' +
+          'adding a changeset for better release notes.'
       );
     }
   }
@@ -118,15 +114,21 @@ try {
   if (issues.length > 0) {
     console.log('\n⚠️  Release preparation warnings:');
     issues.forEach((issue) => console.log(`  - ${issue}`));
-    console.log('\nNote: The CI/CD pipeline will auto-release these changes on main,');
+    console.log(
+      '\nNote: The CI/CD pipeline will auto-release these changes on main,'
+    );
     console.log('but explicit version bumps produce better changelogs.');
     console.log('');
-    console.log('::warning::Publishable changes without explicit version bump/changeset detected. Auto-release will handle this on main.');
+    console.log(
+      '::warning::Publishable changes without explicit version bump/changeset detected. Auto-release will handle this on main.'
+    );
     // Exit 0 — this is a warning, not a blocker (auto-release handles it)
     process.exit(0);
   }
 
-  console.log('\nAll publishable changes have corresponding version bumps/changesets.');
+  console.log(
+    '\nAll publishable changes have corresponding version bumps/changesets.'
+  );
 } catch (error) {
   console.error('Error:', error.message);
   // Don't fail the workflow on script errors

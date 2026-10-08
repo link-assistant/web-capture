@@ -10,10 +10,9 @@
  * @module figures
  */
 
-import fetch from 'node-fetch';
 import * as cheerio from 'cheerio';
 import { URL } from 'url';
-import { retry } from './retry.js';
+import { downloadBinary } from './binary-download.js';
 import { createBrowser, getBrowserEngine } from './browser.js';
 import { dismissPopups, scrollToLoadContent } from './popups.js';
 
@@ -86,16 +85,7 @@ export async function downloadFigures(figures, options = {}) {
     const filename = `figure-${figure.figureNum}.${ext}`;
 
     try {
-      const resp = await retry(() => fetch(figure.src), {
-        retries: 3,
-        baseDelay: 1000,
-      });
-
-      if (!resp.ok) {
-        throw new Error(`HTTP ${resp.status}`);
-      }
-
-      const buffer = await resp.buffer();
+      const buffer = await downloadBinary(figure.src);
 
       if (options.onProgress) {
         options.onProgress(figure.figureNum, 'downloaded');

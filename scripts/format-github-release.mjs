@@ -7,20 +7,14 @@
  *   repository: GitHub repository (e.g., owner/repo)
  *   commit_sha: Commit SHA for PR detection
  *
- * Uses link-foundation libraries:
- * - use-m: Dynamic package loading without package.json dependencies
- * - command-stream: Modern shell command execution with streaming support
+ * Uses locked libraries:
+ * - execa: Process execution with safe tagged argument interpolation
  * - lino-arguments: Unified configuration from CLI args, env vars, and .lenv files
  */
 
-// Load use-m dynamically
-const { use } = eval(
-  await (await fetch('https://unpkg.com/use-m/use.js')).text()
-);
-
-// Import link-foundation libraries
-const { $ } = await use('command-stream');
-const { makeConfig } = await use('lino-arguments');
+// Import locked release tooling
+import { $ } from 'execa';
+import { makeConfig } from 'lino-arguments';
 
 // Parse CLI arguments using lino-arguments
 // Note: Using --release-version instead of --version to avoid conflict with yargs' built-in --version flag
@@ -60,10 +54,9 @@ try {
   // Get the release ID for this version
   let releaseId = '';
   try {
-    const result =
-      await $`gh api "repos/${repository}/releases/tags/${tag}" --jq '.id'`.run(
-        { capture: true }
-      );
+    const result = await $({
+      reject: false,
+    })`gh api repos/${repository}/releases/tags/${tag} --jq .id`;
     releaseId = result.stdout.trim();
   } catch {
     console.log(`\u26A0\uFE0F Could not find release for ${tag}`);
@@ -74,7 +67,7 @@ try {
     console.log(`Formatting release notes for ${tag}...`);
     // Pass the trigger commit SHA for PR detection
     // This allows proper PR lookup even if the changelog doesn't have a commit hash
-    await $`node ../scripts/format-release-notes.mjs --release-id "${releaseId}" --release-version "${tag}" --repository "${repository}" --commit-sha "${commitSha}"`;
+    await $`node ../scripts/format-release-notes.mjs --release-id ${releaseId} --release-version ${tag} --repository ${repository} --commit-sha ${commitSha}`;
     console.log(`\u2705 Formatted release notes for ${tag}`);
   }
 } catch (error) {

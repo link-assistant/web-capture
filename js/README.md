@@ -19,7 +19,8 @@ A CLI and microservice to fetch URLs and render them as:
 
 ## Installation
 
-Node.js 22.22.1 or newer is required. CI and Docker use Node.js 24. Use `npm ci`
+Node.js 26.10.0 or newer is required. CI uses 26.11.1 and the latest published
+Node Docker image uses 26.10.0 on Debian Trixie. Use `npm ci`
 for a locked repository install; Docker and CI share `package-lock.json` and its
 security overrides.
 

@@ -8,22 +8,16 @@
  *   description: Optional release description
  *   commit-sha: Optional commit SHA to target
  *
- * Uses link-foundation libraries:
- * - use-m: Dynamic package loading without package.json dependencies
- * - command-stream: Modern shell command execution with streaming support
+ * Uses locked libraries:
+ * - execa: Process execution with safe tagged argument interpolation
  * - lino-arguments: Unified configuration from CLI args, env vars, and .lenv files
  */
 
 import { readFileSync } from 'fs';
 
-// Load use-m dynamically
-const { use } = eval(
-  await (await fetch('https://unpkg.com/use-m/use.js')).text()
-);
-
-// Import link-foundation libraries
-const { $ } = await use('command-stream');
-const { makeConfig } = await use('lino-arguments');
+// Import locked release tooling
+import { $ } from 'execa';
+import { makeConfig } from 'lino-arguments';
 
 const CRATE_NAME = 'web-capture';
 
@@ -76,7 +70,9 @@ try {
 
     // Extract changelog entry for this version
     // Read from CHANGELOG.md between this version header and the next version header
-    const versionHeaderRegex = new RegExp(`## ${version}[\\s\\S]*?(?=## \\d|$)`);
+    const versionHeaderRegex = new RegExp(
+      `## ${version}[\\s\\S]*?(?=## \\d|$)`
+    );
     const match = changelog.match(versionHeaderRegex);
 
     if (match) {
@@ -109,9 +105,9 @@ try {
     payload.target_commitish = commitSha;
   }
 
-  await $`gh api repos/${repository}/releases -X POST --input -`.run({
-    stdin: JSON.stringify(payload),
-  });
+  await $({
+    input: JSON.stringify(payload),
+  })`gh api repos/${repository}/releases -X POST --input -`;
 
   console.log(`Created GitHub release: ${tag}`);
 } catch (error) {

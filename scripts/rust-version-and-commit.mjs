@@ -4,22 +4,16 @@
  * Version Rust package and commit to main
  * Usage: node scripts/rust-version-and-commit.mjs --bump-type <major|minor|patch> [--description <desc>]
  *
- * Uses link-foundation libraries:
- * - use-m: Dynamic package loading without package.json dependencies
- * - command-stream: Modern shell command execution with streaming support
+ * Uses locked libraries:
+ * - execa: Process execution with safe tagged argument interpolation
  * - lino-arguments: Unified configuration from CLI args, env vars, and .lenv files
  */
 
 import { readFileSync, appendFileSync } from 'fs';
 
-// Load use-m dynamically
-const { use } = eval(
-  await (await fetch('https://unpkg.com/use-m/use.js')).text()
-);
-
-// Import link-foundation libraries
-const { $ } = await use('command-stream');
-const { makeConfig } = await use('lino-arguments');
+// Import locked release tooling
+import { $ } from 'execa';
+import { makeConfig } from 'lino-arguments';
 
 // Parse CLI arguments using lino-arguments
 const config = makeConfig({
@@ -83,8 +77,8 @@ function getVersion() {
 async function main() {
   try {
     // Configure git
-    await $`git config user.name "github-actions[bot]"`;
-    await $`git config user.email "github-actions[bot]@users.noreply.github.com"`;
+    await $`git config user.name github-actions[bot]`;
+    await $`git config user.email github-actions[bot]@users.noreply.github.com`;
 
     // Get current version before bump
     const oldVersion = getVersion();
@@ -104,7 +98,7 @@ async function main() {
     setOutput('version', newVersion);
 
     // Check if there are changes to commit
-    const statusResult = await $`git status --porcelain`.run({ capture: true });
+    const statusResult = await $({ reject: false })`git status --porcelain`;
     const status = statusResult.stdout.trim();
 
     if (status) {
@@ -115,7 +109,7 @@ async function main() {
 
       // Commit with version number as message
       const commitMessage = `chore(rust): bump version to ${newVersion}`;
-      await $`git commit -m "${commitMessage}"`;
+      await $`git commit -m ${commitMessage}`;
 
       // Push to main with fetch+rebase+retry to tolerate concurrent release
       // workflows (e.g. JS release) racing to push to main.

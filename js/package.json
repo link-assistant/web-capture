@@ -8,7 +8,7 @@
   },
   "scripts": {
     "start": "docker compose up -d",
-    "dev": "nodemon bin/web-capture.js -- --serve",
+    "dev": "node --watch bin/web-capture.js --serve",
     "test": "node --experimental-vm-modules ./node_modules/.bin/jest",
     "test:watch": "node --experimental-vm-modules ./node_modules/.bin/jest --watch",
     "test:e2e:process": "node --experimental-vm-modules ./node_modules/.bin/jest tests/e2e/process.test.js",
@@ -43,18 +43,15 @@
     "lino-arguments": "^0.3.0",
     "log-lazy": "^1.0.4",
     "node-fetch": "^3.3.2",
-    "playwright": "^1.63.0",
+    "playwright": "^1.64.0",
     "puppeteer": "^25.12.0",
     "puppeteer-core": "^25.12.0",
     "turndown": "^7.2.4",
     "turndown-plugin-gfm": "^1.0.2"
   },
   "devDependencies": {
-    "@babel/core": "^8.0.7",
-    "@babel/preset-env": "^8.0.7",
     "@changesets/cli": "^3.0.3",
     "@types/archiver": "^8.0.0",
-    "babel-jest": "^30.5.2",
     "eslint": "^10.12.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.6",
@@ -83,7 +80,7 @@
     "url": "https://github.com/link-assistant/web-capture"
   },
   "engines": {
-    "node": ">=22.22.1"
+    "node": ">=26.10.0"
   },
   "lint-staged": {
     "*.{js,mjs,cjs}": [
@@ -106,5 +103,11 @@
     "@istanbuljs/load-nyc-config": {
       "js-yaml": "^4.1.1"
     }
+  },
+  "packageManager": "npm@12.2.0",
+  "allowScripts": {
+    "@parcel/watcher": true,
+    "puppeteer": true,
+    "unrs-resolver": true
   }
 }
