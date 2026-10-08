@@ -1,0 +1,875 @@
+ INFO zizmor: 🌈 zizmor v1.30.1
+ INFO audit: zizmor: 🌈 completed .github/workflows/dependencies.yml
+ INFO audit: zizmor: 🌈 completed .github/workflows/js.yml
+ INFO audit: zizmor: 🌈 completed .github/workflows/parity.yml
+ INFO audit: zizmor: 🌈 completed .github/workflows/rust.yml
+help[artipacked]: credential persistence through GitHub Actions artifacts
+  --> .github/workflows/dependencies.yml:22:9
+   |
+22 |       - uses: actions/checkout@v7.0.1
+   |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ does not set persist-credentials: false
+   |
+   = note: audit confidence → Low
+   = note: this finding has an auto-fix
+   = help: audit documentation → https://docs.zizmor.sh/audits/#artipacked
+
+help[artipacked]: credential persistence through GitHub Actions artifacts
+  --> .github/workflows/dependencies.yml:46:9
+   |
+46 |       - uses: actions/checkout@v7.0.1
+   |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ does not set persist-credentials: false
+   |
+   = note: audit confidence → Low
+   = note: this finding has an auto-fix
+   = help: audit documentation → https://docs.zizmor.sh/audits/#artipacked
+
+help[artipacked]: credential persistence through GitHub Actions artifacts
+  --> .github/workflows/dependencies.yml:68:9
+   |
+68 |       - uses: actions/checkout@v7.0.1
+   |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ does not set persist-credentials: false
+   |
+   = note: audit confidence → Low
+   = note: this finding has an auto-fix
+   = help: audit documentation → https://docs.zizmor.sh/audits/#artipacked
+
+warning[excessive-permissions]: overly broad permissions
+  --> .github/workflows/dependencies.yml:1:1
+   |
+ 1 | / name: Dependency Security and Tooling
+ 2 | |
+ 3 | | on:
+ 4 | |   pull_request:
+...  |
+72 | |       - run: cargo install cargo-audit --version 0.22.2 --locked
+73 | |       - run: cargo audit --file rust/Cargo.lock --deny warnings
+   | |________________________________________________________________^ default permissions used due to no permissions: block
+   |
+   = note: audit confidence → Medium
+   = help: audit documentation → https://docs.zizmor.sh/audits/#excessive-permissions
+
+warning[excessive-permissions]: overly broad permissions
+  --> .github/workflows/dependencies.yml:17:3
+   |
+17 | /   tools:
+18 | |     name: Locked release tools and npm security
+19 | |     runs-on: ubuntu-latest
+20 | |     timeout-minutes: 15
+...  |
+38 | |       - run: node experiments/issue-174/fetch-buffer-probe.mjs
+39 | |       - run: node experiments/issue-174/lockfile-probe.mjs
+   | |                                                          ^
+   | |                                                          |
+   | |__________________________________________________________this job
+   |                                                            default permissions used due to no permissions: block
+   |
+   = note: audit confidence → Medium
+   = help: audit documentation → https://docs.zizmor.sh/audits/#excessive-permissions
+
+warning[excessive-permissions]: overly broad permissions
+  --> .github/workflows/dependencies.yml:41:3
+   |
+41 | /   python:
+42 | |     name: Python examples and security
+43 | |     runs-on: ubuntu-latest
+44 | |     timeout-minutes: 15
+...  |
+58 | |       - run: uv run --locked python -m unittest discover -s tests/python -v
+59 | |       - run: uv run --locked pip-audit --strict
+   | |                                               ^
+   | |                                               |
+   | |_______________________________________________this job
+   |                                                 default permissions used due to no permissions: block
+   |
+   = note: audit confidence → Medium
+   = help: audit documentation → https://docs.zizmor.sh/audits/#excessive-permissions
+
+warning[excessive-permissions]: overly broad permissions
+  --> .github/workflows/dependencies.yml:61:3
+   |
+61 | /   rust-security:
+62 | |     name: Rust locked dependency security
+63 | |     runs-on: ubuntu-latest
+64 | |     timeout-minutes: 15
+...  |
+72 | |       - run: cargo install cargo-audit --version 0.22.2 --locked
+73 | |       - run: cargo audit --file rust/Cargo.lock --deny warnings
+   | |                                                                ^
+   | |                                                                |
+   | |________________________________________________________________this job
+   |                                                                  default permissions used due to no permissions: block
+   |
+   = note: audit confidence → Medium
+   = help: audit documentation → https://docs.zizmor.sh/audits/#excessive-permissions
+
+help[artipacked]: credential persistence through GitHub Actions artifacts
+  --> .github/workflows/js.yml:53:9
+   |
+53 |       - uses: actions/checkout@v7.0.1
+   |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ does not set persist-credentials: false
+   |
+   = note: audit confidence → Low
+   = note: this finding has an auto-fix
+   = help: audit documentation → https://docs.zizmor.sh/audits/#artipacked
+
+help[artipacked]: credential persistence through GitHub Actions artifacts
+  --> .github/workflows/js.yml:89:9
+   |
+89 |         - uses: actions/checkout@v7.0.1
+   |  _________^
+90 | |         with:
+91 | |           fetch-depth: 0
+   | |________________________^ does not set persist-credentials: false
+   |
+   = note: audit confidence → Low
+   = note: this finding has an auto-fix
+   = help: audit documentation → https://docs.zizmor.sh/audits/#artipacked
+
+help[artipacked]: credential persistence through GitHub Actions artifacts
+   --> .github/workflows/js.yml:109:9
+    |
+109 |         - uses: actions/checkout@v7.0.1
+    |  _________^
+110 | |         with:
+111 | |           fetch-depth: 0
+    | |________________________^ does not set persist-credentials: false
+    |
+    = note: audit confidence → Low
+    = note: this finding has an auto-fix
+    = help: audit documentation → https://docs.zizmor.sh/audits/#artipacked
+
+help[artipacked]: credential persistence through GitHub Actions artifacts
+   --> .github/workflows/js.yml:148:9
+    |
+148 |         - uses: actions/checkout@v7.0.1
+    |  _________^
+149 | |         with:
+150 | |           fetch-depth: 0
+    | |________________________^ does not set persist-credentials: false
+    |
+    = note: audit confidence → Low
+    = note: this finding has an auto-fix
+    = help: audit documentation → https://docs.zizmor.sh/audits/#artipacked
+
+help[artipacked]: credential persistence through GitHub Actions artifacts
+   --> .github/workflows/js.yml:171:9
+    |
+171 |         - uses: actions/checkout@v7.0.1
+    |  _________^
+172 | |         with:
+173 | |           fetch-depth: 0
+    | |________________________^ does not set persist-credentials: false
+    |
+    = note: audit confidence → Low
+    = note: this finding has an auto-fix
+    = help: audit documentation → https://docs.zizmor.sh/audits/#artipacked
+
+help[artipacked]: credential persistence through GitHub Actions artifacts
+   --> .github/workflows/js.yml:220:9
+    |
+220 |       - uses: actions/checkout@v7.0.1
+    |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ does not set persist-credentials: false
+    |
+    = note: audit confidence → Low
+    = note: this finding has an auto-fix
+    = help: audit documentation → https://docs.zizmor.sh/audits/#artipacked
+
+help[artipacked]: credential persistence through GitHub Actions artifacts
+   --> .github/workflows/js.yml:413:9
+    |
+413 |         - uses: actions/checkout@v7.0.1
+    |  _________^
+414 | |         with:
+415 | |           fetch-depth: 0
+    | |________________________^ does not set persist-credentials: false
+    |
+    = note: audit confidence → Low
+    = note: this finding has an auto-fix
+    = help: audit documentation → https://docs.zizmor.sh/audits/#artipacked
+
+help[artipacked]: credential persistence through GitHub Actions artifacts
+   --> .github/workflows/js.yml:508:9
+    |
+508 |         - uses: actions/checkout@v7.0.1
+    |  _________^
+509 | |         with:
+510 | |           fetch-depth: 0
+    | |________________________^ does not set persist-credentials: false
+    |
+    = note: audit confidence → Low
+    = note: this finding has an auto-fix
+    = help: audit documentation → https://docs.zizmor.sh/audits/#artipacked
+
+help[artipacked]: credential persistence through GitHub Actions artifacts
+   --> .github/workflows/js.yml:562:9
+    |
+562 |         - uses: actions/checkout@v7.0.1
+    |  _________^
+563 | |         with:
+564 | |           fetch-depth: 0
+    | |________________________^ does not set persist-credentials: false
+    |
+    = note: audit confidence → Low
+    = note: this finding has an auto-fix
+    = help: audit documentation → https://docs.zizmor.sh/audits/#artipacked
+
+warning[excessive-permissions]: overly broad permissions
+   --> .github/workflows/js.yml:1:1
+    |
+  1 | / name: JavaScript Checks and Release
+  2 | |
+  3 | | on:
+  4 | |   push:
+...   |
+612 | |             3. The automated release workflow will create a version PR
+613 | |             4. Merge the version PR to publish to npm and create a GitHub release
+    | |__________________________________________________________________________________^ default permissions used due to no permissions: block
+    |
+    = note: audit confidence → Medium
+    = help: audit documentation → https://docs.zizmor.sh/audits/#excessive-permissions
+
+warning[excessive-permissions]: overly broad permissions
+  --> .github/workflows/js.yml:48:3
+   |
+48 | /   dependency-health:
+49 | |     name: JS - Dependency Audit and Freshness
+50 | |     runs-on: ubuntu-latest
+51 | |     timeout-minutes: 10
+...  |
+75 | |   # === DETECT CHANGES - determines which jobs should run ===
+   | |                                                             ^
+   | |                                                             |
+   | |_____________________________________________________________this job
+   |                                                               default permissions used due to no permissions: block
+   |
+   = note: audit confidence → Medium
+   = help: audit documentation → https://docs.zizmor.sh/audits/#excessive-permissions
+
+warning[excessive-permissions]: overly broad permissions
+   --> .github/workflows/js.yml:76:3
+    |
+ 76 | /   detect-changes:
+ 77 | |     name: JS - Detect Changes
+ 78 | |     runs-on: ubuntu-latest
+ 79 | |     if: github.event_name != 'workflow_dispatch'
+...   |
+102 | |   # Changeset check - only runs on PRs with JS package source changes
+    | |                                                                     ^
+    | |                                                                     |
+    | |_____________________________________________________________________this job
+    |                                                                       default permissions used due to no permissions: block
+    |
+    = note: audit confidence → Medium
+    = help: audit documentation → https://docs.zizmor.sh/audits/#excessive-permissions
+
+warning[excessive-permissions]: overly broad permissions
+   --> .github/workflows/js.yml:103:3
+    |
+103 | /   changeset-check:
+104 | |     name: JS - Check for Changesets
+105 | |     runs-on: ubuntu-latest
+106 | |     needs: [detect-changes]
+...   |
+140 | |   # Warns when PR touches publishable paths without changeset
+141 | |   # This is informational — auto-release on main handles the gap
+    | |                                                                ^
+    | |                                                                |
+    | |________________________________________________________________this job
+    |                                                                  default permissions used due to no permissions: block
+    |
+    = note: audit confidence → Medium
+    = help: audit documentation → https://docs.zizmor.sh/audits/#excessive-permissions
+
+warning[excessive-permissions]: overly broad permissions
+   --> .github/workflows/js.yml:142:3
+    |
+142 | /   publishable-check:
+143 | |     name: JS - Publishable Changes Check
+144 | |     runs-on: ubuntu-latest
+145 | |     needs: [detect-changes]
+...   |
+158 | |   # Linting and formatting - runs when JS-relevant files change
+    | |                                                               ^
+    | |                                                               |
+    | |_______________________________________________________________this job
+    |                                                                 default permissions used due to no permissions: block
+    |
+    = note: audit confidence → Medium
+    = help: audit documentation → https://docs.zizmor.sh/audits/#excessive-permissions
+
+warning[excessive-permissions]: overly broad permissions
+   --> .github/workflows/js.yml:159:3
+    |
+159 | /   lint:
+160 | |     name: JS - Lint and Format Check
+161 | |     runs-on: ubuntu-latest
+162 | |     needs: [detect-changes]
+...   |
+199 | |   # Test matrix: Node.js on Ubuntu with unit tests and e2e tests
+    | |                                                                ^
+    | |                                                                |
+    | |________________________________________________________________this job
+    |                                                                  default permissions used due to no permissions: block
+    |
+    = note: audit confidence → Medium
+    = help: audit documentation → https://docs.zizmor.sh/audits/#excessive-permissions
+
+warning[excessive-permissions]: overly broad permissions
+   --> .github/workflows/js.yml:200:3
+    |
+200 | /   test:
+201 | |     name: JS - Test (Node.js on ${{ matrix.os }})
+202 | |     runs-on: ${{ matrix.os }}
+203 | |     timeout-minutes: 30
+...   |
+394 | |   # Release - only runs on main after tests pass (for push events)
+395 | |   # Self-healing: detects unreleased commits and auto-bumps patch version
+    | |                                                                         ^
+    | |                                                                         |
+    | |_________________________________________________________________________this job
+    |                                                                           default permissions used due to no permissions: block
+    |
+    = note: audit confidence → Medium
+    = help: audit documentation → https://docs.zizmor.sh/audits/#excessive-permissions
+
+error[template-injection]: code injection via template expansion
+   --> .github/workflows/js.yml:131:22
+    |
+129 |         run: |
+    |         --- this run block
+130 |           # Skip changeset check for automated version PRs
+131 |           if [[ "${{ github.head_ref }}" == "changeset-release/"* ]]; then
+    |                      ^^^^^^^^^^^^^^^ may expand into attacker-controllable code
+    |
+    = note: audit confidence → High
+    = note: this finding has an auto-fix
+    = help: audit documentation → https://docs.zizmor.sh/audits/#template-injection
+
+info[template-injection]: code injection via template expansion
+   --> .github/workflows/js.yml:480:79
+    |
+480 |         run: node ../scripts/create-github-release.mjs --release-version "${{ steps.publish.outputs.published_version }}" --reposit...
+    |         --- this run block                                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ may expand into attacker-controllable code
+    |
+    = note: audit confidence → Low
+    = note: this finding has an auto-fix
+    = help: audit documentation → https://docs.zizmor.sh/audits/#template-injection
+
+info[template-injection]: code injection via template expansion
+   --> .github/workflows/js.yml:486:79
+    |
+486 |         run: node ../scripts/format-github-release.mjs --release-version "${{ steps.publish.outputs.published_version }}" --reposit...
+    |         --- this run block                                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ may expand into attacker-controllable code
+    |
+    = note: audit confidence → Low
+    = note: this finding has an auto-fix
+    = help: audit documentation → https://docs.zizmor.sh/audits/#template-injection
+
+error[template-injection]: code injection via template expansion
+   --> .github/workflows/js.yml:533:85
+    |
+533 |         run: node ../scripts/version-and-commit.mjs --mode instant --bump-type "${{ github.event.inputs.bump_type }}" --description...
+    |         --- this run block                                                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ may expand into attacker-controllable code
+    |
+    = note: audit confidence → High
+    = note: this finding has an auto-fix
+    = help: audit documentation → https://docs.zizmor.sh/audits/#template-injection
+
+error[template-injection]: code injection via template expansion
+   --> .github/workflows/js.yml:533:138
+    |
+533 | ...   run: node ../scripts/version-and-commit.mjs --mode instant --bump-type "${{ github.event.inputs.bump_type }}" --description "${{ github.event.inputs.description }}"
+    |       --- this run block                                                                                                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ may expand into attacker-controllable code
+    |
+    = note: audit confidence → High
+    = note: this finding has an auto-fix
+    = help: audit documentation → https://docs.zizmor.sh/audits/#template-injection
+
+info[template-injection]: code injection via template expansion
+   --> .github/workflows/js.yml:545:79
+    |
+545 |         run: node ../scripts/create-github-release.mjs --release-version "${{ steps.publish.outputs.published_version }}" --reposit...
+    |         --- this run block                                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ may expand into attacker-controllable code
+    |
+    = note: audit confidence → Low
+    = note: this finding has an auto-fix
+    = help: audit documentation → https://docs.zizmor.sh/audits/#template-injection
+
+info[template-injection]: code injection via template expansion
+   --> .github/workflows/js.yml:551:79
+    |
+551 |         run: node ../scripts/format-github-release.mjs --release-version "${{ steps.publish.outputs.published_version }}" --reposit...
+    |         --- this run block                                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ may expand into attacker-controllable code
+    |
+    = note: audit confidence → Low
+    = note: this finding has an auto-fix
+    = help: audit documentation → https://docs.zizmor.sh/audits/#template-injection
+
+error[template-injection]: code injection via template expansion
+   --> .github/workflows/js.yml:582:75
+    |
+582 |         run: node ../scripts/create-manual-changeset.mjs --bump-type "${{ github.event.inputs.bump_type }}" --description "${{ gith...
+    |         --- this run block                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ may expand into attacker-controllable code
+    |
+    = note: audit confidence → High
+    = note: this finding has an auto-fix
+    = help: audit documentation → https://docs.zizmor.sh/audits/#template-injection
+
+error[template-injection]: code injection via template expansion
+   --> .github/workflows/js.yml:582:128
+    |
+582 | ...   run: node ../scripts/create-manual-changeset.mjs --bump-type "${{ github.event.inputs.bump_type }}" --description "${{ github.event.inputs.description }}"
+    |       --- this run block                                                                                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ may expand into attacker-controllable code
+    |
+    = note: audit confidence → High
+    = note: this finding has an auto-fix
+    = help: audit documentation → https://docs.zizmor.sh/audits/#template-injection
+
+error[unpinned-uses]: unpinned action reference
+   --> .github/workflows/js.yml:592:15
+    |
+592 |         uses: peter-evans/create-pull-request@v8.1.1
+    |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ action is not pinned to a hash (required by blanket policy)
+    |
+    = note: audit confidence → High
+    = note: this finding has an auto-fix
+    = help: audit documentation → https://docs.zizmor.sh/audits/#unpinned-uses
+
+help[artipacked]: credential persistence through GitHub Actions artifacts
+  --> .github/workflows/parity.yml:16:9
+   |
+16 |         - uses: actions/checkout@v7.0.1
+   |  _________^
+17 | |         with:
+18 | |           fetch-depth: 0
+   | |________________________^ does not set persist-credentials: false
+   |
+   = note: audit confidence → Low
+   = note: this finding has an auto-fix
+   = help: audit documentation → https://docs.zizmor.sh/audits/#artipacked
+
+warning[excessive-permissions]: overly broad permissions
+  --> .github/workflows/parity.yml:12:3
+   |
+12 | /   source-test-parity:
+13 | |     name: JS/Rust Source and Test Parity
+14 | |     runs-on: ubuntu-latest
+15 | |     steps:
+...  |
+29 | |           GITHUB_BASE_REF: ${{ github.base_ref }}
+30 | |         run: node scripts/check-js-rust-parity.mjs
+   | |                                                   ^
+   | |                                                   |
+   | |___________________________________________________this job
+   |                                                     default permissions used due to no permissions: block
+   |
+   = note: audit confidence → Medium
+   = help: audit documentation → https://docs.zizmor.sh/audits/#excessive-permissions
+
+help[artipacked]: credential persistence through GitHub Actions artifacts
+  --> .github/workflows/rust.yml:60:9
+   |
+60 |       - uses: actions/checkout@v7.0.1
+   |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ does not set persist-credentials: false
+   |
+   = note: audit confidence → Low
+   = note: this finding has an auto-fix
+   = help: audit documentation → https://docs.zizmor.sh/audits/#artipacked
+
+help[artipacked]: credential persistence through GitHub Actions artifacts
+  --> .github/workflows/rust.yml:94:9
+   |
+94 |         - uses: actions/checkout@v7.0.1
+   |  _________^
+95 | |         with:
+96 | |           fetch-depth: 0
+   | |________________________^ does not set persist-credentials: false
+   |
+   = note: audit confidence → Low
+   = note: this finding has an auto-fix
+   = help: audit documentation → https://docs.zizmor.sh/audits/#artipacked
+
+help[artipacked]: credential persistence through GitHub Actions artifacts
+   --> .github/workflows/rust.yml:116:9
+    |
+116 |         - uses: actions/checkout@v7.0.1
+    |  _________^
+117 | |         with:
+118 | |           fetch-depth: 0
+    | |________________________^ does not set persist-credentials: false
+    |
+    = note: audit confidence → Low
+    = note: this finding has an auto-fix
+    = help: audit documentation → https://docs.zizmor.sh/audits/#artipacked
+
+help[artipacked]: credential persistence through GitHub Actions artifacts
+   --> .github/workflows/rust.yml:139:9
+    |
+139 |       - uses: actions/checkout@v7.0.1
+    |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ does not set persist-credentials: false
+    |
+    = note: audit confidence → Low
+    = note: this finding has an auto-fix
+    = help: audit documentation → https://docs.zizmor.sh/audits/#artipacked
+
+help[artipacked]: credential persistence through GitHub Actions artifacts
+   --> .github/workflows/rust.yml:194:9
+    |
+194 |       - uses: actions/checkout@v7.0.1
+    |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ does not set persist-credentials: false
+    |
+    = note: audit confidence → Low
+    = note: this finding has an auto-fix
+    = help: audit documentation → https://docs.zizmor.sh/audits/#artipacked
+
+help[artipacked]: credential persistence through GitHub Actions artifacts
+   --> .github/workflows/rust.yml:264:9
+    |
+264 |       - uses: actions/checkout@v7.0.1
+    |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ does not set persist-credentials: false
+    |
+    = note: audit confidence → Low
+    = note: this finding has an auto-fix
+    = help: audit documentation → https://docs.zizmor.sh/audits/#artipacked
+
+help[artipacked]: credential persistence through GitHub Actions artifacts
+   --> .github/workflows/rust.yml:308:9
+    |
+308 |       - uses: actions/checkout@v7.0.1
+    |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ does not set persist-credentials: false
+    |
+    = note: audit confidence → Low
+    = note: this finding has an auto-fix
+    = help: audit documentation → https://docs.zizmor.sh/audits/#artipacked
+
+help[artipacked]: credential persistence through GitHub Actions artifacts
+   --> .github/workflows/rust.yml:324:9
+    |
+324 |       - uses: actions/checkout@v7.0.1
+    |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ does not set persist-credentials: false
+    |
+    = note: audit confidence → Low
+    = note: this finding has an auto-fix
+    = help: audit documentation → https://docs.zizmor.sh/audits/#artipacked
+
+help[artipacked]: credential persistence through GitHub Actions artifacts
+   --> .github/workflows/rust.yml:368:9
+    |
+368 |         - uses: actions/checkout@v7.0.1
+    |  _________^
+369 | |         with:
+370 | |           fetch-depth: 0
+371 | |           token: ${{ secrets.GITHUB_TOKEN }}
+    | |____________________________________________^ does not set persist-credentials: false
+    |
+    = note: audit confidence → Low
+    = note: this finding has an auto-fix
+    = help: audit documentation → https://docs.zizmor.sh/audits/#artipacked
+
+help[artipacked]: credential persistence through GitHub Actions artifacts
+   --> .github/workflows/rust.yml:465:9
+    |
+465 |         - uses: actions/checkout@v7.0.1
+    |  _________^
+466 | |         with:
+467 | |           fetch-depth: 0
+468 | |           token: ${{ secrets.GITHUB_TOKEN }}
+    | |____________________________________________^ does not set persist-credentials: false
+    |
+    = note: audit confidence → Low
+    = note: this finding has an auto-fix
+    = help: audit documentation → https://docs.zizmor.sh/audits/#artipacked
+
+help[artipacked]: credential persistence through GitHub Actions artifacts
+   --> .github/workflows/rust.yml:525:9
+    |
+525 |         - uses: actions/checkout@v7.0.1
+    |  _________^
+526 | |         with:
+527 | |           fetch-depth: 0
+    | |________________________^ does not set persist-credentials: false
+    |
+    = note: audit confidence → Low
+    = note: this finding has an auto-fix
+    = help: audit documentation → https://docs.zizmor.sh/audits/#artipacked
+
+warning[excessive-permissions]: overly broad permissions
+   --> .github/workflows/rust.yml:1:1
+    |
+  1 | / name: Rust Checks and Release
+  2 | |
+  3 | | on:
+  4 | |   push:
+...   |
+567 | |             2. Merge this PR to main
+568 | |             3. The automated release workflow will publish to crates.io and create a GitHub release
+    | |____________________________________________________________________________________________________^ default permissions used due to no permissions: block
+    |
+    = note: audit confidence → Medium
+    = help: audit documentation → https://docs.zizmor.sh/audits/#excessive-permissions
+
+warning[excessive-permissions]: overly broad permissions
+  --> .github/workflows/rust.yml:55:3
+   |
+55 | /   dependency-health:
+56 | |     name: Rust - Dependency Freshness
+57 | |     runs-on: ubuntu-latest
+58 | |     timeout-minutes: 10
+...  |
+80 | |   # === DETECT CHANGES - determines which jobs should run ===
+   | |                                                             ^
+   | |                                                             |
+   | |_____________________________________________________________this job
+   |                                                               default permissions used due to no permissions: block
+   |
+   = note: audit confidence → Medium
+   = help: audit documentation → https://docs.zizmor.sh/audits/#excessive-permissions
+
+warning[excessive-permissions]: overly broad permissions
+   --> .github/workflows/rust.yml:81:3
+    |
+ 81 | /   detect-changes:
+ 82 | |     name: Rust - Detect Changes
+ 83 | |     runs-on: ubuntu-latest
+ 84 | |     if: github.event_name != 'workflow_dispatch'
+...   |
+108 | |   # Warns when PR touches publishable paths without version bump
+109 | |   # This is informational — auto-release on main handles the gap
+    | |                                                                ^
+    | |                                                                |
+    | |________________________________________________________________this job
+    |                                                                  default permissions used due to no permissions: block
+    |
+    = note: audit confidence → Medium
+    = help: audit documentation → https://docs.zizmor.sh/audits/#excessive-permissions
+
+warning[excessive-permissions]: overly broad permissions
+   --> .github/workflows/rust.yml:110:3
+    |
+110 | /   publishable-check:
+111 | |     name: Rust - Publishable Changes Check
+112 | |     runs-on: ubuntu-latest
+113 | |     needs: [detect-changes]
+...   |
+126 | |   # Linting and formatting - runs when Rust-relevant files change
+    | |                                                                 ^
+    | |                                                                 |
+    | |_________________________________________________________________this job
+    |                                                                   default permissions used due to no permissions: block
+    |
+    = note: audit confidence → Medium
+    = help: audit documentation → https://docs.zizmor.sh/audits/#excessive-permissions
+
+warning[excessive-permissions]: overly broad permissions
+   --> .github/workflows/rust.yml:127:3
+    |
+127 | /   lint:
+128 | |     name: Rust - Lint and Format Check
+129 | |     runs-on: ubuntu-latest
+130 | |     needs: [detect-changes]
+...   |
+177 | |   # Test matrix: Rust on multiple OS - only runs when Rust code changes
+    | |                                                                       ^
+    | |                                                                       |
+    | |_______________________________________________________________________this job
+    |                                                                         default permissions used due to no permissions: block
+    |
+    = note: audit confidence → Medium
+    = help: audit documentation → https://docs.zizmor.sh/audits/#excessive-permissions
+
+warning[excessive-permissions]: overly broad permissions
+   --> .github/workflows/rust.yml:178:3
+    |
+178 | /   test:
+179 | |     name: Rust - Test (${{ matrix.os }})
+180 | |     timeout-minutes: 30
+181 | |     runs-on: ${{ matrix.os }}
+...   |
+251 | |   # the committed lockfile still builds. This job re-resolves from scratch and
+252 | |   # builds, surfacing that class of breakage before it ships in a release.
+    | |                                                                          ^
+    | |                                                                          |
+    | |__________________________________________________________________________this job
+    |                                                                            default permissions used due to no permissions: block
+    |
+    = note: audit confidence → Medium
+    = help: audit documentation → https://docs.zizmor.sh/audits/#excessive-permissions
+
+warning[excessive-permissions]: overly broad permissions
+   --> .github/workflows/rust.yml:253:3
+    |
+253 | /   fresh-resolution:
+254 | |     name: Rust - Fresh Dependency Resolution
+255 | |     runs-on: ubuntu-latest
+256 | |     needs: [detect-changes]
+...   |
+294 | |   # system OpenSSL toolchain. The dependency graph guard additionally checks the
+295 | |   # default runtime; current browser-commander uses rustls for fantoccini.
+    | |                                                                          ^
+    | |                                                                          |
+    | |__________________________________________________________________________this job
+    |                                                                            default permissions used due to no permissions: block
+    |
+    = note: audit confidence → Medium
+    = help: audit documentation → https://docs.zizmor.sh/audits/#excessive-permissions
+
+warning[excessive-permissions]: overly broad permissions
+   --> .github/workflows/rust.yml:296:3
+    |
+296 | /   bare-container-build:
+297 | |     name: Rust - Build Without System OpenSSL
+298 | |     runs-on: ubuntu-latest
+299 | |     container: rust:1.99.0-slim-trixie
+...   |
+313 | |   # Build check - only runs when Rust code changes
+    | |                                                  ^
+    | |                                                  |
+    | |__________________________________________________this job
+    |                                                    default permissions used due to no permissions: block
+    |
+    = note: audit confidence → Medium
+    = help: audit documentation → https://docs.zizmor.sh/audits/#excessive-permissions
+
+warning[excessive-permissions]: overly broad permissions
+   --> .github/workflows/rust.yml:314:3
+    |
+314 | /   build:
+315 | |     name: Rust - Build
+316 | |     runs-on: ubuntu-latest
+317 | |     needs: [lint, test, fresh-resolution]
+...   |
+351 | |   # Release - only runs on main after tests pass (for push events)
+352 | |   # Self-healing: detects unreleased commits and auto-bumps patch version
+    | |                                                                         ^
+    | |                                                                         |
+    | |_________________________________________________________________________this job
+    |                                                                           default permissions used due to no permissions: block
+    |
+    = note: audit confidence → Medium
+    = help: audit documentation → https://docs.zizmor.sh/audits/#excessive-permissions
+
+info[template-injection]: code injection via template expansion
+   --> .github/workflows/rust.yml:425:24
+    |
+424 |         run: |
+    |         --- this run block
+425 |           if [ -n "${{ steps.auto_bump.outputs.version }}" ]; then
+    |                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ may expand into attacker-controllable code
+    |
+    = note: audit confidence → Low
+    = note: this finding has an auto-fix
+    = help: audit documentation → https://docs.zizmor.sh/audits/#template-injection
+
+info[template-injection]: code injection via template expansion
+   --> .github/workflows/rust.yml:426:31
+    |
+424 |         run: |
+    |         --- this run block
+425 |           if [ -n "${{ steps.auto_bump.outputs.version }}" ]; then
+426 |             echo "version=${{ steps.auto_bump.outputs.version }}" >> $GITHUB_OUTPUT
+    |                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ may expand into attacker-controllable code
+    |
+    = note: audit confidence → Low
+    = note: this finding has an auto-fix
+    = help: audit documentation → https://docs.zizmor.sh/audits/#template-injection
+
+info[template-injection]: code injection via template expansion
+   --> .github/workflows/rust.yml:428:31
+    |
+424 |         run: |
+    |         --- this run block
+...
+428 |             echo "version=${{ steps.release_check.outputs.version }}" >> $GITHUB_OUTPUT
+    |                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ may expand into attacker-controllable code
+    |
+    = note: audit confidence → Low
+    = note: this finding has an auto-fix
+    = help: audit documentation → https://docs.zizmor.sh/audits/#template-injection
+
+info[template-injection]: code injection via template expansion
+   --> .github/workflows/rust.yml:447:84
+    |
+447 |         run: node ../scripts/rust-create-github-release.mjs --release-version "${{ steps.version.outputs.version }}" --repository "...
+    |         --- this run block                                                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ may expand into attacker-controllable code
+    |
+    = note: audit confidence → Low
+    = note: this finding has an auto-fix
+    = help: audit documentation → https://docs.zizmor.sh/audits/#template-injection
+
+error[template-injection]: code injection via template expansion
+   --> .github/workflows/rust.yml:500:75
+    |
+500 |         run: node ../scripts/rust-version-and-commit.mjs --bump-type "${{ github.event.inputs.bump_type }}" --description "${{ gith...
+    |         --- this run block                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ may expand into attacker-controllable code
+    |
+    = note: audit confidence → High
+    = note: this finding has an auto-fix
+    = help: audit documentation → https://docs.zizmor.sh/audits/#template-injection
+
+error[template-injection]: code injection via template expansion
+   --> .github/workflows/rust.yml:500:128
+    |
+500 | ...   run: node ../scripts/rust-version-and-commit.mjs --bump-type "${{ github.event.inputs.bump_type }}" --description "${{ github.event.inputs.description }}"
+    |       --- this run block                                                                                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ may expand into attacker-controllable code
+    |
+    = note: audit confidence → High
+    = note: this finding has an auto-fix
+    = help: audit documentation → https://docs.zizmor.sh/audits/#template-injection
+
+info[template-injection]: code injection via template expansion
+   --> .github/workflows/rust.yml:514:84
+    |
+514 |         run: node ../scripts/rust-create-github-release.mjs --release-version "${{ steps.version.outputs.version }}" --repository "...
+    |         --- this run block                                                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ may expand into attacker-controllable code
+    |
+    = note: audit confidence → Low
+    = note: this finding has an auto-fix
+    = help: audit documentation → https://docs.zizmor.sh/audits/#template-injection
+
+error[template-injection]: code injection via template expansion
+   --> .github/workflows/rust.yml:514:177
+    |
+514 | ...   run: node ../scripts/rust-create-github-release.mjs --release-version "${{ steps.version.outputs.version }}" --repository "${{ github.repository }}" --description "${{ github.event.inputs.description }}...
+    |       --- this run block                                                                                                                                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ may expand into attacker-controllable code
+    |
+    = note: audit confidence → High
+    = note: this finding has an auto-fix
+    = help: audit documentation → https://docs.zizmor.sh/audits/#template-injection
+
+error[template-injection]: code injection via template expansion
+   --> .github/workflows/rust.yml:545:66
+    |
+543 |         run: |
+    |         --- this run block
+544 |           cd rust
+545 |           node ../scripts/rust-version-bump.mjs --bump-type "${{ github.event.inputs.bump_type }}" --description "${{ github.event....
+    |                                                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ may expand into attacker-controllable code
+    |
+    = note: audit confidence → High
+    = note: this finding has an auto-fix
+    = help: audit documentation → https://docs.zizmor.sh/audits/#template-injection
+
+error[template-injection]: code injection via template expansion
+   --> .github/workflows/rust.yml:545:119
+    |
+543 | ...   run: |
+    |       --- this run block
+544 | ...     cd rust
+545 | ...     node ../scripts/rust-version-bump.mjs --bump-type "${{ github.event.inputs.bump_type }}" --description "${{ github.event.inputs.description }}"
+    |                                                                                                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ may expand into attacker-controllable code
+    |
+    = note: audit confidence → High
+    = note: this finding has an auto-fix
+    = help: audit documentation → https://docs.zizmor.sh/audits/#template-injection
+
+error[unpinned-uses]: unpinned action reference
+   --> .github/workflows/rust.yml:548:15
+    |
+548 |         uses: peter-evans/create-pull-request@v8.1.1
+    |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ action is not pinned to a hash (required by blanket policy)
+    |
+    = note: audit confidence → High
+    = note: this finding has an auto-fix
+    = help: audit documentation → https://docs.zizmor.sh/audits/#unpinned-uses
+
+108 findings (42 suppressed, 45 unsafe fixes): 9 informational, 24 low, 21 medium, 12 high

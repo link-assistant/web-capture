@@ -1,0 +1,25 @@
+.github/workflows/js.yml:129:9: shellcheck reported issue in this script: SC2193:warning:2:32: The arguments to this comparison can never be equal. Make sure your syntax is correct [shellcheck]
+    |
+129 |         run: |
+    |         ^~~~
+.github/workflows/js.yml:129:74: "github.head_ref" is potentially untrusted. avoid using it directly in inline scripts. instead, pass it through an environment variable. see https://docs.github.com/en/actions/reference/security/secure-use#good-practices-for-mitigating-script-injection-attacks for more details [expression]
+.github/workflows/js.yml:315:9: shellcheck reported issue in this script: SC2012:info:15:12: Use find instead of ls to better handle non-alphanumeric filenames [shellcheck]
+    |
+315 |         run: |
+    |         ^~~~
+.github/workflows/js.yml:447:9: shellcheck reported issue in this script: SC2086:info:10:34: Double quote to prevent globbing and word splitting [shellcheck]
+    |
+447 |         run: |
+    |         ^~~~
+.github/workflows/rust.yml:411:9: shellcheck reported issue in this script: SC2086:info:8:34: Double quote to prevent globbing and word splitting [shellcheck]
+    |
+411 |         run: |
+    |         ^~~~
+.github/workflows/rust.yml:424:9: shellcheck reported issue in this script: SC2086:info:2:60: Double quote to prevent globbing and word splitting [shellcheck]
+    |
+424 |         run: |
+    |         ^~~~
+.github/workflows/rust.yml:424:9: shellcheck reported issue in this script: SC2086:info:4:64: Double quote to prevent globbing and word splitting [shellcheck]
+    |
+424 |         run: |
+    |         ^~~~
