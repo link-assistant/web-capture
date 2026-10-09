@@ -5,7 +5,6 @@
 // the archive is self-contained. This module downloads the images and
 // rewrites the captured output accordingly.
 
-import fetch from 'node-fetch';
 import { URL } from 'url';
 
 const DEFAULT_USER_AGENT =

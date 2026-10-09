@@ -9,18 +9,8 @@
  *   engine - 'puppeteer' or 'playwright' (only used for browser rendering fallback)
  */
 
-import fetch from 'node-fetch';
 import * as cheerio from 'cheerio';
 import { URL } from 'url';
-import {
-  Document,
-  Packer,
-  Paragraph,
-  TextRun,
-  HeadingLevel,
-  ImageRun,
-  ExternalHyperlink,
-} from 'docx';
 import { fetchHtml, convertRelativeUrls } from './lib.js';
 
 export async function docxHandler(req, res) {
@@ -34,6 +24,19 @@ export async function docxHandler(req, res) {
     const html = await fetchHtml(absoluteUrl);
     const absHtml = convertRelativeUrls(html, absoluteUrl);
     const $ = cheerio.load(absHtml);
+
+    // Loaded on demand: docx bundles a browser util-deprecate that reads
+    // globalThis.localStorage on import, which makes Node >=25 print an
+    // ExperimentalWarning for every process that merely imports the app.
+    const {
+      Document,
+      Packer,
+      Paragraph,
+      TextRun,
+      HeadingLevel,
+      ImageRun,
+      ExternalHyperlink,
+    } = await import('docx');
 
     // Remove unwanted elements
     $('style, script, noscript, nav, footer, header').remove();

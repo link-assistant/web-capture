@@ -43,7 +43,9 @@ ENV PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1
 ENV PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH=/usr/bin/chromium
 
 COPY package.json package-lock.json ./
-RUN npm install --global npm@12.2.0 && npm ci
+# The `prepare` script installs git hooks from ../scripts, which is outside
+# this build context; `npm rebuild` still runs the dependencies' install scripts.
+RUN npm install --global npm@12.2.0 && npm ci --ignore-scripts && npm rebuild
 
 COPY . .
 

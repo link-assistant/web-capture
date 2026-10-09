@@ -1,0 +1,14 @@
+# zizmor configuration — https://docs.zizmor.sh/configuration/
+# Ported from link-foundation/js-ai-driven-development-pipeline-template (#177).
+rules:
+  unpinned-uses:
+    config:
+      policies:
+        # These publishers are trusted at tag granularity; everything else
+        # (peter-evans/*, dtolnay/* ...) must be pinned to a full commit hash.
+        actions/*: ref-pin
+        github/*: ref-pin
+        docker/*: ref-pin
+        astral-sh/*: ref-pin
+        zizmorcore/*: ref-pin
+        '*': hash-pin

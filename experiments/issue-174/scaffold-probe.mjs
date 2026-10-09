@@ -9,7 +9,7 @@ import {
 } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
-import { execFileSync } from 'node:child_process';
+import { execFileSync, spawnSync } from 'node:child_process';
 const root = path.resolve(import.meta.dirname, '../..');
 const temp = await mkdtemp(path.join(tmpdir(), 'web-capture-scaffold-'));
 try {
@@ -65,11 +65,19 @@ try {
       "console.log(app.router.stack.filter(layer => layer.route).map(layer => layer.route.path).join(','));\n"
     )
   );
-  const output = execFileSync(
+  const probe = spawnSync(
     process.execPath,
     [path.join(generated, 'probe.mjs')],
-    { encoding: 'utf8' }
+    {
+      encoding: 'utf8',
+    }
   );
+  if (probe.status !== 0) throw new Error(`Probe failed:\n${probe.stderr}`);
+  // Importing the app must stay silent; docx used to trigger Node's
+  // "localStorage is not available" ExperimentalWarning (#177).
+  if (probe.stderr.trim())
+    throw new Error(`Importing the app printed:\n${probe.stderr}`);
+  const output = probe.stdout;
   for (const route of ['/html', '/markdown', '/image']) {
     if (!output.includes(route))
       throw new Error(`Missing original route ${route}`);

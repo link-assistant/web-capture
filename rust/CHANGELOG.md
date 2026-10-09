@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 0.5.1
+
+- Transport errors now include the underlying cause from the error source chain (for example `tcp connect error: Connection refused`) instead of only "error sending request for url (...)", matching the JS transport (#177).
+
 ## 0.5.0
 
 - Require Rust 1.99 and adopt edition 2024, including its formatting style.

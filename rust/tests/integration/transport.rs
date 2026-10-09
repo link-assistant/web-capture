@@ -66,3 +66,37 @@ async fn dropping_capture_future_cancels_injected_transport() {
 
     assert!(cancelled.load(Ordering::SeqCst));
 }
+
+// reqwest's Display stops at "error sending request for url (...)"; the
+// reason a caller can act on lives in the source chain (#177, matching the
+// JS transport's "fetch failed: <cause>" message).
+#[tokio::test]
+async fn connect_failures_report_the_underlying_cause() {
+    let port = std::net::TcpListener::bind("127.0.0.1:0")
+        .unwrap()
+        .local_addr()
+        .unwrap()
+        .port();
+    let url = format!("http://127.0.0.1:{port}/");
+
+    let error = web_capture::capture_response(TransportRequest {
+        url: url.clone(),
+        method: "GET".into(),
+        headers: BTreeMap::new(),
+    })
+    .await
+    .unwrap_err();
+
+    assert_eq!(error.kind, "connect");
+    assert_eq!(error.source_url, url);
+    assert!(
+        error.message.starts_with("error sending request for url"),
+        "{}",
+        error.message
+    );
+    assert!(
+        error.message.contains("tcp connect error"),
+        "message lost the cause: {}",
+        error.message
+    );
+}

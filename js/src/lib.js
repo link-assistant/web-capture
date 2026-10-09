@@ -1,6 +1,5 @@
 /* eslint-disable no-useless-escape */
 // Common logic for the web-capture microservice
-import fetch from 'node-fetch';
 import * as cheerio from 'cheerio';
 import TurndownService from 'turndown';
 import iconv from 'iconv-lite';

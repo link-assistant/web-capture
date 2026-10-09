@@ -16,7 +16,6 @@
  */
 
 import { ZipArchive } from 'archiver';
-import fetch from 'node-fetch';
 import * as cheerio from 'cheerio';
 import { URL } from 'url';
 import {

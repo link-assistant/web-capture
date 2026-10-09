@@ -1,0 +1,40 @@
+== run-37783723414.log
+JS/Rust Source and Test Parity	2026-10-08T13:23:49.9958255Z ##[error]JavaScript source/tests changed without corresponding Rust source/tests.
+JS/Rust Source and Test Parity	2026-10-08T13:23:50.0000531Z ##[error]Process completed with exit code 1.
+== run-37781310795.log
+zizmor	2026-10-08T13:12:00.5075481Z ##[warning]dependabot.yml:3: insufficient cooldown in Dependabot updates: insufficient implicit default-days (less than 7)
+zizmor	2026-10-08T13:12:00.5077886Z ##[warning]dependabot.yml:16: insufficient cooldown in Dependabot updates: insufficient implicit default-days (less than 7)
+zizmor	2026-10-08T13:12:00.5079161Z ##[warning]dependabot.yml:25: insufficient cooldown in Dependabot updates: insufficient implicit default-days (less than 7)
+zizmor	2026-10-08T13:12:00.5080544Z ##[warning]dependabot.yml:32: insufficient cooldown in Dependabot updates: insufficient implicit default-days (less than 7)
+zizmor	2026-10-08T13:12:00.5082103Z ##[warning]dependabot.yml:39: insufficient cooldown in Dependabot updates: insufficient implicit default-days (less than 7)
+zizmor	2026-10-08T13:12:00.5083360Z ##[warning]dependabot.yml:43: insufficient cooldown in Dependabot updates: insufficient implicit default-days (less than 7)
+zizmor	2026-10-08T13:12:00.6128505Z ##[error]Process completed with exit code 13.
+== run-37781310524.log
+JS - Dependency Audit and Freshness	2026-10-08T13:14:34.0808779Z browser-commander: 0.10.0 -> 0.26.3 blocked by https://github.com/link-assistant/web-capture/issues/160: Keep the first compatible packaged-browser release; later versions add native better-sqlit
+JS - Dependency Audit and Freshness	2026-10-08T13:14:34.0810473Z puppeteer: 25.12.0 is behind 25.13.0; update or document an open issue blocker
+JS - Dependency Audit and Freshness	2026-10-08T13:14:34.0811529Z puppeteer-core: 25.12.0 is behind 25.13.0; update or document an open issue blocker
+JS - Dependency Audit and Freshness	2026-10-08T13:14:34.0870641Z ##[error]Process completed with exit code 1.
+JS - Check for Changesets	2026-10-08T13:24:34.2394883Z ##[error]Multiple changesets found (4). Each PR should have exactly ONE changeset.
+JS - Check for Changesets	2026-10-08T13:24:34.2406574Z ##[error]Found changeset files:
+JS - Check for Changesets	2026-10-08T13:24:34.2415382Z ##[error]Process completed with exit code 1.
+JS - Lint and Format Check	2026-10-08T13:26:18.5444989Z ^[[1mClone found (javascript)^[[22m ^[[31m[NEW]^[[39m
+JS - Lint and Format Check	2026-10-08T13:26:18.5472805Z ^[[1mClone found (javascript)^[[22m ^[[31m[NEW]^[[39m
+JS - Lint and Format Check	2026-10-08T13:26:18.5474057Z ^[[1mClone found (javascript)^[[22m ^[[31m[NEW]^[[39m
+JS - Lint and Format Check	2026-10-08T13:26:18.5475509Z ^[[1mClone found (javascript)^[[22m ^[[31m[NEW]^[[39m
+JS - Lint and Format Check	2026-10-08T13:26:18.5476738Z ^[[1mClone found (javascript)^[[22m ^[[31m[NEW]^[[39m
+JS - Lint and Format Check	2026-10-08T13:26:18.5477994Z ^[[1mClone found (javascript)^[[22m ^[[31m[NEW]^[[39m
+JS - Lint and Format Check	2026-10-08T13:26:18.5830024Z ##[error]Process completed with exit code 1.
+== run-37797628036.log
+JS - Dependency Audit and Freshness	2026-10-08T15:11:36.5807989Z npm error Missing: @kreuzberg/html-to-markdown-node-linux-arm64-musl@ from lock file
+JS - Dependency Audit and Freshness	2026-10-08T15:11:36.5809351Z npm error Missing: @kreuzberg/html-to-markdown-node-linux-x64-musl@ from lock file
+JS - Dependency Audit and Freshness	2026-10-08T15:11:36.6075005Z ##[error]Process completed with exit code 1.
+JS - Lint and Format Check	2026-10-08T15:18:55.0992202Z npm error Missing: @kreuzberg/html-to-markdown-node-linux-arm64-musl@ from lock file
+JS - Lint and Format Check	2026-10-08T15:18:55.0992859Z npm error Missing: @kreuzberg/html-to-markdown-node-linux-x64-musl@ from lock file
+JS - Lint and Format Check	2026-10-08T15:18:55.1088534Z ##[error]Process completed with exit code 1.
+JS - Test (Node.js on ubuntu-latest)	2026-10-08T15:19:58.4984441Z npm error Missing: @kreuzberg/html-to-markdown-node-linux-arm64-musl@ from lock file
+JS - Test (Node.js on ubuntu-latest)	2026-10-08T15:19:58.4985800Z npm error Missing: @kreuzberg/html-to-markdown-node-linux-x64-musl@ from lock file
+JS - Test (Node.js on ubuntu-latest)	2026-10-08T15:19:58.5134857Z ##[error]Process completed with exit code 1.
+== run-37797628160.log
+Locked release tools and npm security	2026-10-08T15:12:35.6976455Z npm error Missing: @kreuzberg/html-to-markdown-node-linux-arm64-musl@ from lock file
+Locked release tools and npm security	2026-10-08T15:12:35.6976821Z npm error Missing: @kreuzberg/html-to-markdown-node-linux-x64-musl@ from lock file
+Locked release tools and npm security	2026-10-08T15:12:35.7077425Z ##[error]Process completed with exit code 1.

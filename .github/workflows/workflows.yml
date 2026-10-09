@@ -1,0 +1,82 @@
+name: Workflows
+
+# Lints the pipeline itself (ported from
+# link-foundation/js-ai-driven-development-pipeline-template, issue #177).
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/**'
+      - '.github/zizmor.yml'
+      - '.github/dependabot.yml'
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths:
+      - '.github/workflows/**'
+      - '.github/zizmor.yml'
+      - '.github/dependabot.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
+permissions:
+  contents: read
+
+env:
+  # Silences git's default-branch hint when actions/checkout runs `git init`.
+  GIT_CONFIG_COUNT: '1'
+  GIT_CONFIG_KEY_0: init.defaultBranch
+  GIT_CONFIG_VALUE_0: main
+
+jobs:
+  actionlint:
+    name: actionlint
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+
+      # The Docker image bundles shellcheck and pyflakes, so this also lints
+      # every `run:` block; a bare actionlint binary without shellcheck on PATH
+      # skips those checks and exits 0. Reproduce locally with:
+      #   docker run --rm -v "$PWD:/repo" -w /repo rhysd/actionlint:1.7.12 -color
+      - uses: docker://rhysd/actionlint@sha256:b1934ee5f1c509618f2508e6eb47ee0d3520686341fec936f3b79331f9315667 # v1.7.12
+        with:
+          args: -color
+
+  zizmor:
+    name: zizmor
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+
+      # Annotations instead of SARIF, so the job fails loudly without code
+      # scanning. Reproduce locally with:
+      #   uvx zizmor==1.30.1 --config .github/zizmor.yml \
+      #     --min-confidence low --persona regular .github
+      - uses: zizmorcore/zizmor-action@v0.6.4
+        with:
+          advanced-security: false
+          annotations: true
+          config: .github/zizmor.yml
+          # artipacked reports at Low confidence; a higher floor would hide
+          # every checkout that forgets persist-credentials: false.
+          min-confidence: low
+          version: 1.30.1
+
+      # unpinned-images (container: and docker:// references) is a
+      # pedantic-only audit; this narrow pass enforces it without the
+      # pedantic persona's stylistic findings.
+      - name: Audit for pedantic-only high-severity findings
+        run: |
+          pipx run zizmor==1.30.1 --config .github/zizmor.yml \
+            --persona pedantic --min-severity high --min-confidence high \
+            .github/workflows

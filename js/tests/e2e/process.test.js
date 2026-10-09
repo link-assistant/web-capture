@@ -1,5 +1,4 @@
 import { spawn } from 'child_process';
-import fetch from 'node-fetch';
 import getPort from 'get-port';
 import path from 'path';
 

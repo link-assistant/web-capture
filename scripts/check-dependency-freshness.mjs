@@ -46,6 +46,40 @@ export async function checkVersions(
   }
 }
 
+// A blocker pins a dependency on purpose, so Dependabot must not keep proposing
+// the blocked upgrade (PR #176 merged browser-commander 0.22.0 past blocker #160).
+export function checkDependabotIgnores(ecosystem, directory, blockers, config) {
+  const ignored = new Set();
+  for (const entry of config.split(/^\s*- package-ecosystem:/m).slice(1)) {
+    const [name] = entry.trim().split(/\s/, 1);
+    const directories = [...entry.matchAll(/['"]?(\/[\w./-]*)['"]?/g)].map(
+      (match) => match[1],
+    );
+    if (
+      name.replace(/['"]/g, "") !== ecosystem ||
+      !directories.includes(directory)
+    ) {
+      continue;
+    }
+    for (const match of entry.matchAll(/dependency-name:\s*['"]?([^'"\s]+)/g)) {
+      ignored.add(match[1]);
+    }
+  }
+  const problems = Object.keys(blockers)
+    .filter((name) => !ignored.has(name))
+    .map(
+      (name) =>
+        `${name}: blocked by ${blockers[name].issue} but not ignored for ${ecosystem} ${directory} in .github/dependabot.yml`,
+    );
+  if (problems.length) {
+    throw new Error(problems.join("\n"));
+  }
+}
+
+function dependabotConfig() {
+  return readFileSync(path.join(root, ".github/dependabot.yml"), "utf8");
+}
+
 async function json(url, authenticated = false) {
   const headers = { "User-Agent": "web-capture-dependency-freshness" };
   if (authenticated && process.env.GITHUB_TOKEN) {
@@ -83,6 +117,8 @@ export async function checkNpm() {
     }
     outdated = error.stdout;
   }
+  const blockers = manifest.dependencyBlockers || {};
+  checkDependabotIgnores("npm", "/js", blockers, dependabotConfig());
   const data = JSON.parse(outdated || "{}");
   // npm includes production, development and optional direct dependencies.
   const dependencies = Object.entries(data).map(([name, value]) => ({
@@ -91,7 +127,7 @@ export async function checkNpm() {
   }));
   await checkVersions(
     dependencies,
-    manifest.dependencyBlockers || {},
+    blockers,
     async (name) => data[name].latest,
     issue,
   );
@@ -133,6 +169,7 @@ export async function checkCargo() {
       blockers[match[1]] = { issue: match[2], reason: match[3] };
     }
   }
+  checkDependabotIgnores("cargo", "/rust", blockers, dependabotConfig());
   await checkVersions(
     dependencies,
     blockers,

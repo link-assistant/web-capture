@@ -1,4 +1,3 @@
-import fetch from 'node-fetch';
 import http from 'http';
 import getPort from 'get-port';
 import { exec } from 'child_process';

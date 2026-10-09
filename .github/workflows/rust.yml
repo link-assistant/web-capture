@@ -37,15 +37,20 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
+permissions:
+  contents: read
+
 env:
+  # Silences git's default-branch hint when actions/checkout runs `git init`.
+  GIT_CONFIG_COUNT: '1'
+  GIT_CONFIG_KEY_0: init.defaultBranch
+  GIT_CONFIG_VALUE_0: main
   CARGO_TERM_COLOR: always
   RUSTFLAGS: -Dwarnings
   # Generated browser protocol crates have high peak compiler memory usage.
   CARGO_BUILD_JOBS: 2
   CARGO_PROFILE_DEV_DEBUG: 0
   CARGO_PROFILE_TEST_DEBUG: 0
-  # Support both CARGO_REGISTRY_TOKEN (cargo's native env var) and CARGO_TOKEN (for backwards compatibility)
-  CARGO_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN || secrets.CARGO_TOKEN }}
 
 defaults:
   run:
@@ -54,10 +59,12 @@ defaults:
 jobs:
   dependency-health:
     name: Rust - Dependency Freshness
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
       - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d
         with:
           toolchain: 1.99.0
@@ -80,7 +87,8 @@ jobs:
   # === DETECT CHANGES - determines which jobs should run ===
   detect-changes:
     name: Rust - Detect Changes
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
     if: github.event_name != 'workflow_dispatch'
     outputs:
       rust-code-changed: ${{ steps.changes.outputs.rust-code-changed }}
@@ -94,6 +102,7 @@ jobs:
       - uses: actions/checkout@v7.0.1
         with:
           fetch-depth: 0
+          persist-credentials: false
 
       - name: Detect changes
         id: changes
@@ -109,13 +118,15 @@ jobs:
   # This is informational — auto-release on main handles the gap
   publishable-check:
     name: Rust - Publishable Changes Check
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
     needs: [detect-changes]
     if: github.event_name == 'pull_request' && needs.detect-changes.outputs.any-rust-code-changed == 'true'
     steps:
       - uses: actions/checkout@v7.0.1
         with:
           fetch-depth: 0
+          persist-credentials: false
 
       - name: Check for publishable changes without version bump
         working-directory: .
@@ -126,7 +137,8 @@ jobs:
   # Linting and formatting - runs when Rust-relevant files change
   lint:
     name: Rust - Lint and Format Check
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
     needs: [detect-changes]
     if: |
       always() && !cancelled() && (
@@ -137,6 +149,8 @@ jobs:
       )
     steps:
       - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
 
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d
@@ -189,9 +203,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
+        os: [ubuntu-24.04, macos-26, windows-2025]
     steps:
       - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
 
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d
@@ -252,7 +268,8 @@ jobs:
   # builds, surfacing that class of breakage before it ships in a release.
   fresh-resolution:
     name: Rust - Fresh Dependency Resolution
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
     needs: [detect-changes]
     if: |
       always() && !cancelled() && (
@@ -262,6 +279,8 @@ jobs:
       )
     steps:
       - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
 
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d
@@ -295,8 +314,11 @@ jobs:
   # default runtime; current browser-commander uses rustls for fantoccini.
   bare-container-build:
     name: Rust - Build Without System OpenSSL
-    runs-on: ubuntu-latest
-    container: rust:1.99.0-slim-trixie
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    # Pinned by digest: a mutable tag is arbitrary code in this job. Re-resolve with
+    #   docker buildx imagetools inspect rust:<tag>
+    container: rust:1.99.0-slim-trixie@sha256:24e632c09342c20abf8312cf4f61430a911c01ed3a5e4c02b87292b1c39c5273
     needs: [detect-changes]
     if: |
       always() && !cancelled() && (
@@ -306,6 +328,8 @@ jobs:
       )
     steps:
       - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
 
       - name: Build the minimal search feature set with no system packages
         run: cargo build --no-default-features --features search
@@ -313,7 +337,8 @@ jobs:
   # Build check - only runs when Rust code changes
   build:
     name: Rust - Build
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
     needs: [lint, test, fresh-resolution]
     if: |
       !cancelled() &&
@@ -322,6 +347,8 @@ jobs:
       (needs.fresh-resolution.result == 'success' || needs.fresh-resolution.result == 'skipped')
     steps:
       - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
 
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d
@@ -361,14 +388,16 @@ jobs:
       needs.test.result == 'success' &&
       needs.dependency-health.result == 'success' &&
       needs.build.result == 'success'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
     permissions:
       contents: write
     steps:
       - uses: actions/checkout@v7.0.1
         with:
           fetch-depth: 0
-          token: ${{ secrets.GITHUB_TOKEN }}
+          # This job pushes version commits with the checkout token.
+          persist-credentials: true
 
       - name: Setup Node.js
         uses: actions/setup-node@v7.1.0
@@ -416,17 +445,15 @@ jobs:
           NEW_VERSION=$(grep -m1 '^version' Cargo.toml | sed 's/.*"\(.*\)"/\1/')
           git commit -m "chore(rust): auto-bump to ${NEW_VERSION} for unreleased changes"
           node ../scripts/safe-git-push.mjs --branch main
-          echo "version=${NEW_VERSION}" >> $GITHUB_OUTPUT
+          echo "version=${NEW_VERSION}" >> "$GITHUB_OUTPUT"
           echo "Auto-bumped to ${NEW_VERSION}"
 
       - name: Determine release version
         id: version
-        run: |
-          if [ -n "${{ steps.auto_bump.outputs.version }}" ]; then
-            echo "version=${{ steps.auto_bump.outputs.version }}" >> $GITHUB_OUTPUT
-          else
-            echo "version=${{ steps.release_check.outputs.version }}" >> $GITHUB_OUTPUT
-          fi
+        env:
+          AUTO_BUMP_VERSION: ${{ steps.auto_bump.outputs.version }}
+          CHECKED_VERSION: ${{ steps.release_check.outputs.version }}
+        run: echo "version=${AUTO_BUMP_VERSION:-$CHECKED_VERSION}" >> "$GITHUB_OUTPUT"
 
       - name: Build release
         if: steps.release_check.outputs.should_release == 'true'
@@ -444,7 +471,8 @@ jobs:
         if: steps.publish.outputs.published == 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: node ../scripts/rust-create-github-release.mjs --release-version "${{ steps.version.outputs.version }}" --repository "${{ github.repository }}" --commit-sha "${{ github.sha }}"
+          RELEASE_VERSION: ${{ steps.version.outputs.version }}
+        run: node ../scripts/rust-create-github-release.mjs --release-version "$RELEASE_VERSION" --repository "$GITHUB_REPOSITORY" --commit-sha "$GITHUB_SHA"
 
   # Manual Instant Release
   instant-release:
@@ -458,14 +486,16 @@ jobs:
       needs.test.result == 'success' &&
       needs.dependency-health.result == 'success' &&
       needs.build.result == 'success'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
     permissions:
       contents: write
     steps:
       - uses: actions/checkout@v7.0.1
         with:
           fetch-depth: 0
-          token: ${{ secrets.GITHUB_TOKEN }}
+          # This job pushes version commits with the checkout token.
+          persist-credentials: true
 
       - name: Setup Node.js
         uses: actions/setup-node@v7.1.0
@@ -497,7 +527,10 @@ jobs:
 
       - name: Version and commit
         id: version
-        run: node ../scripts/rust-version-and-commit.mjs --bump-type "${{ github.event.inputs.bump_type }}" --description "${{ github.event.inputs.description }}"
+        env:
+          BUMP_TYPE: ${{ github.event.inputs.bump_type }}
+          RELEASE_DESCRIPTION: ${{ github.event.inputs.description }}
+        run: node ../scripts/rust-version-and-commit.mjs --bump-type "$BUMP_TYPE" --description "$RELEASE_DESCRIPTION"
 
       - name: Publish to crates.io
         if: steps.version.outputs.version_committed == 'true'
@@ -511,13 +544,16 @@ jobs:
         if: steps.version.outputs.version_committed == 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: node ../scripts/rust-create-github-release.mjs --release-version "${{ steps.version.outputs.version }}" --repository "${{ github.repository }}" --description "${{ github.event.inputs.description }}" --commit-sha "${{ github.sha }}"
+          RELEASE_VERSION: ${{ steps.version.outputs.version }}
+          RELEASE_DESCRIPTION: ${{ github.event.inputs.description }}
+        run: node ../scripts/rust-create-github-release.mjs --release-version "$RELEASE_VERSION" --repository "$GITHUB_REPOSITORY" --description "$RELEASE_DESCRIPTION" --commit-sha "$GITHUB_SHA"
 
   # Manual Changelog PR - creates a PR with version bump for review before release
   changelog-pr:
     name: Rust - Create Changelog PR
     if: github.event_name == 'workflow_dispatch' && github.event.inputs.release_mode == 'changelog-pr'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
     permissions:
       contents: write
       pull-requests: write
@@ -525,6 +561,7 @@ jobs:
       - uses: actions/checkout@v7.0.1
         with:
           fetch-depth: 0
+          persist-credentials: false
 
       - name: Setup Node.js
         uses: actions/setup-node@v7.1.0
@@ -539,13 +576,13 @@ jobs:
         run: npm ci
 
       - name: Bump version in Cargo.toml and CHANGELOG.md
-        working-directory: .
-        run: |
-          cd rust
-          node ../scripts/rust-version-bump.mjs --bump-type "${{ github.event.inputs.bump_type }}" --description "${{ github.event.inputs.description }}"
+        env:
+          BUMP_TYPE: ${{ github.event.inputs.bump_type }}
+          RELEASE_DESCRIPTION: ${{ github.event.inputs.description }}
+        run: node ../scripts/rust-version-bump.mjs --bump-type "$BUMP_TYPE" --description "$RELEASE_DESCRIPTION"
 
       - name: Create Pull Request
-        uses: peter-evans/create-pull-request@v8.1.1
+        uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8.1.1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           commit-message: 'chore(rust): bump version (${{ github.event.inputs.bump_type }})'
