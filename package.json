@@ -11,6 +11,6 @@
   },
   "dependencies": {
     "lino-arguments": "^0.3.0",
-    "execa": "^10.1.0"
+    "execa": "^10.2.0"
   }
 }
