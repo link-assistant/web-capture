@@ -46,7 +46,7 @@
     "express": "^5.2.1",
     "he": "^2.0.0",
     "iconv-lite": "^0.7.3",
-    "lino-arguments": "^0.3.0",
+    "lino-arguments": "^0.4.0",
     "log-lazy": "^1.0.4",
     "playwright": "^1.64.0",
     "puppeteer": "^25.13.0",
