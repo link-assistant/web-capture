@@ -44,6 +44,8 @@ for (const [, name, body] of releaseJobs) {
       body.slice(publishAt),
       /if: steps.publish.outputs.published == 'true'/
     );
+    assert.ok(body.includes('--commit-sha "$(git rev-parse HEAD)"'));
+    assert.ok(!body.includes('--commit-sha "$GITHUB_SHA"'));
   });
 }
 test('both Rust release paths are covered', () =>

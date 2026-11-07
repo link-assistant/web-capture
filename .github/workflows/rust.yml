@@ -479,7 +479,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           RELEASE_VERSION: ${{ steps.version.outputs.version }}
-        run: node ../scripts/rust-create-github-release.mjs --release-version "$RELEASE_VERSION" --repository "$GITHUB_REPOSITORY" --commit-sha "$GITHUB_SHA"
+        run: node ../scripts/rust-create-github-release.mjs --release-version "$RELEASE_VERSION" --repository "$GITHUB_REPOSITORY" --commit-sha "$(git rev-parse HEAD)"
 
   # Manual Instant Release
   instant-release:
@@ -565,7 +565,7 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           RELEASE_VERSION: ${{ steps.version.outputs.version }}
           RELEASE_DESCRIPTION: ${{ github.event.inputs.description }}
-        run: node ../scripts/rust-create-github-release.mjs --release-version "$RELEASE_VERSION" --repository "$GITHUB_REPOSITORY" --description "$RELEASE_DESCRIPTION" --commit-sha "$GITHUB_SHA"
+        run: node ../scripts/rust-create-github-release.mjs --release-version "$RELEASE_VERSION" --repository "$GITHUB_REPOSITORY" --description "$RELEASE_DESCRIPTION" --commit-sha "$(git rev-parse HEAD)"
 
   # Manual Changelog PR - creates a PR with version bump for review before release
   changelog-pr:

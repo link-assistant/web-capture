@@ -19,6 +19,10 @@ not command arguments. A GitHub release is created only when publishing succeeds
 (including an already-published version). The pinned authentication action revokes
 its temporary token in its post step.
 
+GitHub releases target the checked-out HEAD after any version commit and rebase,
+so their tags identify the version actually published rather than the original
+workflow trigger commit.
+
 ## Verification
 
 Run `npm ci` followed by `node --test tests/tools/rust-trusted-publishing.test.mjs`.
