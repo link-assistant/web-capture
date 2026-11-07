@@ -25,7 +25,7 @@ fn archive_default_contains_md_html_and_images_folder() {
     );
     let mut zip = ZipArchive::new(std::io::Cursor::new(zip_bytes)).unwrap();
     let names: Vec<String> = (0..zip.len())
-        .map(|i| zip.by_index(i).unwrap().name().to_string())
+        .map(|i| zip.by_index(i).unwrap().name().unwrap().into_owned())
         .collect();
     assert!(
         names.contains(&"document.md".to_string()),

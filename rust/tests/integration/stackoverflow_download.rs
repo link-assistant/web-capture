@@ -192,7 +192,8 @@ async fn live_download_stackoverflow_page_as_document_formats() {
             zip.by_index(index)
                 .expect("read ZIP entry")
                 .name()
-                .to_string()
+                .expect("decode ZIP entry name")
+                .into_owned()
         })
         .collect::<Vec<_>>();
     assert!(names.iter().any(|name| name == "document.md"), "{names:?}");

@@ -64,7 +64,9 @@ describe('workflow policy', () => {
 
 test('release workflows require dependency health gates', () => {
   const js = readWorkflow('.github/workflows/js.yml');
-  expect(js).toContain('npm audit --package-lock-only --audit-level=moderate');
+  expect(js).toContain('node ../scripts/audit-npm.mjs');
+  const audit = readRootFile('scripts/audit-npm.mjs');
+  expect(audit).toContain("['audit', '--package-lock-only', '--json'");
   expect(js).toContain('check-dependency-freshness.mjs npm');
   expect(js).toContain('needs: [lint, test, dependency-health]');
   const rust = readWorkflow('.github/workflows/rust.yml');

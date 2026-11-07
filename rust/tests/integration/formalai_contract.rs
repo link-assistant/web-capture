@@ -383,7 +383,8 @@ fn assert_zip_entries(bytes: &[u8], expected_entries: &[&str]) {
             zip.by_index(index)
                 .expect("read ZIP entry")
                 .name()
-                .to_string()
+                .expect("decode ZIP entry name")
+                .into_owned()
         })
         .collect::<Vec<_>>();
 
