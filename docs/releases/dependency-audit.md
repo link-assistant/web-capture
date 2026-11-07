@@ -2,8 +2,7 @@
 
 The original dependency health checks failed on 010f921 because new direct versions
 had been released. Refresh the manifests and complete lockfiles while retaining the
-browser-commander pin tracked by issue #160. Patch release versions are prepared in
-both packages; runtime feature coverage remains in the existing JS/Rust CI matrix.
+browser-commander pin tracked by issue #160. A Rust patch version and a JS patch changeset prepare the next releases; runtime feature coverage remains in the existing JS/Rust CI matrix.
 
 The npm lock also required security updates to compatible transitive dependencies
 and overrides for glob 14.0.4+ and minimatch 11.0.5+ (both still expose CommonJS and
@@ -28,3 +27,7 @@ Reproduction: `npm audit --prefix js --package-lock-only` reports the rejected
 advisory; `node scripts/audit-npm.mjs --prefix js` verifies the rejection and still
 rejects actionable findings. `tests/tools/npm-audit.test.mjs` checks this exception,
 other findings, changed status/identity, network errors, and malformed reports.
+
+Python CI also found advisories in certifi 2026.7.22 and filelock 4.0.12.
+Refresh only those packages in uv.lock and regenerate requirements.txt with the
+locked uv export; existing Python unit tests and strict pip-audit verify the result.

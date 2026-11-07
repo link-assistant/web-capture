@@ -1,11 +1,5 @@
 # @link-assistant/web-capture
 
-## 2.0.2
-
-### Patch Changes
-
-- Refresh direct dependencies and the locked dependency tree to satisfy release freshness and security checks. Keep the browser-commander pin required by blocker #160.
-
 ## 2.0.1
 
 ### Patch Changes
