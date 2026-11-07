@@ -18,6 +18,7 @@ it('default archive contains document.md, document.html, and images/ folder', as
     FIXTURE_HTML,
     'https://example.invalid/'
   );
+  expect(buf.subarray(0, 4)).toEqual(Buffer.from([0x50, 0x4b, 0x03, 0x04]));
   const dir = await unzipper.Open.buffer(buf);
   const names = dir.files.map((f) => f.path);
 
