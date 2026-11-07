@@ -43,7 +43,7 @@ jobs:
       - run: npm ci --prefix js
         env:
           PUPPETEER_SKIP_DOWNLOAD: 'true'
-      - run: npm audit --prefix js --package-lock-only
+      - run: node scripts/audit-npm.mjs --prefix js
       - run: node experiments/issue-174/scaffold-probe.mjs
       - run: node experiments/issue-174/scaffold-install-probe.mjs
       - run: node experiments/issue-174/fetch-buffer-probe.mjs
