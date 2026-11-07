@@ -77,7 +77,7 @@ jobs:
           PUPPETEER_SKIP_DOWNLOAD: 'true'
         run: npm ci
       - name: Audit every locked dependency
-        run: npm audit --package-lock-only --audit-level=moderate
+        run: node ../scripts/audit-npm.mjs
       - name: Require current direct dependencies or open blockers
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

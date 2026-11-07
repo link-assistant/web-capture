@@ -611,7 +611,8 @@ fn test_create_archive_zip_produces_valid_zip() {
 
     for i in 0..zip.len() {
         let file = zip.by_index(i).unwrap();
-        match file.name() {
+        let name = file.name().expect("decode ZIP entry name").into_owned();
+        match name.as_str() {
             "document.md" => {
                 found_md = true;
                 let content: Vec<u8> = std::io::Read::bytes(file).map(|b| b.unwrap()).collect();

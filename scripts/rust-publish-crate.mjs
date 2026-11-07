@@ -84,7 +84,7 @@ try {
       '::error::Neither CARGO_REGISTRY_TOKEN nor CARGO_TOKEN is set.'
     );
     console.error(
-      'Publishing requires a crates.io API token. Configure one of these secrets:'
+      'Publishing requires trusted publishing or a fallback crates.io API token:'
     );
     console.error(
       "  - CARGO_REGISTRY_TOKEN (preferred, cargo's native env var)"
@@ -111,11 +111,14 @@ try {
     process.exit(0);
   }
 
-  // Publish to crates.io with retry logic, passing token explicitly via --token
+  // Cargo reads the resolved token from the environment. Keep credentials out
+  // of command arguments and execa error messages.
   for (let i = 1; i <= MAX_RETRIES; i++) {
     console.log(`Publish attempt ${i} of ${MAX_RETRIES}...`);
     try {
-      await $`cargo publish --allow-dirty --token ${token}`;
+      await $({
+        env: { CARGO_REGISTRY_TOKEN: token },
+      })`cargo publish --allow-dirty`;
       setOutput('published', 'true');
       setOutput('published_version', currentVersion);
       setOutput('publish_result', 'success');

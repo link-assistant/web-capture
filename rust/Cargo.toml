@@ -1,6 +1,6 @@
 [package]
 name = "web-capture"
-version = "0.5.1"
+version = "0.5.2"
 edition = "2024"
 description = "CLI and microservice to render web pages as HTML, Markdown, or PNG"
 license = "Unlicense"
@@ -83,15 +83,15 @@ required-features = ["runtime"]
 
 [dependencies]
 # Browser automation using browser-commander from link-foundation
-browser-commander = { version = "0.19.0", optional = true }
+browser-commander = { version = "0.22.1", optional = true }
 async-tungstenite = { version = "0.35.0", features = ["tokio-runtime"], optional = true }
 futures = { version = "0.3.34", optional = true }
 
 # Unified configuration from CLI args, env vars, and .lenv files
-lino-arguments = { version = "0.4.0", optional = true }
+lino-arguments = { version = "0.5.0", optional = true }
 
 # Async runtime
-tokio = { version = "1.53.2", features = ["full"], optional = true }
+tokio = { version = "1.54.1", features = ["full"], optional = true }
 
 # Web framework
 axum = { version = "0.8.9", optional = true }
@@ -113,18 +113,18 @@ reqwest = { version = "0.13.5", default-features = false, features = [
 ], optional = true }
 
 # HTML parsing and manipulation
-scraper = { version = "0.27.0", optional = true }
+scraper = { version = "0.29.0", optional = true }
 
 # HTML to Markdown conversion
 html2md = { version = "0.2.17", optional = true }
-html-to-markdown-rs = { version = "3.17.2", features = ["inline-images", "metadata", "serde"], optional = true }
+html-to-markdown-rs = { version = "3.21.1", features = ["inline-images", "metadata", "serde"], optional = true }
 
 # Command line argument parsing
 clap = { version = "4.6.7", features = ["derive", "env"], optional = true }
 
 # Serialization
 serde = { version = "1.0.229", features = ["derive"], optional = true }
-serde_json = { version = "1.0.151", optional = true }
+serde_json = { version = "1.0.154", optional = true }
 
 # Error handling
 thiserror = { version = "2.0.21", optional = true }
@@ -138,7 +138,7 @@ tracing-subscriber = { version = "0.3.23", features = ["env-filter"], optional =
 url = { version = "2.5.8", optional = true }
 
 # Encoding
-encoding_rs = { version = "0.8.42", optional = true }
+encoding_rs = { version = "0.8.44", optional = true }
 
 # Base64 for image data
 base64 = { version = "0.23.1", optional = true }
@@ -147,16 +147,16 @@ base64 = { version = "0.23.1", optional = true }
 regex = { version = "1.13.1", optional = true }
 
 # HTML entity decoding
-html-escape = { version = "0.2.15", optional = true }
+html-escape = { version = "0.3.0", optional = true }
 
 # ZIP archive creation
-zip = { version = "8.6.0", default-features = false, features = ["deflate"], optional = true }
+zip = { version = "9.4.1", default-features = false, features = ["deflate"], optional = true }
 
-sha2 = { version = "0.11.0", optional = true }
+sha2 = { version = "0.11.1", optional = true }
 tempfile = { version = "3.27.0", optional = true }
 
 [dev-dependencies]
-tokio = { version = "1.53.2", features = ["macros", "rt"] }
+tokio = { version = "1.54.1", features = ["macros", "rt"] }
 tempfile = "3.27.0"
 tokio-test = "0.4.6"
 
