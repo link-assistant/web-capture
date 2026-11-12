@@ -10,7 +10,7 @@
     "test": "node --test tests/tools/*.test.mjs"
   },
   "dependencies": {
-    "lino-arguments": "^0.3.0",
-    "execa": "^10.1.0"
+    "lino-arguments": "^0.4.0",
+    "execa": "^10.2.1"
   }
 }
