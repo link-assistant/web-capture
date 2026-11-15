@@ -62,9 +62,22 @@ bash experiments/issue-190/verify-installed.sh
 
 At investigation on 2026-11-15, the public PyPI JSON endpoint
 `https://pypi.org/pypi/web-capture-python-examples/json` returned **404**.
-This workspace has no `package-registry-manager` executable or authenticated
-PyPI owner session. Pending-publisher registration and a real OIDC upload
-remain unverified. GitHub credentials alone cannot register a PyPI publisher.
+A clean public-index install attempt also fails because the package is absent.
+PyPI's publisher-management URL redirects to its sign-in page; this workspace
+has no authenticated PyPI owner session. The npm-provided setup tool is available:
+
+```bash
+npx --yes package-registry-manager@0.27.2 --repository "$PWD" setup --registry pypi --package web-capture-python-examples --workflow python.yml --environment pypi --ref issue-190-dc7816216b77 --dry-run
+```
+
+Its plan recognizes the package, `python.yml` publishing job and `pypi`
+environment, and requires a signed-in PyPI browser session to create the
+pending publisher. Its generic bootstrap step proposes `gh workflow run`;
+this workflow intentionally publishes version tags, so use the release-tag
+procedure above after registration. Do not follow its generic token-fallback
+suggestion: this package uses OIDC exclusively as requested in issue #190.
+Pending-publisher registration and a real OIDC upload remain unverified.
+GitHub credentials alone cannot register a PyPI publisher.
 A successful PR build or local installation does not prove PyPI availability.
 Keep the PR unmerged until the external acceptance criteria are resolved and
 record the successful release run and clean public-index installation here.
