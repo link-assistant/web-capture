@@ -8,7 +8,7 @@
 //! - Convert HTML to Markdown
 //! - Capture PNG screenshots of web pages
 //! - Convert relative URLs to absolute URLs
-//! - Support for headless browser rendering via browser-commander
+//! - Support for headless browser rendering via installed Chrome/Chromium
 //!
 //! The default `runtime` feature provides the complete CLI, server, browser,
 //! and HTTP client. For transport-independent search URL construction and
@@ -166,8 +166,8 @@ pub async fn fetch_html_receipt(
 
 /// Render HTML content from a URL using a headless browser
 ///
-/// This function uses browser-commander to launch a headless browser,
-/// navigate to the URL, and return the rendered HTML content.
+/// This function launches an installed headless Chrome/Chromium browser,
+/// navigates to the URL, and returns the rendered HTML content.
 ///
 /// # Arguments
 ///
@@ -206,8 +206,8 @@ pub fn convert_html_to_markdown(html: &str, base_url: Option<&str>) -> Result<St
 
 /// Capture a PNG screenshot of a URL
 ///
-/// This function uses browser-commander to launch a headless browser,
-/// navigate to the URL, and capture a screenshot.
+/// This function launches an installed headless Chrome/Chromium browser,
+/// navigates to the URL, and captures a screenshot.
 ///
 /// # Arguments
 ///

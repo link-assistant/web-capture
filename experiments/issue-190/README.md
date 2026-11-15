@@ -50,19 +50,23 @@ runtime and development dependency set with `--no-emit-project`, then auditing
 it with `--strict --require-hashes --disable-pip`, passes while retaining
 third-party dependency coverage.
 
-A separate existing Rust security failure remains unresolved:
+The Rust security failure was traced beyond the dependency manifest:
 
-- Initial `ci-logs/initial-dependencies-43765507512.log`, lines 1052–1062:
-  `libsqlite3-sys 0.38.2`, RUSTSEC-2026-0459, requires `>=0.39.0`.
-- The current lockfile still resolves `browser-commander 0.22.1 -> rusqlite
-  0.40.2 -> libsqlite3-sys 0.38.2` after all compatible updates.
-- The latest published browser-commander is 0.22.1. Its
-  [upstream manifest](https://github.com/link-foundation/browser-commander/blob/4f22746b763ac368913b78dce6b945f9ef335c3d/rust/Cargo.toml)
-  still requires `rusqlite 0.40.2`; registry metadata confirms the same constraint.
-  Patched libsqlite3-sys versions are outside rusqlite 0.40's dependency range.
-- No advisory was suppressed and no browser/cookie functionality was removed.
-  A compatible upstream dependency update is needed to make this security
-  check green. This remains an unfinished CI criterion.
+- Fresh run `43769460690` at `6d20b86` (2026-11-15 22:28:16 UTC), saved
+  as `ci-logs/dependencies-43769460690.log`, lines 2897–2906, reports
+  `libsqlite3-sys 0.38.2`, RUSTSEC-2026-0459, requiring `>=0.39.0`.
+- Compatible updates cannot fix `browser-commander 0.22.1 -> rusqlite
+  0.40.2 -> libsqlite3-sys 0.38.2`.
+- Source inspection (`rg browser_commander rust/src rust/tests`) finds no
+  imports, calls or re-exports. `src/browser.rs` launches installed Chrome
+  directly with `tokio::process::Command` for DOM rendering and screenshots.
+  Removing this unused dependency removes the vulnerable SQLite code without
+  changing browser or cookie behavior. No advisory or security check is ignored.
+- Regression verification: the unchanged strict `cargo audit --file
+  rust/Cargo.lock --deny warnings` fails before this change and must pass after
+  it. Existing `integration::browser` tests cover JavaScript rendering, CLI
+  browser capture and PNG screenshots; the CI matrix also verifies every
+  feature and fresh dependency resolution.
 
 Public installation probe: `uv pip install --dry-run` in a fresh Python 3.14
 environment, using only `https://pypi.org/simple`, fails for

@@ -29,7 +29,6 @@ runtime = [
     "dep:async-tungstenite",
     "dep:axum",
     "dep:base64",
-    "dep:browser-commander",
     "dep:clap",
     "dep:encoding_rs",
     "dep:futures",
@@ -82,8 +81,7 @@ name = "capture_cache"
 required-features = ["runtime"]
 
 [dependencies]
-# Browser automation using browser-commander from link-foundation
-browser-commander = { version = "0.22.1", optional = true }
+# Browser rendering invokes Chrome directly (see src/browser.rs).
 async-tungstenite = { version = "0.35.0", features = ["tokio-runtime"], optional = true }
 futures = { version = "0.3.34", optional = true }
 
