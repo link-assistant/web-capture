@@ -281,7 +281,7 @@ Install uv 0.12.23, then run these commands from the repository root:
 ```bash
 uv sync --locked
 uv run --locked python -m unittest discover -s tests/python -v
-uv run --locked pip-audit --strict
+uv run --locked pip-audit --strict --skip-editable
 uv run --locked python js/examples/python/html_download.py https://example.com
 ```
 

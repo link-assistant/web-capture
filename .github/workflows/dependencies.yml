@@ -69,7 +69,9 @@ jobs:
             exit 1
           }
       - run: uv run --locked python -m unittest discover -s tests/python -v
-      - run: uv run --locked pip-audit --strict
+      # Audit all installed third-party dependencies; the editable project
+      # is our own source and may not have a public PyPI release yet.
+      - run: uv run --locked pip-audit --strict --skip-editable
 
   rust-security:
     name: Rust locked dependency security
