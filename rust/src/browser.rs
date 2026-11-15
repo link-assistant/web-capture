@@ -1,7 +1,8 @@
 //! Browser automation module
 //!
 //! This module provides headless browser operations for rendering pages
-//! and capturing screenshots by invoking an installed Chrome/Chromium executable.
+//! and capturing screenshots. Note: Full browser automation requires
+//! browser-commander, which depends on having Chrome installed.
 //!
 //! For simpler HTTP fetching without JavaScript rendering, see the html module.
 
@@ -45,8 +46,8 @@ impl std::str::FromStr for BrowserEngine {
 
 /// Render HTML content from a URL using a headless browser
 ///
-/// This function launches an installed headless Chrome/Chromium browser,
-/// navigates to the URL, and returns the rendered HTML content.
+/// This function uses browser-commander to launch a headless browser,
+/// navigate to the URL, and return the rendered HTML content.
 ///
 /// Note: This requires Chrome/Chromium to be installed on the system.
 ///
