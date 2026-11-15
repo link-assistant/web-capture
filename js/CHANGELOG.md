@@ -1,5 +1,11 @@
 # @link-assistant/web-capture
 
+## 2.0.3
+
+### Patch Changes
+
+- 400b731: Refresh compatible dependencies required by the release CI freshness checks.
+
 ## 2.0.2
 
 ### Patch Changes
