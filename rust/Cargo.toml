@@ -1,6 +1,6 @@
 [package]
 name = "web-capture"
-version = "0.5.2"
+version = "0.5.3"
 edition = "2024"
 description = "CLI and microservice to render web pages as HTML, Markdown, or PNG"
 license = "Unlicense"
@@ -117,7 +117,7 @@ scraper = { version = "0.29.0", optional = true }
 
 # HTML to Markdown conversion
 html2md = { version = "0.2.17", optional = true }
-html-to-markdown-rs = { version = "3.21.1", features = ["inline-images", "metadata", "serde"], optional = true }
+html-to-markdown-rs = { version = "3.22.2", features = ["inline-images", "metadata", "serde"], optional = true }
 
 # Command line argument parsing
 clap = { version = "4.6.7", features = ["derive", "env"], optional = true }
@@ -147,10 +147,10 @@ base64 = { version = "0.23.1", optional = true }
 regex = { version = "1.13.1", optional = true }
 
 # HTML entity decoding
-html-escape = { version = "0.3.0", optional = true }
+html-escape = { version = "0.3.1", optional = true }
 
 # ZIP archive creation
-zip = { version = "9.4.1", default-features = false, features = ["deflate"], optional = true }
+zip = { version = "9.6.0", default-features = false, features = ["deflate"], optional = true }
 
 sha2 = { version = "0.11.1", optional = true }
 tempfile = { version = "3.27.0", optional = true }
