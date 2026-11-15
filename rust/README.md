@@ -48,7 +48,7 @@ web-capture = { version = "0.4", default-features = false, features = ["search"]
 
 The `search` feature exposes the pure URL/parser API and the caller-owned
 transport contract, including `build_search_url`, `parse_search_results`, and
-`search_with_transport`. It does not select `browser-commander`, `reqwest`,
+`search_with_transport`. It does not select `reqwest`,
 Tokio, Axum, or OpenSSL. The convenience `search` function, which performs an
 HTTP request with reqwest, remains part of `runtime`.
 
@@ -63,9 +63,9 @@ Consumers that require the platform's system TLS stack can opt back in:
 web-capture = { version = "0.4", features = ["native-tls"] }
 ```
 
-`browser-commander` 0.19 also selects rustls for its WebDriver transport, so the
-default `runtime` dependency graph is fully OpenSSL-free. The dependency guard
-rejects any route back to `openssl-sys`.
+Browser rendering and screenshots invoke installed Chrome/Chromium directly.
+The default `runtime` dependency graph is fully OpenSSL-free; the dependency
+guard rejects any route back to `openssl-sys`.
 
 ## Quick Start
 

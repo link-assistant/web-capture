@@ -11,6 +11,8 @@ import unittest
 from unittest.mock import patch
 
 ROOT = Path(__file__).resolve().parents[2]
+# Distribution checks point this at an installed wheel/sdist, outside the checkout.
+EXAMPLES = Path(os.environ.get("WEB_CAPTURE_EXAMPLES_DIR", ROOT / "js/examples/python"))
 PNG = base64.b64decode("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+/nKsAAAAASUVORK5CYII=")
 
 
@@ -43,16 +45,19 @@ class ExamplesTest(unittest.TestCase):
         try:
             with tempfile.TemporaryDirectory() as directory:
                 env = {**os.environ, "WEB_CAPTURE_URL": f"http://127.0.0.1:{server.server_port}"}
-                (Path(directory) / 'capture_client.py').write_text((ROOT / 'js/examples/python/capture_client.py').read_text())
-                for script in sorted((ROOT / "js/examples/python").glob("*.py")):
-                    if script.name == 'capture_client.py':
+                (Path(directory) / 'capture_client.py').write_text((EXAMPLES / 'capture_client.py').read_text())
+                for script in sorted(EXAMPLES.glob("*.py")):
+                    if script.name in ('capture_client.py', '__init__.py'):
                         continue
                     with self.subTest(script=script.name):
                         # Copy only the examples so outputs stay outside the source tree.
                         target = Path(directory) / script.name
                         target.write_text(script.read_text())
-                        result = subprocess.run([sys.executable, str(target), "https://example.test/?q=café&x=1"],
-                                                cwd=directory, env=env, capture_output=True, check=True)
+                        command = [sys.executable, str(target)]
+                        if "WEB_CAPTURE_EXAMPLES_DIR" in os.environ:
+                            command = [sys.executable, "-m", f"web_capture_python_examples.{script.stem}"]
+                        result = subprocess.run([*command, "https://example.test/?q=café&x=1"],
+                                                cwd=directory, env=env, capture_output=True, check=True, timeout=15)
                         self.assertIn(b"saved", result.stdout.lower())
                 self.assertEqual((Path(directory) / "downloaded.png").read_bytes(), PNG)
                 self.assertIn("café", (Path(directory) / "downloaded.html").read_text())
@@ -69,12 +74,12 @@ class ExamplesTest(unittest.TestCase):
     def test_request_failure_is_reported(self):
         import runpy
         import requests
-        sys.path.insert(0, str(ROOT / 'js/examples/python'))
+        sys.path.insert(0, str(EXAMPLES))
         self.addCleanup(sys.path.pop, 0)
         with patch("requests.get", side_effect=requests.ConnectionError("service unavailable")), \
              patch.object(sys, "argv", ["html_download.py"]):
             with self.assertRaises(requests.ConnectionError):
-                runpy.run_path(str(ROOT / "js/examples/python/html_download.py"))
+                runpy.run_path(str(EXAMPLES / "html_download.py"))
 
 
 if __name__ == "__main__":

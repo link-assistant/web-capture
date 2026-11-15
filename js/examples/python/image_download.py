@@ -1,4 +1,7 @@
-from capture_client import capture
+if __package__:
+    from .capture_client import capture
+else:
+    from capture_client import capture
 import os
 
 response = capture('image')
@@ -8,7 +11,7 @@ print('Content-Type:', response.headers.get('content-type'))
 # PNG signature: first 8 bytes
 png_signature = b'\x89PNG\r\n\x1a\n'
 if response.content[:8] == png_signature:
-    output_path = os.path.join(os.path.dirname(__file__), 'downloaded.png')
+    output_path = 'downloaded.png' if __package__ else os.path.join(os.path.dirname(__file__), 'downloaded.png')
     with open(output_path, 'wb') as f:
         f.write(response.content)
     print(f'Image saved to {output_path} (valid PNG)')

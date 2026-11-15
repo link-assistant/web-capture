@@ -15,6 +15,6 @@ def capture(kind, url=None, **options):
 
 
 def download_text(kind, filename):
-    output = Path(__file__).with_name(filename)
+    output = Path.cwd() / filename if __package__ else Path(__file__).with_name(filename)
     output.write_text(capture(kind).text, encoding='utf-8')
     print(f'{kind.title()} saved to {output}')

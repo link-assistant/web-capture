@@ -1,5 +1,8 @@
 import sys
-from capture_client import capture
+if __package__:
+    from .capture_client import capture
+else:
+    from capture_client import capture
 import os
 
 target_url = sys.argv[1] if len(sys.argv) > 1 else 'https://example.com'

@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 0.5.3
+
+- Refresh compatible dependencies for release CI.
+- Remove the unused browser-commander dependency and its vulnerable bundled SQLite (RUSTSEC-2026-0459). Browser rendering and screenshots continue to invoke installed Chrome/Chromium directly.
+
 ## 0.5.2
 
 - Use crates.io trusted publishing with retained token fallback for automatic and manual releases; build before authentication and restrict publishing to main.
