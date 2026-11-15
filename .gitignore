@@ -154,3 +154,6 @@ ci-logs/
 .tools/
 __pycache__/
 *.pyc
+
+# Python distribution metadata
+*.egg-info/

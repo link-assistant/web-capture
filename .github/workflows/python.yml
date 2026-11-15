@@ -1,0 +1,75 @@
+name: Python Package and Release
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  push:
+    branches: [main]
+    tags: ['python-v*']
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+permissions:
+  contents: read
+
+env:
+  GIT_CONFIG_COUNT: '1'
+  GIT_CONFIG_KEY_0: init.defaultBranch
+  GIT_CONFIG_VALUE_0: main
+
+jobs:
+  build:
+    name: Python - Build and verify distributions
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@v10.2.0
+        with:
+          version: '0.12.23'
+      - name: Require tag to match Python version
+        if: startsWith(github.ref, 'refs/tags/')
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: uv run --locked python scripts/check-python-distribution.py --tag "$RELEASE_TAG"
+      # uv builds the wheel from the sdist, verifying that the source archive
+      # is sufficient to reproduce the wheel without the checkout.
+      - run: uv build --no-sources
+      - run: uvx --from twine==7.0.0 twine check --strict dist/*
+      - run: uv run --locked python scripts/check-python-distribution.py --dist dist
+      - run: uv run --locked python -m unittest discover -s tests/python -v
+      - name: Test installed wheel and sdist outside the checkout
+        run: bash experiments/issue-190/verify-installed.sh
+      - uses: actions/upload-artifact@v6.0.0
+        with:
+          name: python-distributions
+          path: dist/
+          if-no-files-found: error
+          retention-days: 7
+
+  publish:
+    name: Python - Publish to PyPI with OIDC
+    needs: build
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/python-v') && github.repository == 'link-assistant/web-capture'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    environment:
+      name: pypi
+      url: https://pypi.org/p/web-capture-python-examples
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@v6.0.0
+        with:
+          name: python-distributions
+          path: dist/
+      - name: Publish verified distributions
+        uses: pypa/gh-action-pypi-publish@7245906fb61fa33a13554f9d5fb856fe61758086 # release/v1
+      - name: Explain publisher setup on failure
+        if: failure()
+        run: |
+          echo '::error::PyPI publication failed. Verify the pending publisher: project web-capture-python-examples, owner link-assistant, repository web-capture, workflow python.yml, environment pypi. See docs/releases/python-trusted-publishing.md and the upload error above.'

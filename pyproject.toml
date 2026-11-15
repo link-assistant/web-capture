@@ -1,11 +1,26 @@
+[build-system]
+requires = ["setuptools>=77,<83"]
+build-backend = "setuptools.build_meta"
+
 [project]
 name = "web-capture-python-examples"
-version = "0.0.0"
+version = "0.1.0"
+description = "Python HTTP client examples for the web-capture service"
+readme = "docs/python-examples.md"
+license = "Unlicense"
+license-files = ["LICENSE"]
 requires-python = ">=3.14"
 dependencies = ["requests>=2.34.2"]
+
+[project.urls]
+Homepage = "https://github.com/link-assistant/web-capture"
+Repository = "https://github.com/link-assistant/web-capture"
+Issues = "https://github.com/link-assistant/web-capture/issues"
+Documentation = "https://github.com/link-assistant/web-capture/blob/main/docs/python-examples.md"
 
 [dependency-groups]
 dev = ["pip-audit>=2.10.1"]
 
-[tool.uv]
-package = false
+[tool.setuptools]
+packages = ["web_capture_python_examples"]
+package-dir = { web_capture_python_examples = "js/examples/python" }

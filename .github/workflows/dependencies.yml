@@ -63,9 +63,9 @@ jobs:
       - run: uv sync --locked
       - name: Require requirements.txt to match uv.lock
         run: |
-          uv export --locked --no-dev --format requirements-txt --output-file requirements.txt
+          uv export --locked --no-dev --no-emit-project --format requirements-txt --output-file requirements.txt
           git diff --exit-code requirements.txt || {
-            echo '::error file=requirements.txt::requirements.txt is stale; run: uv export --locked --no-dev --format requirements-txt --output-file requirements.txt'
+            echo '::error file=requirements.txt::requirements.txt is stale; run: uv export --locked --no-dev --no-emit-project --format requirements-txt --output-file requirements.txt'
             exit 1
           }
       - run: uv run --locked python -m unittest discover -s tests/python -v

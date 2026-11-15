@@ -272,6 +272,10 @@ cargo fmt            # Format code
 
 ### Python examples
 
+The Python client examples are packaged as `web-capture-python-examples`.
+See [installation and usage](docs/python-examples.md) and
+[trusted publishing and first-release status](docs/releases/python-trusted-publishing.md).
+
 Install uv 0.12.23, then run these commands from the repository root:
 
 ```bash

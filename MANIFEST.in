@@ -1,0 +1,2 @@
+include docs/python-examples.md
+prune tests
