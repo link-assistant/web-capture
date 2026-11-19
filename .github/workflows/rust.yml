@@ -461,7 +461,7 @@ jobs:
         run: cargo build --release
 
       - name: Authenticate with crates.io (trusted publishing)
-        uses: rust-lang/crates-io-auth-action@c6f97d42243bad5fab37ca0427f495c86d5b1a18
+        uses: rust-lang/crates-io-auth-action@3268eb413133e2960fa4ae0e963ca76380c54cd9
         id: prm_auth
         # Trusted publishing first; the publish step falls back to the token secret.
         continue-on-error: true
@@ -546,7 +546,7 @@ jobs:
         run: cargo build --release
 
       - name: Authenticate with crates.io (trusted publishing)
-        uses: rust-lang/crates-io-auth-action@c6f97d42243bad5fab37ca0427f495c86d5b1a18
+        uses: rust-lang/crates-io-auth-action@3268eb413133e2960fa4ae0e963ca76380c54cd9
         id: prm_auth
         # Trusted publishing first; the publish step falls back to the token secret.
         continue-on-error: true
@@ -601,7 +601,7 @@ jobs:
         run: node ../scripts/rust-version-bump.mjs --bump-type "$BUMP_TYPE" --description "$RELEASE_DESCRIPTION"
 
       - name: Create Pull Request
-        uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8.1.1
+        uses: peter-evans/create-pull-request@3ffccacd46053766916f087ce41d627c0b8cf2d1 # v8.1.3
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           commit-message: 'chore(rust): bump version (${{ github.event.inputs.bump_type }})'
